@@ -31,12 +31,12 @@ pub enum DataAction<T> {
 }
 
 pub enum EnemyAction {
-    Push,
+    Insert,
     Remove(usize),
-    Edit(usize, EnemyDataAction),
+    Change(usize, EnemyDataAction),
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, PartialEq)]
 #[repr(transparent)]
 pub struct Enemies(Vec<Rc<PlayerData<SimpleStats>>>);
 
@@ -121,8 +121,8 @@ impl Reducible for Enemies {
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
         match action {
-            EnemyAction::Push => new.push(Default::default()),
-            EnemyAction::Edit(v, action) => new[v] = new[v].clone().reduce(action),
+            EnemyAction::Insert => new.push(Default::default()),
+            EnemyAction::Change(v, action) => new[v] = new[v].clone().reduce(action),
             EnemyAction::Remove(v) => {
                 new.swap_remove(v);
             }

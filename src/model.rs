@@ -145,7 +145,7 @@ impl ValueException {
 }
 
 /// Holds the number of dragons and their types, associated to the ally or enemy team.
-#[derive(Clone, Copy, Debug, Decode, Encode, PartialEq)]
+#[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
 pub struct Dragons {
     pub ally_fire_dragons: u16,
     pub ally_earth_dragons: u16,

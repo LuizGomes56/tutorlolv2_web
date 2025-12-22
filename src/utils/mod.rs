@@ -1,8 +1,10 @@
 #![allow(static_mut_refs)]
 use crate::utils::cache::CACHE;
 use tutorlolv2_gen::{AbilityId, ChampionId, ItemId, RuneId};
+use yew::{Html, virtual_dom::VNode};
 
 pub mod cache;
+pub mod fetch;
 
 #[derive(PartialEq)]
 pub enum ImageType {
@@ -40,9 +42,9 @@ impl_base!(ChampionId, RuneId, ItemId);
 
 pub trait EnumCast: PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<usize> {
     const FORMULAS: &[(u32, u32)];
-    fn docs(&self) -> &'static str {
+    fn docs(&self) -> VNode {
         let offset: usize = (*self).into();
-        get_cache(Self::FORMULAS[offset])
+        Html::from_html_unchecked(get_cache(Self::FORMULAS[offset]).into())
     }
     fn image_type(&self) -> ImageType {
         (*self).into()

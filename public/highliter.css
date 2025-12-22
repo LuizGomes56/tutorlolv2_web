@@ -36,7 +36,20 @@
     color: #4FC1FF;
 }
 
+.bracket_1 {
+    color: #FFD700;
+}
+
+.bracket_2 {
+    color: #DA70D6;
+}
+
+.bracket_3 {
+    color: #189FFF;
+}
+
 .string {
+    white-space: break-spaces;
     color: #CE9178;
 }
 
@@ -46,6 +59,8 @@
 
 code,
 pre {
-    background: 0 0;
-    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    color: #D4D4D4;
+    line-height: 1.5;
+    background: transparent;
+    font-family: Consolas, Monaco, 'AndaleMono', 'UbuntuMono', monospace;
 }
