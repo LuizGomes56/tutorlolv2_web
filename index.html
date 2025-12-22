@@ -1,0 +1,117 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Tutorlolv2</title>
+    <link data-trunk rel="copy-file" href="/public/Oxanium-VariableFont_wght.ttf" />
+    <link data-trunk rel="css" href="/public/main.css" />
+    <link data-trunk rel="css" href="/public/highliter.css" />
+    <link data-trunk rel="rust" data-wasm-opt="4"
+        data-wasm-opt-params="--inlining -O4 --strip-debug --fast-math --enable-bulk-memory --strip-dwarf --enable-nontrapping-float-to-int" />
+    <script type="module">
+        addEventListener("TrunkApplicationStarted", (event) => {
+            let wasm = event.detail.wasm;
+            window.wasm = wasm;
+            const ptr = wasm.cache_ptr();
+            const len = wasm.cache_len();
+            let buf = wasm.memory.buffer;
+            let view = new Uint8Array(buf, ptr, len);
+            function ensureView() {
+                if (buf !== wasm.memory.buffer) {
+                    buf = wasm.memory.buffer;
+                    view = new Uint8Array(buf, ptr, len);
+                }
+                return view;
+            }
+            const textDecoder = new TextDecoder("utf-8");
+            window.decodeCacheSlice = function (s, e) {
+                const arrView = ensureView();
+                return textDecoder.decode(arrView.subarray(s, e));
+            };
+            (() => {
+                let shiftDown = false;
+
+                function parseOffsets(host) {
+                    const raw = host.getAttribute("data-offset") || "";
+                    const [sStr, eStr] = raw.split(",");
+                    const s = parseInt(sStr, 10), e = parseInt(eStr, 10);
+                    if (Number.isNaN(s) || Number.isNaN(e)) return null;
+                    return [s, e];
+                }
+
+                function showOn(host) {
+                    if (!host || host.querySelector(".hover-docs")) return;
+
+                    const off = parseOffsets(host);
+                    if (!off) return;
+                    const [s, e] = off;
+
+                    const t = document.createElement("div");
+                    const extra = host.getAttribute("data-classes") || "";
+                    t.className =
+                        "flex flex-col absolute max-w-md max-h-96 overflow-auto p-2 " +
+                        "leading-6 text-base z-50 hover-docs border _border-800 _bg-900" +
+                        (extra ? " " + extra : "");
+                    t.style.pointerEvents = "auto";
+
+                    const code = document.createElement("code");
+                    code.className = "text-[#D4D4D4] font-normal text-left text-wrap";
+                    code.innerHTML = window.decodeCacheSlice(s, e);
+                    t.appendChild(code);
+
+                    const cs = getComputedStyle(host);
+                    if (cs.position === "static") host.style.position = "relative";
+                    host.appendChild(t);
+
+                    const isInsideSafe = (node) => {
+                        if (!(node instanceof Node)) return false;
+                        if (host.contains(node)) return true;
+                        if (t.contains(node)) return true;
+                        if (node instanceof Element && node.closest(".hoverdocs, .hover-docs")) return true;
+                        return false;
+                    };
+
+                    const onGlobalPointerOut = (ev) => {
+                        const from = ev.target;
+                        const to = ev.relatedTarget;
+                        if (!isInsideSafe(from)) return;
+                        if (to && isInsideSafe(to)) return;
+                        t.remove();
+                        document.removeEventListener("pointerout", onGlobalPointerOut, true);
+                    };
+
+                    document.addEventListener("pointerout", onGlobalPointerOut, true);
+                }
+                window.addEventListener("keydown", (e) => {
+                    if (e.key !== "Shift") return;
+                    shiftDown = true;
+                    const hovered = document.querySelectorAll("[data-offset]:hover");
+                    if (!hovered.length) return;
+                    const host = hovered[hovered.length - 1];
+                    showOn(host);
+                });
+                window.addEventListener("keyup", (e) => {
+                    if (e.key === "Shift") shiftDown = false;
+                });
+                document.addEventListener(
+                    "mouseover",
+                    (e) => {
+                        if (!shiftDown) return;
+                        const el = e.target;
+                        if (!(el instanceof Element)) return;
+                        const host = el.closest?.("[data-offset]");
+                        if (!host) return;
+                        const from = e.relatedTarget;
+                        if (from && from instanceof Node && host.contains(from)) return;
+                        showOn(host);
+                    },
+                    { capture: true }
+                );
+            })();
+        });
+    </script>
+</head>
+
+<body></body>
+
+</html>

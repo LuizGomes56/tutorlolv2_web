@@ -1,0 +1,92 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@font-face {
+    font-family: 'Oxanium';
+    font-style: normal;
+    font-weight: 400;
+    src: url('./Oxanium-VariableFont_wght.ttf') format('truetype');
+    font-weight: 200 800;
+}
+
+body {
+    color: #ffffff;
+}
+
+.oxanium {
+    font-family: Oxanium, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+.img-letter {
+    position: absolute;
+    color: white;
+    height: 100%;
+    width: 100%;
+    align-content: center;
+    font-weight: 700;
+    text-align: center;
+    font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    filter: drop-shadow(1.25px 1.25px 0px black);
+    text-shadow: 0px 0px 4px black;
+}
+
+.img-clipped {
+    width: 100%;
+    object-fit: cover;
+    object-position: 0% 15%;
+}
+
+.hover-docs {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(153, 153, 153, 0.4) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(153, 153, 153, 0.4);
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(153, 153, 153, 0.7);
+}
+
+tr>:nth-child(n+7)>.cell>.hover-docs,
+#i_stack>div:nth-child(n+7)>.hover-docs {
+    transform: translateX(calc(-50% + 16px)) translateY(calc(50% + 16px));
+}
+
+tr>:nth-child(-n+6)>.cell>.hover-docs,
+#i_stack>div:nth-child(-n+6)>.hover-docs {
+    transform: translateX(calc(50% - 16px)) translateY(calc(50% + 16px));
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+table {
+    inline-size: fit-content;
+}
+
+[data-offset]:hover {
+    --is-hovered: true;
+}

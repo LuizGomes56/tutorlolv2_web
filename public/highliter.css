@@ -1,0 +1,51 @@
+.punctuation {
+    color: #D4D4D4;
+}
+
+.control {
+    color: #C586C0;
+}
+
+.lifetime,
+.keyword,
+.macro,
+.boolean {
+    color: #569CD6;
+}
+
+.primitive,
+.type {
+    color: #4EC8B0;
+}
+
+.comment {
+    color: #959596;
+}
+
+.function {
+    color: #DCDCAA;
+}
+
+.number,
+.float {
+    color: #B3CDA8;
+}
+
+.constant,
+.intrinsic {
+    color: #4FC1FF;
+}
+
+.string {
+    color: #CE9178;
+}
+
+.variable {
+    color: #9CDCFE;
+}
+
+code,
+pre {
+    background: 0 0;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+}
