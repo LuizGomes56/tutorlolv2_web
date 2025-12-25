@@ -152,3 +152,30 @@ impl Reducible for Dragons {
         Rc::new(new)
     }
 }
+
+#[derive(PartialEq, Clone, Copy)]
+pub enum LastAction {
+    Init,
+    Any,
+    CurrentPlayer,
+    EnemyPlayer(usize),
+    Replace,
+}
+
+impl PlayerAction {
+    pub const fn action(&self) -> LastAction {
+        match self {
+            Self::Data(DataAction::Stats(_)) => LastAction::Replace,
+            _ => LastAction::CurrentPlayer,
+        }
+    }
+}
+
+impl EnemyDataAction {
+    pub const fn action(&self, i: usize) -> LastAction {
+        match self {
+            Self::Stats(_) => LastAction::Replace,
+            _ => LastAction::EnemyPlayer(i),
+        }
+    }
+}

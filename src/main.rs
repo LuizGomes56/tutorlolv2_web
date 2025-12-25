@@ -4,6 +4,7 @@ use crate::{
 use yew::prelude::*;
 
 mod calculator;
+mod components;
 mod documentation;
 mod model;
 mod utils;
@@ -11,12 +12,11 @@ mod utils;
 #[component]
 fn App() -> Html {
     html! {
-        <Documentation />
+        <Calculator />
     }
 }
 
 fn main() {
     yew::Renderer::<App>::new().render();
     init_cache();
-    println!("Hello, world!");
 }

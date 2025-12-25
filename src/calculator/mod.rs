@@ -3,6 +3,7 @@ use bincode::{Decode, Encode};
 use std::rc::Rc;
 use tutorlolv2_gen::{AbilityId, AdaptativeType, ChampionId, ItemId, RuneId, TypeMetadata};
 
+mod components;
 pub mod page;
 mod reducer;
 

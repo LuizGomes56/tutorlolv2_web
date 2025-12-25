@@ -6,6 +6,7 @@
     <link data-trunk rel="copy-file" href="/public/Oxanium-VariableFont_wght.ttf" />
     <link data-trunk rel="css" href="/public/main.css" />
     <link data-trunk rel="css" href="/public/highliter.css" />
+    <link data-trunk rel="tailwind-css" href="/public/tailwind.css" />
     <link data-trunk rel="rust" data-wasm-opt="4"
         data-wasm-opt-params="--inlining -O4 --strip-debug --fast-math --enable-bulk-memory --strip-dwarf --enable-nontrapping-float-to-int" />
     <script type="module">
@@ -31,12 +32,17 @@
             (() => {
                 let shiftDown = false;
 
+                function unpackOffset(offset) {
+                    const SHIFT = 1 << 23;
+                    const packed = Number(offset);
+                    const start = Math.floor(packed / SHIFT);
+                    const end = packed - start * SHIFT;
+                    return [start, end];
+                }
+
                 function parseOffsets(host) {
-                    const raw = host.getAttribute("data-offset") || "";
-                    const [sStr, eStr] = raw.split(",");
-                    const s = parseInt(sStr, 10), e = parseInt(eStr, 10);
-                    if (Number.isNaN(s) || Number.isNaN(e)) return null;
-                    return [s, e];
+                    const raw = host.getAttribute("offset") || "";
+                    return unpackOffset(raw);
                 }
 
                 function showOn(host) {
@@ -50,7 +56,7 @@
                     const extra = host.getAttribute("data-classes") || "";
                     t.className =
                         "flex flex-col absolute max-w-md max-h-96 overflow-auto p-2 " +
-                        "leading-6 text-base z-50 hover-docs border _border-800 _bg-900" +
+                        "leading-6 text-base z-50 hover-docs border border-std-800 bg-std-900" +
                         (extra ? " " + extra : "");
                     t.style.pointerEvents = "auto";
 
@@ -85,7 +91,7 @@
                 window.addEventListener("keydown", (e) => {
                     if (e.key !== "Shift") return;
                     shiftDown = true;
-                    const hovered = document.querySelectorAll("[data-offset]:hover");
+                    const hovered = document.querySelectorAll("[offset]:hover");
                     if (!hovered.length) return;
                     const host = hovered[hovered.length - 1];
                     showOn(host);
@@ -99,7 +105,7 @@
                         if (!shiftDown) return;
                         const el = e.target;
                         if (!(el instanceof Element)) return;
-                        const host = el.closest?.("[data-offset]");
+                        const host = el.closest?.("[offset]");
                         if (!host) return;
                         const from = e.relatedTarget;
                         if (from && from instanceof Node && host.contains(from)) return;

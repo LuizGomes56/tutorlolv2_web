@@ -1,77 +1,28 @@
 use crate::{
     calculator::{
         Game, InputGame, Player, PlayerData,
-        reducer::{DataAction, DragonAction, Enemies, EnemyAction, EnemyDataAction, PlayerAction},
+        components::inputs::player::PlayerInput,
+        reducer::{DataAction, DragonAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
+    components::image::Image,
     model::{Dragons, SimpleStats},
-    utils::fetch::post_bytes,
+    utils::{ImageType, fetch::post_bytes},
 };
 use std::{cell::RefCell, rc::Rc};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
-#[derive(PartialEq, Clone, Copy)]
-pub enum LastAction {
-    Init,
-    Any,
-    CurrentPlayer,
-    EnemyPlayer(usize),
-    Replace,
-}
-
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct PlayerProps {
     pub player: UseReducerHandle<Player>,
     pub last_action: Rc<RefCell<LastAction>>,
 }
 
-#[hook]
-pub fn use_player_callback<T: 'static>(
-    props: PlayerProps,
-    callback: fn(T) -> PlayerAction,
-) -> Callback<T> {
-    let PlayerProps {
-        player,
-        last_action,
-    } = props;
-    use_callback((), move |v, _| {
-        last_action.replace(LastAction::CurrentPlayer);
-        player.dispatch(callback(v));
-    })
-}
-
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct EnemyProps {
     pub enemies: UseReducerHandle<Enemies>,
     pub enemy_index: UseStateHandle<usize>,
     pub last_action: Rc<RefCell<LastAction>>,
-}
-
-#[hook]
-pub fn use_enemy_callback<T: 'static>(
-    props: EnemyProps,
-    callback: fn(T) -> EnemyDataAction,
-) -> Callback<T> {
-    let EnemyProps {
-        enemies,
-        enemy_index,
-        last_action,
-    } = props;
-    use_callback((), move |v, _| {
-        let index = *enemy_index;
-        last_action.replace(LastAction::EnemyPlayer(index));
-        enemies.dispatch(EnemyAction::Change(index, callback(v)));
-    })
-}
-
-#[hook]
-pub fn use_dragon_callback(
-    dragons: UseReducerHandle<Dragons>,
-    callback: fn(u16) -> DragonAction,
-) -> Callback<u16> {
-    use_callback((), move |v, _| {
-        dragons.dispatch(callback(v));
-    })
 }
 
 #[component]
@@ -152,16 +103,48 @@ pub fn Calculator() -> Html {
         });
     }
 
-    let enemy_index = use_state(|| 0);
     let player_props = PlayerProps {
-        player,
+        player: player.clone(),
         last_action: last_action.clone(),
     };
-    let enemy_props = EnemyProps {
-        enemies,
-        enemy_index,
-        last_action,
-    };
 
-    todo!()
+    html! {
+        <div>
+            <PlayerInput {player_props} />
+            {match *game_data {
+                Some(ref data) => {
+                    let Game {
+                        monster_damages,
+                        current_player,
+                        enemies,
+                        tower_damages,
+                        abilities_meta,
+                        abilities_to_merge,
+                        items_meta,
+                        runes_meta
+                    } = data;
+                    html! {
+                        <div>
+                            <Image src={ImageType::from(current_player.champion_id)} />
+                            <span>{ current_player.champion_id.name() }</span>
+                            <div class={classes!("flex", "gap-4")}>
+                            {
+                                abilities_meta
+                                    .into_iter()
+                                    .map(|metadata| html! {
+                                        <Image src={ImageType::Ability(
+                                            current_player.champion_id,
+                                            metadata.kind
+                                        )} />
+                                    })
+                                    .collect::<Html>()
+                            }
+                            </div>
+                        </div>
+                    }
+                },
+                None => html! { "No data" }
+            }}
+        </div>
+    }
 }

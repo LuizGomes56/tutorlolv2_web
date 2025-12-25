@@ -3,8 +3,9 @@ use gloo_net::http::Headers;
 use std::error::Error;
 use web_sys::AbortSignal;
 
+use crate::utils::BASE_URL;
+
 const CONFIG: Configuration = bincode::config::standard();
-const BASE_URL: &str = "http://localhost:8082";
 
 pub async fn post_bytes<T: Decode<()>>(
     url: &str,
@@ -12,8 +13,10 @@ pub async fn post_bytes<T: Decode<()>>(
     signal: Option<AbortSignal>,
 ) -> Result<T, Box<dyn Error>> {
     let bytes = bincode::encode_to_vec(data, CONFIG)?;
-    let target = format!("{BASE_URL}/{url}");
+    let target = format!("{BASE_URL}{url}");
     let builder = gloo_net::http::Request::post(&target);
+
+    web_sys::console::log_1(&format!("Target is {target:?}").into());
 
     let headers = Headers::new();
     headers.set("Content-Type", "application/octet-stream");

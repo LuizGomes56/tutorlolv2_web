@@ -1,9 +1,7 @@
 use bincode::{Decode, Encode};
 use tutorlolv2_gen::{ItemId, RuneId};
 
-/// Holds all champion stats provided by Riot's API.
-/// Generic parameter `T` is intended to be a numeric type,
-/// like [`f32`], [`f64`], or [`i32`]
+/// Holds all champion stats provided by Riot's API
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
 pub struct Stats {
     pub ability_power: i32,

@@ -1,12 +1,8 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-
 @font-face {
-    font-family: 'Oxanium';
+    font-family: "Oxanium";
     font-style: normal;
     font-weight: 400;
-    src: url('./Oxanium-VariableFont_wght.ttf') format('truetype');
+    src: url("./Oxanium-VariableFont_wght.ttf") format("truetype");
     font-weight: 200 800;
 }
 
@@ -16,7 +12,7 @@ body {
 }
 
 .oxanium {
-    font-family: Oxanium, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    font-family: Oxanium, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 .img-letter {
@@ -27,7 +23,7 @@ body {
     align-content: center;
     font-weight: 700;
     text-align: center;
-    font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     filter: drop-shadow(1.25px 1.25px 0px black);
     text-shadow: 0px 0px 4px black;
 }
