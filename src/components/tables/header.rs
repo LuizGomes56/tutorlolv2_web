@@ -76,6 +76,8 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     html! {
         <thead>
             <tr>
+                <th><Image src={ImageType::BasicAttack} /></th>
+                <th><Image src={ImageType::CritStrike} /></th>
                 {abilities}
                 {header(items_meta)}
                 {header(runes_meta)}

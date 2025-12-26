@@ -1,10 +1,11 @@
 #![allow(static_mut_refs)]
 use crate::utils::cache::CACHE;
 use tutorlolv2_gen::{
-    AbilityId, CHAMPION_ABILITIES, CHAMPION_FORMULAS, ChampionId, DevMergeData, ITEM_FORMULAS,
-    ITEM_ID_TO_RIOT_ID, ItemId, MergeData, RUNE_FORMULAS, RUNE_ID_TO_RIOT_ID, RuneId,
+    ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CHAMPION_FORMULAS,
+    CRITICAL_STRIKE_OFFSET, ChampionId, ITEM_FORMULAS, ITEM_ID_TO_RIOT_ID, ItemId, MergeData,
+    RUNE_FORMULAS, RUNE_ID_TO_RIOT_ID, RuneId,
 };
-use yew::{Html, html, virtual_dom::VNode};
+use yew::prelude::*;
 
 pub mod cache;
 pub mod fetch;
@@ -45,6 +46,8 @@ pub enum ImageType {
     Champion(ChampionId),
     Item(ItemId),
     Rune(RuneId),
+    BasicAttack,
+    CritStrike,
 }
 
 impl ImageType {
@@ -55,7 +58,8 @@ impl ImageType {
                 let char = ability_id.as_char();
                 let name = ability_id.ability_name().display();
                 Some(html! {
-                    <div>{char}{match name {
+                    <div class={classes!("img-letter", "text-sm")}>
+                        {char}{match name {
                         Some(name) => Some(html!(<sub>{name}</sub>)),
                         None => None
                     }}
@@ -67,30 +71,27 @@ impl ImageType {
     }
 
     pub fn offset(&self) -> (String, Option<String>) {
-        let mut tuple_main = (0, 0);
         let mut tuple_exc = None;
-        match self {
+        let tuple_main = match self {
             ImageType::Ability(champion_id, kind) => {
-                let array = CHAMPION_ABILITIES[*champion_id as usize];
+                let offset = *champion_id as usize;
+                let array = ABILITY_FORMULAS[offset];
+                let abilities = CHAMPION_ABILITIES[offset];
                 match kind {
                     AbilityKind::Normal(ability_id) => {
-                        tuple_main = array
-                            .into_iter()
-                            .find(|(id, _)| id == ability_id)
-                            .unwrap()
-                            .1
+                        array[abilities.iter().position(|id| id == ability_id).unwrap()]
                     }
                     AbilityKind::Alias(merge) => {
-                        tuple_main = array[merge.minimum_damage as usize].1;
-                        tuple_exc = Some(array[merge.maximum_damage as usize].1);
+                        tuple_exc = Some(array[merge.maximum_damage as usize]);
+                        array[merge.minimum_damage as usize]
                     }
                 }
             }
-            ImageType::Champion(champion_id) => {
-                tuple_main = CHAMPION_FORMULAS[*champion_id as usize]
-            }
-            ImageType::Item(item_id) => tuple_main = ITEM_FORMULAS[*item_id as usize],
-            ImageType::Rune(rune_id) => tuple_main = RUNE_FORMULAS[*rune_id as usize],
+            ImageType::Champion(champion_id) => CHAMPION_FORMULAS[*champion_id as usize],
+            ImageType::Item(item_id) => ITEM_FORMULAS[*item_id as usize],
+            ImageType::Rune(rune_id) => RUNE_FORMULAS[*rune_id as usize],
+            ImageType::BasicAttack => BASIC_ATTACK_OFFSET,
+            ImageType::CritStrike => CRITICAL_STRIKE_OFFSET,
         };
 
         let encode = |tuple| {
@@ -124,6 +125,8 @@ impl ImageType {
                 let riot_id = RUNE_ID_TO_RIOT_ID[*rune_id as usize];
                 format!("{BASE_URL}/img/runes/{riot_id:?}.avif")
             }
+            ImageType::BasicAttack => format!("{BASE_URL}/img/other/basic_attack.png"),
+            ImageType::CritStrike => format!("{BASE_URL}/img/stats/crit_chance.svg"),
         }
     }
 }
@@ -156,7 +159,7 @@ impl_base!(ChampionId, RuneId, ItemId);
 
 pub trait EnumCast: PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<usize> {
     const FORMULAS: &[(u32, u32)];
-    fn docs(&self) -> VNode {
+    fn docs(&self) -> Html {
         let offset: usize = (*self).into();
         Html::from_html_unchecked(get_cache(Self::FORMULAS[offset]).into())
     }

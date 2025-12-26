@@ -63,15 +63,12 @@
                     t.style.pointerEvents = "auto";
 
                     const code = document.createElement("code");
-                    let codeClass = "text-[#D4D4D4] font-normal text-left text-wrap"
+                    code.className = "text-[#D4D4D4] font-normal text-left text-wrap"
 
                     let innerHTML = window.decodeCacheSlice(s, e);
                     if (s1 && e1) {
-                        codeClass += " flex flex-col gap-2";
                         innerHTML += window.decodeCacheSlice(s1, e1);
                     }
-
-                    code.className = codeClass;
 
                     code.innerHTML = innerHTML;
                     t.appendChild(code);
