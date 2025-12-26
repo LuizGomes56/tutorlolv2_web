@@ -4,7 +4,7 @@ use crate::{
         components::inputs::player::PlayerInput,
         reducer::{DataAction, DragonAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
-    components::image::Image,
+    components::{image::Image, tables::header::TableHeader},
     model::{Dragons, SimpleStats},
     utils::{ImageType, fetch::post_bytes},
 };
@@ -128,17 +128,13 @@ pub fn Calculator() -> Html {
                             <Image src={ImageType::from(current_player.champion_id)} />
                             <span>{ current_player.champion_id.name() }</span>
                             <div class={classes!("flex", "gap-4")}>
-                            {
-                                abilities_meta
-                                    .into_iter()
-                                    .map(|metadata| html! {
-                                        <Image src={ImageType::Ability(
-                                            current_player.champion_id,
-                                            metadata.kind
-                                        )} />
-                                    })
-                                    .collect::<Html>()
-                            }
+                            <TableHeader
+                                champion_id={current_player.champion_id}
+                                abilities_to_merge={abilities_to_merge.clone()}
+                                abilities_meta={abilities_meta.clone()}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                            />
                             </div>
                         </div>
                     }

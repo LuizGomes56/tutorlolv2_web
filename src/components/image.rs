@@ -11,9 +11,18 @@ pub struct ImageProps {
 #[component]
 pub fn Image(props: &ImageProps) -> Html {
     let ImageProps { class, src } = props;
-    let offset = src.offset();
+    let (main_offset, exc_offset) = src.offset();
     let header = src.header();
     let src = src.url();
 
-    html!(<div {class} {offset}><img {src} />{header}</div>)
+    html! {
+        <div
+            {class}
+            data-offset-main={main_offset}
+            data-offset-exc={exc_offset}
+        >
+            <img {src} />
+            {header}
+        </div>
+    }
 }

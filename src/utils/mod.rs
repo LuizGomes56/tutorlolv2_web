@@ -1,8 +1,8 @@
 #![allow(static_mut_refs)]
 use crate::utils::cache::CACHE;
 use tutorlolv2_gen::{
-    AbilityId, CHAMPION_ABILITIES, CHAMPION_FORMULAS, ChampionId, ITEM_FORMULAS,
-    ITEM_ID_TO_RIOT_ID, ItemId, RUNE_FORMULAS, RUNE_ID_TO_RIOT_ID, RuneId,
+    AbilityId, CHAMPION_ABILITIES, CHAMPION_FORMULAS, ChampionId, DevMergeData, ITEM_FORMULAS,
+    ITEM_ID_TO_RIOT_ID, ItemId, MergeData, RUNE_FORMULAS, RUNE_ID_TO_RIOT_ID, RuneId,
 };
 use yew::{Html, html, virtual_dom::VNode};
 
@@ -11,9 +11,37 @@ pub mod fetch;
 
 pub const BASE_URL: &str = "http://localhost:8082";
 
+#[derive(Debug, PartialEq)]
+pub enum AbilityKind {
+    Alias(MergeData),
+    Normal(AbilityId),
+}
+
+impl AbilityKind {
+    pub const fn ability_id(&self) -> AbilityId {
+        match self {
+            AbilityKind::Alias(merge) => merge.alias,
+            AbilityKind::Normal(ability_id) => *ability_id,
+        }
+    }
+
+    pub const fn as_char(&self) -> char {
+        match self {
+            AbilityKind::Alias(merge) => merge.alias.as_char(),
+            AbilityKind::Normal(ability_id) => ability_id.as_char(),
+        }
+    }
+}
+
+impl From<AbilityId> for AbilityKind {
+    fn from(value: AbilityId) -> Self {
+        AbilityKind::Normal(value)
+    }
+}
+
 #[derive(PartialEq)]
 pub enum ImageType {
-    Ability(ChampionId, AbilityId),
+    Ability(ChampionId, AbilityKind),
     Champion(ChampionId),
     Item(ItemId),
     Rune(RuneId),
@@ -22,7 +50,8 @@ pub enum ImageType {
 impl ImageType {
     pub fn header(&self) -> Option<Html> {
         match self {
-            ImageType::Ability(_, ability_id) => {
+            ImageType::Ability(_, kind) => {
+                let ability_id = kind.ability_id();
                 let char = ability_id.as_char();
                 let name = ability_id.ability_name().display();
                 Some(html! {
@@ -37,26 +66,51 @@ impl ImageType {
         }
     }
 
-    pub fn offset(&self) -> String {
-        let (start, end) = match self {
-            ImageType::Ability(champion_id, ability_id) => unsafe {
-                CHAMPION_ABILITIES[*champion_id as usize]
-                    .into_iter()
-                    .find(|(id, _)| id == ability_id)
-                    .unwrap_unchecked()
-                    .1
-            },
-            ImageType::Champion(champion_id) => CHAMPION_FORMULAS[*champion_id as usize],
-            ImageType::Item(item_id) => ITEM_FORMULAS[*item_id as usize],
-            ImageType::Rune(rune_id) => RUNE_FORMULAS[*rune_id as usize],
+    pub fn offset(&self) -> (String, Option<String>) {
+        let mut tuple_main = (0, 0);
+        let mut tuple_exc = None;
+        match self {
+            ImageType::Ability(champion_id, kind) => {
+                let array = CHAMPION_ABILITIES[*champion_id as usize];
+                match kind {
+                    AbilityKind::Normal(ability_id) => {
+                        tuple_main = array
+                            .into_iter()
+                            .find(|(id, _)| id == ability_id)
+                            .unwrap()
+                            .1
+                    }
+                    AbilityKind::Alias(merge) => {
+                        tuple_main = array[merge.minimum_damage as usize].1;
+                        tuple_exc = Some(array[merge.maximum_damage as usize].1);
+                    }
+                }
+            }
+            ImageType::Champion(champion_id) => {
+                tuple_main = CHAMPION_FORMULAS[*champion_id as usize]
+            }
+            ImageType::Item(item_id) => tuple_main = ITEM_FORMULAS[*item_id as usize],
+            ImageType::Rune(rune_id) => tuple_main = RUNE_FORMULAS[*rune_id as usize],
         };
-        (start as u64 * (1 << 23) + end as u64).to_string()
+
+        let encode = |tuple| {
+            let (start, end) = tuple;
+            (start as u64 * (1 << 23) + end as u64).to_string()
+        };
+
+        (
+            encode(tuple_main),
+            match tuple_exc {
+                Some(tuple) => Some(encode(tuple)),
+                None => None,
+            },
+        )
     }
 
     pub fn url(&self) -> String {
         match self {
-            ImageType::Ability(champion_id, ability_id) => {
-                let char = ability_id.as_char();
+            ImageType::Ability(champion_id, kind) => {
+                let char = kind.as_char();
                 format!("{BASE_URL}/img/abilities/{champion_id:?}{char}.avif")
             }
             ImageType::Champion(champion_id) => {

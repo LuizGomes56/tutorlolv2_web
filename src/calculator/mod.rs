@@ -1,7 +1,9 @@
 use crate::model::{Attacks, BasicStats, Damages, Dragons, SimpleStats, Stats, ValueException};
 use bincode::{Decode, Encode};
 use std::rc::Rc;
-use tutorlolv2_gen::{AbilityId, AdaptativeType, ChampionId, ItemId, RuneId, TypeMetadata};
+use tutorlolv2_gen::{
+    AbilityId, AdaptativeType, ChampionId, ItemId, MergeData, RuneId, TypeMetadata,
+};
 
 mod components;
 pub mod page;
@@ -82,10 +84,10 @@ pub struct Game {
     pub current_player: FinalPlayer,
     pub enemies: Box<[FinalEnemy]>,
     pub tower_damages: [i32; L_TWRD],
-    pub abilities_meta: Box<[TypeMetadata<AbilityId>]>,
-    pub abilities_to_merge: Box<[(usize, usize)]>,
-    pub items_meta: Box<[TypeMetadata<ItemId>]>,
-    pub runes_meta: Box<[TypeMetadata<RuneId>]>,
+    pub abilities_meta: Rc<[TypeMetadata<AbilityId>]>,
+    pub abilities_to_merge: Rc<[MergeData]>,
+    pub items_meta: Rc<[TypeMetadata<ItemId>]>,
+    pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
 }
 
 /// Holds the levels of the abilities of a champion
