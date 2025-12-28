@@ -82,7 +82,7 @@ pub struct MonsterDamage {
 pub struct Game {
     pub monster_damages: [MonsterDamage; L_MSTR],
     pub current_player: FinalPlayer,
-    pub enemies: Box<[FinalEnemy]>,
+    pub enemies: Rc<[FinalEnemy]>,
     pub tower_damages: [i32; L_TWRD],
     pub abilities_meta: Rc<[TypeMetadata<AbilityId>]>,
     pub abilities_to_merge: Rc<[MergeData]>,

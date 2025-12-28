@@ -15,7 +15,7 @@ pub enum PlayerAction {
     InsertRuneExc(RuneId, u32),
     RemoveRuneExc(usize),
     Data(PlayerDataAction),
-    AbilityLevel(AbilityLevels),
+    AbilityLevels(AbilityLevels),
 }
 
 pub enum DataAction<T> {
@@ -84,7 +84,7 @@ impl Reducible for Player {
         let mut new = (*self).clone();
         match action {
             Self::Action::InsertRune(v) => new.runes.push(v),
-            Self::Action::AbilityLevel(v) => new.abilities = v,
+            Self::Action::AbilityLevels(v) => new.abilities = v,
             Self::Action::RemoveRune(v) => {
                 new.runes.swap_remove(v);
             }

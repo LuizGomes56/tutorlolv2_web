@@ -3,7 +3,7 @@ use crate::utils::cache::CACHE;
 use tutorlolv2_gen::{
     ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CHAMPION_FORMULAS,
     CRITICAL_STRIKE_OFFSET, ChampionId, ITEM_FORMULAS, ITEM_ID_TO_RIOT_ID, ItemId, MergeData,
-    RUNE_FORMULAS, RUNE_ID_TO_RIOT_ID, RuneId,
+    ONHIT_EFFECT_OFFSET, RUNE_FORMULAS, RUNE_ID_TO_RIOT_ID, RuneId,
 };
 use yew::prelude::*;
 
@@ -27,10 +27,7 @@ impl AbilityKind {
     }
 
     pub const fn as_char(&self) -> char {
-        match self {
-            AbilityKind::Alias(merge) => merge.alias.as_char(),
-            AbilityKind::Normal(ability_id) => ability_id.as_char(),
-        }
+        self.ability_id().as_char()
     }
 }
 
@@ -47,6 +44,7 @@ pub enum ImageType {
     Item(ItemId),
     Rune(RuneId),
     BasicAttack,
+    OnhitAttack,
     CritStrike,
 }
 
@@ -91,6 +89,7 @@ impl ImageType {
             ImageType::Item(item_id) => ITEM_FORMULAS[*item_id as usize],
             ImageType::Rune(rune_id) => RUNE_FORMULAS[*rune_id as usize],
             ImageType::BasicAttack => BASIC_ATTACK_OFFSET,
+            ImageType::OnhitAttack => ONHIT_EFFECT_OFFSET,
             ImageType::CritStrike => CRITICAL_STRIKE_OFFSET,
         };
 
@@ -127,6 +126,7 @@ impl ImageType {
             }
             ImageType::BasicAttack => format!("{BASE_URL}/img/other/basic_attack.png"),
             ImageType::CritStrike => format!("{BASE_URL}/img/stats/crit_chance.svg"),
+            ImageType::OnhitAttack => format!("{BASE_URL}/img/stats/onhit.svg"),
         }
     }
 }

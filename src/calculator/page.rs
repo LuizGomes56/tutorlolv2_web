@@ -1,11 +1,14 @@
 use crate::{
     calculator::{
-        Game, InputGame, Player, PlayerData,
+        AbilityLevels, FinalEnemy, Game, InputGame, Player, PlayerData,
         components::inputs::player::PlayerInput,
         reducer::{DataAction, DragonAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
-    components::{image::Image, tables::header::TableHeader},
-    model::{Dragons, SimpleStats},
+    components::{
+        image::Image,
+        tables::{body::TableBody, header::TableHeader},
+    },
+    model::{Dragons, SimpleStats, Stats},
     utils::{ImageType, fetch::post_bytes},
 };
 use std::{cell::RefCell, rc::Rc};
@@ -30,6 +33,23 @@ pub fn Calculator() -> Html {
     let player = use_reducer(Player::default);
     let enemies = use_reducer(Enemies::default);
     let dragons = use_reducer(Dragons::default);
+    {
+        let enemies = enemies.clone();
+        let player = player.clone();
+        use_effect_with((), move |_| {
+            player.dispatch(PlayerAction::Data(DataAction::Stats(unsafe {
+                &core::mem::transmute::<_, Stats>([100; 16]) as *const _
+            })));
+            player.dispatch(PlayerAction::AbilityLevels(AbilityLevels {
+                q: 5,
+                w: 5,
+                e: 5,
+                r: 3,
+            }));
+            enemies.dispatch(EnemyAction::Insert);
+            enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(true)));
+        })
+    };
 
     let game_data = use_state(|| None::<Game>);
     let controller = use_state(|| None::<AbortController>);
@@ -62,6 +82,8 @@ pub fn Calculator() -> Html {
                     enemy_players: (*enemies).to_vec(),
                     dragons: *dragons,
                 };
+
+                web_sys::console::log_1(&format!("{input_game:#?}").into());
 
                 match post_bytes::<Game>("/api/games/calculator", &input_game, signal).await {
                     Ok(data) => {
@@ -127,15 +149,22 @@ pub fn Calculator() -> Html {
                         <div>
                             <Image src={ImageType::from(current_player.champion_id)} />
                             <span>{ current_player.champion_id.name() }</span>
-                            <div class={classes!("flex", "gap-4")}>
-                            <TableHeader
-                                champion_id={current_player.champion_id}
-                                abilities_to_merge={abilities_to_merge.clone()}
-                                abilities_meta={abilities_meta.clone()}
-                                items_meta={items_meta.clone()}
-                                runes_meta={runes_meta.clone()}
-                            />
-                            </div>
+                            <table class={classes!("border-spacing-0", "p-0")}>
+                                <TableHeader
+                                    champion_id={current_player.champion_id}
+                                    abilities_to_merge={abilities_to_merge.clone()}
+                                    abilities_meta={abilities_meta.clone()}
+                                    items_meta={items_meta.clone()}
+                                    runes_meta={runes_meta.clone()}
+                                />
+                                <TableBody
+                                    enemies={enemies}
+                                    abilities_to_merge={abilities_to_merge.clone()}
+                                    abilities_meta={abilities_meta.clone()}
+                                    items_meta={items_meta.clone()}
+                                    runes_meta={runes_meta.clone()}
+                                />
+                            </table>
                         </div>
                     }
                 },

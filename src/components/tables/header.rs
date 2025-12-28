@@ -9,6 +9,8 @@ use crate::{
 
 #[derive(PartialEq, Properties)]
 pub struct TableHeaderProps {
+    #[prop_or(1)]
+    pub skip: u8,
     pub champion_id: ChampionId,
     pub abilities_meta: Rc<[TypeMetadata<AbilityId>]>,
     pub abilities_to_merge: Rc<[MergeData]>,
@@ -19,6 +21,7 @@ pub struct TableHeaderProps {
 #[component]
 pub fn TableHeader(props: &TableHeaderProps) -> Html {
     let TableHeaderProps {
+        skip,
         champion_id,
         abilities_meta,
         abilities_to_merge,
@@ -49,38 +52,43 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 }
             }
 
-            result.push(html! {
-                <th>
-                    <Image src={ImageType::Ability(*champion_id, ability_kind)} />
-                </th>
-            });
+            result.push(html!(<Image src={ImageType::Ability(*champion_id, ability_kind)} />));
             i += 1;
         }
 
         result
     };
 
-    fn header<T: Copy + Into<ImageType>>(slice: &Rc<[TypeMetadata<T>]>) -> Html {
-        slice
-            .into_iter()
-            .map(|metadata| {
-                html! {
-                    <th>
-                        <Image src={metadata.kind.into()} />
-                    </th>
-                }
-            })
-            .collect::<Html>()
+    let mut headers = Vec::with_capacity(
+        *skip as usize + 2 + abilities.len() + items_meta.len() + runes_meta.len(),
+    );
+
+    fn header<T: Copy + Into<ImageType>>(headers: &mut Vec<Html>, slice: &Rc<[TypeMetadata<T>]>) {
+        for metadata in slice.into_iter() {
+            headers.push(html!(<Image src={metadata.kind.into()} />))
+        }
     }
+
+    (0..*skip).for_each(|_| headers.push(html!()));
+    [
+        ImageType::BasicAttack,
+        ImageType::CritStrike,
+        ImageType::OnhitAttack,
+    ]
+    .into_iter()
+    .for_each(|image| headers.push(html!(<Image src={image} />)));
+    headers.extend(abilities);
+    header(&mut headers, items_meta);
+    header(&mut headers, runes_meta);
 
     html! {
         <thead>
             <tr>
-                <th><Image src={ImageType::BasicAttack} /></th>
-                <th><Image src={ImageType::CritStrike} /></th>
-                {abilities}
-                {header(items_meta)}
-                {header(runes_meta)}
+                {for headers.into_iter().enumerate().map(|(i, value)| {
+                    html!(<th key={i} class={classes!(
+                        "justify-items-center", "py-0.5"
+                    )}>{value}</th>)
+                })}
             </tr>
         </thead>
     }
