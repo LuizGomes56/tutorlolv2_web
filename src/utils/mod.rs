@@ -1,10 +1,13 @@
 #![allow(static_mut_refs)]
+use std::{hint::unreachable_unchecked, ops::Range};
+
 use crate::utils::cache::CACHE;
 use tutorlolv2_gen::{
-    ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CHAMPION_FORMULAS,
-    CRITICAL_STRIKE_OFFSET, ChampionId, ITEM_FORMULAS, ITEM_ID_TO_RIOT_ID, ItemId, MergeData,
-    ONHIT_EFFECT_OFFSET, RUNE_FORMULAS, RUNE_ID_TO_RIOT_ID, RuneId,
+    ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CRITICAL_STRIKE_OFFSET,
+    ChampionId, ITEM_ID_TO_RIOT_ID, ItemId, MergeData, ONHIT_EFFECT_OFFSET, RUNE_ID_TO_RIOT_ID,
+    RuneId,
 };
+use web_sys::js_sys::Math;
 use yew::prelude::*;
 
 pub mod cache;
@@ -56,7 +59,7 @@ impl ImageType {
                 let char = ability_id.as_char();
                 let name = ability_id.ability_name().display();
                 Some(html! {
-                    <div class={classes!("img-letter", "text-sm")}>
+                    <div class={classes!("img-letter", "text-xs")}>
                         {char}{match name {
                         Some(name) => Some(html!(<sub>{name}</sub>)),
                         None => None
@@ -72,9 +75,9 @@ impl ImageType {
         let mut tuple_exc = None;
         let tuple_main = match self {
             ImageType::Ability(champion_id, kind) => {
-                let offset = *champion_id as usize;
-                let array = ABILITY_FORMULAS[offset];
-                let abilities = CHAMPION_ABILITIES[offset];
+                let index = champion_id.index();
+                let array = ABILITY_FORMULAS[index];
+                let abilities = CHAMPION_ABILITIES[index];
                 match kind {
                     AbilityKind::Normal(ability_id) => {
                         array[abilities.iter().position(|id| id == ability_id).unwrap()]
@@ -85,9 +88,9 @@ impl ImageType {
                     }
                 }
             }
-            ImageType::Champion(champion_id) => CHAMPION_FORMULAS[*champion_id as usize],
-            ImageType::Item(item_id) => ITEM_FORMULAS[*item_id as usize],
-            ImageType::Rune(rune_id) => RUNE_FORMULAS[*rune_id as usize],
+            ImageType::Champion(champion_id) => champion_id.offset(),
+            ImageType::Item(item_id) => item_id.offset(),
+            ImageType::Rune(rune_id) => rune_id.offset(),
             ImageType::BasicAttack => BASIC_ATTACK_OFFSET,
             ImageType::OnhitAttack => ONHIT_EFFECT_OFFSET,
             ImageType::CritStrike => CRITICAL_STRIKE_OFFSET,
@@ -157,17 +160,33 @@ macro_rules! impl_base {
 
 impl_base!(ChampionId, RuneId, ItemId);
 
-pub trait EnumCast: PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<usize> {
+fn random_u16(range: Range<u16>) -> u16 {
+    (Math::random() * (range.end - range.start) as f64 + range.start as f64) as u16
+}
+
+pub trait EnumCast: PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<u16> {
     const FORMULAS: &[(u32, u32)];
-    fn docs(&self) -> Html {
-        let offset: usize = (*self).into();
-        Html::from_html_unchecked(get_cache(Self::FORMULAS[offset]).into())
+    fn random() -> Self {
+        let index = random_u16(const { 0..Self::FORMULAS.len() as u16 });
+        unsafe { Self::try_from(index).unwrap_unchecked() }
     }
     fn image_type(&self) -> ImageType {
         (*self).into()
     }
+    fn offset(&self) -> (u32, u32) {
+        let offset: usize = (*self).into();
+        Self::FORMULAS[offset]
+    }
+    fn docs(&self) -> &'static str {
+        let offset = self.offset();
+        get_cache(offset)
+    }
+    fn html(&self) -> Html {
+        Html::from_html_unchecked(self.docs().into())
+    }
 }
 
-fn get_cache((i, j): (u32, u32)) -> &'static str {
+pub fn get_cache(offsets: (u32, u32)) -> &'static str {
+    let (i, j) = offsets;
     unsafe { core::str::from_utf8_unchecked(CACHE.get_unchecked(i as usize..j as usize)) }
 }

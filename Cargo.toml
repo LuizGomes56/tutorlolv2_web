@@ -14,3 +14,7 @@ gloo-net = { version = "0.6.0", default-features = false, features = ["http"] }
 wasm-bindgen-futures = "0.4.54"
 pastey = "0.2.1"
 yew = { version = "0.22.0", features = ["csr"] }
+
+[features]
+default = ["overlay"]
+overlay = []

@@ -1,4 +1,6 @@
-use crate::model::{Attacks, BasicStats, Damages, Dragons, SimpleStats, Stats, ValueException};
+use crate::model::{
+    AbilityLevels, Attacks, BasicStats, Damages, Dragons, SimpleStats, Stats, ValueException,
+};
 use bincode::{Decode, Encode};
 use std::rc::Rc;
 use tutorlolv2_gen::{
@@ -6,8 +8,10 @@ use tutorlolv2_gen::{
 };
 
 mod components;
-pub mod page;
+mod page;
 mod reducer;
+
+pub use page::Calculator;
 
 /// Exact number of resistence variations for jungle monsters
 pub const L_MSTR: usize = 7;
@@ -88,13 +92,4 @@ pub struct Game {
     pub abilities_to_merge: Rc<[MergeData]>,
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
-}
-
-/// Holds the levels of the abilities of a champion
-#[derive(Clone, Copy, Debug, Default, Encode, PartialEq)]
-pub struct AbilityLevels {
-    pub q: u8,
-    pub w: u8,
-    pub e: u8,
-    pub r: u8,
 }

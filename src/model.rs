@@ -25,7 +25,7 @@ pub struct Stats {
 /// Enum that defines the team of some player.
 /// - `CHAOS` is converted to [`Team::Red`],
 /// - `ORDER` and any other variant matches [`Team::Blue`]
-#[derive(Clone, Copy, Debug, Encode, PartialEq)]
+#[derive(Clone, Copy, Debug, Decode, Encode, PartialEq)]
 pub enum Team {
     Blue,
     Red,
@@ -79,6 +79,14 @@ pub struct Damages {
     pub abilities: Box<[i32]>,
     pub items: Box<[i32]>,
     pub runes: Box<[i32]>,
+}
+
+#[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
+pub struct AbilityLevels {
+    pub q: u8,
+    pub w: u8,
+    pub e: u8,
+    pub r: u8,
 }
 
 /// Wrapper around the type [`u32`], whose first [`Self::DISC_BITS`] are used to

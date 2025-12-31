@@ -1,1 +1,3 @@
-pub mod page;
+mod page;
+
+pub use page::Documentation;

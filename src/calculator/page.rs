@@ -2,14 +2,14 @@ use crate::{
     calculator::{
         AbilityLevels, FinalEnemy, Game, InputGame, Player, PlayerData,
         components::inputs::player::PlayerInput,
-        reducer::{DataAction, DragonAction, Enemies, EnemyAction, LastAction, PlayerAction},
+        reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
     components::{
         image::Image,
         tables::{body::TableBody, header::TableHeader},
     },
     model::{Dragons, SimpleStats, Stats},
-    utils::{ImageType, fetch::post_bytes},
+    utils::{EnumCast, fetch::Fetch},
 };
 use std::{cell::RefCell, rc::Rc};
 use web_sys::AbortController;
@@ -33,6 +33,7 @@ pub fn Calculator() -> Html {
     let player = use_reducer(Player::default);
     let enemies = use_reducer(Enemies::default);
     let dragons = use_reducer(Dragons::default);
+
     {
         let enemies = enemies.clone();
         let player = player.clone();
@@ -85,7 +86,13 @@ pub fn Calculator() -> Html {
 
                 web_sys::console::log_1(&format!("{input_game:#?}").into());
 
-                match post_bytes::<Game>("/api/games/calculator", &input_game, signal).await {
+                match Fetch::new("/api/games/calculator")
+                    .signal(signal)
+                    .body_with_bincode(&input_game)
+                    .unwrap()
+                    .post::<Game>()
+                    .await
+                {
                     Ok(data) => {
                         let infer_enemy_player_stats = |index| {
                             let enemy: &Rc<PlayerData<SimpleStats>> = &enemies[index];
@@ -147,7 +154,7 @@ pub fn Calculator() -> Html {
                     } = data;
                     html! {
                         <div>
-                            <Image src={ImageType::from(current_player.champion_id)} />
+                            <Image src={current_player.champion_id.image_type()} />
                             <span>{ current_player.champion_id.name() }</span>
                             <table class={classes!("border-spacing-0", "p-0")}>
                                 <TableHeader
@@ -157,7 +164,7 @@ pub fn Calculator() -> Html {
                                     items_meta={items_meta.clone()}
                                     runes_meta={runes_meta.clone()}
                                 />
-                                <TableBody
+                                <TableBody<FinalEnemy>
                                     enemies={enemies}
                                     abilities_to_merge={abilities_to_merge.clone()}
                                     abilities_meta={abilities_meta.clone()}

@@ -1,5 +1,6 @@
 use crate::{
-    calculator::page::Calculator, documentation::page::Documentation, utils::cache::init_cache,
+    calculator::Calculator, documentation::Documentation, overlay::Overlay,
+    utils::cache::init_cache,
 };
 use yew::prelude::*;
 
@@ -7,13 +8,21 @@ mod calculator;
 mod components;
 mod documentation;
 mod model;
+mod overlay;
 mod utils;
 
 #[component]
 fn App() -> Html {
-    html! {
-        <Calculator />
+    #[cfg(not(feature = "overlay"))]
+    {
+        html! {
+            <Documentation />
+            // <Calculator />
+        }
     }
+
+    #[cfg(feature = "overlay")]
+    html!(<Overlay />)
 }
 
 fn main() {

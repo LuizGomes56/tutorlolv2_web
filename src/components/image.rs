@@ -3,7 +3,7 @@ use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct ImageProps {
-    #[prop_or(classes!("w-8", "h-8"))]
+    #[prop_or(classes!("w-6", "h-6", "opacity-50"))]
     pub class: Classes,
     pub src: ImageType,
 }
@@ -15,7 +15,7 @@ pub fn Image(props: &ImageProps) -> Html {
     let header = src.header();
     let src = src.url();
 
-    let mut classes = classes!("flex", "items-center", "justify-center", "relative", "cell");
+    let mut classes = classes!("relative");
     classes.push(class);
 
     html! {

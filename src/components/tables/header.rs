@@ -52,7 +52,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 }
             }
 
-            result.push(html!(<Image src={ImageType::Ability(*champion_id, ability_kind)} />));
+            result.push(ImageType::Ability(*champion_id, ability_kind));
             i += 1;
         }
 
@@ -63,20 +63,20 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         *skip as usize + 2 + abilities.len() + items_meta.len() + runes_meta.len(),
     );
 
-    fn header<T: Copy + Into<ImageType>>(headers: &mut Vec<Html>, slice: &Rc<[TypeMetadata<T>]>) {
+    fn header<T: Copy + Into<ImageType>>(
+        headers: &mut Vec<ImageType>,
+        slice: &Rc<[TypeMetadata<T>]>,
+    ) {
         for metadata in slice.into_iter() {
-            headers.push(html!(<Image src={metadata.kind.into()} />))
+            headers.push(metadata.kind.into())
         }
     }
 
-    (0..*skip).for_each(|_| headers.push(html!()));
-    [
+    headers.extend([
         ImageType::BasicAttack,
         ImageType::CritStrike,
         ImageType::OnhitAttack,
-    ]
-    .into_iter()
-    .for_each(|image| headers.push(html!(<Image src={image} />)));
+    ]);
     headers.extend(abilities);
     header(&mut headers, items_meta);
     header(&mut headers, runes_meta);
@@ -84,10 +84,15 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     html! {
         <thead>
             <tr>
+                {for (0..*skip).map(|_| html!(<th></th>))}
                 {for headers.into_iter().enumerate().map(|(i, value)| {
-                    html!(<th key={i} class={classes!(
-                        "justify-items-center", "py-0.5"
-                    )}>{value}</th>)
+                    html! {
+                        <th key={i} class={classes!(
+                            "justify-items-center", "py-0.5"
+                        )}>
+                            <Image src={value} />
+                        </th>
+                    }
                 })}
             </tr>
         </thead>
