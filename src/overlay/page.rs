@@ -47,7 +47,7 @@ pub fn Overlay() -> Html {
                 } = game;
 
                 html! {
-                    <div>
+                    <div class={classes!("ml-[400px]")}>
                         <table class={classes!("border-spacing-0", "p-0")}>
                             <TableHeader
                                 champion_id={current_player.champion_id}

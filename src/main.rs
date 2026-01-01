@@ -16,13 +16,15 @@ fn App() -> Html {
     #[cfg(not(feature = "overlay"))]
     {
         html! {
-            <Documentation />
-            // <Calculator />
+            <div class={classes!("bg-[#1f1f1f]")}>
+                <Documentation />
+                // <Calculator />
+            </div>
         }
     }
 
     #[cfg(feature = "overlay")]
-    html!(<Overlay />)
+    html!(<div class={classes!("bg-transparent")}><Overlay /></div>)
 }
 
 fn main() {

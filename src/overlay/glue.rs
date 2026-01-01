@@ -16,8 +16,8 @@ pub async fn get_data() -> Result<Game, String> {
     match bytes {
         Ok(response) => {
             let bytes = response.to_vec();
-            // let bytes: Vec<u8> =
-            //     include_bytes!("../../../tutorlolv2_desktop_app/src-tauri/example.json").into();
+            let bytes: Vec<u8> =
+                include_bytes!("../../../tutorlolv2_desktop_app/src-tauri/example.json").into();
             match bytes.is_empty() {
                 true => Err("Desktop application required to use the overlay feature".into()),
                 false => Ok(Fetch::new("/api/games/realtime")
@@ -27,6 +27,12 @@ pub async fn get_data() -> Result<Game, String> {
                     .unwrap()),
             }
         }
-        Err(e) => Err(format!("[ffi error]: {e:#?}")),
+        Err(e) => {
+            console::log_1(&format!("[tauri] Error: {e:?}").into());
+            Err(
+                "[tauri]: Can't access Riot API or you're not playing a League game right now"
+                    .into(),
+            )
+        }
     }
 }

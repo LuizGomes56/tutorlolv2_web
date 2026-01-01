@@ -10,7 +10,5 @@ export async function invoke_get_live_game() {
     /** @type {ArrayBuffer} */
     let data = await invoke?.("get_live_game");
 
-    console.log("[data]", data);
-
     return new Uint8Array(data);
 }
