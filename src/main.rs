@@ -1,12 +1,12 @@
 use crate::{
-    calculator::Calculator, documentation::Documentation, overlay::Overlay,
+    calculator::Calculator, components::header::Header, docs::Docs, overlay::Overlay,
     utils::cache::init_cache,
 };
 use yew::prelude::*;
 
 mod calculator;
 mod components;
-mod documentation;
+mod docs;
 mod model;
 mod overlay;
 mod utils;
@@ -14,14 +14,13 @@ mod utils;
 #[component]
 fn App() -> Html {
     #[cfg(not(feature = "overlay"))]
-    {
-        html! {
-            <div class={classes!("bg-[#1f1f1f]")}>
-                <Documentation />
-                // <Calculator />
-            </div>
-        }
-    }
+    return html! {
+        <div class={classes!("bg-std-900")}>
+            <Header />
+            <Docs />
+            // <Calculator />
+        </div>
+    };
 
     #[cfg(feature = "overlay")]
     html!(<div class={classes!("bg-transparent")}><Overlay /></div>)

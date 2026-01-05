@@ -15,5 +15,5 @@ yew = { version = "0.22.0", features = ["csr"] }
 brotli = "8.0.2"
 
 [features]
-default = ["overlay"]
+default = []
 overlay = []
