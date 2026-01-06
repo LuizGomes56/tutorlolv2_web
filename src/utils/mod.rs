@@ -3,15 +3,16 @@ use std::{hint::unreachable_unchecked, ops::Range};
 
 use crate::utils::cache::CACHE;
 use tutorlolv2_gen::{
-    ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CRITICAL_STRIKE_OFFSET,
-    ChampionId, ITEM_ID_TO_RIOT_ID, ItemId, MergeData, ONHIT_EFFECT_OFFSET, RUNE_ID_TO_RIOT_ID,
-    RuneId,
+    ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CHAMPION_ID_TO_NAME,
+    CRITICAL_STRIKE_OFFSET, ChampionId, ITEM_ID_TO_NAME, ITEM_ID_TO_RIOT_ID, ItemId, MergeData,
+    ONHIT_EFFECT_OFFSET, RUNE_ID_TO_NAME, RUNE_ID_TO_RIOT_ID, RuneId,
 };
 use web_sys::js_sys::Math;
 use yew::prelude::*;
 
 pub mod cache;
 pub mod fetch;
+pub mod hooks;
 
 pub const BASE_URL: &str = "http://localhost:8082";
 
@@ -140,6 +141,8 @@ macro_rules! impl_base {
             pastey::paste! {
                 impl EnumCast for $ty {
                     const FORMULAS: &[(u32, u32)] = &tutorlolv2_gen::[<$ty:replace("Id", ""):upper _FORMULAS>];
+                    const NAMES: &[&'static str] = &tutorlolv2_gen::[<$ty:replace("Id", ""):upper _ID_TO_NAME>];
+                    const ARRAY: &[$ty] = &tutorlolv2_gen::$ty::ARRAY;
                 }
 
                 impl From<$ty> for ImageType {
@@ -164,8 +167,18 @@ fn random_u16(range: Range<u16>) -> u16 {
     (Math::random() * (range.end - range.start) as f64 + range.start as f64) as u16
 }
 
-pub trait EnumCast: PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<u16> {
+pub trait EnumCast:
+    PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<u16> + 'static
+{
     const FORMULAS: &[(u32, u32)];
+    const NAMES: &[&'static str];
+    const ARRAY: &[Self];
+    fn index(&self) -> usize {
+        (*self).into()
+    }
+    fn name(&self) -> &'static str {
+        Self::NAMES[self.index()]
+    }
     fn random() -> Self {
         let index = random_u16(const { 0..Self::FORMULAS.len() as u16 });
         unsafe { Self::try_from(index).unwrap_unchecked() }
@@ -174,8 +187,7 @@ pub trait EnumCast: PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<u
         (*self).into()
     }
     fn offset(&self) -> (u32, u32) {
-        let offset: usize = (*self).into();
-        Self::FORMULAS[offset]
+        Self::FORMULAS[self.index()]
     }
     fn docs(&self) -> &'static str {
         let offset = self.offset();
