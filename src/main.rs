@@ -45,13 +45,13 @@ fn App() -> Html {
             <Switch<Route> render={|route| {
                 let component = match route {
                     Route::Calculator => html!(<Calculator />),
-                    _ => html!(<Docs />),
+                    _ => html!(<Calculator />),
                 };
                 html! {
                     <div class={classes!("bg-std-900")}>
-                        <Header />
-                        <Sidebar />
-                        <div class={classes!("flex", "w-full", "pl-64")}>
+                        // <Header />
+                        // <Sidebar />
+                        <div class={classes!("flex", "w-full")}>
                             {component}
                         </div>
                     </div>

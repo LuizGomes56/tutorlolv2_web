@@ -1,26 +1,45 @@
 use bincode::{Decode, Encode};
 use tutorlolv2_gen::{ItemId, RuneId};
 
-/// Holds all champion stats provided by Riot's API
-#[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
-pub struct Stats {
-    pub ability_power: i32,
-    pub armor: i32,
-    pub armor_penetration_flat: i32,
-    pub armor_penetration_percent: i32,
-    pub attack_damage: i32,
-    pub attack_range: i32,
-    pub attack_speed: i32,
-    pub crit_chance: i32,
-    pub crit_damage: i32,
-    pub current_health: i32,
-    pub magic_penetration_flat: i32,
-    pub magic_penetration_percent: i32,
-    pub magic_resist: i32,
-    pub health: i32,
-    pub mana: i32,
-    pub current_mana: i32,
+macro_rules! stats_struct {
+    ($($field:ident),*) => {
+        /// Holds all champion stats provided by Riot's API
+        #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
+        pub struct Stats {
+            $(pub $field: i32,)*
+        }
+
+        impl Stats {
+            pastey::paste! {
+                $(
+                    pub const fn [<set_ $field:snake>](mut self, $field: i32) -> Self {
+                        self.$field = $field;
+                        self
+                    }
+                )*
+            }
+        }
+    };
 }
+
+stats_struct!(
+    ability_power,
+    armor,
+    armor_penetration_flat,
+    armor_penetration_percent,
+    attack_damage,
+    attack_range,
+    attack_speed,
+    crit_chance,
+    crit_damage,
+    current_health,
+    magic_penetration_flat,
+    magic_penetration_percent,
+    magic_resist,
+    health,
+    mana,
+    current_mana
+);
 
 /// Enum that defines the team of some player.
 /// - `CHAOS` is converted to [`Team::Red`],
