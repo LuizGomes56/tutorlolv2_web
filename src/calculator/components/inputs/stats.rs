@@ -1,103 +1,138 @@
-use crate::{components::image::Image, model::Stats as StatsI32};
-use wasm_bindgen::JsCast;
+use crate::{
+    components::image::Image,
+    model::PlayerStats,
+    utils::{ImageType, StatType},
+};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
+pub struct StatCellProps {
+    pub image_type: ImageType,
+    pub name: AttrValue,
+    pub disabled: bool,
+    pub value: i32,
+    pub oninput: Callback<InputEvent>,
+    pub placeholder: u8,
+}
+
+#[component]
+pub fn StatCell(props: &StatCellProps) -> Html {
+    let image_type = props.image_type;
+    let disabled = props.disabled;
+    let name = &props.name;
+    let value = &props.value;
+    let oninput = &props.oninput;
+    let placeholder = props.placeholder;
+    html! {
+        <>
+            <span class={classes!("flex", "items-center", "justify-center", "relative")}>
+                <Image
+                    class={classes!("h-3.5", "w-3.5")}
+                    src={image_type}
+                />
+            </span>
+            <span class={classes!("text-sm", "content-center", "whitespace-nowrap")}>
+                {name}
+            </span>
+            <input
+                type={"number"}
+                class={classes!(
+                    "text-center", "min-w-0", "bg-transparent",
+                    if disabled { "text-std-400" }
+                    else { "text-white" }
+                )}
+                {disabled}
+                placeholder={placeholder.to_string()}
+                value={value.to_string()}
+                oninput={oninput}
+            />
+        </>
+    }
+}
+
+impl PlayerStats {
+    pub const fn field(&mut self, stat: StatType) -> &mut i32 {
+        match stat {
+            StatType::AbilityPower => &mut self.ability_power,
+            StatType::Armor => &mut self.armor,
+            StatType::ArmorPenetrationFlat => &mut self.armor_penetration_flat,
+            StatType::ArmorPenetrationPercent => &mut self.armor_penetration_percent,
+            StatType::AttackDamage => &mut self.attack_damage,
+            StatType::AttackRange => &mut self.attack_range,
+            StatType::AttackSpeed => &mut self.attack_speed,
+            StatType::CritChance => &mut self.crit_chance,
+            StatType::CritDamage => &mut self.crit_damage,
+            StatType::CurrentHealth => &mut self.current_health,
+            StatType::MagicPenetrationFlat => &mut self.magic_penetration_flat,
+            StatType::MagicPenetrationPercent => &mut self.magic_penetration_percent,
+            StatType::MagicResist => &mut self.magic_resist,
+            StatType::Health => &mut self.health,
+            StatType::Mana => &mut self.mana,
+            StatType::CurrentMana => &mut self.current_mana,
+        }
+    }
+
+    pub const fn get(&mut self, stat: StatType) -> i32 {
+        *self.field(stat)
+    }
+
+    pub const fn set(mut self, stat: StatType, value: i32) -> Self {
+        *self.field(stat) = value;
+        self
+    }
+}
+
+#[derive(PartialEq, Properties)]
 pub struct StatsProps {
-    infer: bool,
-    stats: StatsI32,
-    callback: Callback<*const StatsI32>,
-}
-
-#[derive(Clone)]
-struct StatsHook {
-    callback: Callback<*const StatsI32>,
-    stats: StatsI32,
-}
-
-#[hook]
-fn use_stats(hook: &StatsHook, func: fn(StatsI32, i32) -> StatsI32) -> Callback<i32> {
-    let StatsHook { callback, stats } = hook.clone();
-    use_callback((), move |v, _| {
-        // let value = target.unchecked_into::<HtmlInputElement>().value();
-        // let number = value.parse().unwrap_or(0);
-        callback.emit(&func(stats, v) as _);
-    })
+    pub infer: bool,
+    pub stats: PlayerStats,
+    pub callback: Callback<*const PlayerStats>,
 }
 
 #[component]
 pub fn Stats(props: &StatsProps) -> Html {
-    let StatsProps {
-        infer,
-        stats,
-        callback,
-    } = props;
-
-    let hook = &StatsHook {
-        callback: callback.clone(),
-        stats: *stats,
-    };
-
-    let ability_power = use_stats(hook, StatsI32::set_ability_power);
-    let armor = use_stats(hook, StatsI32::set_armor);
-    let armor_penetration_flat = use_stats(hook, StatsI32::set_armor_penetration_flat);
-    let armor_penetration_percent = use_stats(hook, StatsI32::set_armor_penetration_percent);
-    let attack_damage = use_stats(hook, StatsI32::set_attack_damage);
-    let attack_range = use_stats(hook, StatsI32::set_attack_range);
-    let attack_speed = use_stats(hook, StatsI32::set_attack_speed);
-    let crit_chance = use_stats(hook, StatsI32::set_crit_chance);
-    let crit_damage = use_stats(hook, StatsI32::set_crit_damage);
-    let current_health = use_stats(hook, StatsI32::set_current_health);
-    let magic_penetration_flat = use_stats(hook, StatsI32::set_magic_penetration_flat);
-    let magic_penetration_percent = use_stats(hook, StatsI32::set_magic_penetration_percent);
-    let magic_resist = use_stats(hook, StatsI32::set_magic_resist);
-    let health = use_stats(hook, StatsI32::set_health);
-    let mana = use_stats(hook, StatsI32::set_mana);
-    let current_mana = use_stats(hook, StatsI32::set_current_mana);
+    let infer = props.infer;
+    let mut stats = props.stats;
+    let callback = &props.callback;
 
     [
-        (ability_power, "Ability Power"),
-        (armor, "Armor"),
-        (armor_penetration_flat, "Armor Penetration Flat"),
-        (armor_penetration_percent, "Armor Penetration Percent"),
-        (attack_damage, "Attack Damage"),
-        (attack_range, "Attack Range"),
-        (attack_speed, "Attack Speed"),
-        (crit_chance, "Crit Chance"),
-        (crit_damage, "Crit Damage"),
-        (current_health, "Current Health"),
-        (magic_penetration_flat, "Magic Penetration Flat"),
-        (magic_penetration_percent, "Magic Penetration Percent"),
-        (magic_resist, "Magic Resist"),
-        (health, "Health"),
-        (mana, "Mana"),
-        (current_mana, "Current Mana"),
+        StatType::AbilityPower,
+        StatType::AttackDamage,
+        StatType::Health,
+        StatType::CurrentHealth,
+        StatType::Armor,
+        StatType::ArmorPenetrationFlat,
+        StatType::ArmorPenetrationPercent,
+        StatType::MagicResist,
+        StatType::MagicPenetrationFlat,
+        StatType::MagicPenetrationPercent,
+        StatType::CritChance,
+        StatType::CritDamage,
+        StatType::Mana,
+        StatType::CurrentMana,
+        StatType::AttackRange,
+        StatType::AttackSpeed,
     ]
     .into_iter()
-    .map(|(func, name)| {
+    .map(|stat| {
         html! {
-            <>
-                // <span class={classes!("flex", "items-center", "justify-center", "relative")}>
-                //     <Image
-                //         class={classes!("h-3.5", "w-3.5")}
-                //         source={ImageType::Other(url!("/img/stats/{}", props.path).into())}
-                //     />
-                // </span>
-                // <span class={classes!("text-sm")}>{props.display}</span>
-                // <input
-                //     type={"number"}
-                //     class={classes!(
-                //         "text-center", "min-w-0", "bg-transparent",
-                //         if props.disabled { "_text-400" }
-                //         else { "text-white" }
-                //     )}
-                //     disabled={props.disabled}
-                //     placeholder={"0"}
-                //     value={props.value.to_string()}
-                //     oninput={props.oninput.clone()}
-                // />
-            </>
+            <StatCell
+                image_type={ImageType::Stats(stat)}
+                name={stat.to_string()}
+                disabled={infer}
+                placeholder={0}
+                value={stats.get(stat)}
+                oninput={{
+                    let callback = callback.clone();
+                    let stats = stats;
+                    Callback::from(move |e: InputEvent| {
+                        let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                        let number = value.parse().unwrap_or(0);
+                        callback.emit(&stats.set(stat, number) as _);
+                    })
+                }}
+            />
         }
     })
     .collect::<Html>()

@@ -1,4 +1,4 @@
-use crate::model::{AbilityLevels, BasicStats, Damages, Dragons, SimpleStats, Stats, Team};
+use crate::model::{AbilityLevels, BasicStats, Damages, Dragons, SimpleStats, PlayerStats, Team};
 use bincode::Decode;
 use std::rc::Rc;
 use tutorlolv2_gen::{
@@ -32,7 +32,7 @@ pub struct CurrentPlayer {
     pub riot_id: Box<str>,
     pub base_stats: BasicStats,
     pub bonus_stats: BasicStats,
-    pub current_stats: Stats,
+    pub current_stats: PlayerStats,
     pub level: u8,
     pub team: Team,
     pub adaptative_type: AdaptativeType,

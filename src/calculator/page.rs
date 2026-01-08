@@ -8,10 +8,11 @@ use crate::{
         image::Image,
         tables::{body::TableBody, header::TableHeader},
     },
-    model::{Dragons, SimpleStats, Stats},
+    model::{Dragons, PlayerStats, SimpleStats},
     utils::{EnumCast, fetch::Fetch},
 };
 use std::{cell::RefCell, rc::Rc};
+use tutorlolv2_gen::ChampionId;
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
@@ -34,12 +35,16 @@ pub fn Calculator() -> Html {
     let enemies = use_reducer(Enemies::default);
     let dragons = use_reducer(Dragons::default);
 
+    let game_data = use_state(|| None::<Game>);
+    let controller = use_state(|| None::<AbortController>);
+    let last_action = use_mut_ref(|| LastAction::Init);
+
     {
         let enemies = enemies.clone();
         let player = player.clone();
         use_effect_with((), move |_| {
             player.dispatch(PlayerAction::Data(DataAction::Stats(unsafe {
-                &core::mem::transmute::<_, Stats>([100; 16]) as *const _
+                &core::mem::transmute::<_, PlayerStats>([100; 16]) as *const _
             })));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevels {
                 q: 5,
@@ -47,14 +52,36 @@ pub fn Calculator() -> Html {
                 e: 5,
                 r: 3,
             }));
+            player.dispatch(PlayerAction::Data(DataAction::ChampionId(
+                ChampionId::random(),
+            )));
             enemies.dispatch(EnemyAction::Insert);
-            enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(true)));
+            enemies.dispatch(EnemyAction::Insert);
+            enemies.dispatch(EnemyAction::Insert);
+            enemies.dispatch(EnemyAction::Insert);
+            enemies.dispatch(EnemyAction::Insert);
+            enemies.dispatch(EnemyAction::Change(
+                0,
+                DataAction::ChampionId(ChampionId::random()),
+            ));
+            enemies.dispatch(EnemyAction::Change(
+                1,
+                DataAction::ChampionId(ChampionId::random()),
+            ));
+            enemies.dispatch(EnemyAction::Change(
+                2,
+                DataAction::ChampionId(ChampionId::random()),
+            ));
+            enemies.dispatch(EnemyAction::Change(
+                3,
+                DataAction::ChampionId(ChampionId::random()),
+            ));
+            enemies.dispatch(EnemyAction::Change(
+                4,
+                DataAction::ChampionId(ChampionId::random()),
+            ));
         })
     };
-
-    let game_data = use_state(|| None::<Game>);
-    let controller = use_state(|| None::<AbortController>);
-    let last_action = use_mut_ref(|| LastAction::Init);
 
     {
         let game_data = game_data.clone();
@@ -138,7 +165,10 @@ pub fn Calculator() -> Html {
     };
 
     html! {
-        <div>
+        <div class={classes!(
+            "flex", "flex-col", "xl:flex-row",
+            "xl:justify-center", "mb-72", "p-4"
+        )}>
             <PlayerInput {player_props} />
             {match *game_data {
                 Some(ref data) => {
@@ -154,24 +184,26 @@ pub fn Calculator() -> Html {
                     } = data;
                     html! {
                         <div>
-                            <Image src={current_player.champion_id.image_type()} />
-                            <span>{ current_player.champion_id.name() }</span>
-                            <table class={classes!("border-spacing-0", "p-0")}>
-                                <TableHeader
-                                    champion_id={current_player.champion_id}
-                                    abilities_to_merge={abilities_to_merge.clone()}
-                                    abilities_meta={abilities_meta.clone()}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
-                                />
-                                <TableBody<FinalEnemy>
-                                    enemies={enemies}
-                                    abilities_to_merge={abilities_to_merge.clone()}
-                                    abilities_meta={abilities_meta.clone()}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
-                                />
-                            </table>
+                            <div class={classes!("box")}>
+                                <table>
+                                    <TableHeader
+                                        champion_id={current_player.champion_id}
+                                        abilities_to_merge={abilities_to_merge.clone()}
+                                        abilities_meta={abilities_meta.clone()}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                    />
+                                    <tbody>
+                                        <TableBody<FinalEnemy>
+                                            enemies={enemies}
+                                            abilities_to_merge={abilities_to_merge.clone()}
+                                            abilities_meta={abilities_meta.clone()}
+                                            items_meta={items_meta.clone()}
+                                            runes_meta={runes_meta.clone()}
+                                        />
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     }
                 },

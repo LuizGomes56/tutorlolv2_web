@@ -1,13 +1,13 @@
 use crate::{
     calculator::{AbilityLevels, Player, PlayerData},
-    model::{Dragons, SimpleStats, Stats, ValueException},
+    model::{Dragons, PlayerStats, SimpleStats, ValueException},
 };
 use std::rc::Rc;
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
 use yew::Reducible;
 
 pub type EnemyDataAction = DataAction<SimpleStats>;
-pub type PlayerDataAction = DataAction<Stats>;
+pub type PlayerDataAction = DataAction<PlayerStats>;
 
 pub enum PlayerAction {
     InsertRune(RuneId),
@@ -19,6 +19,7 @@ pub enum PlayerAction {
 }
 
 pub enum DataAction<T> {
+    Level(u8),
     Stats(*const T),
     Stacks(u32),
     InferStats(bool),
@@ -57,6 +58,7 @@ impl core::ops::DerefMut for Enemies {
 impl<T: Copy> PlayerData<T> {
     pub fn reduce_mut(&mut self, action: DataAction<T>) {
         match action {
+            DataAction::Level(v) => self.level = v,
             DataAction::Stats(v) => self.stats = unsafe { *v },
             DataAction::Stacks(v) => self.stacks = v,
             DataAction::InferStats(v) => self.infer_stats = v,

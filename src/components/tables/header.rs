@@ -87,10 +87,13 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 {for (0..*skip).map(|_| html!(<th></th>))}
                 {for headers.into_iter().enumerate().map(|(i, value)| {
                     html! {
-                        <th key={i} class={classes!(
-                            "justify-items-center", "py-0.5"
-                        )}>
-                            <Image src={value} />
+                        <th key={i}>
+                            <Image
+                                src={value}
+                                class={classes!(
+                                    "w-fit", "justify-self-center"
+                                )}
+                            />
                         </th>
                     }
                 })}

@@ -147,7 +147,9 @@ pub fn TableBody<T: PartialEq + 'static + DisplayDamage>(props: &TableBodyProps<
 
             html! {
                 <tr>
-                    <Image src={champion_id.image_type()} />
+                    <td>
+                        <Image src={champion_id.image_type()} />
+                    </td>
                     {attacks(basic_attack, DamageType::Physical)}
                     {attacks(critical_strike, DamageType::Physical)}
                     <td class={get_classes(DamageType::Mixed)}>

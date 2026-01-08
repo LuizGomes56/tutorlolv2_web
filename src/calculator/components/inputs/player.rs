@@ -1,13 +1,23 @@
-use crate::calculator::{
-    Player,
-    page::PlayerProps,
-    reducer::{LastAction, PlayerAction},
+use crate::{
+    calculator::{
+        Player,
+        components::inputs::{
+            banner::Banner,
+            stats::{StatCell, Stats},
+        },
+        page::PlayerProps,
+        reducer::{DataAction, LastAction, PlayerAction},
+    },
+    components::image::Image,
+    model::PlayerStats,
+    utils::ImageType,
 };
 use std::{cell::RefCell, rc::Rc};
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[hook]
-pub fn use_player_callback<T: 'static>(
+fn use_player_callback<T: 'static>(
     props: &PlayerProps,
     callback: fn(T) -> PlayerAction,
 ) -> Callback<T> {
@@ -22,6 +32,22 @@ pub fn use_player_callback<T: 'static>(
     })
 }
 
+#[hook]
+fn use_data_callback<T: 'static>(
+    props: &PlayerProps,
+    callback: fn(T) -> DataAction<PlayerStats>,
+) -> Callback<T> {
+    let PlayerProps {
+        player,
+        last_action,
+    } = props.clone();
+    use_callback((), move |v, _| {
+        let value = callback(v);
+        last_action.replace(LastAction::CurrentPlayer);
+        player.dispatch(PlayerAction::Data(value));
+    })
+}
+
 #[derive(PartialEq, Properties)]
 pub struct PlayerInputProps {
     pub player_props: PlayerProps,
@@ -30,7 +56,41 @@ pub struct PlayerInputProps {
 #[component]
 pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let PlayerInputProps { player_props } = props;
+
+    let player = &player_props.player;
+    let data = &player.data;
+
+    let stats_cb = use_data_callback(&player_props, DataAction::Stats);
+    let level_cb = use_data_callback(&player_props, DataAction::Level);
+
     html! {
-        <div></div>
+        <div class={classes!("flex", "flex-col", "w-72")}>
+            <Banner champion_id={data.champion_id} />
+            <div class={classes!(
+                "grid", "grid-cols-[auto,1fr,1fr]",
+                "gap-x-2", "px-4", "oxanium", "py-4"
+            )}>
+                <StatCell
+                    image_type={ImageType::Level}
+                    name={"Level"}
+                    disabled={false}
+                    value={data.level as i32}
+                    placeholder={1}
+                    oninput={{
+                        let callback = level_cb.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                            let number = value.parse().unwrap_or(1);
+                            callback.emit(number);
+                        })
+                    }}
+                />
+                <Stats
+                    infer={data.infer_stats}
+                    stats={data.stats}
+                    callback={stats_cb}
+                />
+            </div>
+        </div>
     }
 }

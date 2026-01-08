@@ -1,5 +1,5 @@
 use crate::model::{
-    AbilityLevels, Attacks, BasicStats, Damages, Dragons, SimpleStats, Stats, ValueException,
+    AbilityLevels, Attacks, BasicStats, Damages, Dragons, PlayerStats, SimpleStats, ValueException,
 };
 use bincode::{Decode, Encode};
 use std::rc::Rc;
@@ -31,7 +31,7 @@ pub struct Player {
     pub runes: Vec<RuneId>,
     pub rune_exceptions: Vec<ValueException>,
     pub abilities: AbilityLevels,
-    pub data: PlayerData<Stats>,
+    pub data: PlayerData<PlayerStats>,
 }
 
 /// Minimum required data to qualify a valid enemy player, and calculate
@@ -67,7 +67,7 @@ pub struct FinalEnemy {
 
 #[derive(Clone, Copy, Debug, Decode, PartialEq)]
 pub struct FinalPlayer {
-    pub current_stats: Stats,
+    pub current_stats: PlayerStats,
     pub base_stats: BasicStats,
     pub bonus_stats: BasicStats,
     pub level: u8,

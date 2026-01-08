@@ -44,8 +44,6 @@ impl<'a> Fetch<'a> {
         let target = format!("{BASE_URL}{url}");
         let builder = gloo_net::http::Request::post(&target);
 
-        web_sys::console::log_1(&format!("Target is {target:?}").into());
-
         let headers = Headers::new();
         headers.set("Content-Type", "application/octet-stream");
 

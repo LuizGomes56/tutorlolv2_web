@@ -1,11 +1,10 @@
 #![allow(static_mut_refs)]
-use std::{hint::unreachable_unchecked, ops::Range};
-
 use crate::utils::cache::CACHE;
+use std::{fmt::Display, ops::Range};
 use tutorlolv2_gen::{
-    ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CHAMPION_ID_TO_NAME,
-    CRITICAL_STRIKE_OFFSET, ChampionId, ITEM_ID_TO_NAME, ITEM_ID_TO_RIOT_ID, ItemId, MergeData,
-    ONHIT_EFFECT_OFFSET, RUNE_ID_TO_NAME, RUNE_ID_TO_RIOT_ID, RuneId,
+    ABILITY_FORMULAS, AbilityId, BASIC_ATTACK_OFFSET, CHAMPION_ABILITIES, CRITICAL_STRIKE_OFFSET,
+    ChampionId, ITEM_ID_TO_RIOT_ID, ItemId, MergeData, ONHIT_EFFECT_OFFSET, RUNE_ID_TO_RIOT_ID,
+    RuneId, TOWER_DAMAGE_OFFSET,
 };
 use web_sys::js_sys::Math;
 use yew::prelude::*;
@@ -16,7 +15,7 @@ pub mod hooks;
 
 pub const BASE_URL: &str = "http://localhost:8082";
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum AbilityKind {
     Alias(MergeData),
     Normal(AbilityId),
@@ -41,15 +40,62 @@ impl From<AbilityId> for AbilityKind {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
+pub enum StatType {
+    AbilityPower,
+    Armor,
+    ArmorPenetrationFlat,
+    ArmorPenetrationPercent,
+    AttackDamage,
+    AttackRange,
+    AttackSpeed,
+    CritChance,
+    CritDamage,
+    CurrentHealth,
+    MagicPenetrationFlat,
+    MagicPenetrationPercent,
+    MagicResist,
+    Health,
+    Mana,
+    CurrentMana,
+}
+
+impl Display for StatType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StatType::AbilityPower => write!(f, "Ability Power"),
+            StatType::Armor => write!(f, "Armor"),
+            StatType::ArmorPenetrationFlat => write!(f, "Armor Penetration Flat"),
+            StatType::ArmorPenetrationPercent => write!(f, "Armor Penetration %"),
+            StatType::AttackDamage => write!(f, "Attack Damage"),
+            StatType::AttackRange => write!(f, "Attack Range"),
+            StatType::AttackSpeed => write!(f, "Attack Speed"),
+            StatType::CritChance => write!(f, "Crit Chance"),
+            StatType::CritDamage => write!(f, "Crit Damage"),
+            StatType::CurrentHealth => write!(f, "Current Health"),
+            StatType::MagicPenetrationFlat => write!(f, "Magic Penetration Flat"),
+            StatType::MagicPenetrationPercent => write!(f, "Magic Penetration %"),
+            StatType::MagicResist => write!(f, "Magic Resist"),
+            StatType::Health => write!(f, "Health"),
+            StatType::Mana => write!(f, "Mana"),
+            StatType::CurrentMana => write!(f, "Current Mana"),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub enum ImageType {
     Ability(ChampionId, AbilityKind),
     Champion(ChampionId),
+    Centered(ChampionId),
     Item(ItemId),
     Rune(RuneId),
     BasicAttack,
     OnhitAttack,
     CritStrike,
+    Level,
+    Stats(StatType),
+    Tower,
 }
 
 impl ImageType {
@@ -72,7 +118,7 @@ impl ImageType {
         }
     }
 
-    pub fn offset(&self) -> (String, Option<String>) {
+    pub fn offset(&self) -> (Option<u64>, Option<u64>) {
         let mut tuple_exc = None;
         let tuple_main = match self {
             ImageType::Ability(champion_id, kind) => {
@@ -81,57 +127,78 @@ impl ImageType {
                 let abilities = CHAMPION_ABILITIES[index];
                 match kind {
                     AbilityKind::Normal(ability_id) => {
-                        array[abilities.iter().position(|id| id == ability_id).unwrap()]
+                        Some(array[abilities.iter().position(|id| id == ability_id).unwrap()])
                     }
                     AbilityKind::Alias(merge) => {
                         tuple_exc = Some(array[merge.maximum_damage as usize]);
-                        array[merge.minimum_damage as usize]
+                        Some(array[merge.minimum_damage as usize])
                     }
                 }
             }
-            ImageType::Champion(champion_id) => champion_id.offset(),
-            ImageType::Item(item_id) => item_id.offset(),
-            ImageType::Rune(rune_id) => rune_id.offset(),
-            ImageType::BasicAttack => BASIC_ATTACK_OFFSET,
-            ImageType::OnhitAttack => ONHIT_EFFECT_OFFSET,
-            ImageType::CritStrike => CRITICAL_STRIKE_OFFSET,
+            ImageType::Champion(champion_id) => Some(champion_id.offset()),
+            ImageType::Item(item_id) => Some(item_id.offset()),
+            ImageType::Rune(rune_id) => Some(rune_id.offset()),
+            ImageType::BasicAttack => Some(BASIC_ATTACK_OFFSET),
+            ImageType::OnhitAttack => Some(ONHIT_EFFECT_OFFSET),
+            ImageType::CritStrike => Some(CRITICAL_STRIKE_OFFSET),
+            ImageType::Tower => Some(TOWER_DAMAGE_OFFSET),
+            _ => None,
         };
 
-        let encode = |tuple| {
-            let (start, end) = tuple;
-            (start as u64 * (1 << 23) + end as u64).to_string()
+        let encode = |tuple: Option<(u32, u32)>| {
+            tuple.map(|(start, end)| start as u64 * (1 << 23) + end as u64)
         };
 
-        (
-            encode(tuple_main),
-            match tuple_exc {
-                Some(tuple) => Some(encode(tuple)),
-                None => None,
-            },
-        )
+        (encode(tuple_main), encode(tuple_exc))
     }
 
     pub fn url(&self) -> String {
-        match self {
+        let path = match self {
             ImageType::Ability(champion_id, kind) => {
                 let char = kind.as_char();
-                format!("{BASE_URL}/img/abilities/{champion_id:?}{char}.avif")
+                format!("abilities/{champion_id:?}{char}.avif")
             }
             ImageType::Champion(champion_id) => {
-                format!("{BASE_URL}/img/champions/{champion_id:?}.avif")
+                format!("champions/{champion_id:?}.avif")
+            }
+            ImageType::Centered(champion_id) => {
+                format!("centered/{champion_id:?}_0.avif")
             }
             ImageType::Item(item_id) => {
-                let riot_id = ITEM_ID_TO_RIOT_ID[*item_id as usize];
-                format!("{BASE_URL}/img/items/{riot_id:?}.avif")
+                let riot_id = ITEM_ID_TO_RIOT_ID[item_id.index()];
+                format!("items/{riot_id:?}.avif")
             }
             ImageType::Rune(rune_id) => {
-                let riot_id = RUNE_ID_TO_RIOT_ID[*rune_id as usize];
-                format!("{BASE_URL}/img/runes/{riot_id:?}.avif")
+                let riot_id = RUNE_ID_TO_RIOT_ID[rune_id.index()];
+                format!("runes/{riot_id:?}.avif")
             }
-            ImageType::BasicAttack => format!("{BASE_URL}/img/other/basic_attack.png"),
-            ImageType::CritStrike => format!("{BASE_URL}/img/stats/crit_chance.svg"),
-            ImageType::OnhitAttack => format!("{BASE_URL}/img/stats/onhit.svg"),
-        }
+            ImageType::Tower => "other/tower.avif".into(),
+            ImageType::BasicAttack => "other/basic_attack.png".into(),
+            ImageType::CritStrike => "stats/crit_chance.svg".into(),
+            ImageType::OnhitAttack => "stats/onhit.svg".into(),
+            ImageType::Level => "stats/level.svg".into(),
+            ImageType::Stats(stat) => match stat {
+                StatType::AbilityPower => "stats/ability_power.svg",
+                StatType::Armor => "stats/armor.svg",
+                StatType::ArmorPenetrationFlat => "stats/armor_penetration.svg",
+                StatType::ArmorPenetrationPercent => "stats/armor_penetration.svg",
+                StatType::AttackDamage => "stats/attack_damage.svg",
+                StatType::AttackRange => "stats/onhit.svg",
+                StatType::AttackSpeed => "stats/attack_speed.svg",
+                StatType::CritChance => "stats/crit_chance.svg",
+                StatType::CritDamage => "stats/crit_damage.svg",
+                StatType::CurrentHealth => "stats/health.svg",
+                StatType::MagicPenetrationFlat => "stats/magic_penetration.svg",
+                StatType::MagicPenetrationPercent => "stats/magic_penetration.svg",
+                StatType::MagicResist => "stats/magic_resist.svg",
+                StatType::Health => "stats/health.svg",
+                StatType::Mana => "stats/mana.svg",
+                StatType::CurrentMana => "stats/mana.svg",
+            }
+            .into(),
+        };
+
+        format!("{BASE_URL}/img/{path}")
     }
 }
 

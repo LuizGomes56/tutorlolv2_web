@@ -3,7 +3,7 @@ use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct ImageProps {
-    #[prop_or(classes!("w-6", "h-6", "opacity-50"))]
+    #[prop_or_default]
     pub class: Classes,
     pub src: ImageType,
 }
@@ -20,8 +20,8 @@ pub fn Image(props: &ImageProps) -> Html {
 
     html! {
         <div
-            data-offset-main={main_offset}
-            data-offset-exc={exc_offset}
+            data-offset-main={main_offset.as_ref().map(ToString::to_string)}
+            data-offset-exc={exc_offset.as_ref().map(ToString::to_string)}
             class={classes}
         >
             <img loading={"lazy"} {src} alt={""} />
