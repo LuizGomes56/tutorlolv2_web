@@ -165,10 +165,7 @@ pub fn Calculator() -> Html {
     };
 
     html! {
-        <div class={classes!(
-            "flex", "flex-col", "xl:flex-row",
-            "xl:justify-center", "mb-72", "p-4"
-        )}>
+        <div class={classes!("flex", "mb-72", "p-4", "gap-4")}>
             <PlayerInput {player_props} />
             {match *game_data {
                 Some(ref data) => {

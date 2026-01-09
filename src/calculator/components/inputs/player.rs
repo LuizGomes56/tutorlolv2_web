@@ -2,6 +2,7 @@ use crate::{
     calculator::{
         Player,
         components::inputs::{
+            abilities::Abilities,
             banner::Banner,
             stats::{StatCell, Stats},
         },
@@ -60,15 +61,23 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let player = &player_props.player;
     let data = &player.data;
 
-    let stats_cb = use_data_callback(&player_props, DataAction::Stats);
-    let level_cb = use_data_callback(&player_props, DataAction::Level);
+    let stats_cb = use_data_callback(player_props, DataAction::Stats);
+    let level_cb = use_data_callback(player_props, DataAction::Level);
+    let abilities_cb = use_player_callback(player_props, PlayerAction::AbilityLevels);
 
     html! {
-        <div class={classes!("flex", "flex-col", "w-72")}>
+        <div class={classes!("flex", "flex-col", "w-72", "box")}>
             <Banner champion_id={data.champion_id} />
+            <div class={classes!("grid", "grid-cols-4")}>
+                <Abilities
+                    ability_levels={player.abilities}
+                    callback={abilities_cb}
+                    champion_id={data.champion_id}
+                />
+            </div>
             <div class={classes!(
                 "grid", "grid-cols-[auto,1fr,1fr]",
-                "gap-x-2", "px-4", "oxanium", "py-4"
+                "gap-x-2", "p-4", "oxanium"
             )}>
                 <StatCell
                     image_type={ImageType::Level}

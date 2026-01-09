@@ -1,3 +1,4 @@
+pub mod abilities;
 pub mod banner;
 pub mod dragon;
 pub mod enemies;

@@ -106,7 +106,7 @@ impl ImageType {
                 let char = ability_id.as_char();
                 let name = ability_id.ability_name().display();
                 Some(html! {
-                    <div class={classes!("img-letter", "text-xs")}>
+                    <div class={classes!("img-letter", "text-sm")}>
                         {char}{match name {
                         Some(name) => Some(html!(<sub>{name}</sub>)),
                         None => None
@@ -126,9 +126,10 @@ impl ImageType {
                 let array = ABILITY_FORMULAS[index];
                 let abilities = CHAMPION_ABILITIES[index];
                 match kind {
-                    AbilityKind::Normal(ability_id) => {
-                        Some(array[abilities.iter().position(|id| id == ability_id).unwrap()])
-                    }
+                    AbilityKind::Normal(ability_id) => abilities
+                        .iter()
+                        .position(|id| id == ability_id)
+                        .and_then(|i| Some(array[i])),
                     AbilityKind::Alias(merge) => {
                         tuple_exc = Some(array[merge.maximum_damage as usize]);
                         Some(array[merge.minimum_damage as usize])
