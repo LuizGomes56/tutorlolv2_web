@@ -15,6 +15,11 @@ body {
     font-family: Oxanium, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+.text-shadow {
+    filter: drop-shadow(1.25px 1.25px 0px black);
+    text-shadow: 0px 0px 4px black;
+}
+
 .img-letter {
     position: absolute;
     color: white;

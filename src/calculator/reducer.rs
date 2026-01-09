@@ -12,6 +12,7 @@ pub type PlayerDataAction = DataAction<PlayerStats>;
 pub enum PlayerAction {
     InsertRune(RuneId),
     RemoveRune(usize),
+    SetRuneVec(&'static [RuneId]),
     InsertRuneExc(RuneId, u32),
     RemoveRuneExc(usize),
     Data(PlayerDataAction),
@@ -26,6 +27,7 @@ pub enum DataAction<T> {
     IsMegaGnar(bool),
     InsertItem(ItemId),
     RemoveItem(usize),
+    SetItemVec(&'static [ItemId]),
     ChampionId(ChampionId),
     InsertItemExc(ItemId, u32),
     RemoveItemExc(usize),
@@ -65,6 +67,7 @@ impl<T: Copy> PlayerData<T> {
             DataAction::IsMegaGnar(v) => self.is_mega_gnar = v,
             DataAction::InsertItem(v) => self.items.push(v),
             DataAction::ChampionId(v) => self.champion_id = v,
+            DataAction::SetItemVec(v) => self.items = v.into(),
             DataAction::RemoveItem(v) => {
                 self.items.swap_remove(v);
             }
@@ -85,6 +88,7 @@ impl Reducible for Player {
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
         match action {
+            Self::Action::SetRuneVec(v) => new.runes = v.into(),
             Self::Action::InsertRune(v) => new.runes.push(v),
             Self::Action::AbilityLevels(v) => new.abilities = v,
             Self::Action::RemoveRune(v) => {

@@ -145,6 +145,23 @@ pub fn TableBody<T: PartialEq + 'static + DisplayDamage>(props: &TableBodyProps<
                     },
             } = damages.attacks;
 
+            let item_damages =  items_meta
+                .into_iter()
+                .enumerate()
+                    .map(|(i, metadata)| {
+                        let damage_type = metadata.damage_type;
+                        let minimum_damage = damages.items[i];
+                        let maximum_damage = damages.items[i +1];
+                        html! {
+                            <td key={i} class={get_classes(damage_type)}>
+                                {minimum_damage}{(maximum_damage != 0 && minimum_damage != maximum_damage).then_some(
+                                    html!(<>{" - "}{maximum_damage}</>)
+                                )}
+                            </td>
+                        }
+                    })
+                    .collect::<Html>();
+
             html! {
                 <tr>
                     <td>
@@ -153,15 +170,15 @@ pub fn TableBody<T: PartialEq + 'static + DisplayDamage>(props: &TableBodyProps<
                     {attacks(basic_attack, DamageType::Physical)}
                     {attacks(critical_strike, DamageType::Physical)}
                     <td class={get_classes(DamageType::Mixed)}>
-                        {onhit_min}{(onhit_max != 0 && onhit_max != onhit_min).then_some({
+                        {onhit_min}{(onhit_max != 0 && onhit_max != onhit_min).then_some(
                             html!(<>{" - "}{onhit_max}</>)
-                        })}
+                        )}
                     </td>
                     {abilities.into_iter().map(|(i, damage)| {
                         let damage_type = abilities_meta[i].damage_type;
                         html! { <td key={i} class={get_classes(damage_type)}>{damage}</td> }
                     }).collect::<Html>()}
-                    {cell(items_meta, &damages.items)}
+                    {item_damages}
                     {cell(runes_meta, &damages.runes)}
                 </tr>
             }

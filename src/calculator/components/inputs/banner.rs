@@ -20,7 +20,7 @@ pub fn Banner(props: &BannerProps) -> Html {
                 )}
             />
             <span class={classes!(
-                "absolute", "left-4", "bottom-4",
+                "absolute", "left-4", "bottom-4", "text-shadow",
                 "font-bold", "text-lg", "text-white",
             )}>
                 {format!("{champion_id:?}")}

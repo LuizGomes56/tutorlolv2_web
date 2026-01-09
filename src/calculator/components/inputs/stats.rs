@@ -38,7 +38,7 @@ pub fn StatCell(props: &StatCellProps) -> Html {
             <input
                 type={"number"}
                 class={classes!(
-                    "text-center", "min-w-0", "bg-transparent",
+                    "text-center", "min-w-0", "ml-2", "bg-transparent",
                     if disabled { "text-std-400" }
                     else { "text-white" }
                 )}
@@ -125,7 +125,6 @@ pub fn Stats(props: &StatsProps) -> Html {
                 value={stats.get(stat)}
                 oninput={{
                     let callback = callback.clone();
-                    let stats = stats;
                     Callback::from(move |e: InputEvent| {
                         let value = e.target_unchecked_into::<HtmlInputElement>().value();
                         let number = value.parse().unwrap_or(0);

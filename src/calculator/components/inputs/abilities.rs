@@ -51,7 +51,7 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                 <label class={classes!("grid", "grid-cols-2")}>
                     <Image
                         src={ImageType::Ability(champion_id, ability_id.into())}
-                        class={classes!("h-9", "w-9", "rounded")}
+                        class={classes!("h-8", "w-8", "rounded")}
                     />
                     <input
                         value={value.to_string()}
@@ -66,8 +66,8 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                         }}
                         type={"number"}
                         class={classes!(
-                            "text-sm", "bg-std-800", "w-9",
-                            "h-9", "text-center", "text-std-200"
+                            "text-sm", "bg-std-800", "w-8",
+                            "h-8", "text-center", "text-std-200"
                         )}
                     />
                 </label>
