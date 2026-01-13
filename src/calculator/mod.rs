@@ -4,7 +4,7 @@ use crate::model::{
 use bincode::{Decode, Encode};
 use std::rc::Rc;
 use tutorlolv2_gen::{
-    AbilityId, AdaptativeType, ChampionId, ItemId, MergeData, RuneId, TypeMetadata,
+    AbilityId, AdaptativeType, ChampionId, Ctx, ItemId, MergeData, RuneId, TypeMetadata,
 };
 
 mod components;
@@ -63,6 +63,7 @@ pub struct FinalEnemy {
     pub real_magic_resist: i32,
     pub level: u8,
     pub champion_id: ChampionId,
+    pub eval_ctx: Ctx,
 }
 
 #[derive(Clone, Copy, Debug, Decode, PartialEq)]

@@ -98,6 +98,10 @@ pub enum ImageType {
     Tower,
 }
 
+pub fn encode_offset(tuple: Option<Range<usize>>) -> Option<u64> {
+    tuple.map(|range| range.start as u64 * (1 << 23) + range.end as u64)
+}
+
 impl ImageType {
     pub fn header(&self) -> Option<Html> {
         match self {
@@ -129,28 +133,24 @@ impl ImageType {
                     AbilityKind::Normal(ability_id) => abilities
                         .iter()
                         .position(|id| id == ability_id)
-                        .and_then(|i| Some(array[i])),
+                        .and_then(|i| Some(array[i].clone())),
                     AbilityKind::Alias(merge) => {
-                        tuple_exc = Some(array[merge.maximum_damage as usize]);
-                        Some(array[merge.minimum_damage as usize])
+                        tuple_exc = Some(array[merge.maximum_damage as usize].clone());
+                        Some(array[merge.minimum_damage as usize].clone())
                     }
                 }
             }
             ImageType::Champion(champion_id) => Some(champion_id.offset()),
             ImageType::Item(item_id) => Some(item_id.offset()),
             ImageType::Rune(rune_id) => Some(rune_id.offset()),
-            ImageType::BasicAttack => Some(BASIC_ATTACK_OFFSET),
-            ImageType::OnhitAttack => Some(ONHIT_EFFECT_OFFSET),
-            ImageType::CritStrike => Some(CRITICAL_STRIKE_OFFSET),
-            ImageType::Tower => Some(TOWER_DAMAGE_OFFSET),
+            ImageType::BasicAttack => Some(BASIC_ATTACK_OFFSET.clone()),
+            ImageType::OnhitAttack => Some(ONHIT_EFFECT_OFFSET.clone()),
+            ImageType::CritStrike => Some(CRITICAL_STRIKE_OFFSET.clone()),
+            ImageType::Tower => Some(TOWER_DAMAGE_OFFSET.clone()),
             _ => None,
         };
 
-        let encode = |tuple: Option<(u32, u32)>| {
-            tuple.map(|(start, end)| start as u64 * (1 << 23) + end as u64)
-        };
-
-        (encode(tuple_main), encode(tuple_exc))
+        (encode_offset(tuple_main), encode_offset(tuple_exc))
     }
 
     pub fn url(&self) -> String {
@@ -208,7 +208,7 @@ macro_rules! impl_base {
         $(
             pastey::paste! {
                 impl EnumCast for $ty {
-                    const FORMULAS: &[(u32, u32)] = &tutorlolv2_gen::[<$ty:replace("Id", ""):upper _FORMULAS>];
+                    const FORMULAS: &[Range<usize>] = &tutorlolv2_gen::[<$ty:replace("Id", ""):upper _FORMULAS>];
                     const NAMES: &[&'static str] = &tutorlolv2_gen::[<$ty:replace("Id", ""):upper _ID_TO_NAME>];
                     const ARRAY: &[$ty] = &tutorlolv2_gen::$ty::ARRAY;
                 }
@@ -238,7 +238,7 @@ fn random_u16(range: Range<u16>) -> u16 {
 pub trait EnumCast:
     PartialEq + Copy + Into<ImageType> + Into<usize> + TryFrom<u16> + 'static
 {
-    const FORMULAS: &[(u32, u32)];
+    const FORMULAS: &[Range<usize>];
     const NAMES: &[&'static str];
     const ARRAY: &[Self];
     fn index(&self) -> usize {
@@ -254,8 +254,8 @@ pub trait EnumCast:
     fn image_type(&self) -> ImageType {
         (*self).into()
     }
-    fn offset(&self) -> (u32, u32) {
-        Self::FORMULAS[self.index()]
+    fn offset(&self) -> Range<usize> {
+        Self::FORMULAS[self.index()].clone()
     }
     fn docs(&self) -> &'static str {
         let offset = self.offset();
@@ -266,7 +266,6 @@ pub trait EnumCast:
     }
 }
 
-pub fn get_cache(offsets: (u32, u32)) -> &'static str {
-    let (i, j) = offsets;
-    unsafe { core::str::from_utf8_unchecked(CACHE.get_unchecked(i as usize..j as usize)) }
+pub fn get_cache(offsets: Range<usize>) -> &'static str {
+    unsafe { core::str::from_utf8_unchecked(CACHE.get_unchecked(offsets)) }
 }

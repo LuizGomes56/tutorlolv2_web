@@ -1,9 +1,9 @@
-use crate::model::{AbilityLevels, BasicStats, Damages, Dragons, SimpleStats, PlayerStats, Team};
+use crate::model::{AbilityLevels, BasicStats, Damages, Dragons, PlayerStats, SimpleStats, Team};
 use bincode::Decode;
 use std::rc::Rc;
 use tutorlolv2_gen::{
-    AbilityId, AdaptativeType, ChampionId, GameMap, ItemId, L_SIML, MergeData, Position, RuneId,
-    TypeMetadata,
+    AbilityId, AdaptativeType, ChampionId, Ctx, GameMap, ItemId, L_SIML, MergeData, Position,
+    RuneId, TypeMetadata,
 };
 
 mod components;
@@ -67,4 +67,5 @@ pub struct Enemy {
     pub champion_id: ChampionId,
     pub team: Team,
     pub position: Position,
+    pub eval_ctx: Ctx,
 }

@@ -12,7 +12,7 @@ use crate::{
     utils::{EnumCast, fetch::Fetch},
 };
 use std::{cell::RefCell, rc::Rc};
-use tutorlolv2_gen::ChampionId;
+use tutorlolv2_gen::{ABILITY_CLOSURES, ChampionId};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
@@ -53,7 +53,7 @@ pub fn Calculator() -> Html {
                 r: 3,
             }));
             player.dispatch(PlayerAction::Data(DataAction::ChampionId(
-                ChampionId::random(),
+                ChampionId::Aatrox,
             )));
             enemies.dispatch(EnemyAction::Insert);
             enemies.dispatch(EnemyAction::Insert);
@@ -192,6 +192,7 @@ pub fn Calculator() -> Html {
                                     />
                                     <tbody>
                                         <TableBody<FinalEnemy>
+                                            ability_offsets={ABILITY_CLOSURES[current_player.champion_id.index()]}
                                             enemies={enemies}
                                             abilities_to_merge={abilities_to_merge.clone()}
                                             abilities_meta={abilities_meta.clone()}

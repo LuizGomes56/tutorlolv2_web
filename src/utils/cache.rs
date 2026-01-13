@@ -41,11 +41,11 @@ pub fn init_cache() {
     web_sys::console::time();
     unsafe {
         BrotliDecompress(
-            &mut (&BLOCK as &[u8]),
-            &mut (&mut FixedBuffer {
+            &mut BLOCK,
+            &mut FixedBuffer {
                 buffer: &mut CACHE,
                 position: 0,
-            }),
+            },
         )
         .unwrap_unchecked();
     }

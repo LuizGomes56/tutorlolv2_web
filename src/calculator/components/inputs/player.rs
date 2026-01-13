@@ -15,8 +15,7 @@ use crate::{
     model::PlayerStats,
     utils::ImageType,
 };
-use std::{cell::RefCell, rc::Rc};
-use tutorlolv2_gen::{ItemId, RECOMMENDED_ITEMS, RECOMMENDED_RUNES, RuneId};
+use tutorlolv2_gen::{ItemId, Position, RuneId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -119,7 +118,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     let rec_items_cb = rec_items_cb.clone();
                     let champion_id = data.champion_id;
                     Callback::from(move |_| {
-                        let rec = RECOMMENDED_ITEMS[champion_id as usize][0];
+                        let rec = champion_id.recommended_items(Position::Top);
                         rec_items_cb.emit(rec);
                     })
                 }}>
@@ -134,7 +133,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     let rec_runes_cb = rec_runes_cb.clone();
                     let champion_id = data.champion_id;
                     Callback::from(move |_| {
-                        let rec = RECOMMENDED_RUNES[champion_id as usize][0];
+                        let rec = champion_id.recommended_runes(Position::Top);
                         rec_runes_cb.emit(rec);
                     })
                 }}>

@@ -7,6 +7,7 @@ use crate::{
     utils::EnumCast,
 };
 use std::time::Duration;
+use tutorlolv2_gen::ABILITY_CLOSURES;
 use yew::{
     platform::{spawn_local, time::sleep},
     prelude::*,
@@ -57,6 +58,7 @@ pub fn Overlay() -> Html {
                                 runes_meta={runes_meta.clone()}
                             />
                             <TableBody<Enemy>
+                                ability_offsets={ABILITY_CLOSURES[current_player.champion_id.index()]}
                                 enemies={enemies}
                                 abilities_to_merge={abilities_to_merge.clone()}
                                 abilities_meta={abilities_meta.clone()}
