@@ -7,10 +7,176 @@ use crate::{
 };
 use std::{collections::HashSet, ops::Range, rc::Rc};
 use tutorlolv2_gen::{
-    AbilityId, ChampionId, Ctx, DamageType, ITEM_IDENTS, ItemId, MergeData, RUNE_CLOSURES, RuneId,
-    TypeMetadata,
+    ABILITY_IDENTS, AbilityId, ChampionId, Ctx, DamageType, EvalIdent, ITEM_IDENTS, ItemId,
+    MergeData, RUNE_CLOSURES, RUNE_IDENTS, RuneId, TypeMetadata,
 };
 use yew::prelude::*;
+
+const CTX_VARIANTS: usize = size_of::<Ctx>() / size_of::<f32>();
+
+pub struct Cell {
+    damage_type: DamageType,
+    min_dmg: i32,
+    max_dmg: Option<i32>,
+    offset_main: Option<u64>,
+    offset_exc: Option<u64>,
+    idents: &'static [EvalIdent],
+    key: usize,
+}
+
+fn rdmg(metadata: &Rc<[TypeMetadata<RuneId>]>, damages: Box<[i32]>) -> Box<[Cell]> {
+    let mlen = metadata.len();
+    let dlen = damages.len();
+
+    assert!(
+        mlen == dlen,
+        "Incompatible metadata vs box i32 len: [{mlen}m] [{dlen}d]"
+    );
+
+    let mut cells = Box::<[Cell]>::new_uninit_slice(mlen);
+    let mut i = 0;
+
+    while i < mlen {
+        let TypeMetadata {
+            kind, damage_type, ..
+        } = metadata[i];
+        let text = damages[i];
+        let closure_range = &RUNE_CLOSURES[kind.index()];
+        let offset_main = encode_offset(Some(closure_range.clone()));
+        let idents = RUNE_IDENTS[kind.index()];
+        cells[i].write(Cell {
+            damage_type,
+            min_dmg: text,
+            offset_main,
+            offset_exc: None,
+            max_dmg: None,
+            idents,
+            key: i,
+        });
+        i += 1;
+    }
+
+    unsafe { cells.assume_init() }
+}
+
+impl Cell {
+    pub fn display(self, ctx: Ctx) -> Html {
+        let Self {
+            damage_type,
+            min_dmg,
+            max_dmg,
+            offset_main,
+            offset_exc,
+            idents,
+            key,
+        } = self;
+        let ctx_array = unsafe { core::mem::transmute::<_, [f32; CTX_VARIANTS]>(ctx) };
+
+        let class = classes!(
+            "text-xs",
+            "text-center",
+            match damage_type {
+                DamageType::Physical => "text-orange-500",
+                DamageType::Magic => "text-sky-500",
+                DamageType::Mixed => "text-indigo-500",
+                DamageType::True => "text-white",
+                DamageType::Adaptative => "text-purple-500",
+                DamageType::Unknown => "text-emerald-500",
+            }
+        );
+
+        let enc64 = |value: Option<u64>| value.as_ref().map(ToString::to_string);
+        let data_idents = idents
+            .into_iter()
+            .map(|&ident| {
+                let value = ctx_array[ident as usize];
+                format!("[{ident}:{value}]")
+            })
+            .collect::<String>();
+
+        let text = match max_dmg {
+            Some(max) => format!("{min_dmg} - {max}"),
+            None => min_dmg.to_string(),
+        };
+
+        html! {
+            <td
+                {key}
+                {class}
+                data-offset-main={enc64(offset_main)}
+                data-offset-exc={enc64(offset_exc)}
+                data-idents={data_idents}
+            >
+                {text}
+            </td>
+        }
+    }
+}
+
+fn admg(
+    metadata: &Rc<[TypeMetadata<AbilityId>]>,
+    merge_data: &Rc<[MergeData]>,
+    damages: Box<[i32]>,
+) -> Box<[Cell]> {
+    let mlen = metadata.len();
+    let dlen = damages.len();
+    let glen = merge_data.len();
+
+    assert!(
+        mlen == dlen,
+        "[a] Lenght of damage cells must have the same amount of metadata"
+    );
+
+    struct ACell {
+        min: i32,
+        max: Option<i32>,
+        min_i: u8,
+        max_i: Option<u8>,
+    }
+
+    let len = dlen - glen;
+    let mut data = Box::<[ACell]>::new_uninit_slice(len);
+    let mut to_remove = Box::<[u8]>::new_uninit_slice(glen);
+
+    let mut c = 0;
+    let mut g = 0;
+    let mut t = 0;
+    while g < glen {
+        let MergeData {
+            minimum_damage,
+            maximum_damage,
+            alias,
+        } = merge_data[g];
+
+        let min_i = minimum_damage as usize;
+        let max_i = maximum_damage as usize;
+        let min = damages[min_i];
+        let max = damages[max_i];
+
+        if max != 0 && min != max {
+            let ptr = data[min_i].as_mut_ptr();
+            unsafe {
+                (*ptr).max_i = Some(maximum_damage);
+                (*ptr).max = Some(damages[max_i])
+            }
+        }
+
+        to_remove[t].write(maximum_damage);
+    }
+
+    while c < len {
+        unsafe {
+            let acell_ptr = data[c].as_mut_ptr();
+            let ptr_deref = &(*acell_ptr);
+            (*acell_ptr).min = damages[ptr_deref.min_i as usize];
+            c += 1;
+        }
+    }
+
+    unsafe { data.assume_init() };
+
+    todo!()
+}
 
 #[derive(PartialEq, Properties)]
 pub struct TableBodyProps<T: PartialEq + 'static + DisplayDamage> {
@@ -69,10 +235,7 @@ pub fn TableBody<T: PartialEq + 'static + DisplayDamage>(props: &TableBodyProps<
             let damages = enemy.get_damages();
             let champion_id = enemy.get_champion_id();
             let eval_ctx = enemy.get_eval_ctx();
-            let eval_meta = unsafe {
-                const VARIANTS: usize = size_of::<Ctx>() / size_of::<f32>();
-                core::mem::transmute::<_, &[f32; VARIANTS]>(eval_ctx)
-            };
+            let eval_meta = unsafe { core::mem::transmute::<_, &[f32; CTX_VARIANTS]>(eval_ctx) };
 
             let abilities = {
                 let damages = &damages.abilities;

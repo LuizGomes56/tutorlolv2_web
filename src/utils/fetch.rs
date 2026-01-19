@@ -41,7 +41,7 @@ impl<'a> Fetch<'a> {
 
     pub async fn post<T: Decode<()>>(self) -> Result<T, Box<dyn Error>> {
         let Self { url, signal, data } = self;
-        let target = format!("{BASE_URL}{url}");
+        let target = [BASE_URL, url].concat();
         let builder = gloo_net::http::Request::post(&target);
 
         let headers = Headers::new();
