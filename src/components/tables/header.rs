@@ -60,14 +60,14 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     };
 
     let mut headers = Vec::with_capacity(
-        *skip as usize + 2 + abilities.len() + items_meta.len() + runes_meta.len(),
+        *skip as usize + 3 + abilities.len() + items_meta.len() + runes_meta.len(),
     );
 
     fn header<T: Copy + Into<ImageType>>(
         headers: &mut Vec<ImageType>,
         slice: &Rc<[TypeMetadata<T>]>,
     ) {
-        for metadata in slice.into_iter() {
+        for metadata in slice.iter() {
             headers.push(metadata.kind.into())
         }
     }

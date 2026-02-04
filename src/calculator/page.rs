@@ -4,11 +4,8 @@ use crate::{
         components::inputs::player::PlayerInput,
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
-    components::{
-        image::Image,
-        tables::{body::TableBody, header::TableHeader},
-    },
-    model::{Dragons, PlayerStats, SimpleStats},
+    components::tables::{body::TableBody, header::TableHeader},
+    model::{Dragons, PlayerStats},
     utils::{EnumCast, fetch::Fetch},
 };
 use std::{cell::RefCell, rc::Rc};
@@ -55,31 +52,13 @@ pub fn Calculator() -> Html {
             player.dispatch(PlayerAction::Data(DataAction::ChampionId(
                 ChampionId::Aatrox,
             )));
-            enemies.dispatch(EnemyAction::Insert);
-            enemies.dispatch(EnemyAction::Insert);
-            enemies.dispatch(EnemyAction::Insert);
-            enemies.dispatch(EnemyAction::Insert);
-            enemies.dispatch(EnemyAction::Insert);
-            enemies.dispatch(EnemyAction::Change(
-                0,
-                DataAction::ChampionId(ChampionId::random()),
-            ));
-            enemies.dispatch(EnemyAction::Change(
-                1,
-                DataAction::ChampionId(ChampionId::random()),
-            ));
-            enemies.dispatch(EnemyAction::Change(
-                2,
-                DataAction::ChampionId(ChampionId::random()),
-            ));
-            enemies.dispatch(EnemyAction::Change(
-                3,
-                DataAction::ChampionId(ChampionId::random()),
-            ));
-            enemies.dispatch(EnemyAction::Change(
-                4,
-                DataAction::ChampionId(ChampionId::random()),
-            ));
+            (0..5).for_each(|i| {
+                enemies.dispatch(EnemyAction::Insert);
+                enemies.dispatch(EnemyAction::Change(
+                    i,
+                    DataAction::ChampionId(ChampionId::random()),
+                ))
+            });
         })
     };
 
@@ -122,7 +101,7 @@ pub fn Calculator() -> Html {
                 {
                     Ok(data) => {
                         let infer_enemy_player_stats = |index| {
-                            let enemy: &Rc<PlayerData<SimpleStats>> = &enemies[index];
+                            let enemy: &Rc<PlayerData<_>> = &enemies[index];
                             if enemy.infer_stats {
                                 last_action.replace(LastAction::Replace);
                                 enemies.dispatch(EnemyAction::Change(
@@ -141,14 +120,15 @@ pub fn Calculator() -> Html {
                                     )));
                                 }
                                 if action == LastAction::Init {
-                                    (0..data.enemies.len())
-                                        .into_iter()
-                                        .for_each(infer_enemy_player_stats);
+                                    (0..data.enemies.len()).for_each(infer_enemy_player_stats);
                                 }
                             }
                             LastAction::EnemyPlayer(index) => infer_enemy_player_stats(index),
                             _ => {}
                         };
+
+                        web_sys::console::log_1(&format!("{data:#?}").into());
+
                         game_data.set(Some(data));
                     }
                     Err(e) => web_sys::console::error_1(

@@ -1,5 +1,6 @@
 use crate::model::{
-    AbilityLevels, Attacks, BasicStats, Damages, Dragons, PlayerStats, SimpleStats, ValueException,
+    AbilityLevels, Attacks, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
+    ValueException,
 };
 use bincode::{Decode, Encode};
 use std::rc::Rc;
@@ -22,7 +23,7 @@ pub const L_TWRD: usize = 6;
 #[derive(Clone, Debug, Encode, PartialEq)]
 pub struct InputGame {
     pub active_player: Player,
-    pub enemy_players: Vec<Rc<PlayerData<SimpleStats>>>,
+    pub enemy_players: Vec<Rc<PlayerData<EnemyStats>>>,
     pub dragons: Dragons,
 }
 
@@ -58,7 +59,7 @@ pub struct FinalEnemy {
     pub damages: Damages,
     pub base_stats: SimpleStats,
     pub bonus_stats: SimpleStats,
-    pub current_stats: SimpleStats,
+    pub current_stats: EnemyStats,
     pub real_armor: i32,
     pub real_magic_resist: i32,
     pub level: u8,

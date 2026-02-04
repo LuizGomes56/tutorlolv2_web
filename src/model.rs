@@ -158,3 +158,12 @@ pub struct Dragons {
     pub ally_chemtech_dragons: u16,
     pub enemy_earth_dragons: u16,
 }
+
+#[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq, PartialOrd)]
+pub struct EnemyStats {
+    enemy_armor: i32,
+    enemy_health: i32,
+    enemy_magic_resist: i32,
+    enemy_max_health: i32,
+    enemy_missing_health: i32,
+}

@@ -17,7 +17,7 @@ pub async fn get_data() -> Result<Game, String> {
         Ok(response) => {
             let bytes = response.to_vec();
             let bytes =
-                include_bytes!("../../../tutorlolv2_desktop_app/src-tauri/example.json").to_vec();
+                include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.json")).to_vec();
             match bytes.is_empty() {
                 true => Err("Desktop application required to use the overlay feature".into()),
                 false => Ok(Fetch::new("/api/games/realtime")

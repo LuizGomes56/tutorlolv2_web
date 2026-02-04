@@ -12,7 +12,7 @@ pub fn Selector<T: EnumCast>(props: &SelectorProps<T>) -> Html {
 
     let items = use_memo(callback.clone(), |callback| {
         T::ARRAY
-            .into_iter()
+            .iter()
             .map(|item| {
                 let onclick = {
                     let callback = callback.clone();

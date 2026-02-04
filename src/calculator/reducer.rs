@@ -1,12 +1,12 @@
 use crate::{
     calculator::{AbilityLevels, Player, PlayerData},
-    model::{Dragons, PlayerStats, SimpleStats, ValueException},
+    model::{Dragons, EnemyStats, PlayerStats, ValueException},
 };
 use std::rc::Rc;
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
 use yew::Reducible;
 
-pub type EnemyDataAction = DataAction<SimpleStats>;
+pub type EnemyDataAction = DataAction<EnemyStats>;
 pub type PlayerDataAction = DataAction<PlayerStats>;
 
 pub enum PlayerAction {
@@ -41,10 +41,10 @@ pub enum EnemyAction {
 
 #[derive(Clone, Default, PartialEq)]
 #[repr(transparent)]
-pub struct Enemies(Vec<Rc<PlayerData<SimpleStats>>>);
+pub struct Enemies(Vec<Rc<PlayerData<EnemyStats>>>);
 
 impl core::ops::Deref for Enemies {
-    type Target = Vec<Rc<PlayerData<SimpleStats>>>;
+    type Target = Vec<Rc<PlayerData<EnemyStats>>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -148,7 +148,7 @@ impl Reducible for Dragons {
     type Action = DragonAction;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
-        let mut new = (*self).clone();
+        let mut new = *self;
         match action {
             DragonAction::AllyFire(v) => new.ally_fire_dragons = v,
             DragonAction::AllyEarth(v) => new.ally_earth_dragons = v,

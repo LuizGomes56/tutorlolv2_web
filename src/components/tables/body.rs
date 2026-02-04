@@ -24,7 +24,7 @@ pub struct Cell {
     key: usize,
 }
 
-fn rdmg(metadata: &Rc<[TypeMetadata<RuneId>]>, damages: Box<[i32]>) -> Box<[Cell]> {
+fn rdmg(metadata: &Rc<[TypeMetadata<RuneId>]>, damages: &[i32]) -> Box<[Cell]> {
     let mlen = metadata.len();
     let dlen = damages.len();
 
@@ -87,7 +87,7 @@ impl Cell {
 
         let enc64 = |value: Option<u64>| value.as_ref().map(ToString::to_string);
         let data_idents = idents
-            .into_iter()
+            .iter()
             .map(|&ident| {
                 let value = ctx_array[ident as usize];
                 format!("[{ident}:{value}]")
@@ -111,71 +111,6 @@ impl Cell {
             </td>
         }
     }
-}
-
-fn admg(
-    metadata: &Rc<[TypeMetadata<AbilityId>]>,
-    merge_data: &Rc<[MergeData]>,
-    damages: Box<[i32]>,
-) -> Box<[Cell]> {
-    let mlen = metadata.len();
-    let dlen = damages.len();
-    let glen = merge_data.len();
-
-    assert!(
-        mlen == dlen,
-        "[a] Lenght of damage cells must have the same amount of metadata"
-    );
-
-    struct ACell {
-        min: i32,
-        max: Option<i32>,
-        min_i: u8,
-        max_i: Option<u8>,
-    }
-
-    let len = dlen - glen;
-    let mut data = Box::<[ACell]>::new_uninit_slice(len);
-    let mut to_remove = Box::<[u8]>::new_uninit_slice(glen);
-
-    let mut c = 0;
-    let mut g = 0;
-    let mut t = 0;
-    while g < glen {
-        let MergeData {
-            minimum_damage,
-            maximum_damage,
-            alias,
-        } = merge_data[g];
-
-        let min_i = minimum_damage as usize;
-        let max_i = maximum_damage as usize;
-        let min = damages[min_i];
-        let max = damages[max_i];
-
-        if max != 0 && min != max {
-            let ptr = data[min_i].as_mut_ptr();
-            unsafe {
-                (*ptr).max_i = Some(maximum_damage);
-                (*ptr).max = Some(damages[max_i])
-            }
-        }
-
-        to_remove[t].write(maximum_damage);
-    }
-
-    while c < len {
-        unsafe {
-            let acell_ptr = data[c].as_mut_ptr();
-            let ptr_deref = &(*acell_ptr);
-            (*acell_ptr).min = damages[ptr_deref.min_i as usize];
-            c += 1;
-        }
-    }
-
-    unsafe { data.assume_init() };
-
-    todo!()
 }
 
 #[derive(PartialEq, Properties)]
@@ -329,7 +264,7 @@ pub fn TableBody<T: PartialEq + 'static + DisplayDamage>(props: &TableBodyProps<
             } = damages.attacks;
 
             let item_damages = items_meta
-                .into_iter()
+                .iter()
                 .enumerate()
                 .map(|(i, metadata)| {
                     let TypeMetadata {
@@ -339,7 +274,7 @@ pub fn TableBody<T: PartialEq + 'static + DisplayDamage>(props: &TableBodyProps<
                     let maximum_damage = damages.items[i + 1];
 
                     let data = ITEM_IDENTS[kind.index()]
-                        .into_iter()
+                        .iter()
                         .map(|ident| {
                             let value = eval_meta[*ident as usize];
                             format!("{ident}: {value}, ")

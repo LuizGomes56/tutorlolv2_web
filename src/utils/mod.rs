@@ -111,10 +111,7 @@ impl ImageType {
                 let name = ability_id.ability_name().display();
                 Some(html! {
                     <div class={classes!("img-letter", "text-sm")}>
-                        {char}{match name {
-                        Some(name) => Some(html!(<sub>{name}</sub>)),
-                        None => None
-                    }}
+                        {char}{name.map(|name| html!(<sub>{name}</sub>))}
                     </div>
                 })
             }
@@ -133,7 +130,7 @@ impl ImageType {
                     AbilityKind::Normal(ability_id) => abilities
                         .iter()
                         .position(|id| id == ability_id)
-                        .and_then(|i| Some(array[i].clone())),
+                        .map(|i| array[i].clone()),
                     AbilityKind::Alias(merge) => {
                         tuple_exc = Some(array[merge.maximum_damage as usize].clone());
                         Some(array[merge.minimum_damage as usize].clone())

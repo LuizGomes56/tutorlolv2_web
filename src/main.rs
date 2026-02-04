@@ -1,13 +1,6 @@
-#[cfg(not(feature = "overlay"))]
-use crate::components::sidebar::Sidebar;
-use crate::{
-    calculator::Calculator, components::header::Header, docs::Docs, overlay::Overlay,
-    utils::cache::init_cache,
-};
+use crate::{calculator::Calculator, utils::cache::init_cache};
 use yew::prelude::*;
-#[cfg(not(feature = "overlay"))]
-use yew_router::Switch;
-use yew_router::{BrowserRouter, Routable};
+use yew_router::{BrowserRouter, Routable, Switch};
 
 mod calculator;
 mod components;
@@ -39,7 +32,6 @@ pub enum Route {
 
 #[component]
 fn App() -> Html {
-    #[cfg(not(feature = "overlay"))]
     return html! {
         <BrowserRouter>
             <Switch<Route> render={|route| {
@@ -49,8 +41,6 @@ fn App() -> Html {
                 };
                 html! {
                     <div class={classes!("bg-std-900")}>
-                        // <Header />
-                        // <Sidebar />
                         <div class={classes!("flex", "w-full")}>
                             {component}
                         </div>
@@ -59,9 +49,6 @@ fn App() -> Html {
             }} />
         </BrowserRouter>
     };
-
-    #[cfg(feature = "overlay")]
-    html!(<div class={classes!("bg-transparent")}><Overlay /></div>)
 }
 
 fn main() {

@@ -29,7 +29,7 @@ fn CodeDocs<T: EnumCast>(props: &CodeDocsProps<T>) -> Html {
 
     let selector = use_memo(callback.clone(), |callback| {
         T::ARRAY
-            .into_iter()
+            .iter()
             .map(|element| {
                 let onclick = {
                     let callback = callback.clone();
