@@ -1,3 +1,4 @@
+#![allow(static_mut_refs)]
 use crate::{calculator::Calculator, utils::cache::init_cache};
 use yew::prelude::*;
 use yew_router::{BrowserRouter, Routable, Switch};

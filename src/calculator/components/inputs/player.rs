@@ -1,9 +1,9 @@
 use crate::{
     calculator::{
-        Player,
         components::inputs::{
             abilities::Abilities,
             banner::Banner,
+            recommendations::Recommendations,
             selector::Selector,
             stats::{StatCell, Stats},
             tray::Tray,
@@ -11,11 +11,10 @@ use crate::{
         page::PlayerProps,
         reducer::{DataAction, LastAction, PlayerAction},
     },
-    components::image::Image,
+    components::image::ImageType,
     model::PlayerStats,
-    utils::ImageType,
 };
-use tutorlolv2_gen::{ItemId, Position, RuneId};
+use tutorlolv2_gen::{ItemId, RuneId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -67,14 +66,14 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let level_cb = use_data_callback(player_props, DataAction::Level);
     let abilities_cb = use_player_callback(player_props, PlayerAction::AbilityLevels);
 
-    let add_items_cb = use_data_callback(player_props, DataAction::InsertItem);
-    let add_runes_cb = use_player_callback(player_props, PlayerAction::InsertRune);
+    let inser_item = use_data_callback(player_props, DataAction::InsertItem);
+    let insert_rune = use_player_callback(player_props, PlayerAction::InsertRune);
 
-    let rem_items_cb = use_data_callback(player_props, DataAction::RemoveItem);
-    let rem_runes_cb = use_player_callback(player_props, PlayerAction::RemoveRune);
+    let remove_item = use_data_callback(player_props, DataAction::RemoveItem);
+    let remove_rune = use_player_callback(player_props, PlayerAction::RemoveRune);
 
-    let rec_items_cb = use_data_callback(player_props, DataAction::SetItemVec);
-    let rec_runes_cb = use_player_callback(player_props, PlayerAction::SetRuneVec);
+    let recommended_items = use_data_callback(player_props, DataAction::SetItemVec);
+    let recommended_runes = use_player_callback(player_props, PlayerAction::SetRuneVec);
 
     html! {
         <>
@@ -114,34 +113,33 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                 </div>
             </div>
             <div class={classes!("flex", "flex-col", "w-64", "box")}>
-                <button class={classes!("my-4", "bg-red-500")} onclick={{
-                    let rec_items_cb = rec_items_cb.clone();
-                    let champion_id = data.champion_id;
-                    Callback::from(move |_| {
-                        let rec = champion_id.recommended_items(Position::Top);
-                        rec_items_cb.emit(rec);
-                    })
-                }}>
-                    {"Add recommended items"}
-                </button>
-
-                <Selector<ItemId> callback={add_items_cb} />
+                <Recommendations
+                    callback={{
+                        let recommended_items = recommended_items.clone();
+                        let champion_id = data.champion_id;
+                        Callback::from(move |position| {
+                            let rec = champion_id.recommended_items(position);
+                            recommended_items.emit(rec);
+                        })
+                    }}
+                />
+                <Selector<ItemId> callback={inser_item} />
                 <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
-                <Tray<ItemId> callback={rem_items_cb} vector={data.items.clone()} />
+                <Tray<ItemId> callback={remove_item} vector={data.items.clone()} />
 
-                <button class={classes!("my-4", "bg-red-500")} onclick={{
-                    let rec_runes_cb = rec_runes_cb.clone();
-                    let champion_id = data.champion_id;
-                    Callback::from(move |_| {
-                        let rec = champion_id.recommended_runes(Position::Top);
-                        rec_runes_cb.emit(rec);
-                    })
-                }}>
-                    {"Add recommended items"}
-                </button>
-                <Selector<RuneId> callback={add_runes_cb} />
+                <Recommendations
+                    callback={{
+                        let recommended_runes = recommended_runes.clone();
+                        let champion_id = data.champion_id;
+                        Callback::from(move |position| {
+                            let rec = champion_id.recommended_runes(position);
+                            recommended_runes.emit(rec);
+                        })
+                    }}
+                />
+                <Selector<RuneId> callback={insert_rune} />
                 <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
-                <Tray<RuneId> callback={rem_runes_cb} vector={player.runes.clone()} />
+                <Tray<RuneId> callback={remove_rune} vector={player.runes.clone()} />
             </div>
         </>
     }

@@ -4,12 +4,12 @@ use crate::{
         components::inputs::player::PlayerInput,
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
-    components::tables::{body::TableBody, header::TableHeader},
+    components::tables::header::TableHeader,
     model::{Dragons, PlayerStats},
     utils::{EnumCast, fetch::Fetch},
 };
 use std::{cell::RefCell, rc::Rc};
-use tutorlolv2_gen::{ABILITY_CLOSURES, ChampionId};
+use tutorlolv2_gen::ChampionId;
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
@@ -171,14 +171,14 @@ pub fn Calculator() -> Html {
                                         runes_meta={runes_meta.clone()}
                                     />
                                     <tbody>
-                                        <TableBody<FinalEnemy>
-                                            ability_offsets={ABILITY_CLOSURES[current_player.champion_id.index()]}
-                                            enemies={enemies}
-                                            abilities_to_merge={abilities_to_merge.clone()}
-                                            abilities_meta={abilities_meta.clone()}
-                                            items_meta={items_meta.clone()}
-                                            runes_meta={runes_meta.clone()}
-                                        />
+                                        // <TableBody<FinalEnemy>
+                                        //     ability_offsets={ABILITY_CLOSURES[current_player.champion_id.index()]}
+                                        //     enemies={enemies}
+                                        //     abilities_to_merge={abilities_to_merge.clone()}
+                                        //     abilities_meta={abilities_meta.clone()}
+                                        //     items_meta={items_meta.clone()}
+                                        //     runes_meta={runes_meta.clone()}
+                                        // />
                                     </tbody>
                                 </table>
                             </div>

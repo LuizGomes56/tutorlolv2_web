@@ -1,5 +1,6 @@
 use bincode::{Decode, Encode};
-use tutorlolv2_gen::{ItemId, RuneId};
+use std::fmt::Display;
+use tutorlolv2_gen::{AbilityId, ItemId, MergeData, RuneId};
 
 /// Holds all champion stats provided by Riot's API
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
@@ -166,4 +167,72 @@ pub struct EnemyStats {
     enemy_magic_resist: i32,
     enemy_max_health: i32,
     enemy_missing_health: i32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum AbilityKind {
+    Alias(MergeData),
+    Normal(AbilityId),
+}
+
+impl AbilityKind {
+    pub const fn ability_id(&self) -> AbilityId {
+        match self {
+            AbilityKind::Alias(merge) => merge.alias,
+            AbilityKind::Normal(ability_id) => *ability_id,
+        }
+    }
+
+    pub const fn as_char(&self) -> char {
+        self.ability_id().as_char()
+    }
+}
+
+impl From<AbilityId> for AbilityKind {
+    fn from(value: AbilityId) -> Self {
+        AbilityKind::Normal(value)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum StatType {
+    AbilityPower,
+    Armor,
+    ArmorPenetrationFlat,
+    ArmorPenetrationPercent,
+    AttackDamage,
+    AttackRange,
+    AttackSpeed,
+    CritChance,
+    CritDamage,
+    CurrentHealth,
+    MagicPenetrationFlat,
+    MagicPenetrationPercent,
+    MagicResist,
+    Health,
+    Mana,
+    CurrentMana,
+}
+
+impl Display for StatType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StatType::AbilityPower => write!(f, "Ability Power"),
+            StatType::Armor => write!(f, "Armor"),
+            StatType::ArmorPenetrationFlat => write!(f, "Armor Pen. Flat"),
+            StatType::ArmorPenetrationPercent => write!(f, "Armor Pen. %"),
+            StatType::AttackDamage => write!(f, "Attack Damage"),
+            StatType::AttackRange => write!(f, "Attack Range"),
+            StatType::AttackSpeed => write!(f, "Attack Speed"),
+            StatType::CritChance => write!(f, "Crit Chance"),
+            StatType::CritDamage => write!(f, "Crit Damage"),
+            StatType::CurrentHealth => write!(f, "Current Health"),
+            StatType::MagicPenetrationFlat => write!(f, "Magic Pen. Flat"),
+            StatType::MagicPenetrationPercent => write!(f, "Magic Pen. %"),
+            StatType::MagicResist => write!(f, "Magic Resist"),
+            StatType::Health => write!(f, "Max Health"),
+            StatType::Mana => write!(f, "Max Mana"),
+            StatType::CurrentMana => write!(f, "Current Mana"),
+        }
+    }
 }

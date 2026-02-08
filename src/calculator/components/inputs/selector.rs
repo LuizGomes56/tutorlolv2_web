@@ -11,7 +11,7 @@ pub fn Selector<T: EnumCast>(props: &SelectorProps<T>) -> Html {
     let SelectorProps { callback } = props;
 
     let items = use_memo(callback.clone(), |callback| {
-        T::ARRAY
+        T::DISPLAY
             .iter()
             .map(|item| {
                 let onclick = {

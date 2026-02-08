@@ -1,4 +1,4 @@
-use crate::{components::image::Image, utils::ImageType};
+use crate::components::image::{Image, ImageType};
 use tutorlolv2_gen::ChampionId;
 use yew::prelude::*;
 

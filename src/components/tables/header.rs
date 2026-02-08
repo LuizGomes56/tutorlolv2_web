@@ -1,11 +1,10 @@
+use crate::{
+    components::image::{Image, ImageType},
+    model::AbilityKind,
+};
 use std::rc::Rc;
 use tutorlolv2_gen::{AbilityId, ChampionId, ItemId, MergeData, RuneId, TypeMetadata};
 use yew::prelude::*;
-
-use crate::{
-    components::image::Image,
-    utils::{AbilityKind, ImageType},
-};
 
 #[derive(PartialEq, Properties)]
 pub struct TableHeaderProps {

@@ -1,5 +1,9 @@
-use crate::{components::image::Image, model::AbilityLevels, utils::ImageType};
-use std::hint::unreachable_unchecked;
+use crate::{
+    components::image::{Image, ImageType},
+    impl_index,
+    model::AbilityLevels,
+};
+use std::ops::{Index, IndexMut};
 use tutorlolv2_gen::{AbilityId, AbilityName, ChampionId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -11,31 +15,19 @@ pub struct AbilitiesProps {
     pub champion_id: ChampionId,
 }
 
-impl AbilityLevels {
-    pub const fn field(&mut self, ability_id: AbilityId) -> &mut u8 {
-        match ability_id {
-            AbilityId::Q(_) => &mut self.q,
-            AbilityId::W(_) => &mut self.w,
-            AbilityId::E(_) => &mut self.e,
-            AbilityId::R(_) => &mut self.r,
-            _ => unsafe { unreachable_unchecked() },
-        }
-    }
-
-    pub const fn get(&mut self, ability_id: AbilityId) -> u8 {
-        *self.field(ability_id)
-    }
-
-    pub const fn set(mut self, ability_id: AbilityId, value: u8) -> Self {
-        *self.field(ability_id) = value;
-        self
+impl_index! {
+    AbilityLevels[AbilityId] u8 {
+        AbilityId::Q(_) => q,
+        AbilityId::W(_) => w,
+        AbilityId::E(_) => e,
+        AbilityId::R(_) => r,
     }
 }
 
 #[component]
 pub fn Abilities(props: &AbilitiesProps) -> Html {
     let AbilitiesProps {
-        mut ability_levels,
+        ability_levels,
         champion_id,
         ..
     } = *props;
@@ -46,7 +38,7 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
         .into_iter()
         .map(|func| {
             let ability_id = func(AbilityName::Void);
-            let value = ability_levels.get(ability_id);
+            let value = ability_levels[ability_id];
             html! {
                 <label class={classes!("grid", "grid-cols-2")}>
                     <Image
@@ -61,7 +53,9 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                             Callback::from(move |e: InputEvent| {
                                 let target = e.target_unchecked_into::<HtmlInputElement>();
                                 let value = target.value().parse::<u8>().unwrap_or(0);
-                                callback.emit(ability_levels.set(ability_id, value));
+                                let mut result = ability_levels;
+                                result[ability_id] = value;
+                                callback.emit(result);
                             })
                         }}
                         type={"number"}

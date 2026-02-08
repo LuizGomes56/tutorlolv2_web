@@ -13,76 +13,6 @@ struct CodeDocsProps<T: PartialEq> {
 }
 
 #[component]
-fn CodeDocs<T: EnumCast>(props: &CodeDocsProps<T>) -> Html {
-    let CodeDocsProps {
-        title,
-        value,
-        callback,
-    } = props;
-
-    let is_open = use_state(|| false);
-    let is_open_setter = use_setter(&is_open);
-    let is_open_callback = {
-        let is_open_setter = is_open_setter.clone();
-        move |boolean| is_open_setter.emit(boolean)
-    };
-
-    let selector = use_memo(callback.clone(), |callback| {
-        T::ARRAY
-            .iter()
-            .map(|element| {
-                let onclick = {
-                    let callback = callback.clone();
-                    let is_open_callback = is_open_callback.clone();
-                    move |_| {
-                        is_open_callback(false);
-                        callback.emit(*element)
-                    }
-                };
-                html! {
-                    <div {onclick} class={classes!(
-                        "px-1.5", "py-1", "hover:bg-std-800", "text-lg",
-                        "flex", "items-center", "gap-3", "font-medium",
-                        "first:pt-1.5", "last:pb-1.5"
-                    )}>
-                        <Image src={element.image_type()} class={classes!("w-8")} />
-                        <span class={classes!("whitespace-nowrap")}>{element.name()}</span>
-                    </div>
-                }
-            })
-            .collect::<Html>()
-    });
-
-    html! {
-        <div class={classes!("flex", "flex-col", "gap-4")}>
-            <h1 class={classes!("text-4xl", "font-bold")}>{*title}</h1>
-            <button
-                class={classes!(
-                    "relative", "w-fit", "py-2", "rounded-xl",
-                    "hover:bg-std-950", "transition-colors"
-                )}
-                onclick={{
-                    let is_open = is_open.clone();
-                    move |_| is_open_callback(!*is_open)
-                }}
-            >
-                <div class={classes!("flex", "items-center", "gap-4")}>
-                    <Image src={value.image_type()} class={classes!("ml-2", "w-12")} />
-                    <h2 class={classes!("text-3xl", "font-bold", "pr-4")}>{value.name()}</h2>
-                </div>
-                <div class={classes!(
-                    "absolute", "max-h-64", "bg-std-800", "overflow-auto",
-                    "flex", "flex-col", "mt-4"
-                )}>
-                    {is_open.then_some((*selector).clone())}
-                </div>
-            </button>
-            <code>{value.html()}</code>
-        </div>
-    }
-}
-
-#[component]
 fn Disclaimer() -> Html {
     html! {
         <>
@@ -156,31 +86,7 @@ pub fn Docs() -> Html {
             "pt-4", "pb-8", "px-6", "flex-col", "gap-4"
         )}>
             <Disclaimer />
-            {
-                match *view {
-                    View::Champion => html! {
-                        <CodeDocs<ChampionId>
-                            title={"Champion"}
-                            value={*champion_id}
-                            callback={champion_callback}
-                        />
-                    },
-                    View::Item => html! {
-                        <CodeDocs<ItemId>
-                            title={"Item"}
-                            value={*item_id}
-                            callback={item_callback}
-                        />
-                    },
-                    View::Rune => html! {
-                        <CodeDocs<RuneId>
-                            title={"Rune"}
-                            value={*rune_id}
-                            callback={rune_callback}
-                        />
-                    }
-                }
-            }
+
         </main>
     }
 }

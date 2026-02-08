@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-tutorlolv2_gen = { path = "../tutorlolv2/tutorlolv2_gen", features = ["glob"] }
+tutorlolv2_gen = { path = "../tutorlolv2/tutorlolv2_gen" }
 bincode = "2.0.1"
 web-sys = { version = "0.3.78", features = ["AbortController"] }
 wasm-bindgen = "0.2.101"
