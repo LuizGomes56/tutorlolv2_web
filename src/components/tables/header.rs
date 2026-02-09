@@ -1,9 +1,13 @@
 use crate::{
     components::image::{Image, ImageType},
     model::AbilityKind,
+    utils::encode_offset,
 };
-use std::rc::Rc;
-use tutorlolv2_gen::{AbilityId, ChampionId, ItemId, MergeData, RuneId, TypeMetadata};
+use std::{ops::Range, rc::Rc};
+use tutorlolv2_gen::{
+    BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, CastId, ChampionId, ItemId, ONHIT_EFFECT_OFFSET,
+    RuneId, TypeMetadata,
+};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -11,8 +15,6 @@ pub struct TableHeaderProps {
     #[prop_or(1)]
     pub skip: u8,
     pub champion_id: ChampionId,
-    pub abilities_meta: Rc<[TypeMetadata<AbilityId>]>,
-    pub abilities_to_merge: Rc<[MergeData]>,
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
 }
@@ -22,11 +24,13 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     let TableHeaderProps {
         skip,
         champion_id,
-        abilities_meta,
-        abilities_to_merge,
         items_meta,
         runes_meta,
     } = props;
+
+    let cache = champion_id.cache();
+    let abilities_meta = cache.metadata;
+    let abilities_to_merge = cache.merge_data;
 
     let abilities = {
         let meta_len = abilities_meta.len();
@@ -36,7 +40,8 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         let mut i = 0;
         'outer: while i < meta_len {
             let metadata = abilities_meta[i];
-            let mut ability_kind = AbilityKind::Normal(metadata.kind);
+            let kind = metadata.kind;
+            let mut ability_kind = AbilityKind::Normal(kind);
             let mut j = 0;
             'inner: while j < merge_len {
                 let merge = abilities_to_merge[j];
@@ -51,7 +56,10 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 }
             }
 
-            result.push(ImageType::Ability(*champion_id, ability_kind));
+            result.push((
+                champion_id.get_ability_formula(i),
+                ImageType::Ability(*champion_id, ability_kind),
+            ));
             i += 1;
         }
 
@@ -62,19 +70,20 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         *skip as usize + 3 + abilities.len() + items_meta.len() + runes_meta.len(),
     );
 
-    fn header<T: Copy + Into<ImageType>>(
-        headers: &mut Vec<ImageType>,
+    fn header<T: Copy + Into<ImageType> + CastId>(
+        headers: &mut Vec<(&'static Range<usize>, ImageType)>,
         slice: &Rc<[TypeMetadata<T>]>,
     ) {
         for metadata in slice.iter() {
-            headers.push(metadata.kind.into())
+            let kind = metadata.kind;
+            headers.push((kind.formula(), kind.into()))
         }
     }
 
     headers.extend([
-        ImageType::BasicAttack,
-        ImageType::CritStrike,
-        ImageType::OnhitAttack,
+        (&BASIC_ATTACK_OFFSET, ImageType::BasicAttack),
+        (&CRITICAL_STRIKE_OFFSET, ImageType::CritStrike),
+        (&ONHIT_EFFECT_OFFSET, ImageType::OnhitAttack),
     ]);
     headers.extend(abilities);
     header(&mut headers, items_meta);
@@ -84,9 +93,10 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         <thead>
             <tr>
                 {for (0..*skip).map(|_| html!(<th></th>))}
-                {for headers.into_iter().enumerate().map(|(i, value)| {
+                {for headers.into_iter().enumerate().map(|(i, (offset, value))| {
+                    let data_offset_main = encode_offset(offset);
                     html! {
-                        <th key={i}>
+                        <th key={i} {data_offset_main}>
                             <Image
                                 src={value}
                                 class={classes!(

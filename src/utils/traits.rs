@@ -1,15 +1,15 @@
 use crate::components::image::ImageType;
 use std::ops::Range;
-use tutorlolv2_gen::{CastId, ChampionId, ItemId, RuneId};
+use tutorlolv2_gen::{CastId, ChampionId, DamageType, ItemId, RuneId};
 use web_sys::js_sys::Math;
 
 pub fn random_u16(range: Range<u16>) -> u16 {
-    (Math::random() * (range.end - range.start) as f64 + range.start as f64) as u16
+    (Math::random() * (range.end - range.start) as f64 + range.start as f64) as _
 }
 
 pub trait EnumCast: CastId + TryFrom<u16> + Into<ImageType> + PartialEq + Copy {
     fn random() -> Self {
-        let index = random_u16(0..Self::VARIANTS as u16);
+        let index = random_u16(0..Self::VARIANTS as _);
         unsafe { Self::try_from(index).unwrap_unchecked() }
     }
 
@@ -21,3 +21,20 @@ pub trait EnumCast: CastId + TryFrom<u16> + Into<ImageType> + PartialEq + Copy {
 impl EnumCast for ChampionId {}
 impl EnumCast for ItemId {}
 impl EnumCast for RuneId {}
+
+pub trait ClassCast {
+    fn class(&self) -> &'static str;
+}
+
+impl ClassCast for DamageType {
+    fn class(&self) -> &'static str {
+        match self {
+            DamageType::Physical => "text-orange-500",
+            DamageType::Magic => "text-sky-500",
+            DamageType::Mixed => "text-indigo-500",
+            DamageType::True => "text-white",
+            DamageType::Adaptative => "text-purple-500",
+            DamageType::Unknown => "text-emerald-500",
+        }
+    }
+}

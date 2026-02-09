@@ -31,25 +31,18 @@
             (() => {
                 let shiftDown = false;
 
-                function unpackOffset(offset) {
-                    const SHIFT = 1 << 23;
-                    const packed = Number(offset);
-                    const start = Math.floor(packed / SHIFT);
-                    const end = packed - start * SHIFT;
-                    return [start, end];
-                }
-
                 function parseOffsets(host) {
-                    const main = host.getAttribute("data-offset-main") || "";
-                    const exc = host.getAttribute("data-offset-exc") || "";
-                    return [unpackOffset(main), unpackOffset(exc)];
+                    return ["data_offset_main", "data_offset_exc"]
+                        .map(attr => (host.getAttribute(attr) || "")
+                            .split("..")
+                            .map(Number)
+                        )
                 }
 
                 function showOn(host) {
                     if (!host || host.querySelector(".hover-docs")) return;
 
                     const [mainOffset, excOffset] = parseOffsets(host);
-                    if (!mainOffset) return;
                     const [s, e] = mainOffset;
                     const [s1, e1] = excOffset;
 
@@ -61,10 +54,24 @@
                         (extra ? " " + extra : "");
                     t.style.pointerEvents = "auto";
 
-                    const code = document.createElement("code");
-                    code.className = "text-[#D4D4D4] font-normal text-left text-wrap"
+                    const data_idents = host.getAttribute("data_idents") || "";
+                    const idents = data_idents
+                        .split("|")
+                        .filter(Boolean)
+                        .map(entry => {
+                            const [ctx_var, ctx_value] = entry.split(":");
+                            return `<div class="whitespace-nowrap"><span class="variable">${ctx_var}</span>: <span class="number">${ctx_value ?? "?"}</span></div>`;
+                        })
+                        .join("");
 
-                    let innerHTML = window.decodeCacheSlice(s, e);
+                    let innerHTML = idents.length ? `<div class="flex flex-col">${idents}</div>` : "";
+
+                    const code = document.createElement("code");
+                    code.className = "flex flex-col gap-2 text-[#D4D4D4] font-normal text-left text-wrap"
+
+                    if (s && e) {
+                        innerHTML += window.decodeCacheSlice(s, e);
+                    }
                     if (s1 && e1) {
                         innerHTML += window.decodeCacheSlice(s1, e1);
                     }
@@ -98,7 +105,7 @@
                 window.addEventListener("keydown", (e) => {
                     if (e.key !== "Shift") return;
                     shiftDown = true;
-                    const hovered = document.querySelectorAll("[data-offset-main]:hover");
+                    const hovered = document.querySelectorAll("[data_offset_main]:hover");
                     if (!hovered.length) return;
                     const host = hovered[hovered.length - 1];
                     showOn(host);
@@ -112,7 +119,7 @@
                         if (!shiftDown) return;
                         const el = e.target;
                         if (!(el instanceof Element)) return;
-                        const host = el.closest?.("[data-offset-main]");
+                        const host = el.closest?.("[data_offset_main]");
                         if (!host) return;
                         const from = e.relatedTarget;
                         if (from && from instanceof Node && host.contains(from)) return;

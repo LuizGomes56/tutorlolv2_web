@@ -4,7 +4,7 @@ use crate::{
         components::inputs::player::PlayerInput,
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
-    components::tables::header::TableHeader,
+    components::tables::{body::TableBody, header::TableHeader},
     model::{Dragons, PlayerStats},
     utils::{EnumCast, fetch::Fetch},
 };
@@ -154,8 +154,6 @@ pub fn Calculator() -> Html {
                         current_player,
                         enemies,
                         tower_damages,
-                        abilities_meta,
-                        abilities_to_merge,
                         items_meta,
                         runes_meta
                     } = data;
@@ -165,20 +163,16 @@ pub fn Calculator() -> Html {
                                 <table>
                                     <TableHeader
                                         champion_id={current_player.champion_id}
-                                        abilities_to_merge={abilities_to_merge.clone()}
-                                        abilities_meta={abilities_meta.clone()}
                                         items_meta={items_meta.clone()}
                                         runes_meta={runes_meta.clone()}
                                     />
                                     <tbody>
-                                        // <TableBody<FinalEnemy>
-                                        //     ability_offsets={ABILITY_CLOSURES[current_player.champion_id.index()]}
-                                        //     enemies={enemies}
-                                        //     abilities_to_merge={abilities_to_merge.clone()}
-                                        //     abilities_meta={abilities_meta.clone()}
-                                        //     items_meta={items_meta.clone()}
-                                        //     runes_meta={runes_meta.clone()}
-                                        // />
+                                        <TableBody<FinalEnemy>
+                                            champion_id={current_player.champion_id}
+                                            enemies={enemies}
+                                            items_meta={items_meta.clone()}
+                                            runes_meta={runes_meta.clone()}
+                                        />
                                     </tbody>
                                 </table>
                             </div>

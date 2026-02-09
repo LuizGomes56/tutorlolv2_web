@@ -5,7 +5,8 @@ use crate::model::{
 use bincode::{Decode, Encode};
 use std::rc::Rc;
 use tutorlolv2_gen::{
-    AbilityId, AdaptativeType, ChampionId, Ctx, ItemId, MergeData, RuneId, TypeMetadata,
+    AbilityId, AdaptativeType, ChampionId, Ctx, ItemId, L_MSTR, L_TWRD, MergeData, RuneId,
+    TypeMetadata,
 };
 
 mod components;
@@ -13,12 +14,6 @@ mod page;
 mod reducer;
 
 pub use page::Calculator;
-
-/// Exact number of resistence variations for jungle monsters
-pub const L_MSTR: usize = 7;
-
-/// Number of different plates a tower can have. Each tower can have `0..=5` plates
-pub const L_TWRD: usize = 6;
 
 #[derive(Clone, Debug, Encode, PartialEq)]
 pub struct InputGame {
@@ -56,7 +51,7 @@ pub struct PlayerData<T> {
 
 #[derive(Clone, Debug, Decode, PartialEq)]
 pub struct FinalEnemy {
-    pub damages: Damages,
+    pub damages: Rc<Damages>,
     pub base_stats: SimpleStats,
     pub bonus_stats: SimpleStats,
     pub current_stats: EnemyStats,
@@ -90,8 +85,6 @@ pub struct Game {
     pub current_player: FinalPlayer,
     pub enemies: Rc<[FinalEnemy]>,
     pub tower_damages: [i32; L_TWRD],
-    pub abilities_meta: Rc<[TypeMetadata<AbilityId>]>,
-    pub abilities_to_merge: Rc<[MergeData]>,
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
 }
