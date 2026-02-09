@@ -1,5 +1,8 @@
-use crate::components::image::{Image, ImageType};
-use tutorlolv2_gen::ChampionId;
+use crate::{
+    components::image::{Image, ImageType},
+    utils::encode_offset,
+};
+use tutorlolv2_gen::{CastId, ChampionId};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -10,8 +13,9 @@ pub struct BannerProps {
 #[component]
 pub fn Banner(props: &BannerProps) -> Html {
     let BannerProps { champion_id } = *props;
+    let data_offset = encode_offset(&[champion_id.formula()]);
     html! {
-        <div class={classes!("bg-std-900", "box", "relative")}>
+        <div {data_offset} class={classes!("bg-std-900", "box", "relative")}>
             <Image
                 src={ImageType::Centered(champion_id)}
                 class={classes!(

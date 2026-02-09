@@ -24,9 +24,9 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     let TableHeaderProps {
         skip,
         champion_id,
-        items_meta,
-        runes_meta,
-    } = props;
+        ref items_meta,
+        ref runes_meta,
+    } = *props;
 
     let cache = champion_id.cache();
     let abilities_meta = cache.metadata;
@@ -57,8 +57,16 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
             }
 
             result.push((
-                champion_id.get_ability_formula(i),
-                ImageType::Ability(*champion_id, ability_kind),
+                ImageType::Ability(champion_id, ability_kind),
+                match ability_kind {
+                    AbilityKind::Alias(merge_data) => {
+                        vec![
+                            champion_id.get_ability_formula(merge_data.minimum_damage as usize),
+                            champion_id.get_ability_formula(merge_data.maximum_damage as usize),
+                        ]
+                    }
+                    _ => vec![champion_id.get_ability_formula(i)],
+                },
             ));
             i += 1;
         }
@@ -67,23 +75,23 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     };
 
     let mut headers = Vec::with_capacity(
-        *skip as usize + 3 + abilities.len() + items_meta.len() + runes_meta.len(),
+        skip as usize + 3 + abilities.len() + items_meta.len() + runes_meta.len(),
     );
 
     fn header<T: Copy + Into<ImageType> + CastId>(
-        headers: &mut Vec<(&'static Range<usize>, ImageType)>,
+        headers: &mut Vec<(ImageType, Vec<&'static Range<usize>>)>,
         slice: &Rc<[TypeMetadata<T>]>,
     ) {
         for metadata in slice.iter() {
             let kind = metadata.kind;
-            headers.push((kind.formula(), kind.into()))
+            headers.push((kind.into(), vec![kind.formula()]))
         }
     }
 
     headers.extend([
-        (&BASIC_ATTACK_OFFSET, ImageType::BasicAttack),
-        (&CRITICAL_STRIKE_OFFSET, ImageType::CritStrike),
-        (&ONHIT_EFFECT_OFFSET, ImageType::OnhitAttack),
+        (ImageType::BasicAttack, vec![&BASIC_ATTACK_OFFSET]),
+        (ImageType::CritStrike, vec![&CRITICAL_STRIKE_OFFSET]),
+        (ImageType::OnhitAttack, vec![&ONHIT_EFFECT_OFFSET]),
     ]);
     headers.extend(abilities);
     header(&mut headers, items_meta);
@@ -92,13 +100,13 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     html! {
         <thead>
             <tr>
-                {for (0..*skip).map(|_| html!(<th></th>))}
-                {for headers.into_iter().enumerate().map(|(i, (offset, value))| {
-                    let data_offset_main = encode_offset(offset);
+                {for (0..skip).map(|_| html!(<th></th>))}
+                {for headers.into_iter().enumerate().map(|(i, (src, offsets))| {
+                    let data_offset = encode_offset(&offsets);
                     html! {
-                        <th key={i} {data_offset_main}>
+                        <th key={i} {data_offset}>
                             <Image
-                                src={value}
+                                {src}
                                 class={classes!(
                                     "w-fit", "justify-self-center"
                                 )}

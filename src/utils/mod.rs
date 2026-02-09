@@ -10,8 +10,12 @@ pub mod traits;
 pub const BASE_URL: &str = "http://localhost:8082";
 pub const VOID_MAIN_OFFSET: &str = "0..0";
 
-pub fn encode_offset(range: &Range<usize>) -> String {
-    format!("{range:?}")
+pub fn encode_offset(range: &[&Range<usize>]) -> String {
+    range
+        .iter()
+        .map(|r| format!("{r:?}"))
+        .collect::<Vec<_>>()
+        .join("|")
 }
 
 pub fn get_cache(offsets: Range<usize>) -> &'static str {

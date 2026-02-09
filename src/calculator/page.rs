@@ -1,7 +1,7 @@
 use crate::{
     calculator::{
         AbilityLevels, FinalEnemy, Game, InputGame, Player, PlayerData,
-        components::inputs::player::PlayerInput,
+        components::inputs::{player::PlayerInput, stats::Stats},
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
     components::tables::{body::TableBody, header::TableHeader},
@@ -40,9 +40,13 @@ pub fn Calculator() -> Html {
         let enemies = enemies.clone();
         let player = player.clone();
         use_effect_with((), move |_| {
-            player.dispatch(PlayerAction::Data(DataAction::Stats(unsafe {
-                &core::mem::transmute::<_, PlayerStats>([100; 16]) as *const _
-            })));
+            let mut stats = unsafe { core::mem::transmute::<_, PlayerStats>([100i32; 16]) };
+            stats.armor_penetration_flat = 0;
+            stats.armor_penetration_percent = 0;
+            stats.magic_penetration_flat = 0;
+            stats.magic_penetration_percent = 0;
+            player.dispatch(PlayerAction::Data(DataAction::Level(18)));
+            player.dispatch(PlayerAction::Data(DataAction::Stats(&stats as *const _)));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevels {
                 q: 5,
                 w: 5,
@@ -50,7 +54,7 @@ pub fn Calculator() -> Html {
                 r: 3,
             }));
             player.dispatch(PlayerAction::Data(DataAction::ChampionId(
-                ChampionId::Aatrox,
+                ChampionId::random(),
             )));
             (0..5).for_each(|i| {
                 enemies.dispatch(EnemyAction::Insert);

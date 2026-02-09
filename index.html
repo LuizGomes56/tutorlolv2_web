@@ -32,19 +32,18 @@
                 let shiftDown = false;
 
                 function parseOffsets(host) {
-                    return ["data_offset_main", "data_offset_exc"]
-                        .map(attr => (host.getAttribute(attr) || "")
-                            .split("..")
-                            .map(Number)
-                        )
+                    return (host.getAttribute("data_offset") || "")
+                        .split("|")
+                        .filter(Boolean)
+                        .map(range =>
+                            range.split("..").map(Number)
+                        );
                 }
 
                 function showOn(host) {
                     if (!host || host.querySelector(".hover-docs")) return;
 
-                    const [mainOffset, excOffset] = parseOffsets(host);
-                    const [s, e] = mainOffset;
-                    const [s1, e1] = excOffset;
+                    const offsets = parseOffsets(host);
 
                     const t = document.createElement("div");
                     const extra = host.getAttribute("data-classes") || "";
@@ -60,7 +59,7 @@
                         .filter(Boolean)
                         .map(entry => {
                             const [ctx_var, ctx_value] = entry.split(":");
-                            return `<div class="whitespace-nowrap"><span class="variable">${ctx_var}</span>: <span class="number">${ctx_value ?? "?"}</span></div>`;
+                            return `<div class="whitespace-nowrap"><span class="variable">${ctx_var}</span> = <span class="number">${ctx_value ?? "?"}</span></div>`;
                         })
                         .join("");
 
@@ -69,11 +68,8 @@
                     const code = document.createElement("code");
                     code.className = "flex flex-col gap-2 text-[#D4D4D4] font-normal text-left text-wrap"
 
-                    if (s && e) {
+                    for (const [s, e] of offsets) {
                         innerHTML += window.decodeCacheSlice(s, e);
-                    }
-                    if (s1 && e1) {
-                        innerHTML += window.decodeCacheSlice(s1, e1);
                     }
 
                     code.innerHTML = innerHTML;
@@ -105,7 +101,7 @@
                 window.addEventListener("keydown", (e) => {
                     if (e.key !== "Shift") return;
                     shiftDown = true;
-                    const hovered = document.querySelectorAll("[data_offset_main]:hover");
+                    const hovered = document.querySelectorAll("[data_offset]:hover");
                     if (!hovered.length) return;
                     const host = hovered[hovered.length - 1];
                     showOn(host);
@@ -119,7 +115,7 @@
                         if (!shiftDown) return;
                         const el = e.target;
                         if (!(el instanceof Element)) return;
-                        const host = el.closest?.("[data_offset_main]");
+                        const host = el.closest?.("[data_offset]");
                         if (!host) return;
                         const from = e.relatedTarget;
                         if (from && from instanceof Node && host.contains(from)) return;
