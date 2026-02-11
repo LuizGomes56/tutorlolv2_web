@@ -1,15 +1,18 @@
 use crate::{
     calculator::{
         AbilityLevels, FinalEnemy, Game, InputGame, Player, PlayerData,
-        components::inputs::{player::PlayerInput, stats::Stats},
+        components::inputs::player::PlayerInput,
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
-    components::tables::{body::TableBody, header::TableHeader},
+    components::{
+        image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
+        tables::{header::TableHeader, turret::TurretTable},
+    },
     model::{Dragons, PlayerStats},
-    utils::{EnumCast, fetch::Fetch},
+    utils::{ClassCast, EnumCast, encode_offset, fetch::Fetch},
 };
 use std::{cell::RefCell, rc::Rc};
-use tutorlolv2_gen::ChampionId;
+use tutorlolv2_gen::{ChampionId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
@@ -25,6 +28,47 @@ pub struct EnemyProps {
     pub enemy_index: UseStateHandle<usize>,
     pub last_action: Rc<RefCell<LastAction>>,
 }
+
+const MONSTER_HEADERS: [&[OtherImage]; L_MSTR] = [
+    &[
+        OtherImage::Voidgrubs,
+        OtherImage::Minion(MinionImage::Melee),
+        OtherImage::Minion(MinionImage::Ranged),
+        OtherImage::Minion(MinionImage::Cannon),
+    ],
+    &[OtherImage::Minion(MinionImage::Super)],
+    &[
+        OtherImage::Dragon(DragonImage::Elder),
+        OtherImage::Dragon(DragonImage::Fire),
+        OtherImage::Dragon(DragonImage::Ocean),
+        OtherImage::Dragon(DragonImage::Earth),
+    ],
+    &[OtherImage::Baron],
+    &[OtherImage::Atakhan],
+    &[
+        OtherImage::Monster(MonsterImage::Red),
+        OtherImage::Monster(MonsterImage::Blue),
+        OtherImage::Monster(MonsterImage::Gromp),
+        OtherImage::Monster(MonsterImage::Wolves),
+    ],
+    &[
+        OtherImage::Monster(MonsterImage::Krug),
+        OtherImage::Monster(MonsterImage::Raptor),
+    ],
+];
+
+const MONSTER_COUNT: usize = {
+    let mut i = 0;
+    let mut max = 0;
+    while i < L_MSTR {
+        let len = MONSTER_HEADERS[i].len();
+        if len > max {
+            max = len;
+        }
+        i += 1;
+    }
+    max
+};
 
 #[component]
 pub fn Calculator() -> Html {
@@ -149,7 +193,7 @@ pub fn Calculator() -> Html {
     };
 
     html! {
-        <div class={classes!("flex", "mb-72", "p-4", "gap-4")}>
+        <div class={classes!("flex", "mb-96", "p-4", "gap-4")}>
             <PlayerInput {player_props} />
             {match *game_data {
                 Some(ref data) => {
@@ -162,7 +206,7 @@ pub fn Calculator() -> Html {
                         runes_meta
                     } = data;
                     html! {
-                        <div>
+                        <div class={classes!("flex", "flex-col", "gap-4")}>
                             <div class={classes!("box")}>
                                 <table>
                                     <TableHeader
@@ -171,14 +215,78 @@ pub fn Calculator() -> Html {
                                         runes_meta={runes_meta.clone()}
                                     />
                                     <tbody>
-                                        <TableBody<FinalEnemy>
-                                            champion_id={current_player.champion_id}
-                                            enemies={enemies}
-                                            items_meta={items_meta.clone()}
-                                            runes_meta={runes_meta.clone()}
-                                        />
+                                        {
+                                            enemies.iter().map(|enemy| {
+                                                let damages = enemy.damages.to_html(
+                                                    current_player.champion_id,
+                                                    items_meta,
+                                                    runes_meta
+                                                );
+                                                html! {
+                                                    <tr>
+                                                        <td>
+                                                            <Image src={ImageType::from(enemy.champion_id)} />
+                                                        </td>
+                                                        {damages}
+                                                    </tr>
+                                                }
+                                            })
+                                            .collect::<Html>()
+                                        }
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class={classes!("box")}>
+                                <table>
+                                    <TableHeader
+                                        skip={MONSTER_COUNT}
+                                        champion_id={current_player.champion_id}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                    />
+                                    <tbody>
+                                        {
+                                            monster_damages.iter().enumerate().map(|(i, damage)| {
+                                                let damages = damage.to_html(
+                                                    current_player.champion_id,
+                                                    items_meta,
+                                                    runes_meta
+                                                );
+
+                                                let mut images = Vec::with_capacity(MONSTER_COUNT);
+                                                for j in (0..MONSTER_COUNT).rev() {
+                                                    let cell = MONSTER_HEADERS[i].get(j).map(|&value| {
+                                                        html!(<Image src={ImageType::Other(value)} />)
+                                                    });
+                                                    images.push(html! {
+                                                        <td>{cell}</td>
+                                                    });
+                                                }
+
+                                                html!(<tr>{images}{damages}</tr>)
+                                            })
+                                            .collect::<Html>()
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class={classes!("box")}>
+                                <TurretTable
+                                    damages={{
+                                        let offset = encode_offset(&[&TOWER_DAMAGE_FN_OFFSET]);
+                                        (0..L_TWRD).into_iter().map(|i| {
+                                            html! {
+                                                <td
+                                                    data_offset={offset.clone()}
+                                                    class={classes!(current_player.adaptative_type.class())}
+                                                >
+                                                    {tower_damages[i]}
+                                                </td>
+                                            }
+                                        })
+                                        .collect::<Html>()
+                                    }}
+                                />
                             </div>
                         </div>
                     }

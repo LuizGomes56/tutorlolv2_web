@@ -1,6 +1,6 @@
 use bincode::{Decode, Encode};
 use std::fmt::Display;
-use tutorlolv2_gen::{AbilityId, ItemId, MergeData, RuneId};
+use tutorlolv2_gen::{AbilityId, Ctx, ItemId, MergeData, RuneId};
 
 /// Holds all champion stats provided by Riot's API
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
@@ -80,6 +80,7 @@ pub struct Damages {
     pub abilities: Box<[i32]>,
     pub items: Box<[i32]>,
     pub runes: Box<[i32]>,
+    pub ctx: Ctx,
 }
 
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]

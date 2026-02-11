@@ -51,7 +51,7 @@ pub struct PlayerData<T> {
 
 #[derive(Clone, Debug, Decode, PartialEq)]
 pub struct FinalEnemy {
-    pub damages: Rc<Damages>,
+    pub damages: Damages,
     pub base_stats: SimpleStats,
     pub bonus_stats: SimpleStats,
     pub current_stats: EnemyStats,
@@ -59,7 +59,6 @@ pub struct FinalEnemy {
     pub real_magic_resist: i32,
     pub level: u8,
     pub champion_id: ChampionId,
-    pub eval_ctx: Ctx,
 }
 
 #[derive(Clone, Copy, Debug, Decode, PartialEq)]
@@ -73,15 +72,8 @@ pub struct FinalPlayer {
 }
 
 #[derive(Clone, Debug, Decode, PartialEq)]
-pub struct MonsterDamage {
-    pub attacks: Attacks,
-    pub abilities: Box<[i32]>,
-    pub items: Box<[i32]>,
-}
-
-#[derive(Clone, Debug, Decode, PartialEq)]
 pub struct Game {
-    pub monster_damages: [MonsterDamage; L_MSTR],
+    pub monster_damages: [Damages; L_MSTR],
     pub current_player: FinalPlayer,
     pub enemies: Rc<[FinalEnemy]>,
     pub tower_damages: [i32; L_TWRD],

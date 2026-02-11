@@ -5,6 +5,42 @@ use crate::{
 use tutorlolv2_gen::{ChampionId, ItemId, Position, RuneId};
 use yew::prelude::*;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum DragonImage {
+    Elder,
+    Fire,
+    Ocean,
+    Earth,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum MinionImage {
+    Melee,
+    Ranged,
+    Cannon,
+    Super,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum MonsterImage {
+    Gromp,
+    Wolves,
+    Red,
+    Blue,
+    Krug,
+    Raptor,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum OtherImage {
+    Voidgrubs,
+    Minion(MinionImage),
+    Dragon(DragonImage),
+    Monster(MonsterImage),
+    Baron,
+    Atakhan,
+}
+
 #[derive(PartialEq, Properties)]
 pub struct ImageProps {
     #[prop_or_default]
@@ -18,18 +54,19 @@ pub fn Image(props: &ImageProps) -> Html {
     let header = src.header();
     let src = src.url();
 
-    let mut classes = classes!("relative");
-    classes.push(class);
-
     match header {
-        Some(h) => html! {
-            <div class={classes}>
-                <img loading={"lazy"} {src} alt={""} />
-                {h}
-            </div>
-        },
+        Some(h) => {
+            let mut classes = classes!("relative");
+            classes.push(class);
+            html! {
+                <div class={classes}>
+                    <img loading={"lazy"} {src} alt={""} />
+                    {h}
+                </div>
+            }
+        }
         None => html! {
-            <img class={classes} loading={"lazy"} {src} alt={""} />
+            <img {class} loading={"lazy"} {src} alt={""} />
         },
     }
 }
@@ -47,6 +84,7 @@ pub enum ImageType {
     Level,
     Position(Position),
     Stats(StatType),
+    Other(OtherImage),
     Tower,
 }
 
@@ -113,6 +151,32 @@ impl ImageType {
                 StatType::Health => "stats/health.svg",
                 StatType::Mana => "stats/mana.svg",
                 StatType::CurrentMana => "stats/mana.svg",
+            }
+            .into(),
+            ImageType::Other(other) => match other {
+                OtherImage::Voidgrubs => "other/voidgrubs.avif",
+                OtherImage::Atakhan => "other/atakhan.avif",
+                OtherImage::Baron => "other/baron.avif",
+                OtherImage::Dragon(dragon) => match dragon {
+                    DragonImage::Earth => "other/earth_dragon.avif",
+                    DragonImage::Elder => "other/elder_dragon.avif",
+                    DragonImage::Fire => "other/fire_dragon.avif",
+                    DragonImage::Ocean => "other/ocean_dragon.avif",
+                },
+                OtherImage::Monster(monster) => match monster {
+                    MonsterImage::Gromp => "other/gromp.avif",
+                    MonsterImage::Wolves => "other/wolves.avif",
+                    MonsterImage::Red => "other/red_buff.avif",
+                    MonsterImage::Blue => "other/blue_buff.avif",
+                    MonsterImage::Krug => "other/krug.avif",
+                    MonsterImage::Raptor => "other/raptor.avif",
+                },
+                OtherImage::Minion(minion) => match minion {
+                    MinionImage::Melee => "other/melee_minion.avif",
+                    MinionImage::Ranged => "other/ranged_minion.avif",
+                    MinionImage::Cannon => "other/cannon.avif",
+                    MinionImage::Super => "other/super_minion.avif",
+                },
             }
             .into(),
         };

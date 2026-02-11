@@ -13,7 +13,7 @@ use yew::prelude::*;
 #[derive(PartialEq, Properties)]
 pub struct TableHeaderProps {
     #[prop_or(1)]
-    pub skip: u8,
+    pub skip: usize,
     pub champion_id: ChampionId,
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
@@ -74,9 +74,8 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         result
     };
 
-    let mut headers = Vec::with_capacity(
-        skip as usize + 3 + abilities.len() + items_meta.len() + runes_meta.len(),
-    );
+    let mut headers =
+        Vec::with_capacity(skip + 3 + abilities.len() + items_meta.len() + runes_meta.len());
 
     fn header<T: Copy + Into<ImageType> + CastId>(
         headers: &mut Vec<(ImageType, Vec<&'static Range<usize>>)>,
@@ -108,7 +107,10 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                             <Image
                                 {src}
                                 class={classes!(
-                                    "w-fit", "justify-self-center"
+                                    "w-fit", "flex",
+                                    "items-center",
+                                    "justify-center",
+                                    "place-self-center"
                                 )}
                             />
                         </th>
