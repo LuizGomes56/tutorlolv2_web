@@ -1,5 +1,7 @@
 use crate::{
+    calculator::FinalEnemy,
     model::{Attacks, Damages},
+    overlay::Enemy,
     utils::{encode_offset, traits::ClassCast},
 };
 use std::{fmt::Write, ops::Range};
@@ -8,6 +10,22 @@ use tutorlolv2_gen::{
     ONHIT_EFFECT_FN_OFFSET, RuneId, TypeMetadata,
 };
 use yew::prelude::*;
+
+pub trait Victim {
+    fn damages(&self) -> &Damages;
+}
+
+impl Victim for FinalEnemy {
+    fn damages(&self) -> &Damages {
+        &self.damages
+    }
+}
+
+impl Victim for Enemy {
+    fn damages(&self) -> &Damages {
+        &self.damages
+    }
+}
 
 pub struct Cell {
     damage_type: DamageType,
@@ -170,8 +188,7 @@ impl Damages {
 
         cells
             .into_iter()
-            .enumerate()
-            .map(|(key, cell)| {
+            .map(|cell| {
                 let Cell {
                     damage_type,
                     min_dmg,
@@ -199,7 +216,6 @@ impl Damages {
 
                 html! {
                     <td
-                        {key}
                         {data_idents}
                         {data_offset}
                         class={damage_type.class()}>

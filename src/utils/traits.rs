@@ -1,5 +1,5 @@
 use crate::components::image::ImageType;
-use std::ops::Range;
+use std::{fmt::Debug, ops::Range};
 use tutorlolv2_gen::{AdaptativeType, CastId, ChampionId, DamageType, ItemId, RuneId};
 use web_sys::js_sys::Math;
 
@@ -47,3 +47,14 @@ impl ClassCast for AdaptativeType {
         }
     }
 }
+
+pub trait Print: Debug {
+    fn log(&self) {
+        web_sys::console::log_1(&format!("{self:#?}").into());
+    }
+    fn err(&self) {
+        web_sys::console::error_1(&format!("{self:#?}").into());
+    }
+}
+
+impl<T: Debug> Print for T {}

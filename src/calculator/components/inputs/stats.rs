@@ -1,7 +1,7 @@
 use crate::{
     components::image::{Image, ImageType},
     impl_index,
-    model::{PlayerStats, StatType},
+    model::{EnemyStats, PlayerStats, StatType},
 };
 use std::ops::{Index, IndexMut};
 use web_sys::HtmlInputElement;
@@ -19,12 +19,14 @@ pub struct StatCellProps {
 
 #[component]
 pub fn StatCell(props: &StatCellProps) -> Html {
-    let image_type = props.image_type;
-    let disabled = props.disabled;
-    let name = &props.name;
-    let value = &props.value;
-    let oninput = &props.oninput;
-    let placeholder = props.placeholder;
+    let StatCellProps {
+        image_type,
+        disabled,
+        ref name,
+        value,
+        ref oninput,
+        placeholder,
+    } = *props;
     html! {
         <>
             <span class={classes!("flex", "items-center", "justify-center", "relative")}>
@@ -73,20 +75,37 @@ impl_index! {
     }
 }
 
-#[derive(PartialEq, Properties)]
-pub struct StatsProps {
-    pub infer: bool,
-    pub stats: PlayerStats,
-    pub callback: Callback<*const PlayerStats>,
+impl_index! {
+    EnemyStats[StatType] i32 {
+        StatType::Armor => armor,
+        StatType::CurrentHealth => health,
+        StatType::MagicResist => magic_resist,
+        StatType::Health => max_health,
+        StatType::MissingHealth => missing_health
+    }
 }
 
-#[component]
-pub fn Stats(props: &StatsProps) -> Html {
-    let infer = props.infer;
-    let stats = props.stats;
-    let callback = &props.callback;
+#[derive(PartialEq, Properties)]
+pub struct StatsProps<T: PartialEq> {
+    pub infer: bool,
+    pub stats: T,
+    pub callback: Callback<*const T>,
+}
 
-    [
+pub trait StatDisplay
+where
+    Self: Copy
+        + PartialEq
+        + Index<StatType, Output = i32>
+        + IndexMut<StatType, Output = i32>
+        + Clone
+        + 'static,
+{
+    const VALUES: &[StatType];
+}
+
+impl StatDisplay for PlayerStats {
+    const VALUES: &[StatType] = &[
         StatType::AbilityPower,
         StatType::AttackDamage,
         StatType::Health,
@@ -103,28 +122,47 @@ pub fn Stats(props: &StatsProps) -> Html {
         StatType::CurrentMana,
         StatType::AttackRange,
         StatType::AttackSpeed,
-    ]
-    .into_iter()
-    .map(|stat| {
-        html! {
-            <StatCell
-                image_type={ImageType::Stats(stat)}
-                name={stat.to_string()}
-                disabled={infer}
-                placeholder={0}
-                value={stats[stat]}
-                oninput={{
-                    let callback = callback.clone();
-                    Callback::from(move |e: InputEvent| {
-                        let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                        let number = value.parse().unwrap_or(0);
-                        let mut result = stats;
-                        result[stat] = number;
-                        callback.emit(&result as _);
-                    })
-                }}
-            />
-        }
-    })
-    .collect::<Html>()
+    ];
+}
+
+impl StatDisplay for EnemyStats {
+    const VALUES: &[StatType] = &[
+        StatType::Health,
+        StatType::CurrentHealth,
+        StatType::MissingHealth,
+        StatType::Armor,
+        StatType::MagicResist,
+    ];
+}
+
+#[component]
+pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {
+    let infer = props.infer;
+    let stats = props.stats;
+    let callback = &props.callback;
+
+    T::VALUES
+        .into_iter()
+        .map(|&stat| {
+            html! {
+                <StatCell
+                    image_type={ImageType::Stats(stat)}
+                    name={stat.to_string()}
+                    disabled={infer}
+                    placeholder={0}
+                    value={stats[stat]}
+                    oninput={{
+                        let callback = callback.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                            let number = value.parse().unwrap_or(0);
+                            let mut result = stats;
+                            result[stat] = number;
+                            callback.emit(&result as _);
+                        })
+                    }}
+                />
+            }
+        })
+        .collect::<Html>()
 }

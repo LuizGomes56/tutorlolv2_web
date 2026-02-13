@@ -43,7 +43,7 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                 <label class={classes!("grid", "grid-cols-2")}>
                     <Image
                         src={ImageType::Ability(champion_id, ability_id.into())}
-                        class={classes!("h-8", "w-8", "rounded")}
+                        class={classes!("flex", "items-center", "justify-center")}
                     />
                     <input
                         value={value.to_string()}

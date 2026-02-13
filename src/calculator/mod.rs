@@ -1,6 +1,9 @@
-use crate::model::{
-    AbilityLevels, Attacks, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
-    ValueException,
+use crate::{
+    model::{
+        AbilityLevels, Attacks, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
+        ValueException,
+    },
+    utils::EnumCast,
 };
 use bincode::{Decode, Encode};
 use std::rc::Rc;
@@ -37,7 +40,7 @@ pub struct Player {
 /// have effect if field `champion_id` is also of type [`ChampionId::Gnar`].
 /// Field `stacks` is useless if the associated champion does not have any special
 /// characteristics that are related to stack-scaling
-#[derive(Clone, Debug, Default, Encode, PartialEq)]
+#[derive(Clone, Debug, Encode, PartialEq)]
 pub struct PlayerData<T> {
     pub stats: T,
     pub items: Vec<ItemId>,
@@ -47,6 +50,21 @@ pub struct PlayerData<T> {
     pub infer_stats: bool,
     pub is_mega_gnar: bool,
     pub champion_id: ChampionId,
+}
+
+impl<T: Default> Default for PlayerData<T> {
+    fn default() -> Self {
+        Self {
+            stats: T::default(),
+            items: Vec::new(),
+            item_exceptions: Vec::new(),
+            stacks: 0,
+            level: 1,
+            infer_stats: true,
+            is_mega_gnar: false,
+            champion_id: ChampionId::random(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Decode, PartialEq)]

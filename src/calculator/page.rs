@@ -1,18 +1,18 @@
 use crate::{
     calculator::{
-        AbilityLevels, FinalEnemy, Game, InputGame, Player, PlayerData,
-        components::inputs::player::PlayerInput,
+        AbilityLevels, Game, InputGame, Player, PlayerData,
+        components::inputs::{enemies::EnemiesInput, player::PlayerInput},
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
     components::{
         image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
         tables::{header::TableHeader, turret::TurretTable},
     },
-    model::{Dragons, PlayerStats},
-    utils::{ClassCast, EnumCast, encode_offset, fetch::Fetch},
+    model::{Dragons, EnemyStats, PlayerStats},
+    utils::{ClassCast, EnumCast, encode_offset, fetch::Fetch, traits::Print},
 };
 use std::{cell::RefCell, rc::Rc};
-use tutorlolv2_gen::{ChampionId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
+use tutorlolv2_gen::{CastId, ChampionId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
@@ -36,15 +36,12 @@ const MONSTER_HEADERS: [&[OtherImage]; L_MSTR] = [
         OtherImage::Minion(MinionImage::Ranged),
         OtherImage::Minion(MinionImage::Cannon),
     ],
-    &[OtherImage::Minion(MinionImage::Super)],
     &[
         OtherImage::Dragon(DragonImage::Elder),
         OtherImage::Dragon(DragonImage::Fire),
         OtherImage::Dragon(DragonImage::Ocean),
         OtherImage::Dragon(DragonImage::Earth),
     ],
-    &[OtherImage::Baron],
-    &[OtherImage::Atakhan],
     &[
         OtherImage::Monster(MonsterImage::Red),
         OtherImage::Monster(MonsterImage::Blue),
@@ -55,6 +52,9 @@ const MONSTER_HEADERS: [&[OtherImage]; L_MSTR] = [
         OtherImage::Monster(MonsterImage::Krug),
         OtherImage::Monster(MonsterImage::Raptor),
     ],
+    &[OtherImage::Baron],
+    &[OtherImage::Atakhan],
+    &[OtherImage::Minion(MinionImage::Super)],
 ];
 
 const MONSTER_COUNT: usize = {
@@ -75,6 +75,7 @@ pub fn Calculator() -> Html {
     let player = use_reducer(Player::default);
     let enemies = use_reducer(Enemies::default);
     let dragons = use_reducer(Dragons::default);
+    let enemy_index = use_state(|| 0);
 
     let game_data = use_state(|| None::<Game>);
     let controller = use_state(|| None::<AbortController>);
@@ -84,6 +85,7 @@ pub fn Calculator() -> Html {
         let enemies = enemies.clone();
         let player = player.clone();
         use_effect_with((), move |_| {
+            // player.dispatch(PlayerAction::Data(DataAction::InferStats(false)));
             let mut stats = unsafe { core::mem::transmute::<_, PlayerStats>([100i32; 16]) };
             stats.armor_penetration_flat = 0;
             stats.armor_penetration_percent = 0;
@@ -100,13 +102,14 @@ pub fn Calculator() -> Html {
             player.dispatch(PlayerAction::Data(DataAction::ChampionId(
                 ChampionId::random(),
             )));
-            (0..5).for_each(|i| {
-                enemies.dispatch(EnemyAction::Insert);
+            (1..5).for_each(|i| {
+                enemies.dispatch(EnemyAction::Insert(ChampionId::random()));
                 enemies.dispatch(EnemyAction::Change(
                     i,
                     DataAction::ChampionId(ChampionId::random()),
                 ))
             });
+            // enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
         })
     };
 
@@ -138,7 +141,7 @@ pub fn Calculator() -> Html {
                     dragons: *dragons,
                 };
 
-                web_sys::console::log_1(&format!("{input_game:#?}").into());
+                // input_game.log();
 
                 match Fetch::new("/api/games/calculator")
                     .signal(signal)
@@ -149,12 +152,15 @@ pub fn Calculator() -> Html {
                 {
                     Ok(data) => {
                         let infer_enemy_player_stats = |index| {
-                            let enemy: &Rc<PlayerData<_>> = &enemies[index];
-                            if enemy.infer_stats {
+                            if let Some(enemy) = &data.enemies.get(index)
+                                && let Some(input_enemy) =
+                                    enemies.get(index) as Option<&Rc<PlayerData<EnemyStats>>>
+                                && input_enemy.infer_stats
+                            {
                                 last_action.replace(LastAction::Replace);
                                 enemies.dispatch(EnemyAction::Change(
                                     index,
-                                    DataAction::Stats(&enemy.stats as _),
+                                    DataAction::Stats(&enemy.current_stats as _),
                                 ));
                             }
                         };
@@ -162,6 +168,7 @@ pub fn Calculator() -> Html {
                         match action {
                             LastAction::Init | LastAction::CurrentPlayer => {
                                 if player.data.infer_stats {
+                                    // data.current_player.log();
                                     last_action.replace(LastAction::Replace);
                                     player.dispatch(PlayerAction::Data(DataAction::Stats(
                                         &data.current_player.current_stats as _,
@@ -175,13 +182,11 @@ pub fn Calculator() -> Html {
                             _ => {}
                         };
 
-                        web_sys::console::log_1(&format!("{data:#?}").into());
+                        // data.log();
 
                         game_data.set(Some(data));
                     }
-                    Err(e) => web_sys::console::error_1(
-                        &format!("Failed to request calculator api: {e:?}").into(),
-                    ),
+                    Err(e) => format!("Failed to request calculator api: {e:?}").err(),
                 }
             });
         });
@@ -193,7 +198,7 @@ pub fn Calculator() -> Html {
     };
 
     html! {
-        <div class={classes!("flex", "mb-96", "p-4", "gap-4")}>
+        <div class={classes!("flex", "mb-96", "w-full", "px-2", "mt-2")}>
             <PlayerInput {player_props} />
             {match *game_data {
                 Some(ref data) => {
@@ -206,8 +211,12 @@ pub fn Calculator() -> Html {
                         runes_meta
                     } = data;
                     html! {
-                        <div class={classes!("flex", "flex-col", "gap-4")}>
-                            <div class={classes!("box")}>
+                        <div class={classes!(
+                            "flex", "flex-col", "gap-4",
+                            "p-2", "overflow-hidden",
+                            "flex-1"
+                        )}>
+                            <div class={classes!("box", "overflow-auto")}>
                                 <table>
                                     <TableHeader
                                         champion_id={current_player.champion_id}
@@ -222,10 +231,11 @@ pub fn Calculator() -> Html {
                                                     items_meta,
                                                     runes_meta
                                                 );
+                                                let enemy_id = enemy.champion_id;
                                                 html! {
                                                     <tr>
-                                                        <td>
-                                                            <Image src={ImageType::from(enemy.champion_id)} />
+                                                        <td data_offset={encode_offset(&[enemy_id.formula()])}>
+                                                            <Image src={ImageType::from(enemy_id)} />
                                                         </td>
                                                         {damages}
                                                     </tr>
@@ -236,7 +246,7 @@ pub fn Calculator() -> Html {
                                     </tbody>
                                 </table>
                             </div>
-                            <div class={classes!("box")}>
+                            <div class={classes!("box", "overflow-auto")}>
                                 <table>
                                     <TableHeader
                                         skip={MONSTER_COUNT}
@@ -258,9 +268,7 @@ pub fn Calculator() -> Html {
                                                     let cell = MONSTER_HEADERS[i].get(j).map(|&value| {
                                                         html!(<Image src={ImageType::Other(value)} />)
                                                     });
-                                                    images.push(html! {
-                                                        <td>{cell}</td>
-                                                    });
+                                                    images.push(html!(<td>{cell}</td>));
                                                 }
 
                                                 html!(<tr>{images}{damages}</tr>)
@@ -270,7 +278,7 @@ pub fn Calculator() -> Html {
                                     </tbody>
                                 </table>
                             </div>
-                            <div class={classes!("box")}>
+                            <div class={classes!("box", "overflow-auto")}>
                                 <TurretTable
                                     damages={{
                                         let offset = encode_offset(&[&TOWER_DAMAGE_FN_OFFSET]);
@@ -291,8 +299,13 @@ pub fn Calculator() -> Html {
                         </div>
                     }
                 },
-                None => html! { "No data" }
+                None => html!("No data")
             }}
+            <EnemiesInput
+                enemies={enemies.clone()}
+                enemy_index={enemy_index.clone()}
+                last_action={last_action.clone()}
+            />
         </div>
     }
 }

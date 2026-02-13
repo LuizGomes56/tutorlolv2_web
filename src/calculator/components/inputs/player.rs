@@ -29,7 +29,7 @@ fn use_player_callback<T: 'static>(
     } = props.clone();
     use_callback((), move |v, _| {
         let value = callback(v);
-        last_action.replace(value.action());
+        last_action.replace(LastAction::CurrentPlayer);
         player.dispatch(value);
     })
 }
@@ -45,7 +45,7 @@ fn use_data_callback<T: 'static>(
     } = props.clone();
     use_callback((), move |v, _| {
         let value = callback(v);
-        last_action.replace(LastAction::CurrentPlayer);
+        last_action.replace(value.action(LastAction::CurrentPlayer));
         player.dispatch(PlayerAction::Data(value));
     })
 }
@@ -77,7 +77,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
 
     html! {
         <>
-            <div class={classes!("flex", "flex-col", "w-64", "box")}>
+            <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
                 <Banner champion_id={data.champion_id} />
                 <div class={classes!("grid", "grid-cols-4")}>
                     <Abilities
@@ -105,14 +105,14 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                             })
                         }}
                     />
-                    <Stats
+                    <Stats<PlayerStats>
                         infer={data.infer_stats}
                         stats={data.stats}
                         callback={stats_cb}
                     />
                 </div>
             </div>
-            <div class={classes!("flex", "flex-col", "w-64", "box")}>
+            <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
                 <Recommendations
                     callback={{
                         let recommended_items = recommended_items.clone();
@@ -123,7 +123,16 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         })
                     }}
                 />
-                <Selector<ItemId> callback={inser_item} />
+                <Selector<ItemId>
+                    callback={inser_item}
+                    filter={Callback::from(|item: ItemId| {
+                        let cache = item.cache();
+                        cache.maps.summoners_rift
+                            && cache.purchasable
+                            && !cache.prettified_stats.is_empty()
+                            && cache.riot_id < 100000
+                    })}
+                />
                 <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
                 <Tray<ItemId> callback={remove_item} vector={data.items.clone()} />
 

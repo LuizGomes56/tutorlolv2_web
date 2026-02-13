@@ -137,20 +137,21 @@ impl ImageType {
             ImageType::Stats(stat) => match stat {
                 StatType::AbilityPower => "stats/ability_power.svg",
                 StatType::Armor => "stats/armor.svg",
-                StatType::ArmorPenetrationFlat => "stats/armor_penetration.svg",
-                StatType::ArmorPenetrationPercent => "stats/armor_penetration.svg",
+                StatType::ArmorPenetrationFlat | StatType::ArmorPenetrationPercent => {
+                    "stats/armor_penetration.svg"
+                }
                 StatType::AttackDamage => "stats/attack_damage.svg",
                 StatType::AttackRange => "stats/onhit.svg",
                 StatType::AttackSpeed => "stats/attack_speed.svg",
                 StatType::CritChance => "stats/crit_chance.svg",
                 StatType::CritDamage => "stats/crit_damage.svg",
                 StatType::CurrentHealth => "stats/health.svg",
-                StatType::MagicPenetrationFlat => "stats/magic_penetration.svg",
-                StatType::MagicPenetrationPercent => "stats/magic_penetration.svg",
+                StatType::CurrentMana | StatType::Mana => "stats/mana.svg",
+                StatType::Health | StatType::MissingHealth => "stats/health.svg",
+                StatType::MagicPenetrationFlat | StatType::MagicPenetrationPercent => {
+                    "stats/magic_penetration.svg"
+                }
                 StatType::MagicResist => "stats/magic_resist.svg",
-                StatType::Health => "stats/health.svg",
-                StatType::Mana => "stats/mana.svg",
-                StatType::CurrentMana => "stats/mana.svg",
             }
             .into(),
             ImageType::Other(other) => match other {

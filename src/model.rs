@@ -163,11 +163,11 @@ pub struct Dragons {
 
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq, PartialOrd)]
 pub struct EnemyStats {
-    enemy_armor: i32,
-    enemy_health: i32,
-    enemy_magic_resist: i32,
-    enemy_max_health: i32,
-    enemy_missing_health: i32,
+    pub armor: i32,
+    pub health: i32,
+    pub magic_resist: i32,
+    pub max_health: i32,
+    pub missing_health: i32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -210,6 +210,7 @@ pub enum StatType {
     MagicPenetrationFlat,
     MagicPenetrationPercent,
     MagicResist,
+    MissingHealth,
     Health,
     Mana,
     CurrentMana,
@@ -231,6 +232,7 @@ impl Display for StatType {
             StatType::MagicPenetrationFlat => write!(f, "Magic Pen. Flat"),
             StatType::MagicPenetrationPercent => write!(f, "Magic Pen. %"),
             StatType::MagicResist => write!(f, "Magic Resist"),
+            StatType::MissingHealth => write!(f, "Missing Health"),
             StatType::Health => write!(f, "Max Health"),
             StatType::Mana => write!(f, "Max Mana"),
             StatType::CurrentMana => write!(f, "Current Mana"),

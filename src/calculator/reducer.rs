@@ -1,6 +1,7 @@
 use crate::{
     calculator::{AbilityLevels, Player, PlayerData},
     model::{Dragons, EnemyStats, PlayerStats, ValueException},
+    utils::traits::Print,
 };
 use std::rc::Rc;
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
@@ -34,14 +35,26 @@ pub enum DataAction<T> {
 }
 
 pub enum EnemyAction {
-    Insert,
+    Insert(ChampionId),
     Remove(usize),
     Change(usize, EnemyDataAction),
 }
 
-#[derive(Clone, Default, PartialEq)]
+#[derive(Clone, PartialEq)]
 #[repr(transparent)]
 pub struct Enemies(Vec<Rc<PlayerData<EnemyStats>>>);
+
+impl Enemies {
+    pub const MAX_ENEMIES: usize = 5;
+}
+
+impl Default for Enemies {
+    fn default() -> Self {
+        let mut vector = Vec::with_capacity(Self::MAX_ENEMIES);
+        vector.push(Default::default());
+        Self(vector)
+    }
+}
 
 impl core::ops::Deref for Enemies {
     type Target = Vec<Rc<PlayerData<EnemyStats>>>;
@@ -127,11 +140,22 @@ impl Reducible for Enemies {
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
         match action {
-            EnemyAction::Insert => new.push(Default::default()),
+            EnemyAction::Insert(champion_id) => match new.len() < Self::MAX_ENEMIES {
+                true => {
+                    new.push(Rc::new(PlayerData {
+                        champion_id,
+                        ..Default::default()
+                    }));
+                }
+                false => "Max enemies reached".log(),
+            },
             EnemyAction::Change(v, action) => new[v] = new[v].clone().reduce(action),
-            EnemyAction::Remove(v) => {
-                new.swap_remove(v);
-            }
+            EnemyAction::Remove(v) => match !new.is_empty() {
+                true => {
+                    new.swap_remove(v);
+                }
+                false => "At least one champion required".log(),
+            },
         }
         Rc::new(new)
     }
@@ -168,20 +192,11 @@ pub enum LastAction {
     Replace,
 }
 
-impl PlayerAction {
-    pub const fn action(&self) -> LastAction {
-        match self {
-            Self::Data(DataAction::Stats(_)) => LastAction::Replace,
-            _ => LastAction::CurrentPlayer,
-        }
-    }
-}
-
-impl EnemyDataAction {
-    pub const fn action(&self, i: usize) -> LastAction {
+impl<T> DataAction<T> {
+    pub fn action(&self, default: LastAction) -> LastAction {
         match self {
             Self::Stats(_) => LastAction::Replace,
-            _ => LastAction::EnemyPlayer(i),
+            _ => default,
         }
     }
 }

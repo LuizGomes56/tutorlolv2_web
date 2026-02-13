@@ -107,10 +107,10 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                             <Image
                                 {src}
                                 class={classes!(
-                                    "w-fit", "flex",
-                                    "items-center",
+                                    "flex", "items-center",
                                     "justify-center",
-                                    "place-self-center"
+                                    "place-self-center",
+                                    "w-8", "h-8"
                                 )}
                             />
                         </th>
