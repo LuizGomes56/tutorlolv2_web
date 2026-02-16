@@ -86,6 +86,7 @@ pub enum ImageType {
     Stats(StatType),
     Other(OtherImage),
     Tower,
+    Ignite,
 }
 
 impl ImageType {
@@ -123,6 +124,7 @@ impl ImageType {
             }
             ImageType::Tower => "other/tower.avif".into(),
             ImageType::BasicAttack => "other/basic_attack.png".into(),
+            ImageType::Ignite => "other/ignite.png".into(),
             ImageType::CritStrike => "stats/crit_chance.svg".into(),
             ImageType::OnhitAttack => "stats/onhit.svg".into(),
             ImageType::Level => "stats/level.svg".into(),
@@ -145,9 +147,7 @@ impl ImageType {
                 StatType::AttackSpeed => "stats/attack_speed.svg",
                 StatType::CritChance => "stats/crit_chance.svg",
                 StatType::CritDamage => "stats/crit_damage.svg",
-                StatType::CurrentHealth | StatType::MaxHealth | StatType::MissingHealth => {
-                    "stats/health.svg"
-                }
+                StatType::CurrentHealth | StatType::MaxHealth => "stats/health.svg",
                 StatType::CurrentMana | StatType::MaxMana => "stats/mana.svg",
                 StatType::MagicPenetrationFlat | StatType::MagicPenetrationPercent => {
                     "stats/magic_penetration.svg"

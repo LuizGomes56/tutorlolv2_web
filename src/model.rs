@@ -213,7 +213,6 @@ pub enum StatType {
     MagicResist,
     MaxMana,
     MaxHealth,
-    MissingHealth,
     CurrentMana,
 }
 
@@ -233,7 +232,6 @@ impl Display for StatType {
             StatType::MagicPenetrationFlat => write!(f, "Magic Pen. Flat"),
             StatType::MagicPenetrationPercent => write!(f, "Magic Pen. %"),
             StatType::MagicResist => write!(f, "Magic Resist"),
-            StatType::MissingHealth => write!(f, "Missing Health"),
             StatType::MaxHealth => write!(f, "Max Health"),
             StatType::MaxMana => write!(f, "Max Mana"),
             StatType::CurrentMana => write!(f, "Current Mana"),

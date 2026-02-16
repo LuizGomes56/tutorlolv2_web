@@ -53,9 +53,9 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                             .iter()
                             .copied()
                             .map(|value| match value {
-                                StackValue::Ability(i) => damages.abilities[i],
-                                StackValue::Item(i) => damages.items[i],
-                                StackValue::Rune(i) => damages.runes[i],
+                                StackValue::Ability(i, ..) => damages.abilities[i],
+                                StackValue::Item(i, ..) => damages.items[i],
+                                StackValue::Rune(i, ..) => damages.runes[i],
                                 StackValue::BasicAttack => damages.attacks.basic_attack,
                                 StackValue::CriticalStrike => damages.attacks.critical_strike,
                                 StackValue::OnhitMin => damages.attacks.onhit_damage.minimum_damage,

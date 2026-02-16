@@ -82,7 +82,6 @@ impl_index! {
         CurrentHealth,
         MagicResist,
         MaxHealth,
-        MissingHealth
     }
 }
 
@@ -137,7 +136,6 @@ impl_stat_display!(PlayerStats {
 impl_stat_display!(EnemyStats {
     MaxHealth,
     CurrentHealth,
-    MissingHealth,
     Armor,
     MagicResist,
 });

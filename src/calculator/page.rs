@@ -88,6 +88,7 @@ pub fn Calculator() -> Html {
 
     {
         let player = player.clone();
+        let enemies = enemies.clone();
         use_effect_with((), move |_| {
             // player.dispatch(PlayerAction::Data(DataAction::InferStats(false)));
             let random = |i| random_u16(0..i) as _;
@@ -110,6 +111,10 @@ pub fn Calculator() -> Html {
                 current_mana: random(2000),
             };
             player.dispatch(PlayerAction::Data(DataAction::Level(18)));
+            let champion_id = player.data.champion_id;
+            player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
+                champion_id.recommended_items(champion_id.main_position()),
+            )));
             player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
                 &stats as *const _,
             )));
@@ -120,6 +125,12 @@ pub fn Calculator() -> Html {
             player.dispatch(PlayerAction::Data(DataAction::ChampionId(
                 ChampionId::random(),
             )));
+            enemies.dispatch(EnemyAction::Change(0, DataAction::Level(18)));
+            enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
+            enemies.dispatch(EnemyAction::Change(0, {
+                let champion_id = enemies[0].champion_id;
+                DataAction::SetItemVec(champion_id.recommended_items(champion_id.main_position()))
+            }));
         })
     };
 

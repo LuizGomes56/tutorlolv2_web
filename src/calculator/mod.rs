@@ -1,16 +1,13 @@
 use crate::{
     model::{
-        AbilityLevels, Attacks, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
+        AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
         ValueException,
     },
     utils::EnumCast,
 };
 use bincode::{Decode, Encode};
 use std::rc::Rc;
-use tutorlolv2_gen::{
-    AbilityId, AdaptativeType, ChampionId, Ctx, ItemId, L_MSTR, L_TWRD, MergeData, RuneId,
-    TypeMetadata,
-};
+use tutorlolv2_gen::{AdaptativeType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
 
 mod components;
 mod page;

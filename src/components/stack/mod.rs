@@ -1,19 +1,21 @@
 mod selector;
 mod table;
 
-use std::rc::Rc;
-use tutorlolv2_gen::ItemId;
+use std::{ops::Deref, rc::Rc};
+use tutorlolv2_gen::{AbilityId, ChampionId, ItemId, RuneId};
 use yew::Reducible;
 
-pub use selector::{StackSelector, StackSelectorProps};
-pub use table::{StackTable, StackTableProps};
+pub use selector::StackSelector;
+pub use table::StackTable;
 
 #[derive(Clone, Default, PartialEq)]
 pub struct Stack(Vec<StackValue>);
 
-impl Stack {
-    pub fn boxed(&self) -> Box<[StackValue]> {
-        self.0.clone().into_boxed_slice()
+impl Deref for Stack {
+    type Target = Vec<StackValue>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -41,9 +43,9 @@ impl Reducible for Stack {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum StackValue {
-    Ability(usize),
-    Item(usize),
-    Rune(usize),
+    Ability(usize, ChampionId, AbilityId),
+    Item(usize, ItemId),
+    Rune(usize, RuneId),
     BasicAttack,
     CriticalStrike,
     OnhitMin,

@@ -47,65 +47,116 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
 
     let class = classes!("w-8", "h-8", "cursor-pointer");
 
-    let abilities = champion_id
-        .cache()
-        .metadata
-        .iter()
-        .enumerate()
-        .map(|(i, metadata)| {
-            html! {
-                <button onclick={{
-                    let stack_push = stack_push.clone();
-                    Callback::from(move |_| {
-                        stack_push.emit(StackValue::Ability(i));
-                    })
-                }}>
-                    <Image
-                        class={class.clone()}
-                        src={ImageType::Ability(
-                            champion_id,
-                            AbilityKind::Normal(metadata.kind)
-                        )}
-                    />
-                </button>
-            }
-        })
-        .collect::<Html>();
+    let selector = use_memo(
+        (champion_id, items_meta.clone(), runes_meta.clone()),
+        |data| {
+            let (champion_id, ref items_meta, ref runes_meta) = *data;
+            let abilities = champion_id
+                .cache()
+                .metadata
+                .iter()
+                .enumerate()
+                .map(|(i, metadata)| {
+                    let kind = metadata.kind;
+                    html! {
+                        <button onclick={{
+                            let stack_push = stack_push.clone();
+                            Callback::from(move |_| {
+                                stack_push.emit(StackValue::Ability(i, champion_id, kind));
+                            })
+                        }}>
+                            <Image
+                                class={class.clone()}
+                                src={ImageType::Ability(
+                                    champion_id,
+                                    AbilityKind::Normal(kind)
+                                )}
+                            />
+                        </button>
+                    }
+                })
+                .collect::<Html>();
 
-    let items = items_meta
-        .iter()
-        .enumerate()
-        .map(|(i, metadata)| {
-            html! {
-                <button onclick={{
-                    let stack_push = stack_push.clone();
-                    Callback::from(move |_| {
-                        stack_push.emit(StackValue::Item(i));
-                    })
-                }}>
-                    <Image
-                        class={class.clone()}
-                        src={ImageType::from(metadata.kind)}
-                    />
-                </button>
-            }
-        })
-        .collect::<Html>();
+            let items = items_meta
+                .iter()
+                .enumerate()
+                .map(|(i, metadata)| {
+                    let kind = metadata.kind;
+                    html! {
+                        <button onclick={{
+                            let stack_push = stack_push.clone();
+                            Callback::from(move |_| {
+                                stack_push.emit(StackValue::Item(i, kind));
+                            })
+                        }}>
+                            <Image
+                                class={class.clone()}
+                                src={ImageType::from(kind)}
+                            />
+                        </button>
+                    }
+                })
+                .collect::<Html>();
 
-    let runes = runes_meta
+            let runes = runes_meta
+                .iter()
+                .enumerate()
+                .map(|(i, metadata)| {
+                    let kind = metadata.kind;
+                    html! {
+                        <button onclick={{
+                            let stack_push = stack_push.clone();
+                            Callback::from(move |_| {
+                                stack_push.emit(StackValue::Rune(i, kind));
+                            })
+                        }}>
+                            <Image
+                                class={class.clone()}
+                                src={ImageType::from(kind)}
+                            />
+                        </button>
+                    }
+                })
+                .collect::<Html>();
+
+            html! {
+                <div class={classes!("flex", "gap-2", "flex-wrap")}>
+                    {abilities}
+                    {items}
+                    {runes}
+                </div>
+            }
+        },
+    );
+
+    let remover = stack
         .iter()
+        .copied()
         .enumerate()
-        .map(|(i, metadata)| {
+        .map(|(i, value)| {
+            let image_type = match value {
+                StackValue::Ability(_, champion_id, ability_id) => {
+                    ImageType::Ability(champion_id, AbilityKind::Normal(ability_id))
+                }
+                StackValue::Item(_, item_id) => ImageType::from(item_id),
+                StackValue::Rune(_, rune_id) => ImageType::from(rune_id),
+                StackValue::BasicAttack => ImageType::BasicAttack,
+                StackValue::CriticalStrike => ImageType::CritStrike,
+                StackValue::OnhitMin => ImageType::OnhitAttack,
+                StackValue::OnhitMax => ImageType::OnhitAttack,
+                StackValue::Ignite(_) => ImageType::Ignite,
+            };
+
             html! {
                 <button onclick={{
-                    let stack_push = stack_push.clone();
+                    let stack_remove = stack_remove.clone();
                     Callback::from(move |_| {
-                        stack_push.emit(StackValue::Rune(i));
+                        stack_remove.emit(i);
                     })
                 }}>
                     <Image
                         class={class.clone()}
-                        src={ImageType::from(metadata.kind)}
+                        src={image_type}
                     />
                 </button>
             }
@@ -113,13 +164,13 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
         .collect::<Html>();
 
     html! {
-        <div class={classes!("grid", "grid-cols-3")}>
-            <div class={classes!("flex", "gap-2")}>
-                {abilities}
-                {items}
-                {runes}
-            </div>
-            <div>
+        <div class={classes!("grid", "grid-cols-3", "gap-4")}>
+            {(*selector).clone()}
+            <div class={classes!("flex", "gap-2", "flex-wrap")}>
+                {remover}
+                <button onclick={Callback::from(move |_: MouseEvent| clear_stack.emit(()))}>
+                    { "Clear stack"}
+                </button>
             </div>
             <div>
                 <StackTable<T>
@@ -127,7 +178,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                     enemies={enemies.clone()}
                     items_meta={items_meta.clone()}
                     runes_meta={runes_meta.clone()}
-                    stack={stack.boxed()}
+                    stack={stack.0.clone().into_boxed_slice()}
                 />
             </div>
         </div>
