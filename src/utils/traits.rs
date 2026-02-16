@@ -58,3 +58,12 @@ pub trait Print: Debug {
 }
 
 impl<T: Debug> Print for T {}
+
+pub trait StatHolder
+where
+    Self: Copy + PartialEq + 'static,
+    Self::Action: PartialEq + Copy,
+{
+    type Action;
+    fn apply(&mut self, action: Self::Action);
+}

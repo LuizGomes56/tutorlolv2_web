@@ -65,8 +65,9 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let stats_cb = use_data_callback(player_props, DataAction::Stats);
     let level_cb = use_data_callback(player_props, DataAction::Level);
     let abilities_cb = use_player_callback(player_props, PlayerAction::AbilityLevels);
+    let champion_cb = use_data_callback(player_props, DataAction::ChampionId);
 
-    let inser_item = use_data_callback(player_props, DataAction::InsertItem);
+    let insert_item = use_data_callback(player_props, DataAction::InsertItem);
     let insert_rune = use_player_callback(player_props, PlayerAction::InsertRune);
 
     let remove_item = use_data_callback(player_props, DataAction::RemoveItem);
@@ -78,7 +79,10 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     html! {
         <>
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
-                <Banner champion_id={data.champion_id} />
+                <Banner
+                    callback={champion_cb}
+                    champion_id={data.champion_id}
+                />
                 <div class={classes!("grid", "grid-cols-4")}>
                     <Abilities
                         ability_levels={player.abilities}
@@ -124,7 +128,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     }}
                 />
                 <Selector<ItemId>
-                    callback={inser_item}
+                    callback={insert_item}
                     filter={Callback::from(|item: ItemId| {
                         let cache = item.cache();
                         cache.maps.summoners_rift

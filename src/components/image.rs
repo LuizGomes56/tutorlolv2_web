@@ -145,9 +145,10 @@ impl ImageType {
                 StatType::AttackSpeed => "stats/attack_speed.svg",
                 StatType::CritChance => "stats/crit_chance.svg",
                 StatType::CritDamage => "stats/crit_damage.svg",
-                StatType::CurrentHealth => "stats/health.svg",
-                StatType::CurrentMana | StatType::Mana => "stats/mana.svg",
-                StatType::Health | StatType::MissingHealth => "stats/health.svg",
+                StatType::CurrentHealth | StatType::MaxHealth | StatType::MissingHealth => {
+                    "stats/health.svg"
+                }
+                StatType::CurrentMana | StatType::MaxMana => "stats/mana.svg",
                 StatType::MagicPenetrationFlat | StatType::MagicPenetrationPercent => {
                     "stats/magic_penetration.svg"
                 }

@@ -12,18 +12,36 @@ use tutorlolv2_gen::{
 use yew::prelude::*;
 
 pub trait Victim {
+    fn max_health(&self) -> i32;
+    fn champion_id(&self) -> ChampionId;
     fn damages(&self) -> &Damages;
 }
 
 impl Victim for FinalEnemy {
+    fn champion_id(&self) -> ChampionId {
+        self.champion_id
+    }
+
+    fn max_health(&self) -> i32 {
+        self.current_stats.max_health
+    }
+
     fn damages(&self) -> &Damages {
         &self.damages
     }
 }
 
 impl Victim for Enemy {
+    fn champion_id(&self) -> ChampionId {
+        self.champion_id
+    }
+
     fn damages(&self) -> &Damages {
         &self.damages
+    }
+
+    fn max_health(&self) -> i32 {
+        self.current_stats.max_health
     }
 }
 

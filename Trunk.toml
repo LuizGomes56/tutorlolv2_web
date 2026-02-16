@@ -4,3 +4,4 @@ port = 8000
 [build]
 release = false
 minify = "on_release"
+open = false

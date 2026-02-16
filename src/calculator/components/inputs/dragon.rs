@@ -1,4 +1,4 @@
-use crate::{calculator::reducer::DragonAction, model::Dragons};
+use crate::model::Dragons;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

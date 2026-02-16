@@ -1,7 +1,8 @@
 use crate::{
     components::image::{Image, ImageType},
     impl_index,
-    model::AbilityLevels,
+    model::{AbilityLevels, AbilityLevelsAction},
+    utils::StatHolder,
 };
 use std::ops::{Index, IndexMut};
 use tutorlolv2_gen::{AbilityId, AbilityName, ChampionId};
@@ -11,7 +12,7 @@ use yew::prelude::*;
 #[derive(PartialEq, Properties)]
 pub struct AbilitiesProps {
     pub ability_levels: AbilityLevels,
-    pub callback: Callback<AbilityLevels>,
+    pub callback: Callback<<AbilityLevels as StatHolder>::Action>,
     pub champion_id: ChampionId,
 }
 
@@ -34,11 +35,13 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
 
     let callback = &props.callback;
 
-    [AbilityId::Q, AbilityId::W, AbilityId::E, AbilityId::R]
+    AbilityLevels::ABILITIES
         .into_iter()
-        .map(|func| {
+        .enumerate()
+        .map(|(i, func)| {
             let ability_id = func(AbilityName::Void);
             let value = ability_levels[ability_id];
+            let prototype = AbilityLevels::ACTIONS[i];
             html! {
                 <label class={classes!("grid", "grid-cols-2")}>
                     <Image
@@ -53,9 +56,7 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                             Callback::from(move |e: InputEvent| {
                                 let target = e.target_unchecked_into::<HtmlInputElement>();
                                 let value = target.value().parse::<u8>().unwrap_or(0);
-                                let mut result = ability_levels;
-                                result[ability_id] = value;
-                                callback.emit(result);
+                                callback.emit(prototype(value));
                             })
                         }}
                         type={"number"}

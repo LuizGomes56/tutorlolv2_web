@@ -1,15 +1,20 @@
 use crate::{
     calculator::{
-        AbilityLevels, Game, InputGame, Player, PlayerData,
+        FinalEnemy, Game, InputGame, Player, PlayerData,
         components::inputs::{enemies::EnemiesInput, player::PlayerInput},
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
     components::{
         image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
+        stack::StackSelector,
         tables::{header::TableHeader, turret::TurretTable},
     },
-    model::{Dragons, EnemyStats, PlayerStats},
-    utils::{ClassCast, EnumCast, encode_offset, fetch::Fetch, traits::Print},
+    model::{AbilityLevelsAction, Dragons, EnemyStats, PlayerStats},
+    utils::{
+        ClassCast, EnumCast, encode_offset,
+        fetch::Fetch,
+        traits::{Print, random_u16},
+    },
 };
 use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{CastId, ChampionId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
@@ -82,34 +87,39 @@ pub fn Calculator() -> Html {
     let last_action = use_mut_ref(|| LastAction::Init);
 
     {
-        let enemies = enemies.clone();
         let player = player.clone();
         use_effect_with((), move |_| {
             // player.dispatch(PlayerAction::Data(DataAction::InferStats(false)));
-            let mut stats = unsafe { core::mem::transmute::<_, PlayerStats>([100i32; 16]) };
-            stats.armor_penetration_flat = 0;
-            stats.armor_penetration_percent = 0;
-            stats.magic_penetration_flat = 0;
-            stats.magic_penetration_percent = 0;
+            let random = |i| random_u16(0..i) as _;
+            let stats = PlayerStats {
+                ability_power: random(1600),
+                armor: random(350),
+                armor_penetration_flat: 0,
+                armor_penetration_percent: 0,
+                attack_damage: random(600),
+                attack_range: random(750),
+                attack_speed: random(2),
+                crit_chance: random(100),
+                crit_damage: random(200),
+                current_health: random(5000),
+                magic_penetration_flat: 0,
+                magic_penetration_percent: 0,
+                magic_resist: random(300),
+                max_health: random(5000),
+                max_mana: random(2000),
+                current_mana: random(2000),
+            };
             player.dispatch(PlayerAction::Data(DataAction::Level(18)));
-            player.dispatch(PlayerAction::Data(DataAction::Stats(&stats as *const _)));
-            player.dispatch(PlayerAction::AbilityLevels(AbilityLevels {
-                q: 5,
-                w: 5,
-                e: 5,
-                r: 3,
-            }));
+            player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
+                &stats as *const _,
+            )));
+            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::Q(5)));
+            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::W(5)));
+            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::E(5)));
+            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::R(3)));
             player.dispatch(PlayerAction::Data(DataAction::ChampionId(
                 ChampionId::random(),
             )));
-            (1..5).for_each(|i| {
-                enemies.dispatch(EnemyAction::Insert(ChampionId::random()));
-                enemies.dispatch(EnemyAction::Change(
-                    i,
-                    DataAction::ChampionId(ChampionId::random()),
-                ))
-            });
-            // enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
         })
     };
 
@@ -141,52 +151,53 @@ pub fn Calculator() -> Html {
                     dragons: *dragons,
                 };
 
-                // input_game.log();
+                input_game.enemy_players[0].stats.log();
 
-                match Fetch::new("/api/games/calculator")
+                if let Ok(req) = Fetch::new("/api/games/calculator")
                     .signal(signal)
                     .body_with_bincode(&input_game)
-                    .unwrap()
-                    .post::<Game>()
-                    .await
                 {
-                    Ok(data) => {
-                        let infer_enemy_player_stats = |index| {
-                            if let Some(enemy) = &data.enemies.get(index)
-                                && let Some(input_enemy) =
-                                    enemies.get(index) as Option<&Rc<PlayerData<EnemyStats>>>
-                                && input_enemy.infer_stats
-                            {
-                                last_action.replace(LastAction::Replace);
-                                enemies.dispatch(EnemyAction::Change(
-                                    index,
-                                    DataAction::Stats(&enemy.current_stats as _),
-                                ));
-                            }
-                        };
-                        let action = *last_action.borrow();
-                        match action {
-                            LastAction::Init | LastAction::CurrentPlayer => {
-                                if player.data.infer_stats {
-                                    // data.current_player.log();
+                    match req.post::<Game>().await {
+                        Ok(data) => {
+                            let infer_enemy_player_stats = |index| {
+                                if let Some(enemy) = &data.enemies.get(index)
+                                    && let Some(input_enemy) =
+                                        enemies.get(index) as Option<&Rc<PlayerData<EnemyStats>>>
+                                    && input_enemy.infer_stats
+                                {
                                     last_action.replace(LastAction::Replace);
-                                    player.dispatch(PlayerAction::Data(DataAction::Stats(
-                                        &data.current_player.current_stats as _,
-                                    )));
+                                    enemies.dispatch(EnemyAction::Change(
+                                        index,
+                                        DataAction::ReplaceStats(&enemy.current_stats as _),
+                                    ));
                                 }
-                                if action == LastAction::Init {
-                                    (0..data.enemies.len()).for_each(infer_enemy_player_stats);
+                            };
+                            let action = *last_action.borrow();
+                            match action {
+                                LastAction::Init | LastAction::CurrentPlayer => {
+                                    if player.data.infer_stats {
+                                        // data.current_player.log();
+                                        last_action.replace(LastAction::Replace);
+                                        player.dispatch(PlayerAction::Data(
+                                            DataAction::ReplaceStats(
+                                                &data.current_player.current_stats as _,
+                                            ),
+                                        ));
+                                    }
+                                    if action == LastAction::Init {
+                                        (0..data.enemies.len()).for_each(infer_enemy_player_stats);
+                                    }
                                 }
-                            }
-                            LastAction::EnemyPlayer(index) => infer_enemy_player_stats(index),
-                            _ => {}
-                        };
+                                LastAction::EnemyPlayer(index) => infer_enemy_player_stats(index),
+                                _ => {}
+                            };
 
-                        // data.log();
+                            // data.log();
 
-                        game_data.set(Some(data));
+                            game_data.set(Some(data));
+                        }
+                        Err(e) => format!("Failed to request calculator api: {e:?}").err(),
                     }
-                    Err(e) => format!("Failed to request calculator api: {e:?}").err(),
                 }
             });
         });
@@ -225,7 +236,7 @@ pub fn Calculator() -> Html {
                                     />
                                     <tbody>
                                         {
-                                            enemies.iter().map(|enemy| {
+                                            enemies.iter().enumerate().map(|(i, enemy)| {
                                                 let damages = enemy.damages.to_html(
                                                     current_player.champion_id,
                                                     items_meta,
@@ -234,7 +245,16 @@ pub fn Calculator() -> Html {
                                                 let enemy_id = enemy.champion_id;
                                                 html! {
                                                     <tr>
-                                                        <td data_offset={encode_offset(&[enemy_id.formula()])}>
+                                                        <td
+                                                            onclick={{
+                                                                let enemy_index = enemy_index.clone();
+                                                                Callback::from(move |_| {
+                                                                    enemy_index.set(i);
+                                                                })
+                                                            }}
+                                                            class={classes!("cursor-pointer")}
+                                                            data_offset={encode_offset(&[enemy_id.formula()])}
+                                                        >
                                                             <Image src={ImageType::from(enemy_id)} />
                                                         </td>
                                                         {damages}
@@ -294,6 +314,14 @@ pub fn Calculator() -> Html {
                                         })
                                         .collect::<Html>()
                                     }}
+                                />
+                            </div>
+                            <div class={classes!("box", "overflow-auto")}>
+                                <StackSelector<FinalEnemy>
+                                    champion_id={current_player.champion_id}
+                                    enemies={enemies.clone()}
+                                    items_meta={items_meta.clone()}
+                                    runes_meta={runes_meta.clone()}
                                 />
                             </div>
                         </div>

@@ -2,6 +2,7 @@ use crate::{
     components::image::{Image, ImageType},
     impl_index,
     model::{EnemyStats, PlayerStats, StatType},
+    utils::StatHolder,
 };
 use std::ops::{Index, IndexMut};
 use web_sys::HtmlInputElement;
@@ -48,92 +49,98 @@ pub fn StatCell(props: &StatCellProps) -> Html {
                 {disabled}
                 placeholder={placeholder.to_string()}
                 value={value.to_string()}
-                oninput={oninput}
+                {oninput}
             />
         </>
     }
 }
 
 impl_index! {
-    PlayerStats[StatType] i32 {
-        StatType::AbilityPower => ability_power,
-        StatType::Armor => armor,
-        StatType::ArmorPenetrationFlat => armor_penetration_flat,
-        StatType::ArmorPenetrationPercent => armor_penetration_percent,
-        StatType::AttackDamage => attack_damage,
-        StatType::AttackRange => attack_range,
-        StatType::AttackSpeed => attack_speed,
-        StatType::CritChance => crit_chance,
-        StatType::CritDamage => crit_damage,
-        StatType::CurrentHealth => current_health,
-        StatType::MagicPenetrationFlat => magic_penetration_flat,
-        StatType::MagicPenetrationPercent => magic_penetration_percent,
-        StatType::MagicResist => magic_resist,
-        StatType::Health => health,
-        StatType::Mana => mana,
-        StatType::CurrentMana => current_mana,
+    @PlayerStats[StatType] i32 {
+        AbilityPower,
+        Armor,
+        ArmorPenetrationFlat,
+        ArmorPenetrationPercent,
+        AttackDamage,
+        AttackRange,
+        AttackSpeed,
+        CritChance,
+        CritDamage,
+        CurrentHealth,
+        MagicPenetrationFlat,
+        MagicPenetrationPercent,
+        MagicResist,
+        MaxHealth,
+        MaxMana,
+        CurrentMana,
     }
 }
 
 impl_index! {
-    EnemyStats[StatType] i32 {
-        StatType::Armor => armor,
-        StatType::CurrentHealth => health,
-        StatType::MagicResist => magic_resist,
-        StatType::Health => max_health,
-        StatType::MissingHealth => missing_health
+    @EnemyStats[StatType] i32 {
+        Armor,
+        CurrentHealth,
+        MagicResist,
+        MaxHealth,
+        MissingHealth
     }
 }
 
 #[derive(PartialEq, Properties)]
-pub struct StatsProps<T: PartialEq> {
+pub struct StatsProps<T: StatHolder> {
     pub infer: bool,
     pub stats: T,
-    pub callback: Callback<*const T>,
+    pub callback: Callback<T::Action>,
 }
 
 pub trait StatDisplay
 where
-    Self: Copy
-        + PartialEq
-        + Index<StatType, Output = i32>
-        + IndexMut<StatType, Output = i32>
-        + Clone
-        + 'static,
+    Self: Index<StatType, Output = i32> + IndexMut<StatType, Output = i32> + StatHolder,
 {
     const VALUES: &[StatType];
+    fn prototype(value: StatType) -> fn(i32) -> Self::Action;
 }
 
-impl StatDisplay for PlayerStats {
-    const VALUES: &[StatType] = &[
-        StatType::AbilityPower,
-        StatType::AttackDamage,
-        StatType::Health,
-        StatType::CurrentHealth,
-        StatType::Armor,
-        StatType::ArmorPenetrationFlat,
-        StatType::ArmorPenetrationPercent,
-        StatType::MagicResist,
-        StatType::MagicPenetrationFlat,
-        StatType::MagicPenetrationPercent,
-        StatType::CritChance,
-        StatType::CritDamage,
-        StatType::Mana,
-        StatType::CurrentMana,
-        StatType::AttackRange,
-        StatType::AttackSpeed,
-    ];
+macro_rules! impl_stat_display {
+    ($type:ty { $($stat:ident),+$(,)? }) => {
+        impl StatDisplay for $type {
+            const VALUES: &[StatType] = &[$(StatType::$stat),+];
+            fn prototype(value: StatType) -> fn(i32) -> Self::Action {
+                match value {
+                    $(StatType::$stat => Self::Action::$stat,)+
+                    _ => unreachable!(),
+                }
+            }
+        }
+    };
 }
 
-impl StatDisplay for EnemyStats {
-    const VALUES: &[StatType] = &[
-        StatType::Health,
-        StatType::CurrentHealth,
-        StatType::MissingHealth,
-        StatType::Armor,
-        StatType::MagicResist,
-    ];
-}
+impl_stat_display!(PlayerStats {
+    AbilityPower,
+    AttackDamage,
+    MaxHealth,
+    CurrentHealth,
+    Armor,
+    ArmorPenetrationFlat,
+    ArmorPenetrationPercent,
+    MagicResist,
+    MagicPenetrationFlat,
+    MagicPenetrationPercent,
+    CritChance,
+    CritDamage,
+    MaxMana,
+    CurrentMana,
+    AttackRange,
+    AttackSpeed,
+});
+
+impl_stat_display!(EnemyStats {
+    MaxHealth,
+    CurrentHealth,
+    MissingHealth,
+    Armor,
+    MagicResist,
+});
 
 #[component]
 pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {
@@ -142,7 +149,7 @@ pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {
     let callback = &props.callback;
 
     T::VALUES
-        .into_iter()
+        .iter()
         .map(|&stat| {
             html! {
                 <StatCell
@@ -156,9 +163,7 @@ pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {
                         Callback::from(move |e: InputEvent| {
                             let value = e.target_unchecked_into::<HtmlInputElement>().value();
                             let number = value.parse().unwrap_or(0);
-                            let mut result = stats;
-                            result[stat] = number;
-                            callback.emit(&result as _);
+                            callback.emit(T::prototype(stat)(number));
                         })
                     }}
                 />

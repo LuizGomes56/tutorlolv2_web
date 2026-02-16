@@ -1,7 +1,7 @@
 use crate::{
     calculator::{AbilityLevels, Player, PlayerData},
-    model::{Dragons, EnemyStats, PlayerStats, ValueException},
-    utils::traits::Print,
+    model::{AbilityLevelsAction, Dragons, EnemyStats, PlayerStats, ValueException},
+    utils::traits::{Print, StatHolder},
 };
 use std::rc::Rc;
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
@@ -17,12 +17,13 @@ pub enum PlayerAction {
     InsertRuneExc(RuneId, u32),
     RemoveRuneExc(usize),
     Data(PlayerDataAction),
-    AbilityLevels(AbilityLevels),
+    AbilityLevels(AbilityLevelsAction),
 }
 
-pub enum DataAction<T> {
+pub enum DataAction<T: StatHolder> {
     Level(u8),
-    Stats(*const T),
+    ReplaceStats(*const T),
+    Stats(T::Action),
     Stacks(u32),
     InferStats(bool),
     IsMegaGnar(bool),
@@ -70,11 +71,12 @@ impl core::ops::DerefMut for Enemies {
     }
 }
 
-impl<T: Copy> PlayerData<T> {
+impl<T: StatHolder> PlayerData<T> {
     pub fn reduce_mut(&mut self, action: DataAction<T>) {
         match action {
             DataAction::Level(v) => self.level = v,
-            DataAction::Stats(v) => self.stats = unsafe { *v },
+            DataAction::ReplaceStats(v) => self.stats = unsafe { *v },
+            DataAction::Stats(v) => self.stats.apply(v),
             DataAction::Stacks(v) => self.stacks = v,
             DataAction::InferStats(v) => self.infer_stats = v,
             DataAction::IsMegaGnar(v) => self.is_mega_gnar = v,
@@ -103,7 +105,7 @@ impl Reducible for Player {
         match action {
             Self::Action::SetRuneVec(v) => new.runes = v.into(),
             Self::Action::InsertRune(v) => new.runes.push(v),
-            Self::Action::AbilityLevels(v) => new.abilities = v,
+            Self::Action::AbilityLevels(v) => new.abilities.apply(v),
             Self::Action::RemoveRune(v) => {
                 new.runes.swap_remove(v);
             }
@@ -124,7 +126,7 @@ impl Reducible for Player {
     }
 }
 
-impl<T: Copy> Reducible for PlayerData<T> {
+impl<T: StatHolder> Reducible for PlayerData<T> {
     type Action = DataAction<T>;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
@@ -161,28 +163,6 @@ impl Reducible for Enemies {
     }
 }
 
-pub enum DragonAction {
-    AllyFire(u16),
-    AllyEarth(u16),
-    AllyChemtech(u16),
-    EnemyEarth(u16),
-}
-
-impl Reducible for Dragons {
-    type Action = DragonAction;
-
-    fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
-        let mut new = *self;
-        match action {
-            DragonAction::AllyFire(v) => new.ally_fire_dragons = v,
-            DragonAction::AllyEarth(v) => new.ally_earth_dragons = v,
-            DragonAction::AllyChemtech(v) => new.ally_chemtech_dragons = v,
-            DragonAction::EnemyEarth(v) => new.enemy_earth_dragons = v,
-        }
-        Rc::new(new)
-    }
-}
-
 #[derive(PartialEq, Clone, Copy)]
 pub enum LastAction {
     Init,
@@ -192,10 +172,10 @@ pub enum LastAction {
     Replace,
 }
 
-impl<T> DataAction<T> {
+impl<T: StatHolder> DataAction<T> {
     pub fn action(&self, default: LastAction) -> LastAction {
         match self {
-            Self::Stats(_) => LastAction::Replace,
+            Self::ReplaceStats(_) => LastAction::Replace,
             _ => default,
         }
     }

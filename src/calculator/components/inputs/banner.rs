@@ -1,4 +1,5 @@
 use crate::{
+    calculator::components::inputs::selector::Selector,
     components::image::{Image, ImageType},
     utils::encode_offset,
 };
@@ -7,15 +8,22 @@ use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct BannerProps {
+    pub callback: Callback<ChampionId>,
     pub champion_id: ChampionId,
 }
 
 #[component]
 pub fn Banner(props: &BannerProps) -> Html {
-    let BannerProps { champion_id } = *props;
+    let BannerProps {
+        champion_id,
+        ref callback,
+    } = *props;
     let data_offset = encode_offset(&[champion_id.formula()]);
     html! {
-        <div {data_offset} class={classes!("bg-std-900", "box", "relative")}>
+        <div
+            {data_offset}
+            class={classes!("bg-std-900", "box", "relative")}
+        >
             <Image
                 src={ImageType::Centered(champion_id)}
                 class={classes!(
@@ -29,6 +37,9 @@ pub fn Banner(props: &BannerProps) -> Html {
             )}>
                 {format!("{champion_id:?}")}
             </span>
+            // <div class={classes!("absolute", "z-10", "bg-std-900", "w-full")}>
+            //     <Selector<ChampionId> callback={callback.clone()} />
+            // </div>
         </div>
     }
 }

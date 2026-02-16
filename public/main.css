@@ -20,6 +20,10 @@ body {
     filter: drop-shadow(1.25px 1.25px 0px black);
     text-shadow: 0px 0px 4px black;
     white-space: nowrap;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .img-clipped {
