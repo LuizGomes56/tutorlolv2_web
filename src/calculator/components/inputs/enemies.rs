@@ -3,7 +3,7 @@ use crate::{
         components::inputs::{
             banner::Banner,
             recommendations::Recommendations,
-            selector::Selector,
+            selector::{Selector, item_filter},
             stats::{StatCell, Stats},
             tray::Tray,
         },
@@ -132,13 +132,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                 />
                 <Selector<ItemId>
                     callback={insert_item}
-                    filter={Callback::from(|item: ItemId| {
-                        let cache = item.cache();
-                        cache.maps.summoners_rift
-                            && cache.purchasable
-                            && !cache.prettified_stats.is_empty()
-                            && cache.riot_id < 100000
-                    })}
+                    filter={Callback::from(item_filter)}
                 />
                 <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
                 <Tray<ItemId> callback={remove_item} vector={enemy.items.clone()} />

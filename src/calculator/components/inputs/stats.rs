@@ -62,7 +62,6 @@ impl_index! {
         ArmorPenetrationFlat,
         ArmorPenetrationPercent,
         AttackDamage,
-        AttackRange,
         AttackSpeed,
         CritChance,
         CritDamage,
@@ -94,7 +93,7 @@ pub struct StatsProps<T: StatHolder> {
 
 pub trait StatDisplay
 where
-    Self: Index<StatType, Output = i32> + IndexMut<StatType, Output = i32> + StatHolder,
+    Self: Index<StatType, Output = i32> + StatHolder,
 {
     const VALUES: &[StatType];
     fn prototype(value: StatType) -> fn(i32) -> Self::Action;
@@ -129,7 +128,6 @@ impl_stat_display!(PlayerStats {
     CritDamage,
     MaxMana,
     CurrentMana,
-    AttackRange,
     AttackSpeed,
 });
 
@@ -161,7 +159,8 @@ pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {
                         Callback::from(move |e: InputEvent| {
                             let value = e.target_unchecked_into::<HtmlInputElement>().value();
                             let number = value.parse().unwrap_or(0);
-                            callback.emit(T::prototype(stat)(number));
+                            let prototype = T::prototype(stat);
+                            callback.emit(prototype(number));
                         })
                     }}
                 />

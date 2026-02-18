@@ -169,15 +169,12 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
             <div class={classes!("flex", "gap-2", "flex-wrap")}>
                 {remover}
                 <button onclick={Callback::from(move |_: MouseEvent| clear_stack.emit(()))}>
-                    { "Clear stack"}
+                    { "Clear stack" }
                 </button>
             </div>
             <div>
                 <StackTable<T>
-                    champion_id={champion_id}
                     enemies={enemies.clone()}
-                    items_meta={items_meta.clone()}
-                    runes_meta={runes_meta.clone()}
                     stack={stack.0.clone().into_boxed_slice()}
                 />
             </div>

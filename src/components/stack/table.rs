@@ -2,35 +2,23 @@ use crate::{
     components::{
         image::{Image, ImageType},
         stack::StackValue,
-        tables::{body::Victim, header::TableHeader},
+        tables::body::Victim,
     },
-    model::Damages,
     utils::encode_offset,
 };
-use std::{ops::Index, rc::Rc};
-use tutorlolv2_gen::{AbilityId, CastId, ChampionId, ItemId, RuneId, TypeMetadata, ignite};
+use std::rc::Rc;
+use tutorlolv2_gen::{CastId, ignite};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct StackTableProps<T: Victim + PartialEq + 'static> {
-    pub champion_id: ChampionId,
     pub enemies: Rc<[T]>,
-    pub items_meta: Rc<[TypeMetadata<ItemId>]>,
-    pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
     pub stack: Box<[StackValue]>,
 }
 
 #[component]
 pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -> Html {
-    let StackTableProps {
-        champion_id,
-        ref enemies,
-        ref items_meta,
-        ref runes_meta,
-        ref stack,
-    } = *props;
-
-    let mut damage = 0;
+    let StackTableProps { enemies, stack } = props;
 
     html! {
         <table>

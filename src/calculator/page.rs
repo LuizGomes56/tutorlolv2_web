@@ -111,10 +111,10 @@ pub fn Calculator() -> Html {
                 current_mana: random(2000),
             };
             player.dispatch(PlayerAction::Data(DataAction::Level(18)));
-            let champion_id = player.data.champion_id;
-            player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
-                champion_id.recommended_items(champion_id.main_position()),
-            )));
+            // let champion_id = player.data.champion_id;
+            // player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
+            //     champion_id.recommended_items(champion_id.main_position()),
+            // )));
             player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
                 &stats as *const _,
             )));
@@ -126,11 +126,11 @@ pub fn Calculator() -> Html {
                 ChampionId::random(),
             )));
             enemies.dispatch(EnemyAction::Change(0, DataAction::Level(18)));
-            enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
-            enemies.dispatch(EnemyAction::Change(0, {
-                let champion_id = enemies[0].champion_id;
-                DataAction::SetItemVec(champion_id.recommended_items(champion_id.main_position()))
-            }));
+            // enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
+            // enemies.dispatch(EnemyAction::Change(0, {
+            //     let champion_id = enemies[0].champion_id;
+            //     DataAction::SetItemVec(champion_id.recommended_items(champion_id.main_position()))
+            // }));
         })
     };
 
@@ -203,7 +203,7 @@ pub fn Calculator() -> Html {
                                 _ => {}
                             };
 
-                            // data.log();
+                            data.current_player.current_stats.log();
 
                             game_data.set(Some(data));
                         }

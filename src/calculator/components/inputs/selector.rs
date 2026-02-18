@@ -3,6 +3,7 @@ use crate::{
     utils::{EnumCast, encode_offset},
 };
 use std::cmp::Ordering;
+use tutorlolv2_gen::ItemId;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -69,4 +70,12 @@ pub fn Selector<T: EnumCast>(props: &SelectorProps<T>) -> Html {
             {(*items).clone()}
         </div>
     }
+}
+
+pub const fn item_filter(item: ItemId) -> bool {
+    let cache = item.cache();
+    cache.maps.summoners_rift
+        && cache.purchasable
+        && !cache.prettified_stats.is_empty()
+        && cache.riot_id < 100000
 }
