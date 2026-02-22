@@ -236,7 +236,7 @@ impl Damages {
                     <td
                         {data_idents}
                         {data_offset}
-                        class={damage_type.class()}>
+                        class={classes!("whitespace-nowrap", damage_type.class())}>
                         {dmg}
                     </td>
                 }

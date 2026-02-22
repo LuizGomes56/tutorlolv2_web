@@ -25,5 +25,5 @@ pub fn get_cache(offsets: Range<usize>) -> &'static str {
 pub use self::{
     fetch::Fetch,
     hooks::use_setter,
-    traits::{ClassCast, EnumCast, StatHolder},
+    traits::{ClassCast, EnumCast, ReduceApply},
 };

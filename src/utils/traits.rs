@@ -59,7 +59,7 @@ pub trait Print: Debug {
 
 impl<T: Debug> Print for T {}
 
-pub trait StatHolder
+pub trait ReduceApply
 where
     Self: Copy + PartialEq + 'static,
     Self::Action: PartialEq + Copy,

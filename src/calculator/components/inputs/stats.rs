@@ -2,7 +2,7 @@ use crate::{
     components::image::{Image, ImageType},
     impl_index,
     model::{EnemyStats, PlayerStats, StatType},
-    utils::StatHolder,
+    utils::ReduceApply,
 };
 use std::ops::{Index, IndexMut};
 use web_sys::HtmlInputElement;
@@ -85,7 +85,7 @@ impl_index! {
 }
 
 #[derive(PartialEq, Properties)]
-pub struct StatsProps<T: StatHolder> {
+pub struct StatsProps<T: ReduceApply> {
     pub infer: bool,
     pub stats: T,
     pub callback: Callback<T::Action>,
@@ -93,7 +93,7 @@ pub struct StatsProps<T: StatHolder> {
 
 pub trait StatDisplay
 where
-    Self: Index<StatType, Output = i32> + StatHolder,
+    Self: Index<StatType, Output = i32> + ReduceApply,
 {
     const VALUES: &[StatType];
     fn prototype(value: StatType) -> fn(i32) -> Self::Action;

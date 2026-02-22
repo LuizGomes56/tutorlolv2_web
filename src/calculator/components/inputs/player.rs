@@ -3,6 +3,7 @@ use crate::{
         components::inputs::{
             abilities::Abilities,
             banner::Banner,
+            item_selector::ItemSelector,
             recommendations::Recommendations,
             selector::{Selector, item_filter},
             stats::{StatCell, Stats},
@@ -78,6 +79,12 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
 
     html! {
         <>
+            <ItemSelector
+                insert={insert_item}
+                remove={remove_item}
+                recommended={recommended_items}
+                items={data.items.clone().into_boxed_slice()}
+            />
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
                 <Banner
                     callback={champion_cb}
@@ -116,38 +123,38 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     />
                 </div>
             </div>
-            <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
-                <Recommendations
-                    callback={{
-                        let recommended_items = recommended_items.clone();
-                        let champion_id = data.champion_id;
-                        Callback::from(move |position| {
-                            let rec = champion_id.recommended_items(position);
-                            recommended_items.emit(rec);
-                        })
-                    }}
-                />
-                <Selector<ItemId>
-                    callback={insert_item}
-                    filter={Callback::from(item_filter)}
-                />
-                <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
-                <Tray<ItemId> callback={remove_item} vector={data.items.clone()} />
+            // <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
+            //     <Recommendations
+            //         callback={{
+            //             let recommended_items = recommended_items.clone();
+            //             let champion_id = data.champion_id;
+            //             Callback::from(move |position| {
+            //                 let rec = champion_id.recommended_items(position);
+            //                 recommended_items.emit(rec);
+            //             })
+            //         }}
+            //     />
+            //     <Selector<ItemId>
+            //         callback={insert_item}
+            //         filter={Callback::from(item_filter)}
+            //     />
+            //     <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
+            //     <Tray<ItemId> callback={remove_item} vector={data.items.clone()} />
 
-                <Recommendations
-                    callback={{
-                        let recommended_runes = recommended_runes.clone();
-                        let champion_id = data.champion_id;
-                        Callback::from(move |position| {
-                            let rec = champion_id.recommended_runes(position);
-                            recommended_runes.emit(rec);
-                        })
-                    }}
-                />
-                <Selector<RuneId> callback={insert_rune} />
-                <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
-                <Tray<RuneId> callback={remove_rune} vector={player.runes.clone()} />
-            </div>
+            //     <Recommendations
+            //         callback={{
+            //             let recommended_runes = recommended_runes.clone();
+            //             let champion_id = data.champion_id;
+            //             Callback::from(move |position| {
+            //                 let rec = champion_id.recommended_runes(position);
+            //                 recommended_runes.emit(rec);
+            //             })
+            //         }}
+            //     />
+            //     <Selector<RuneId> callback={insert_rune} />
+            //     <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
+            //     <Tray<RuneId> callback={remove_rune} vector={player.runes.clone()} />
+            // </div>
         </>
     }
 }

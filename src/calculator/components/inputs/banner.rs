@@ -26,10 +26,7 @@ pub fn Banner(props: &BannerProps) -> Html {
         >
             <Image
                 src={ImageType::Centered(champion_id)}
-                class={classes!(
-                    "clip", "h-24", "sm:h-40",
-                    "md:h-48", "lg:h-64", "xl:h-32"
-                )}
+                class={classes!("clip", "h-36")}
             />
             <span class={classes!(
                 "absolute", "left-4", "bottom-4", "text-shadow",

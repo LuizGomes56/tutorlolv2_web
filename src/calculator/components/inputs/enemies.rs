@@ -80,9 +80,9 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
 
     let level_cb = use_enemy_data_callback(&enemy_props, DataAction::Level);
     let stats_cb = use_enemy_data_callback(&enemy_props, DataAction::Stats);
-    let champion_db = use_enemy_data_callback(&enemy_props, DataAction::ChampionId);
+    let champion_cb = use_enemy_data_callback(&enemy_props, DataAction::ChampionId);
 
-    let enemy = enemies.get(**enemy_index).unwrap_or(&enemies[0]);
+    let enemy = enemies.get(**enemy_index).unwrap_or_else(|| &enemies[0]);
 
     let insert_item = use_enemy_data_callback(&enemy_props, DataAction::InsertItem);
     let remove_item = use_enemy_data_callback(&enemy_props, DataAction::RemoveItem);
@@ -92,11 +92,11 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
         <>
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
                 <Banner
-                    callback={champion_db}
+                    callback={champion_cb}
                     champion_id={enemy.champion_id}
                 />
                 <div class={classes!(
-                    "grid", "grid-cols-[auto,1fr,1fr]",
+                    "grid", "grid-cols-[auto_1fr_1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-0.5"
                 )}>
                     <StatCell

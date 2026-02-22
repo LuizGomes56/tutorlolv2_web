@@ -1,8 +1,8 @@
 use crate::{
     components::image::{Image, ImageType},
     impl_index,
-    model::{AbilityLevels, AbilityLevelsAction},
-    utils::StatHolder,
+    model::AbilityLevels,
+    utils::ReduceApply,
 };
 use std::ops::{Index, IndexMut};
 use tutorlolv2_gen::{AbilityId, AbilityName, ChampionId};
@@ -12,7 +12,7 @@ use yew::prelude::*;
 #[derive(PartialEq, Properties)]
 pub struct AbilitiesProps {
     pub ability_levels: AbilityLevels,
-    pub callback: Callback<<AbilityLevels as StatHolder>::Action>,
+    pub callback: Callback<<AbilityLevels as ReduceApply>::Action>,
     pub champion_id: ChampionId,
 }
 
@@ -30,10 +30,8 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
     let AbilitiesProps {
         ability_levels,
         champion_id,
-        ..
+        ref callback,
     } = *props;
-
-    let callback = &props.callback;
 
     AbilityLevels::ABILITIES
         .into_iter()

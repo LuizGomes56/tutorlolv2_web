@@ -2,7 +2,7 @@ use crate::{
     model::{AbilityKind, StatType},
     utils::BASE_URL,
 };
-use tutorlolv2_gen::{ChampionId, ItemId, Position, RuneId};
+use tutorlolv2_gen::{ChampionId, ItemId, Position, RuneId, StatName};
 use yew::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -84,6 +84,7 @@ pub enum ImageType {
     Level,
     Position(Position),
     Stats(StatType),
+    StatsFilter(StatName),
     Other(OtherImage),
     Tower,
     Ignite,
@@ -143,7 +144,6 @@ impl ImageType {
                     "stats/armor_penetration.svg"
                 }
                 StatType::AttackDamage => "stats/attack_damage.svg",
-                StatType::AttackRange => "stats/onhit.svg",
                 StatType::AttackSpeed => "stats/attack_speed.svg",
                 StatType::CritChance => "stats/crit_chance.svg",
                 StatType::CritDamage => "stats/crit_damage.svg",
@@ -153,6 +153,30 @@ impl ImageType {
                     "stats/magic_penetration.svg"
                 }
                 StatType::MagicResist => "stats/magic_resist.svg",
+            }
+            .into(),
+            ImageType::StatsFilter(stat) => match stat {
+                StatName::AbilityHaste => "stats/ability_haste.svg",
+                StatName::AbilityPower => "stats/ability_power.svg",
+                StatName::AdaptiveForce => "stats/adaptive_force.svg",
+                StatName::Armor => "stats/armor.svg",
+                StatName::ArmorPenetration | StatName::Lethality => "stats/armor_penetration.svg",
+                StatName::AttackDamage => "stats/attack_damage.svg",
+                StatName::AttackSpeed => "stats/attack_speed.svg",
+                StatName::BaseHealthRegen => "stats/health_regeneration.svg",
+                StatName::BaseManaRegen => "stats/mana_regeneration.svg",
+                StatName::CriticalStrikeChance => "stats/crit_chance.svg",
+                StatName::CriticalStrikeDamage => "stats/crit_damage.svg",
+                StatName::GoldPer10Seconds => "stats/gold.svg",
+                StatName::HealAndShieldPower => "stats/heal_and_shield_power.svg",
+                StatName::Health => "stats/health.svg",
+                StatName::LifeSteal => "stats/life_steal.svg",
+                StatName::MagicPenetration => "stats/magic_penetration.svg",
+                StatName::MagicResist => "stats/magic_resist.svg",
+                StatName::Mana => "stats/mana.svg",
+                StatName::MoveSpeed => "stats/move_speed.svg",
+                StatName::Omnivamp => "stats/omnivamp.svg",
+                StatName::Tenacity => "stats/tenacity.svg",
             }
             .into(),
             ImageType::Other(other) => match other {

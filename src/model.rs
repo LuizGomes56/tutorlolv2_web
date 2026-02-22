@@ -157,10 +157,10 @@ impl ValueException {
 }
 
 impl_reducible!(Dragons u16 {
-    ally_fire_dragons,
-    ally_earth_dragons,
-    ally_chemtech_dragons,
-    enemy_earth_dragons
+    ally_fire,
+    ally_earth,
+    ally_chemtech,
+    enemy_earth
 });
 
 impl_reducible!(EnemyStats i32 {
@@ -203,7 +203,6 @@ pub enum StatType {
     ArmorPenetrationFlat,
     ArmorPenetrationPercent,
     AttackDamage,
-    AttackRange,
     AttackSpeed,
     CritChance,
     CritDamage,
@@ -224,7 +223,6 @@ impl Display for StatType {
             StatType::ArmorPenetrationFlat => write!(f, "Armor Pen. Flat"),
             StatType::ArmorPenetrationPercent => write!(f, "Armor Pen. %"),
             StatType::AttackDamage => write!(f, "Attack Damage"),
-            StatType::AttackRange => write!(f, "Attack Range"),
             StatType::AttackSpeed => write!(f, "Attack Speed"),
             StatType::CritChance => write!(f, "Crit Chance"),
             StatType::CritDamage => write!(f, "Crit Damage"),

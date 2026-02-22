@@ -88,7 +88,7 @@ macro_rules! impl_reducible {
                 $([<$field:camel>]($fty),)*
             }
 
-            impl $crate::utils::StatHolder for $type {
+            impl $crate::utils::ReduceApply for $type {
                 type Action = [<$type Action>];
 
                 fn apply(&mut self, action: Self::Action) {
@@ -103,7 +103,7 @@ macro_rules! impl_reducible {
 
                 fn reduce(self: std::rc::Rc<Self>, action: Self::Action) -> std::rc::Rc<Self> {
                     let mut new = *self;
-                    <Self as $crate::utils::StatHolder>::apply(&mut new, action);
+                    <Self as $crate::utils::ReduceApply>::apply(&mut new, action);
                     std::rc::Rc::new(new)
                 }
             }

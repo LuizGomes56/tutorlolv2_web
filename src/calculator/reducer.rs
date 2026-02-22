@@ -1,7 +1,7 @@
 use crate::{
     calculator::{AbilityLevels, Player, PlayerData},
     model::{AbilityLevelsAction, Dragons, EnemyStats, PlayerStats, ValueException},
-    utils::traits::{Print, StatHolder},
+    utils::traits::{Print, ReduceApply},
 };
 use std::rc::Rc;
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
@@ -20,7 +20,7 @@ pub enum PlayerAction {
     AbilityLevels(AbilityLevelsAction),
 }
 
-pub enum DataAction<T: StatHolder> {
+pub enum DataAction<T: ReduceApply> {
     Level(u8),
     ReplaceStats(*const T),
     Stats(T::Action),
@@ -71,7 +71,7 @@ impl core::ops::DerefMut for Enemies {
     }
 }
 
-impl<T: StatHolder> PlayerData<T> {
+impl<T: ReduceApply> PlayerData<T> {
     pub fn reduce_mut(&mut self, action: DataAction<T>) {
         match action {
             DataAction::Level(v) => self.level = v,
@@ -126,7 +126,7 @@ impl Reducible for Player {
     }
 }
 
-impl<T: StatHolder> Reducible for PlayerData<T> {
+impl<T: ReduceApply> Reducible for PlayerData<T> {
     type Action = DataAction<T>;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
@@ -172,7 +172,7 @@ pub enum LastAction {
     Replace,
 }
 
-impl<T: StatHolder> DataAction<T> {
+impl<T: ReduceApply> DataAction<T> {
     pub fn action(&self, default: LastAction) -> LastAction {
         match self {
             Self::ReplaceStats(_) => LastAction::Replace,

@@ -91,33 +91,33 @@ pub fn Calculator() -> Html {
         let enemies = enemies.clone();
         use_effect_with((), move |_| {
             // player.dispatch(PlayerAction::Data(DataAction::InferStats(false)));
-            let random = |i| random_u16(0..i) as _;
-            let stats = PlayerStats {
-                ability_power: random(1600),
-                armor: random(350),
-                armor_penetration_flat: 0,
-                armor_penetration_percent: 0,
-                attack_damage: random(600),
-                attack_range: random(750),
-                attack_speed: random(2),
-                crit_chance: random(100),
-                crit_damage: random(200),
-                current_health: random(5000),
-                magic_penetration_flat: 0,
-                magic_penetration_percent: 0,
-                magic_resist: random(300),
-                max_health: random(5000),
-                max_mana: random(2000),
-                current_mana: random(2000),
-            };
+            // let random = |i| random_u16(0..i) as _;
+            // let stats = PlayerStats {
+            //     ability_power: random(1600),
+            //     armor: random(350),
+            //     armor_penetration_flat: 0,
+            //     armor_penetration_percent: 0,
+            //     attack_damage: random(600),
+            //     attack_range: random(750),
+            //     attack_speed: random(2),
+            //     crit_chance: random(100),
+            //     crit_damage: random(200),
+            //     current_health: random(5000),
+            //     magic_penetration_flat: 0,
+            //     magic_penetration_percent: 0,
+            //     magic_resist: random(300),
+            //     max_health: random(5000),
+            //     max_mana: random(2000),
+            //     current_mana: random(2000),
+            // };
             player.dispatch(PlayerAction::Data(DataAction::Level(18)));
             // let champion_id = player.data.champion_id;
             // player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
             //     champion_id.recommended_items(champion_id.main_position()),
             // )));
-            player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
-                &stats as *const _,
-            )));
+            // player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
+            //     &stats as *const _,
+            // )));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::Q(5)));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::W(5)));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::E(5)));
@@ -257,13 +257,13 @@ pub fn Calculator() -> Html {
                                                 html! {
                                                     <tr>
                                                         <td
+                                                            class={classes!("w-8", "h-8")}
                                                             onclick={{
                                                                 let enemy_index = enemy_index.clone();
                                                                 Callback::from(move |_| {
                                                                     enemy_index.set(i);
                                                                 })
                                                             }}
-                                                            class={classes!("cursor-pointer")}
                                                             data_offset={encode_offset(&[enemy_id.formula()])}
                                                         >
                                                             <Image src={ImageType::from(enemy_id)} />
@@ -299,7 +299,7 @@ pub fn Calculator() -> Html {
                                                     let cell = MONSTER_HEADERS[i].get(j).map(|&value| {
                                                         html!(<Image src={ImageType::Other(value)} />)
                                                     });
-                                                    images.push(html!(<td>{cell}</td>));
+                                                    images.push(html!(<td class={classes!("w-8", "h-8")}>{cell}</td>));
                                                 }
 
                                                 html!(<tr>{images}{damages}</tr>)
