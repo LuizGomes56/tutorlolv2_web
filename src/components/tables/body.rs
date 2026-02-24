@@ -90,7 +90,7 @@ impl Damages {
             });
 
             debug_assert_eq!(pos, BASE_CELLS + len - merge_data.len());
-            indexes.into_boxed_slice()
+            indexes
         };
 
         let len = BASE_CELLS + abilities_meta.len() - merge_data.len()

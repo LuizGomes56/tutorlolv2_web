@@ -2,7 +2,7 @@ use crate::model::{AbilityLevels, BasicStats, Damages, Dragons, PlayerStats, Sim
 use bincode::Decode;
 use std::rc::Rc;
 use tutorlolv2_gen::{
-    AdaptativeType, ChampionId, GameMap, ItemId, L_SIML, Position, RuneId, TypeMetadata,
+    AdaptiveType, ChampionId, GameMap, ItemId, L_SIML, Position, RuneId, TypeMetadata,
 };
 
 #[derive(Decode)]
@@ -25,7 +25,7 @@ pub struct CurrentPlayer {
     pub current_stats: PlayerStats,
     pub level: u8,
     pub team: Team,
-    pub adaptative_type: AdaptativeType,
+    pub adaptive_type: AdaptiveType,
     pub position: Position,
     pub champion_id: ChampionId,
     pub game_map: GameMap,

@@ -317,7 +317,7 @@ pub fn Calculator() -> Html {
                                             html! {
                                                 <td
                                                     data_offset={offset.clone()}
-                                                    class={classes!(current_player.adaptative_type.class())}
+                                                    class={classes!(current_player.adaptive_type.class())}
                                                 >
                                                     {tower_damages[i]}
                                                 </td>

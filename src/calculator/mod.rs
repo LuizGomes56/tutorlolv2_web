@@ -7,7 +7,7 @@ use crate::{
 };
 use bincode::{Decode, Encode};
 use std::rc::Rc;
-use tutorlolv2_gen::{AdaptativeType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
+use tutorlolv2_gen::{AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
 
 mod components;
 mod page;
@@ -82,7 +82,7 @@ pub struct FinalPlayer {
     pub base_stats: BasicStats,
     pub bonus_stats: BasicStats,
     pub level: u8,
-    pub adaptative_type: AdaptativeType,
+    pub adaptive_type: AdaptiveType,
     pub champion_id: ChampionId,
 }
 

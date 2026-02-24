@@ -83,7 +83,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                 insert={insert_item}
                 remove={remove_item}
                 recommended={recommended_items}
-                items={data.items.clone().into_boxed_slice()}
+                items={data.items.clone()}
             />
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
                 <Banner

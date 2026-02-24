@@ -13,7 +13,7 @@ use yew::prelude::*;
 #[derive(PartialEq, Properties)]
 pub struct StackTableProps<T: Victim + PartialEq + 'static> {
     pub enemies: Rc<[T]>,
-    pub stack: Box<[StackValue]>,
+    pub stack: Vec<StackValue>,
 }
 
 #[component]

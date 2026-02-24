@@ -175,7 +175,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
             <div>
                 <StackTable<T>
                     enemies={enemies.clone()}
-                    stack={stack.0.clone().into_boxed_slice()}
+                    stack={stack.0.clone()}
                 />
             </div>
         </div>

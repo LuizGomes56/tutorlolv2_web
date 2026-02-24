@@ -1,6 +1,6 @@
 use crate::components::image::ImageType;
 use std::{fmt::Debug, ops::Range};
-use tutorlolv2_gen::{AdaptativeType, CastId, ChampionId, DamageType, ItemId, RuneId};
+use tutorlolv2_gen::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
 use web_sys::js_sys::Math;
 
 pub fn random_u16(range: Range<u16>) -> u16 {
@@ -33,13 +33,13 @@ impl ClassCast for DamageType {
             DamageType::Magic => "text-sky-500",
             DamageType::Mixed => "text-indigo-500",
             DamageType::True => "text-white",
-            DamageType::Adaptative => "text-purple-500",
+            DamageType::Adaptive => "text-purple-500",
             DamageType::Unknown => "text-emerald-500",
         }
     }
 }
 
-impl ClassCast for AdaptativeType {
+impl ClassCast for AdaptiveType {
     fn class(&self) -> &'static str {
         match self {
             Self::Magic => DamageType::Magic.class(),

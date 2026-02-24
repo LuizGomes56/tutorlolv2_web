@@ -58,15 +58,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
 
             result.push((
                 ImageType::Ability(champion_id, ability_kind),
-                match ability_kind {
-                    AbilityKind::Alias(merge_data) => {
-                        vec![
-                            champion_id.get_ability_formula(merge_data.minimum_damage as usize),
-                            champion_id.get_ability_formula(merge_data.maximum_damage as usize),
-                        ]
-                    }
-                    _ => vec![champion_id.get_ability_formula(i)],
-                },
+                champion_id.get_ability_formula(i),
             ));
             i += 1;
         }
@@ -78,19 +70,19 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         Vec::with_capacity(skip + 3 + abilities.len() + items_meta.len() + runes_meta.len());
 
     fn header<T: Copy + Into<ImageType> + CastId>(
-        headers: &mut Vec<(ImageType, Vec<&'static Range<usize>>)>,
+        headers: &mut Vec<(ImageType, &'static Range<usize>)>,
         slice: &Rc<[TypeMetadata<T>]>,
     ) {
         for metadata in slice.iter() {
             let kind = metadata.kind;
-            headers.push((kind.into(), vec![kind.formula()]))
+            headers.push((kind.into(), kind.formula()))
         }
     }
 
     headers.extend([
-        (ImageType::BasicAttack, vec![&BASIC_ATTACK_OFFSET]),
-        (ImageType::CritStrike, vec![&CRITICAL_STRIKE_OFFSET]),
-        (ImageType::OnhitAttack, vec![&ONHIT_EFFECT_OFFSET]),
+        (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET),
+        (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET),
+        (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET),
     ]);
     headers.extend(abilities);
     header(&mut headers, items_meta);
@@ -101,7 +93,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
             <tr>
                 {for (0..skip).map(|_| html!(<th></th>))}
                 {for headers.into_iter().enumerate().map(|(i, (src, offsets))| {
-                    let data_offset = encode_offset(&offsets);
+                    let data_offset = encode_offset(&[offsets]);
                     html! {
                         <th key={i} {data_offset}>
                             <Image
