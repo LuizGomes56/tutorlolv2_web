@@ -7,7 +7,7 @@ mod calculator;
 mod components;
 mod docs;
 mod model;
-mod overlay;
+mod realtime;
 mod utils;
 
 #[derive(Clone, Debug, PartialEq, Routable)]

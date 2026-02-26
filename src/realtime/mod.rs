@@ -1,3 +1,5 @@
+pub mod page;
+
 use crate::model::{AbilityLevels, BasicStats, Damages, Dragons, PlayerStats, SimpleStats, Team};
 use bincode::Decode;
 use std::rc::Rc;
@@ -5,7 +7,7 @@ use tutorlolv2_gen::{
     AdaptiveType, ChampionId, GameMap, ItemId, L_SIML, Position, RuneId, TypeMetadata,
 };
 
-#[derive(Decode)]
+#[derive(Debug, Decode)]
 pub struct Game {
     pub current_player: CurrentPlayer,
     pub enemies: Rc<[Enemy]>,
@@ -17,7 +19,7 @@ pub struct Game {
     pub dragons: Dragons,
 }
 
-#[derive(Decode)]
+#[derive(Debug, Decode)]
 pub struct CurrentPlayer {
     pub riot_id: Box<str>,
     pub base_stats: BasicStats,
@@ -31,7 +33,7 @@ pub struct CurrentPlayer {
     pub game_map: GameMap,
 }
 
-#[derive(Decode)]
+#[derive(Debug, Decode)]
 pub struct Scoreboard {
     pub riot_id: Box<str>,
     pub assists: u8,
@@ -43,7 +45,7 @@ pub struct Scoreboard {
     pub team: Team,
 }
 
-#[derive(Decode, PartialEq)]
+#[derive(Debug, Decode, PartialEq)]
 pub struct Enemy {
     pub riot_id: Box<str>,
     pub damages: Damages,

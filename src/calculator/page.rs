@@ -219,127 +219,129 @@ pub fn Calculator() -> Html {
         last_action: last_action.clone(),
     };
 
+    let data = match *game_data {
+        Some(ref data) => {
+            let Game {
+                monster_damages,
+                current_player,
+                enemies,
+                tower_damages,
+                items_meta,
+                runes_meta,
+            } = data;
+            html! {
+                <div class={classes!(
+                    "flex", "flex-col", "gap-4",
+                    "p-2", "overflow-hidden",
+                    "flex-1"
+                )}>
+                    <div class={classes!("box", "overflow-auto")}>
+                        <table>
+                            <TableHeader
+                                champion_id={current_player.champion_id}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                            />
+                            <tbody>
+                                {
+                                    enemies.iter().enumerate().map(|(i, enemy)| {
+                                        let damages = enemy.damages.to_html(
+                                            current_player.champion_id,
+                                            items_meta,
+                                            runes_meta
+                                        );
+                                        let enemy_id = enemy.champion_id;
+                                        html! {
+                                            <tr>
+                                                <td
+                                                    class={classes!("w-8", "h-8")}
+                                                    onclick={{
+                                                        let enemy_index = enemy_index.clone();
+                                                        Callback::from(move |_| {
+                                                            enemy_index.set(i);
+                                                        })
+                                                    }}
+                                                    data_offset={encode_offset(&[enemy_id.formula()])}
+                                                >
+                                                    <Image src={ImageType::from(enemy_id)} />
+                                                </td>
+                                                {damages}
+                                            </tr>
+                                        }
+                                    })
+                                    .collect::<Html>()
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class={classes!("box", "overflow-auto")}>
+                        <table>
+                            <TableHeader
+                                skip={MONSTER_COUNT}
+                                champion_id={current_player.champion_id}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                            />
+                            <tbody>
+                                {
+                                    monster_damages.iter().enumerate().map(|(i, damage)| {
+                                        let damages = damage.to_html(
+                                            current_player.champion_id,
+                                            items_meta,
+                                            runes_meta
+                                        );
+
+                                        let mut images = Vec::with_capacity(MONSTER_COUNT);
+                                        for j in (0..MONSTER_COUNT).rev() {
+                                            let cell = MONSTER_HEADERS[i].get(j).map(|&value| {
+                                                html!(<Image src={ImageType::Other(value)} />)
+                                            });
+                                            images.push(html!(<td class={classes!("w-8", "h-8")}>{cell}</td>));
+                                        }
+
+                                        html!(<tr>{images}{damages}</tr>)
+                                    })
+                                    .collect::<Html>()
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class={classes!("box", "overflow-auto")}>
+                        <TurretTable
+                            damages={{
+                                let offset = encode_offset(&[&TOWER_DAMAGE_FN_OFFSET]);
+                                (0..L_TWRD).into_iter().map(|i| {
+                                    html! {
+                                        <td
+                                            data_offset={offset.clone()}
+                                            class={classes!(current_player.adaptive_type.class())}
+                                        >
+                                            {tower_damages[i]}
+                                        </td>
+                                    }
+                                })
+                                .collect::<Html>()
+                            }}
+                        />
+                    </div>
+                    <div class={classes!("box", "overflow-auto")}>
+                        <StackSelector<FinalEnemy>
+                            champion_id={current_player.champion_id}
+                            enemies={enemies.clone()}
+                            items_meta={items_meta.clone()}
+                            runes_meta={runes_meta.clone()}
+                        />
+                    </div>
+                </div>
+            }
+        }
+        None => html!("No data"),
+    };
+
     html! {
         <div class={classes!("flex", "mb-96", "w-full", "px-2", "mt-2")}>
             <PlayerInput {player_props} />
-            {match *game_data {
-                Some(ref data) => {
-                    let Game {
-                        monster_damages,
-                        current_player,
-                        enemies,
-                        tower_damages,
-                        items_meta,
-                        runes_meta
-                    } = data;
-                    html! {
-                        <div class={classes!(
-                            "flex", "flex-col", "gap-4",
-                            "p-2", "overflow-hidden",
-                            "flex-1"
-                        )}>
-                            <div class={classes!("box", "overflow-auto")}>
-                                <table>
-                                    <TableHeader
-                                        champion_id={current_player.champion_id}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
-                                    />
-                                    <tbody>
-                                        {
-                                            enemies.iter().enumerate().map(|(i, enemy)| {
-                                                let damages = enemy.damages.to_html(
-                                                    current_player.champion_id,
-                                                    items_meta,
-                                                    runes_meta
-                                                );
-                                                let enemy_id = enemy.champion_id;
-                                                html! {
-                                                    <tr>
-                                                        <td
-                                                            class={classes!("w-8", "h-8")}
-                                                            onclick={{
-                                                                let enemy_index = enemy_index.clone();
-                                                                Callback::from(move |_| {
-                                                                    enemy_index.set(i);
-                                                                })
-                                                            }}
-                                                            data_offset={encode_offset(&[enemy_id.formula()])}
-                                                        >
-                                                            <Image src={ImageType::from(enemy_id)} />
-                                                        </td>
-                                                        {damages}
-                                                    </tr>
-                                                }
-                                            })
-                                            .collect::<Html>()
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class={classes!("box", "overflow-auto")}>
-                                <table>
-                                    <TableHeader
-                                        skip={MONSTER_COUNT}
-                                        champion_id={current_player.champion_id}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
-                                    />
-                                    <tbody>
-                                        {
-                                            monster_damages.iter().enumerate().map(|(i, damage)| {
-                                                let damages = damage.to_html(
-                                                    current_player.champion_id,
-                                                    items_meta,
-                                                    runes_meta
-                                                );
-
-                                                let mut images = Vec::with_capacity(MONSTER_COUNT);
-                                                for j in (0..MONSTER_COUNT).rev() {
-                                                    let cell = MONSTER_HEADERS[i].get(j).map(|&value| {
-                                                        html!(<Image src={ImageType::Other(value)} />)
-                                                    });
-                                                    images.push(html!(<td class={classes!("w-8", "h-8")}>{cell}</td>));
-                                                }
-
-                                                html!(<tr>{images}{damages}</tr>)
-                                            })
-                                            .collect::<Html>()
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class={classes!("box", "overflow-auto")}>
-                                <TurretTable
-                                    damages={{
-                                        let offset = encode_offset(&[&TOWER_DAMAGE_FN_OFFSET]);
-                                        (0..L_TWRD).into_iter().map(|i| {
-                                            html! {
-                                                <td
-                                                    data_offset={offset.clone()}
-                                                    class={classes!(current_player.adaptive_type.class())}
-                                                >
-                                                    {tower_damages[i]}
-                                                </td>
-                                            }
-                                        })
-                                        .collect::<Html>()
-                                    }}
-                                />
-                            </div>
-                            <div class={classes!("box", "overflow-auto")}>
-                                <StackSelector<FinalEnemy>
-                                    champion_id={current_player.champion_id}
-                                    enemies={enemies.clone()}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
-                                />
-                            </div>
-                        </div>
-                    }
-                },
-                None => html!("No data")
-            }}
+            {data}
             <EnemiesInput
                 enemies={enemies.clone()}
                 enemy_index={enemy_index.clone()}

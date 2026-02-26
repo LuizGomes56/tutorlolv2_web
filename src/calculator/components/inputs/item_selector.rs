@@ -131,7 +131,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         items,
     } = props;
 
-    let is_open = use_state(|| true);
+    let is_open = use_state(|| false);
     let search = use_state(String::new);
     let selected_stats = use_state(Vec::<StatName>::new);
     let strict_or_mode = use_state(|| false);

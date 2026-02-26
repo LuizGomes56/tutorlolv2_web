@@ -1,4 +1,4 @@
-use crate::{overlay::Game, utils::fetch::Fetch};
+use crate::{realtime::Game, utils::fetch::Fetch};
 use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
 use web_sys::{console, js_sys::Uint8Array};
 

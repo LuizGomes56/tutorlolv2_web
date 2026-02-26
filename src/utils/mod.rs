@@ -3,6 +3,7 @@ use std::ops::Range;
 
 pub mod cache;
 pub mod fetch;
+pub mod glue;
 pub mod hooks;
 pub mod macros;
 pub mod traits;
