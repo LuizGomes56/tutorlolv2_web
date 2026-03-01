@@ -1,7 +1,7 @@
 use crate::{
     calculator::components::inputs::selector::item_filter,
     components::image::{Image, ImageType},
-    utils::{EnumCast, encode_offset, hooks::use_mouseout},
+    utils::{EnumCast, encode_offset, hooks::use_clickout},
 };
 use tutorlolv2_gen::{CastId, ItemId, StatName};
 use web_sys::HtmlInputElement;
@@ -139,7 +139,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
     let dropdown_ref = use_node_ref();
     let button_ref = {
         let is_open = is_open.clone();
-        use_mouseout(
+        use_clickout(
             Callback::from(move |_| is_open.set(false)),
             [dropdown_ref.clone()],
         )

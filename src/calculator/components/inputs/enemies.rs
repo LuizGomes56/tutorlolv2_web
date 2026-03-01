@@ -2,12 +2,13 @@ use crate::{
     calculator::{
         components::inputs::{
             banner::Banner,
+            item_selector::ItemButton,
             recommendations::Recommendations,
             selector::{Selector, item_filter},
             stats::{StatCell, Stats},
             tray::Tray,
         },
-        page::EnemyProps,
+        page::{EnemyProps, TargetEntity},
         reducer::{DataAction, Enemies, EnemyAction, EnemyDataAction, LastAction},
     },
     components::image::ImageType,
@@ -22,6 +23,7 @@ use yew::prelude::*;
 #[derive(PartialEq, Properties)]
 pub struct EnemiesInputProps {
     pub enemy_props: EnemyProps,
+    pub open_item_menu: Callback<TargetEntity>,
 }
 
 #[hook]
@@ -61,7 +63,10 @@ pub fn use_enemy_data_callback<T: 'static>(
 
 #[component]
 pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
-    let EnemiesInputProps { enemy_props } = props;
+    let EnemiesInputProps {
+        enemy_props,
+        open_item_menu,
+    } = props;
 
     let add_enemy = use_enemy_callback(enemy_props, EnemyAction::Insert);
     let remove_enemy = use_enemy_callback(enemy_props, EnemyAction::Remove);
@@ -74,10 +79,6 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
         .enemies
         .get(*enemy_props.enemy_index)
         .unwrap_or_else(|| &enemy_props.enemies[0]);
-
-    let insert_item = use_enemy_data_callback(enemy_props, DataAction::InsertItem);
-    let remove_item = use_enemy_data_callback(enemy_props, DataAction::RemoveItem);
-    let recommended_items = use_enemy_data_callback(enemy_props, DataAction::SetItemVec);
 
     html! {
         <>
@@ -111,22 +112,16 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         callback={stats_cb}
                     />
                 </div>
-                <Recommendations
-                    callback={{
-                        let recommended_items = recommended_items.clone();
-                        let champion_id = enemy.champion_id;
-                        Callback::from(move |position| {
-                            let rec = champion_id.recommended_items(position);
-                            recommended_items.emit(rec);
+                <ItemButton
+                    onclick={{
+                        let open_item_menu = open_item_menu.clone();
+                        let index = *enemy_props.enemy_index;
+                        Callback::from(move |_| {
+                            open_item_menu.emit(TargetEntity::Enemy(index));
                         })
                     }}
+                    length={enemy.items.len()}
                 />
-                <Selector<ItemId>
-                    callback={insert_item}
-                    filter={Callback::from(item_filter)}
-                />
-                <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
-                <Tray<ItemId> callback={remove_item} vector={enemy.items.clone()} />
             </div>
         </>
     }

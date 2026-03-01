@@ -4,16 +4,18 @@ use crate::{
             _item_selector::ItemSelector,
             abilities::Abilities,
             banner::Banner,
+            item_selector::ItemButton,
             recommendations::Recommendations,
             selector::{Selector, item_filter},
             stats::{StatCell, Stats},
             tray::Tray,
         },
-        page::PlayerProps,
+        page::{PlayerProps, TargetEntity},
         reducer::{DataAction, LastAction, PlayerAction},
     },
     components::image::ImageType,
     model::PlayerStats,
+    utils::traits::Print,
 };
 use tutorlolv2_gen::{ItemId, RuneId};
 use web_sys::HtmlInputElement;
@@ -54,11 +56,15 @@ pub fn use_data_callback<T: 'static>(
 #[derive(PartialEq, Properties)]
 pub struct PlayerInputProps {
     pub player_props: PlayerProps,
+    pub open_item_menu: Callback<TargetEntity>,
 }
 
 #[component]
 pub fn PlayerInput(props: &PlayerInputProps) -> Html {
-    let PlayerInputProps { player_props } = props;
+    let PlayerInputProps {
+        player_props,
+        open_item_menu,
+    } = props;
 
     let player = &player_props.player;
     let data = &player.data;
@@ -87,6 +93,15 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         champion_id={data.champion_id}
                     />
                 </div>
+                <ItemButton
+                    onclick={{
+                        let open_item_menu = open_item_menu.clone();
+                        Callback::from(move |_| {
+                            open_item_menu.emit(TargetEntity::Player);
+                        })
+                    }}
+                    length={player.data.items.len()}
+                />
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-0.5"
@@ -113,38 +128,6 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     />
                 </div>
             </div>
-            // <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
-            //     <Recommendations
-            //         callback={{
-            //             let recommended_items = recommended_items.clone();
-            //             let champion_id = data.champion_id;
-            //             Callback::from(move |position| {
-            //                 let rec = champion_id.recommended_items(position);
-            //                 recommended_items.emit(rec);
-            //             })
-            //         }}
-            //     />
-            //     <Selector<ItemId>
-            //         callback={insert_item}
-            //         filter={Callback::from(item_filter)}
-            //     />
-            //     <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
-            //     <Tray<ItemId> callback={remove_item} vector={data.items.clone()} />
-
-            //     <Recommendations
-            //         callback={{
-            //             let recommended_runes = recommended_runes.clone();
-            //             let champion_id = data.champion_id;
-            //             Callback::from(move |position| {
-            //                 let rec = champion_id.recommended_runes(position);
-            //                 recommended_runes.emit(rec);
-            //             })
-            //         }}
-            //     />
-            //     <Selector<RuneId> callback={insert_rune} />
-            //     <div class={classes!("bg-emerald-500", "py-2", "my-4")} />
-            //     <Tray<RuneId> callback={remove_rune} vector={player.runes.clone()} />
-            // </div>
         </>
     }
 }

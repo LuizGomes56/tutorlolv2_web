@@ -73,6 +73,12 @@ const MONSTER_COUNT: usize = {
     max
 };
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum TargetEntity {
+    Player,
+    Enemy(usize),
+}
+
 #[component]
 pub fn Calculator() -> Html {
     let player = use_reducer(Player::default);
@@ -83,6 +89,7 @@ pub fn Calculator() -> Html {
     let game_data = use_state(|| None::<Game>);
     let controller = use_state(|| None::<AbortController>);
     let last_action = use_mut_ref(|| LastAction::Init);
+    let entity = use_state(|| None::<TargetEntity>);
 
     {
         let player = player.clone();
@@ -342,15 +349,21 @@ pub fn Calculator() -> Html {
         last_action,
     };
 
+    let open_item_menu = {
+        let entity = entity.clone();
+        use_callback((), move |v, _| entity.set(Some(v)))
+    };
+
     html! {
         <div class={classes!("flex", "mb-96", "w-full", "px-2", "mt-2")}>
             <ItemSelector
                 player_props={player_props.clone()}
                 enemy_props={enemy_props.clone()}
+                {entity}
             />
-            <PlayerInput {player_props} />
+            <PlayerInput {player_props} open_item_menu={open_item_menu.clone()} />
             {data}
-            <EnemiesInput {enemy_props} />
+            <EnemiesInput {enemy_props} {open_item_menu} />
         </div>
     }
 }

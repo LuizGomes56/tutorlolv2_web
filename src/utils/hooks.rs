@@ -11,7 +11,7 @@ pub fn use_setter<T: 'static>(value: &UseStateHandle<T>) -> Callback<T> {
 }
 
 #[hook]
-pub fn use_mouseout<const N: usize>(callback: Callback<()>, exceptions: [NodeRef; N]) -> NodeRef {
+pub fn use_clickout<const N: usize>(callback: Callback<()>, exceptions: [NodeRef; N]) -> NodeRef {
     let node_ref = use_node_ref();
 
     unsafe {
