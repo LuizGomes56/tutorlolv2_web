@@ -21,9 +21,7 @@ use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct EnemiesInputProps {
-    pub enemies: UseReducerHandle<Enemies>,
-    pub enemy_index: UseStateHandle<usize>,
-    pub last_action: Rc<RefCell<LastAction>>,
+    pub enemy_props: EnemyProps,
 }
 
 #[hook]
@@ -63,30 +61,23 @@ pub fn use_enemy_data_callback<T: 'static>(
 
 #[component]
 pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
-    let EnemiesInputProps {
-        enemies,
-        enemy_index,
-        last_action,
-    } = props;
+    let EnemiesInputProps { enemy_props } = props;
 
-    let enemy_props = EnemyProps {
-        enemies: enemies.clone(),
-        enemy_index: enemy_index.clone(),
-        last_action: last_action.clone(),
-    };
+    let add_enemy = use_enemy_callback(enemy_props, EnemyAction::Insert);
+    let remove_enemy = use_enemy_callback(enemy_props, EnemyAction::Remove);
 
-    let add_enemy = use_enemy_callback(&enemy_props, EnemyAction::Insert);
-    let remove_enemy = use_enemy_callback(&enemy_props, EnemyAction::Remove);
+    let level_cb = use_enemy_data_callback(enemy_props, DataAction::Level);
+    let stats_cb = use_enemy_data_callback(enemy_props, DataAction::Stats);
+    let champion_cb = use_enemy_data_callback(enemy_props, DataAction::ChampionId);
 
-    let level_cb = use_enemy_data_callback(&enemy_props, DataAction::Level);
-    let stats_cb = use_enemy_data_callback(&enemy_props, DataAction::Stats);
-    let champion_cb = use_enemy_data_callback(&enemy_props, DataAction::ChampionId);
+    let enemy = enemy_props
+        .enemies
+        .get(*enemy_props.enemy_index)
+        .unwrap_or_else(|| &enemy_props.enemies[0]);
 
-    let enemy = enemies.get(**enemy_index).unwrap_or_else(|| &enemies[0]);
-
-    let insert_item = use_enemy_data_callback(&enemy_props, DataAction::InsertItem);
-    let remove_item = use_enemy_data_callback(&enemy_props, DataAction::RemoveItem);
-    let recommended_items = use_enemy_data_callback(&enemy_props, DataAction::SetItemVec);
+    let insert_item = use_enemy_data_callback(enemy_props, DataAction::InsertItem);
+    let remove_item = use_enemy_data_callback(enemy_props, DataAction::RemoveItem);
+    let recommended_items = use_enemy_data_callback(enemy_props, DataAction::SetItemVec);
 
     html! {
         <>

@@ -1,7 +1,9 @@
 use crate::{
     calculator::{
         FinalEnemy, Game, InputGame, Player, PlayerData,
-        components::inputs::{enemies::EnemiesInput, player::PlayerInput},
+        components::inputs::{
+            enemies::EnemiesInput, item_selector::ItemSelector, player::PlayerInput,
+        },
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
     components::{
@@ -9,19 +11,15 @@ use crate::{
         stack::StackSelector,
         tables::{header::TableHeader, turret::TurretTable},
     },
-    model::{AbilityLevelsAction, Dragons, EnemyStats, PlayerStats},
-    utils::{
-        ClassCast, EnumCast, encode_offset,
-        fetch::Fetch,
-        traits::{Print, random_u16},
-    },
+    model::{AbilityLevelsAction, Dragons, EnemyStats},
+    utils::{ClassCast, EnumCast, encode_offset, fetch::Fetch, traits::Print},
 };
 use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{CastId, ChampionId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Properties)]
 pub struct PlayerProps {
     pub player: UseReducerHandle<Player>,
     pub last_action: Rc<RefCell<LastAction>>,
@@ -214,11 +212,6 @@ pub fn Calculator() -> Html {
         });
     }
 
-    let player_props = PlayerProps {
-        player: player.clone(),
-        last_action: last_action.clone(),
-    };
-
     let data = match *game_data {
         Some(ref data) => {
             let Game {
@@ -338,15 +331,26 @@ pub fn Calculator() -> Html {
         None => html!("No data"),
     };
 
+    let player_props = PlayerProps {
+        player,
+        last_action: last_action.clone(),
+    };
+
+    let enemy_props = EnemyProps {
+        enemies,
+        enemy_index,
+        last_action,
+    };
+
     html! {
         <div class={classes!("flex", "mb-96", "w-full", "px-2", "mt-2")}>
+            <ItemSelector
+                player_props={player_props.clone()}
+                enemy_props={enemy_props.clone()}
+            />
             <PlayerInput {player_props} />
             {data}
-            <EnemiesInput
-                enemies={enemies.clone()}
-                enemy_index={enemy_index.clone()}
-                last_action={last_action.clone()}
-            />
+            <EnemiesInput {enemy_props} />
         </div>
     }
 }

@@ -1,3 +1,4 @@
+pub mod _item_selector;
 pub mod abilities;
 pub mod banner;
 pub mod dragon;

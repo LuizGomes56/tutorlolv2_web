@@ -1,9 +1,9 @@
 use crate::{
     calculator::{
         components::inputs::{
+            _item_selector::ItemSelector,
             abilities::Abilities,
             banner::Banner,
-            item_selector::ItemSelector,
             recommendations::Recommendations,
             selector::{Selector, item_filter},
             stats::{StatCell, Stats},
@@ -20,7 +20,7 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[hook]
-fn use_player_callback<T: 'static>(
+pub fn use_player_callback<T: 'static>(
     props: &PlayerProps,
     callback: fn(T) -> PlayerAction,
 ) -> Callback<T> {
@@ -36,7 +36,7 @@ fn use_player_callback<T: 'static>(
 }
 
 #[hook]
-fn use_data_callback<T: 'static>(
+pub fn use_data_callback<T: 'static>(
     props: &PlayerProps,
     callback: fn(T) -> DataAction<PlayerStats>,
 ) -> Callback<T> {
@@ -68,23 +68,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let abilities_cb = use_player_callback(player_props, PlayerAction::AbilityLevels);
     let champion_cb = use_data_callback(player_props, DataAction::ChampionId);
 
-    let insert_item = use_data_callback(player_props, DataAction::InsertItem);
     let insert_rune = use_player_callback(player_props, PlayerAction::InsertRune);
-
-    let remove_item = use_data_callback(player_props, DataAction::RemoveItem);
     let remove_rune = use_player_callback(player_props, PlayerAction::RemoveRune);
 
-    let recommended_items = use_data_callback(player_props, DataAction::SetItemVec);
     let recommended_runes = use_player_callback(player_props, PlayerAction::SetRuneVec);
 
     html! {
         <>
-            <ItemSelector
-                insert={insert_item}
-                remove={remove_item}
-                recommended={recommended_items}
-                items={data.items.clone()}
-            />
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
                 <Banner
                     callback={champion_cb}
