@@ -43,7 +43,7 @@ pub fn TurretTable(props: &TurretTableProps) -> Html {
     });
 
     html! {
-        <table>
+        <table class={classes!("data-table")}>
             {(*header).clone()}
             <tbody><tr>{props.damages.clone()}</tr></tbody>
         </table>

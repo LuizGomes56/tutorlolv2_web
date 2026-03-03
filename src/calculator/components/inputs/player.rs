@@ -6,7 +6,6 @@ use crate::{
             banner::Banner,
             item_selector::ItemButton,
             recommendations::Recommendations,
-            selector::{Selector, item_filter},
             stats::{StatCell, Stats},
             tray::Tray,
         },

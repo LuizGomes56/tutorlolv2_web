@@ -236,7 +236,7 @@ pub fn Calculator() -> Html {
                     "flex-1"
                 )}>
                     <div class={classes!("box", "overflow-auto")}>
-                        <table>
+                        <table class={classes!("data-table")}>
                             <TableHeader
                                 champion_id={current_player.champion_id}
                                 items_meta={items_meta.clone()}
@@ -275,7 +275,7 @@ pub fn Calculator() -> Html {
                         </table>
                     </div>
                     <div class={classes!("box", "overflow-auto")}>
-                        <table>
+                        <table class={classes!("data-table")}>
                             <TableHeader
                                 skip={MONSTER_COUNT}
                                 champion_id={current_player.champion_id}

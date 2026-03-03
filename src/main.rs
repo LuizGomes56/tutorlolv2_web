@@ -1,11 +1,14 @@
 #![allow(static_mut_refs)]
-use crate::{calculator::Calculator, utils::cache::init_cache};
+use crate::{
+    calculator::Calculator, components::sidebar::Sidebar, formulas::Formulas,
+    utils::cache::init_cache,
+};
 use yew::prelude::*;
 use yew_router::{BrowserRouter, Routable, Switch};
 
 mod calculator;
 mod components;
-mod docs;
+mod formulas;
 mod model;
 mod realtime;
 mod utils;
@@ -19,8 +22,8 @@ pub enum Route {
     Calculator,
     #[at("/livegame")]
     Livegame,
-    #[at("/docs")]
-    Docs,
+    #[at("/formulas")]
+    Formulas,
     #[at("/help")]
     Help,
     #[at("/about")]
@@ -38,12 +41,21 @@ fn App() -> Html {
             <Switch<Route> render={|route| {
                 let component = match route {
                     Route::Calculator => html!(<Calculator />),
+                    Route::Formulas => html!(<Formulas />),
                     _ => html!(<Calculator />),
                 };
                 html! {
                     <div class={classes!("bg-std-900")}>
-                        <div class={classes!("flex", "w-full")}>
-                            {component}
+                        <div class={classes!(
+                            "grid", "grid-cols-[auto_1fr]",
+                            "max-h-screen", "h-full"
+                        )}>
+                            <Sidebar />
+                            <div class={classes!(
+                                "w-full", "overflow-auto"
+                            )}>
+                                {component}
+                            </div>
                         </div>
                     </div>
                 }

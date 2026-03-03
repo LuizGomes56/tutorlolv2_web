@@ -21,7 +21,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
     let StackTableProps { enemies, stack } = props;
 
     html! {
-        <table>
+        <table class={classes!("data-table")}>
             <thead>
                 <tr>
                     <th></th>

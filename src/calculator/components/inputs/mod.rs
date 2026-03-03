@@ -6,6 +6,5 @@ pub mod enemies;
 pub mod item_selector;
 pub mod player;
 pub mod recommendations;
-pub mod selector;
 pub mod stats;
 pub mod tray;

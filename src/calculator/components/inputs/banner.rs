@@ -1,5 +1,4 @@
 use crate::{
-    calculator::components::inputs::selector::Selector,
     components::image::{Image, ImageType},
     utils::encode_offset,
 };

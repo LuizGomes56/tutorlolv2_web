@@ -236,3 +236,37 @@ impl_conv_image_type! {
     RuneId => Rune,
     StatType => Stats
 }
+
+#[derive(PartialEq, Properties)]
+pub struct SvgProps {
+    #[prop_or_default]
+    pub class: Classes,
+    pub src: AttrValue,
+}
+
+#[component]
+pub fn Svg(props: &SvgProps) -> Html {
+    let SvgProps { class, src } = props;
+
+    let mut classes = classes!("inline-block", "bg-current", "shrink-0");
+    classes.push(class);
+
+    html! {
+        <span
+            class={classes}
+            style={format!(
+                concat!(
+                    "-webkit-mask-image:url('{}');",
+                    "-webkit-mask-repeat:no-repeat;",
+                    "-webkit-mask-position:center;",
+                    "-webkit-mask-size:contain;",
+                    "mask-image:url('{}');",
+                    "mask-repeat:no-repeat;",
+                    "mask-position:center;",
+                    "mask-size:contain;"
+                ),
+                src, src
+            )}
+        />
+    }
+}

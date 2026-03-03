@@ -1,7 +1,9 @@
 [serve]
 port = 8000
+open = false
 
 [build]
 release = false
 minify = "on_release"
 open = false
+public_url = "/"

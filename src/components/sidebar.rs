@@ -1,4 +1,4 @@
-use crate::Route;
+use crate::{Route, components::image::Svg};
 use yew::prelude::*;
 use yew_router::components::Link;
 
@@ -12,12 +12,19 @@ pub fn Sidebar() -> Html {
                     <Link<Route>
                         to={to}
                         classes={classes!(
-                            "py-2", "px-4", "leading-5", "rounded-md",
+                            "py-3", "px-4", "leading-5", "rounded-md",
                             "transition-all", "hover:bg-std-800",
-                            "text-std-200", "text-lg"
+                            "text-std-200", "flex", "items-center",
+                            "gap-4"
                         )}
                     >
-                        {text}
+                        <Svg
+                            class={classes!("h-5", "w-5")}
+                            src={format!("/sidebar/{text}.svg")}
+                        />
+                        <span class={classes!("text-shadow", "font-medium")}>
+                            {text}
+                        </span>
                     </Link<Route>>
                 }
             })
@@ -26,28 +33,26 @@ pub fn Sidebar() -> Html {
 
     html! {
         <aside class={classes!(
-            "w-64", "top-0", "fixed", "left-0",
-            "h-full", "max-h-screen", "pt-[60px]"
+            "w-48", "h-full", "max-h-screen"
         )}>
             <nav class={classes!(
                 "flex", "flex-col", "h-full",
-                "py-4", "pl-2", "pr-4", "justify-between",
-                "border-r", "border-r-gray-700",
+                "py-4", "px-4", "justify-between",
+                "box",
             )}>
                 <div class={classes!("flex", "flex-col", "gap-2")}>
                     {buttons([
-                        ("Homepage", Route::Homepage),
-                        ("Calculator", Route::Calculator),
-                        ("Livegame", Route::Livegame)
+                        ("Homepage",    Route::Homepage),
+                        ("Calculator",  Route::Calculator),
+                        ("Livegame",    Route::Livegame)
                     ])}
                 </div>
                 <div class={classes!("flex", "flex-col", "gap-2")}>
                     {buttons([
-                        ("Documentation", Route::Docs),
-                        ("Help", Route::Docs),
-                        ("FAQ", Route::FAQ),
-                        ("About", Route::About),
-                        ("GitHub", Route::Homepage)
+                        ("Formulas",    Route::Formulas),
+                        ("Help & FAQ",    Route::Formulas),
+                        ("About",   Route::About),
+                        ("GitHub",  Route::Homepage)
                     ])}
                 </div>
             </nav>
