@@ -12,7 +12,6 @@ use yew::prelude::*;
 #[component]
 pub fn ChampionFormulas() -> Html {
     let champion = use_state(ChampionId::random);
-
     let callback = use_setter(&champion);
 
     fn get_recommendations<T, F>(f: F) -> Html
@@ -24,7 +23,7 @@ pub fn ChampionFormulas() -> Html {
         html! {
             for position in Position::ARRAY {
                 <td class={"content-baseline"}>
-                    <div class={classes!("flex", "flex-col", "gap-2", "py-2")}>
+                    <div class={classes!("flex", "flex-col", "gap-2")}>
                         for item in f(position) {
                             <div class={classes!("flex", "items-center", "gap-3")}>
                                 <Image
@@ -65,7 +64,7 @@ pub fn ChampionFormulas() -> Html {
             </div>
             <Section text={"Recommended items and runes per position"} />
             <div class={classes!("overflow-auto")}>
-                <table>
+                <table class={classes!("table-fixed")}>
                     <thead>
                         <tr>
                             for position in Position::ARRAY {
@@ -98,7 +97,7 @@ pub fn ChampionFormulas() -> Html {
             </div>
             <Section text={"Source code definition"} />
             <Code range={champion.formula()} />
-            <Section text={"Abilities definiton"} />
+            <Section text={"Abilities virtual definiton"} />
             for i in 0..champion.number_of_abilities() {
                 <Code range={champion.get_ability_formula(i)} />
             }

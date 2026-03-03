@@ -12,7 +12,6 @@ use yew::prelude::*;
 #[component]
 pub fn ItemFormulas() -> Html {
     let item = use_state(ItemId::random);
-
     let callback = use_setter(&item);
 
     html! {
@@ -35,7 +34,7 @@ pub fn ItemFormulas() -> Html {
             </div>
             <Section text={"Source code definition"} />
             <Code range={item.formula()} />
-            <Section text={"Damaging function definiton"} />
+            <Section text={"Damaging function definition"} />
             <Code range={item.closure()} />
             <Section text={"Item generator implementation"} />
             <Code range={item.generator()} />
