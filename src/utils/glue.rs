@@ -1,6 +1,9 @@
-use crate::{realtime::Game, utils::fetch::Fetch};
+use crate::{
+    realtime::Game,
+    utils::{fetch::Fetch, traits::Print},
+};
 use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
-use web_sys::{console, js_sys::Uint8Array};
+use web_sys::js_sys::Uint8Array;
 
 #[wasm_bindgen(module = "/public/invoke.js")]
 unsafe extern "C" {
@@ -11,7 +14,7 @@ unsafe extern "C" {
 pub async fn get_data() -> Result<Game, String> {
     let bytes = get_live_game().await;
 
-    console::log_1(&"Called get_data() function".into());
+    "Called get_data() function".log();
 
     match bytes {
         Ok(response) => {
@@ -28,7 +31,7 @@ pub async fn get_data() -> Result<Game, String> {
             }
         }
         Err(e) => {
-            console::log_1(&format!("[tauri] Error: {e:?}").into());
+            format!("[tauri] Error: {e:?}").log();
             Err(
                 "[tauri]: Can't access Riot API or you're not playing a League game right now"
                     .into(),

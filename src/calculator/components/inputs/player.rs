@@ -4,6 +4,7 @@ use crate::{
             _item_selector::ItemSelector,
             abilities::Abilities,
             banner::Banner,
+            exceptions::Exceptions,
             item_selector::ItemButton,
             recommendations::Recommendations,
             stats::{StatCell, Stats},
@@ -75,8 +76,11 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
 
     let insert_rune = use_player_callback(player_props, PlayerAction::InsertRune);
     let remove_rune = use_player_callback(player_props, PlayerAction::RemoveRune);
-
     let recommended_runes = use_player_callback(player_props, PlayerAction::SetRuneVec);
+
+    let item_exception_callback = use_data_callback(player_props, DataAction::InsertItemExc);
+    let rune_exception_callback = use_player_callback(player_props, PlayerAction::InsertRuneExc);
+    let stack_callback = use_data_callback(player_props, DataAction::Stacks);
 
     html! {
         <>
@@ -100,6 +104,17 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         })
                     }}
                     length={player.data.items.len()}
+                />
+                <Exceptions
+                    items={player.data.items.clone()}
+                    runes={player.runes.clone()}
+                    item_exceptions={player.data.item_exceptions.clone()}
+                    rune_exceptions={player.rune_exceptions.clone()}
+                    item_callback={item_exception_callback}
+                    rune_callback={rune_exception_callback}
+                    stack_callback={stack_callback}
+                    stacks={player.data.stacks}
+                    champion_id={player.data.champion_id}
                 />
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",

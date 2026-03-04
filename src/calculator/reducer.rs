@@ -14,7 +14,7 @@ pub enum PlayerAction {
     InsertRune(RuneId),
     RemoveRune(usize),
     SetRuneVec(&'static [RuneId]),
-    InsertRuneExc(RuneId, u32),
+    InsertRuneExc((RuneId, u32)),
     RemoveRuneExc(usize),
     Data(PlayerDataAction),
     AbilityLevels(AbilityLevelsAction),
@@ -31,7 +31,7 @@ pub enum DataAction<T: ReduceApply> {
     RemoveItem(usize),
     SetItemVec(&'static [ItemId]),
     ChampionId(ChampionId),
-    InsertItemExc(ItemId, u32),
+    InsertItemExc((ItemId, u32)),
     RemoveItemExc(usize),
 }
 
@@ -86,7 +86,7 @@ impl<T: ReduceApply> PlayerData<T> {
             DataAction::RemoveItem(v) => {
                 self.items.swap_remove(v);
             }
-            DataAction::InsertItemExc(item_id, stacks) => {
+            DataAction::InsertItemExc((item_id, stacks)) => {
                 let value = ValueException::pack_item_id(item_id, stacks);
                 self.item_exceptions.push(value)
             }
@@ -109,7 +109,7 @@ impl Reducible for Player {
             Self::Action::RemoveRune(v) => {
                 new.runes.swap_remove(v);
             }
-            Self::Action::InsertRuneExc(rune_id, stacks) => {
+            Self::Action::InsertRuneExc((rune_id, stacks)) => {
                 let value = ValueException::pack_rune_id(rune_id, stacks);
                 new.rune_exceptions.push(value);
             }

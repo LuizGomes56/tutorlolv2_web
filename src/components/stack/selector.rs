@@ -136,7 +136,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
         .map(|(i, value)| {
             let image_type = match value {
                 StackValue::Ability(_, champion_id, ability_id) => {
-                    ImageType::Ability(champion_id, AbilityKind::Normal(ability_id))
+                    ImageType::Ability(champion_id, ability_id.into())
                 }
                 StackValue::Item(_, item_id) => ImageType::from(item_id),
                 StackValue::Rune(_, rune_id) => ImageType::from(rune_id),

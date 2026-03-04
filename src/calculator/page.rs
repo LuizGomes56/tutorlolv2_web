@@ -167,7 +167,7 @@ pub fn Calculator() -> Html {
                     dragons: *dragons,
                 };
 
-                input_game.enemy_players[0].stats.log();
+                input_game.active_player.log();
 
                 if let Ok(req) = Fetch::new("/api/games/calculator")
                     .signal(signal)
@@ -208,7 +208,7 @@ pub fn Calculator() -> Html {
                                 _ => {}
                             };
 
-                            data.current_player.current_stats.log();
+                            // data.current_player.log();
 
                             game_data.set(Some(data));
                         }

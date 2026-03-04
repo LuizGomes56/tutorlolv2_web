@@ -1,7 +1,7 @@
 use crate::impl_reducible;
 use bincode::{Decode, Encode};
 use std::fmt::Display;
-use tutorlolv2_gen::{AbilityId, AbilityName, Ctx, ItemId, MergeData, RuneId};
+use tutorlolv2_gen::{AbilityId, Ctx, ItemId, Key, MergeData, RuneId};
 
 impl_reducible!(PlayerStats i32 {
     ability_power,
@@ -85,8 +85,8 @@ pub struct Damages {
 impl_reducible!(AbilityLevels u8 { q, w, e, r });
 
 impl AbilityLevels {
-    pub const ABILITIES: [fn(AbilityName) -> AbilityId; 4] =
-        [AbilityId::Q, AbilityId::W, AbilityId::E, AbilityId::R];
+    pub const ABILITIES: [Key; 4] = [Key::Q, Key::W, Key::E, Key::R];
+
     pub const ACTIONS: [fn(u8) -> AbilityLevelsAction; 4] = [
         AbilityLevelsAction::Q,
         AbilityLevelsAction::W,
@@ -187,6 +187,12 @@ impl AbilityKind {
 
     pub const fn as_char(&self) -> char {
         self.ability_id().as_char()
+    }
+}
+
+impl From<Key> for AbilityKind {
+    fn from(value: Key) -> Self {
+        AbilityId::from(value).into()
     }
 }
 

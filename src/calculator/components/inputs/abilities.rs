@@ -5,7 +5,7 @@ use crate::{
     utils::ReduceApply,
 };
 use std::ops::{Index, IndexMut};
-use tutorlolv2_gen::{AbilityId, AbilityName, ChampionId};
+use tutorlolv2_gen::{ChampionId, Key};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -17,11 +17,11 @@ pub struct AbilitiesProps {
 }
 
 impl_index! {
-    AbilityLevels[AbilityId] u8 {
-        AbilityId::Q(_) => q,
-        AbilityId::W(_) => w,
-        AbilityId::E(_) => e,
-        AbilityId::R(_) => r,
+    AbilityLevels[Key] u8 {
+        Key::Q => q,
+        Key::W => w,
+        Key::E => e,
+        Key::R => r,
     }
 }
 
@@ -36,14 +36,13 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
     AbilityLevels::ABILITIES
         .into_iter()
         .enumerate()
-        .map(|(i, func)| {
-            let ability_id = func(AbilityName::Void);
-            let value = ability_levels[ability_id];
+        .map(|(i, key)| {
+            let value = ability_levels[key];
             let prototype = AbilityLevels::ACTIONS[i];
             html! {
                 <label class={classes!("grid", "grid-cols-2")}>
                     <Image
-                        src={ImageType::Ability(champion_id, ability_id.into())}
+                        src={ImageType::Ability(champion_id, key.into())}
                         class={classes!("flex", "items-center", "justify-center")}
                     />
                     <input
