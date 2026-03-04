@@ -162,9 +162,9 @@ pub fn Calculator() -> Html {
 
             spawn_local(async move {
                 let input_game = InputGame {
-                    active_player: (*player).clone(),
-                    enemy_players: (*enemies).to_vec(),
-                    dragons: *dragons,
+                    active_player: &player,
+                    enemy_players: enemies.as_slice(),
+                    dragons: &dragons,
                 };
 
                 input_game.active_player.log();

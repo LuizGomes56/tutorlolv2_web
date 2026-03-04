@@ -1,165 +1,141 @@
 use crate::{
+    calculator::ExceptionMap,
     components::image::{Image, ImageType},
-    model::{AbilityKind, ValueException},
+    utils::encode_offset,
 };
-use tutorlolv2_gen::{AbilityId, AbilityName, ChampionId, ItemId, Key, RuneId};
+use std::hash::Hash;
+use tutorlolv2_gen::{CastId, ChampionId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
-pub struct ExceptionsProps {
-    pub items: Vec<ItemId>,
-    pub runes: Vec<RuneId>,
-    pub item_exceptions: Vec<ValueException>,
-    pub rune_exceptions: Vec<ValueException>,
-    pub item_callback: Callback<(ItemId, u32)>,
-    pub rune_callback: Callback<(RuneId, u32)>,
-    pub stack_callback: Callback<u32>,
+pub struct ExceptionInputProps<T: PartialEq> {
+    pub oninput: Callback<InputEvent>,
+    #[prop_or(None)]
+    pub value: Option<T>,
+    pub image_type: ImageType,
     pub stacks: u32,
-    pub champion_id: ChampionId,
 }
 
 #[component]
-pub fn Exceptions(props: &ExceptionsProps) -> Html {
-    let ExceptionsProps {
-        ref items,
-        ref runes,
-        ref item_exceptions,
-        ref rune_exceptions,
-        ref item_callback,
-        ref rune_callback,
-        ref stack_callback,
+pub fn ExceptionInput<T>(props: &ExceptionInputProps<T>) -> Html
+where
+    T: CastId + PartialEq,
+{
+    let ExceptionInputProps {
+        ref oninput,
+        value,
+        image_type,
         stacks,
-        champion_id,
     } = *props;
 
-    const EXCEPTION_ITEMS: [ItemId; 12] = [
-        ItemId::DarkSeal,
-        ItemId::DragonheartU44,
-        ItemId::DemonKingsCrownU66,
-        ItemId::RiteOfRuin,
-        ItemId::MejaisSoulstealer,
-        ItemId::DemonKingsCrownU44,
-        ItemId::Hubris6697,
-        ItemId::Hubris126697,
-        ItemId::HubrisArena,
-        ItemId::BloodlettersCurse4010,
-        ItemId::BloodlettersCurse8010,
-        ItemId::BlackCleaver,
-    ];
-
-    let oninput_stacks = use_callback(
-        stack_callback.clone(),
-        move |e: InputEvent, stack_callback| {
-            let target = e.target_unchecked_into::<HtmlInputElement>();
-            let value = target.value().parse::<u32>().unwrap_or(0);
-            stack_callback.emit(value);
-        },
-    );
-
-    let champion_stack_selector = use_memo(
-        (oninput_stacks, champion_id, stacks),
-        move |(oninput, ..)| {
-            let image = match champion_id {
-                ChampionId::AurelionSol
-                | ChampionId::Bard
-                | ChampionId::Belveth
-                | ChampionId::Graves
-                | ChampionId::Hecarim
-                | ChampionId::Kalista
-                | ChampionId::Kindred
-                | ChampionId::Senna
-                | ChampionId::Shyvana
-                | ChampionId::Sion
-                | ChampionId::Smolder
-                | ChampionId::Swain
-                | ChampionId::Thresh
-                | ChampionId::Veigar => Some(Key::P),
-                ChampionId::Nasus => Some(Key::Q),
-                ChampionId::Darius => Some(Key::E),
-                ChampionId::Chogath => Some(Key::R),
-                _ => None,
-            };
-
-            image.map(|key| {
-                html! {
-                    <div class={classes!("flex", "items-center", "gap-2")}>
-                        <Image
-                            class={classes!("w-8", "h-8")}
-                            src={ImageType::Ability(champion_id, key.into())}
-                        />
-                        <input
-                            type={"number"}
-                            class={classes!(
-                                "text-center", "min-w-0", "ml-2",
-                                "bg-transparent", "text-white"
-                            )}
-                            {oninput}
-                            value={stacks.to_string()}
-                            placeholder={"0"}
-                        />
-                    </div>
-                }
-            })
-        },
-    );
-
-    let item_exception_selector = use_memo(
-        (
-            items.clone(),
-            item_exceptions.clone(),
-            item_callback.clone(),
-        ),
-        |(items, item_exceptions, callback)| {
-            items
-                .iter()
-                .filter(|item| EXCEPTION_ITEMS.contains(item))
-                .filter_map(|item| {
-                    item_exceptions
-                        .iter()
-                        .find(|v| match v.get_item_id() {
-                            Some(i) => i == *item,
-                            None => false,
-                        })
-                        .map(|v| {
-                            let oninput = {
-                                let callback = callback.clone();
-                                let item = *item;
-                                Callback::from(move |e: InputEvent| {
-                                    let target = e.target_unchecked_into::<HtmlInputElement>();
-                                    let value = target.value().parse::<u32>().unwrap_or(0);
-                                    callback.emit((item, value));
-                                })
-                            };
-
-                            html! {
-                                <div class={classes!("flex", "items-center", "gap-2")}>
-                                    <Image
-                                        class={classes!("w-8", "h-8")}
-                                        src={ImageType::from(item)}
-                                    />
-                                    <input
-                                        type={"number"}
-                                        class={classes!(
-                                            "text-center", "min-w-0", "ml-2",
-                                            "bg-transparent", "text-white"
-                                        )}
-                                        {oninput}
-                                        value={v.stacks().to_string()}
-                                        placeholder={"0"}
-                                    />
-                                </div>
-                            }
-                        })
-                })
-                .collect::<Html>()
-        },
-    );
+    let data_offset = value.map(|v| encode_offset(&[v.formula()]));
+    let title = value.map(|v| v.name());
 
     html! {
-        <div>
-            {(*champion_stack_selector).clone()}
-            {(*item_exception_selector).clone()}
+        <div class={classes!("flex", "items-center", "gap-2")}>
+            <div {title} {data_offset}>
+                <Image
+                    class={classes!("w-8", "h-8")}
+                    src={image_type}
+                />
+            </div>
+            <input
+                type={"number"}
+                class={classes!(
+                    "text-center", "min-w-0", "ml-2",
+                    "bg-transparent", "text-white"
+                )}
+                {oninput}
+                value={stacks.to_string()}
+                placeholder={"0"}
+            />
         </div>
     }
+}
+
+#[derive(PartialEq, Properties)]
+pub struct ExceptionSelectorProps<T: Default + Eq + Hash + 'static> {
+    pub values: Vec<T>,
+    pub exceptions: ExceptionMap<T>,
+    pub callback: Callback<(T, u32)>,
+    pub filter: &'static [T],
+}
+
+#[component]
+pub fn ExceptionSelector<T>(props: &ExceptionSelectorProps<T>) -> Html
+where
+    T: CastId + Default + Eq + Hash,
+    ImageType: From<T>,
+{
+    let ExceptionSelectorProps {
+        ref values,
+        ref exceptions,
+        ref callback,
+        filter,
+    } = *props;
+
+    values
+        .iter()
+        .filter(|value| filter.contains(value))
+        .filter_map(|&value| {
+            exceptions.inner.get(&value).map(|v| {
+                let oninput = {
+                    let callback = callback.clone();
+                    Callback::from(move |e: InputEvent| {
+                        let target = e.target_unchecked_into::<HtmlInputElement>();
+                        let stacks = target.value().parse::<u32>().unwrap_or(0);
+                        callback.emit((value, stacks));
+                    })
+                };
+
+                html!(
+                    <ExceptionInput<T>
+                        {oninput}
+                        {value}
+                        image_type={ImageType::from(value)}
+                        stacks={v.stacks()}
+                    />
+                )
+            })
+        })
+        .collect::<Html>()
+}
+
+#[derive(PartialEq, Properties)]
+pub struct ChampionExceptionSelectorProps {
+    pub callback: Callback<u32>,
+    pub stacks: u32,
+    pub champion_id: ChampionId,
+    #[prop_or(false)]
+    pub ally: bool,
+}
+
+#[component]
+pub fn ChampionExceptionSelector(props: &ChampionExceptionSelectorProps) -> Html {
+    let ChampionExceptionSelectorProps {
+        ref callback,
+        stacks,
+        champion_id,
+        ally,
+    } = *props;
+
+    let oninput = use_callback(callback.clone(), move |e: InputEvent, callback| {
+        let target = e.target_unchecked_into::<HtmlInputElement>();
+        let value = target.value().parse::<u32>().unwrap_or(0);
+        callback.emit(value);
+    });
+
+    champion_id
+        .exceptions(ally)
+        .map(|key| {
+            html!(
+                <ExceptionInput<ChampionId>
+                    {oninput}
+                    image_type={ImageType::Ability(champion_id, key.into())}
+                    {stacks}
+                />
+            )
+        })
+        .unwrap_or_default()
 }

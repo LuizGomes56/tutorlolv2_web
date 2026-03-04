@@ -1,6 +1,6 @@
 use crate::{
-    calculator::{AbilityLevels, Player, PlayerData},
-    model::{AbilityLevelsAction, Dragons, EnemyStats, PlayerStats, ValueException},
+    calculator::{Player, PlayerData},
+    model::{AbilityLevelsAction, EnemyStats, PlayerStats, ValueException},
     utils::traits::{Print, ReduceApply},
 };
 use std::rc::Rc;
@@ -14,8 +14,7 @@ pub enum PlayerAction {
     InsertRune(RuneId),
     RemoveRune(usize),
     SetRuneVec(&'static [RuneId]),
-    InsertRuneExc((RuneId, u32)),
-    RemoveRuneExc(usize),
+    ModifyRuneExc((RuneId, u32)),
     Data(PlayerDataAction),
     AbilityLevels(AbilityLevelsAction),
 }
@@ -31,8 +30,7 @@ pub enum DataAction<T: ReduceApply> {
     RemoveItem(usize),
     SetItemVec(&'static [ItemId]),
     ChampionId(ChampionId),
-    InsertItemExc((ItemId, u32)),
-    RemoveItemExc(usize),
+    ModifyItemExc((ItemId, u32)),
 }
 
 pub enum EnemyAction {
@@ -72,7 +70,7 @@ impl core::ops::DerefMut for Enemies {
 }
 
 impl<T: ReduceApply> PlayerData<T> {
-    pub fn reduce_mut(&mut self, action: DataAction<T>) {
+    pub fn reduce_mut(&mut self, ally: bool, action: DataAction<T>) {
         match action {
             DataAction::Level(v) => self.level = v,
             DataAction::ReplaceStats(v) => self.stats = unsafe { *v },
@@ -80,18 +78,22 @@ impl<T: ReduceApply> PlayerData<T> {
             DataAction::Stacks(v) => self.stacks = v,
             DataAction::InferStats(v) => self.infer_stats = v,
             DataAction::IsMegaGnar(v) => self.is_mega_gnar = v,
-            DataAction::InsertItem(v) => self.items.push(v),
+            DataAction::InsertItem(v) => {
+                if ItemId::exceptions(ally).contains(&v) {
+                    let value = ValueException::pack_item_id(v, 0);
+                    self.item_exceptions.inner.insert(v, value);
+                }
+                self.items.push(v);
+            }
             DataAction::ChampionId(v) => self.champion_id = v,
             DataAction::SetItemVec(v) => self.items = v.into(),
             DataAction::RemoveItem(v) => {
-                self.items.swap_remove(v);
+                let value = self.items.swap_remove(v);
+                self.item_exceptions.inner.remove(&value);
             }
-            DataAction::InsertItemExc((item_id, stacks)) => {
+            DataAction::ModifyItemExc((item_id, stacks)) => {
                 let value = ValueException::pack_item_id(item_id, stacks);
-                self.item_exceptions.push(value)
-            }
-            DataAction::RemoveItemExc(v) => {
-                self.item_exceptions.swap_remove(v);
+                self.item_exceptions.inner.insert(item_id, value);
             }
         }
     }
@@ -104,21 +106,24 @@ impl Reducible for Player {
         let mut new = (*self).clone();
         match action {
             Self::Action::SetRuneVec(v) => new.runes = v.into(),
-            Self::Action::InsertRune(v) => new.runes.push(v),
+            Self::Action::InsertRune(v) => {
+                if RuneId::exceptions().contains(&v) {
+                    let value = ValueException::pack_rune_id(v, 0);
+                    new.rune_exceptions.inner.insert(v, value);
+                }
+                new.runes.push(v);
+            }
             Self::Action::AbilityLevels(v) => new.abilities.apply(v),
             Self::Action::RemoveRune(v) => {
                 new.runes.swap_remove(v);
             }
-            Self::Action::InsertRuneExc((rune_id, stacks)) => {
+            Self::Action::ModifyRuneExc((rune_id, stacks)) => {
                 let value = ValueException::pack_rune_id(rune_id, stacks);
-                new.rune_exceptions.push(value);
-            }
-            Self::Action::RemoveRuneExc(v) => {
-                new.rune_exceptions.swap_remove(v);
+                new.rune_exceptions.inner.insert(rune_id, value);
             }
             Self::Action::Data(v) => {
                 let mut data = new.data;
-                data.reduce_mut(v);
+                data.reduce_mut(true, v);
                 new.data = data;
             }
         }
@@ -131,7 +136,7 @@ impl<T: ReduceApply> Reducible for PlayerData<T> {
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
-        new.reduce_mut(action);
+        new.reduce_mut(false, action);
         Rc::new(new)
     }
 }

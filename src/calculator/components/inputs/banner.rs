@@ -17,7 +17,9 @@ pub fn Banner(props: &BannerProps) -> Html {
         champion_id,
         ref callback,
     } = *props;
+
     let data_offset = encode_offset(&[champion_id.formula()]);
+
     html! {
         <div
             {data_offset}

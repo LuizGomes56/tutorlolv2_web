@@ -4,7 +4,7 @@ use crate::{
             _item_selector::ItemSelector,
             abilities::Abilities,
             banner::Banner,
-            exceptions::Exceptions,
+            exceptions::{ChampionExceptionSelector, ExceptionSelector},
             item_selector::ItemButton,
             recommendations::Recommendations,
             stats::{StatCell, Stats},
@@ -78,8 +78,8 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let remove_rune = use_player_callback(player_props, PlayerAction::RemoveRune);
     let recommended_runes = use_player_callback(player_props, PlayerAction::SetRuneVec);
 
-    let item_exception_callback = use_data_callback(player_props, DataAction::InsertItemExc);
-    let rune_exception_callback = use_player_callback(player_props, PlayerAction::InsertRuneExc);
+    let item_exception_callback = use_data_callback(player_props, DataAction::ModifyItemExc);
+    let rune_exception_callback = use_player_callback(player_props, PlayerAction::ModifyRuneExc);
     let stack_callback = use_data_callback(player_props, DataAction::Stacks);
 
     html! {
@@ -105,16 +105,23 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     }}
                     length={player.data.items.len()}
                 />
-                <Exceptions
-                    items={player.data.items.clone()}
-                    runes={player.runes.clone()}
-                    item_exceptions={player.data.item_exceptions.clone()}
-                    rune_exceptions={player.rune_exceptions.clone()}
-                    item_callback={item_exception_callback}
-                    rune_callback={rune_exception_callback}
-                    stack_callback={stack_callback}
-                    stacks={player.data.stacks}
+                <ChampionExceptionSelector
                     champion_id={player.data.champion_id}
+                    stacks={player.data.stacks}
+                    callback={stack_callback}
+                    ally={true}
+                />
+                <ExceptionSelector<ItemId>
+                    values={player.data.items.clone()}
+                    exceptions={player.data.item_exceptions.clone()}
+                    callback={item_exception_callback}
+                    filter={ItemId::exceptions(true)}
+                />
+                <ExceptionSelector<RuneId>
+                    values={player.runes.clone()}
+                    exceptions={player.rune_exceptions.clone()}
+                    callback={rune_exception_callback}
+                    filter={RuneId::exceptions()}
                 />
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",

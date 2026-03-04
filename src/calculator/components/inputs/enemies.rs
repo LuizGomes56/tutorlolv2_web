@@ -2,6 +2,7 @@ use crate::{
     calculator::{
         components::inputs::{
             banner::Banner,
+            exceptions::{ChampionExceptionSelector, ExceptionSelector},
             item_selector::ItemButton,
             recommendations::Recommendations,
             stats::{StatCell, Stats},
@@ -70,9 +71,12 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     let add_enemy = use_enemy_callback(enemy_props, EnemyAction::Insert);
     let remove_enemy = use_enemy_callback(enemy_props, EnemyAction::Remove);
 
-    let level_cb = use_enemy_data_callback(enemy_props, DataAction::Level);
-    let stats_cb = use_enemy_data_callback(enemy_props, DataAction::Stats);
-    let champion_cb = use_enemy_data_callback(enemy_props, DataAction::ChampionId);
+    let level_callback = use_enemy_data_callback(enemy_props, DataAction::Level);
+    let stats_callback = use_enemy_data_callback(enemy_props, DataAction::Stats);
+    let champion_callback = use_enemy_data_callback(enemy_props, DataAction::ChampionId);
+    let stack_callback = use_enemy_data_callback(enemy_props, DataAction::Stacks);
+
+    let item_exception_callback = use_enemy_data_callback(enemy_props, DataAction::ModifyItemExc);
 
     let enemy = enemy_props
         .enemies
@@ -83,7 +87,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
         <>
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
                 <Banner
-                    callback={champion_cb}
+                    callback={champion_callback}
                     champion_id={enemy.champion_id}
                 />
                 <div class={classes!(
@@ -97,7 +101,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         value={enemy.level as i32}
                         placeholder={1}
                         oninput={{
-                            let callback = level_cb.clone();
+                            let callback = level_callback.clone();
                             Callback::from(move |e: InputEvent| {
                                 let value = e.target_unchecked_into::<HtmlInputElement>().value();
                                 let number = value.parse().unwrap_or(1);
@@ -108,7 +112,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     <Stats<EnemyStats>
                         infer={enemy.infer_stats}
                         stats={enemy.stats}
-                        callback={stats_cb}
+                        callback={stats_callback}
                     />
                 </div>
                 <ItemButton
@@ -120,6 +124,18 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         })
                     }}
                     length={enemy.items.len()}
+                />
+                <ChampionExceptionSelector
+                    champion_id={enemy.champion_id}
+                    stacks={enemy.stacks}
+                    callback={stack_callback}
+                    ally={true}
+                />
+                <ExceptionSelector<ItemId>
+                    values={enemy.items.clone()}
+                    exceptions={enemy.item_exceptions.clone()}
+                    callback={item_exception_callback}
+                    filter={ItemId::exceptions(false)}
                 />
             </div>
         </>

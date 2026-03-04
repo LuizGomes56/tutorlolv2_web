@@ -6,7 +6,12 @@ use crate::{
     utils::EnumCast,
 };
 use bincode::{Decode, Encode};
-use std::rc::Rc;
+use std::{
+    collections::HashMap,
+    hash::Hash,
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 use tutorlolv2_gen::{AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
 
 mod components;
@@ -15,17 +20,39 @@ mod reducer;
 
 pub use page::Calculator;
 
+#[derive(Clone, Debug, Default, PartialEq)]
+#[repr(transparent)]
+pub struct ExceptionMap<T: Default + Eq + Hash> {
+    pub inner: HashMap<T, ValueException>,
+}
+
+impl<T> Encode for ExceptionMap<T>
+where
+    T: Default + Encode + Eq + Hash,
+{
+    fn encode<E: bincode::enc::Encoder>(
+        &self,
+        encoder: &mut E,
+    ) -> Result<(), bincode::error::EncodeError> {
+        self.inner.len().encode(encoder)?;
+        for value in self.inner.values() {
+            value.encode(encoder)?;
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Debug, Encode, PartialEq)]
-pub struct InputGame {
-    pub active_player: Player,
-    pub enemy_players: Vec<Rc<PlayerData<EnemyStats>>>,
-    pub dragons: Dragons,
+pub struct InputGame<'a> {
+    pub active_player: &'a Player,
+    pub enemy_players: &'a [Rc<PlayerData<EnemyStats>>],
+    pub dragons: &'a Dragons,
 }
 
 #[derive(Clone, Debug, Default, Encode, PartialEq)]
 pub struct Player {
     pub runes: Vec<RuneId>,
-    pub rune_exceptions: Vec<ValueException>,
+    pub rune_exceptions: ExceptionMap<RuneId>,
     pub abilities: AbilityLevels,
     pub data: PlayerData<PlayerStats>,
 }
@@ -41,7 +68,7 @@ pub struct Player {
 pub struct PlayerData<T> {
     pub stats: T,
     pub items: Vec<ItemId>,
-    pub item_exceptions: Vec<ValueException>,
+    pub item_exceptions: ExceptionMap<ItemId>,
     pub stacks: u32,
     pub level: u8,
     pub infer_stats: bool,
@@ -53,8 +80,8 @@ impl<T: Default> Default for PlayerData<T> {
     fn default() -> Self {
         Self {
             stats: T::default(),
-            items: Vec::new(),
-            item_exceptions: Vec::new(),
+            items: Default::default(),
+            item_exceptions: Default::default(),
             stacks: 0,
             level: 1,
             infer_stats: true,

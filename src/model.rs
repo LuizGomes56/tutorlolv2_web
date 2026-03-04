@@ -98,14 +98,14 @@ impl AbilityLevels {
 /// Wrapper around the type [`u32`], whose first [`Self::DISC_BITS`] are used to
 /// identify the enum type of the current value, which is either [`ItemId`] or [`RuneId`],
 /// and the remaining [`Self::VAL_BITS`] are used to store the actual number of stacks held
-#[derive(Clone, Copy, Debug, Encode, PartialEq)]
+#[derive(Clone, Copy, Debug, Encode, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct ValueException(u32);
 
 impl ValueException {
     pub const DISC_BITS: u32 =
         Self::find_disc_bits(ItemId::VARIANTS as u32, RuneId::VARIANTS as u32);
-    pub const VAL_BITS: u32 = 32 - Self::DISC_BITS;
+    pub const VAL_BITS: u32 = u32::BITS - Self::DISC_BITS;
     pub const VAL_MASK: u32 = (1u32 << Self::VAL_BITS) - 1;
     pub const DISC_MASK: u32 = !Self::VAL_MASK;
     pub const DISC_LOW_MASK: u32 = (1u32 << Self::DISC_BITS) - 1;
