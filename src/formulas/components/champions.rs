@@ -4,7 +4,7 @@ use crate::{
         selector::Selector,
     },
     formulas::components::{Section, code::Code},
-    utils::{EnumCast, use_setter},
+    utils::{EnumCast, encode_offset, use_setter},
 };
 use tutorlolv2_gen::{CastId, ChampionId, Position};
 use yew::prelude::*;
@@ -25,16 +25,18 @@ pub fn ChampionFormulas() -> Html {
                 <td class={"content-baseline"}>
                     <div class={classes!("flex", "flex-col", "gap-2")}>
                         for item in f(position) {
-                            <div class={classes!("flex", "items-center", "gap-3")}>
-                                <Image
-                                    class={classes!("w-7", "h-7")}
-                                    src={ImageType::from(*item)}
-                                />
-                                <span class={classes!(
-                                    "text-std-300", "truncate"
-                                )}>
-                                    {item.name()}
-                                </span>
+                            <div data_offset={encode_offset(&[item.formula()])}>
+                                <div class={classes!("flex", "items-center", "gap-3")}>
+                                    <Image
+                                        class={classes!("w-7", "h-7")}
+                                        src={ImageType::from(*item)}
+                                    />
+                                    <span class={classes!(
+                                        "text-std-300", "truncate"
+                                    )}>
+                                        {item.name()}
+                                    </span>
+                                </div>
                             </div>
                         }
                     </div>
@@ -53,15 +55,10 @@ pub fn ChampionFormulas() -> Html {
                     "and other basic information about it"
                 )}
             </p>
-            <div class={classes!("flex", "items-center", "gap-4")}>
-                <Image
-                    class={classes!("w-12", "h-12")}
-                    src={ImageType::from(*champion)}
-                />
-                <h3 class={classes!("text-std-200", "text-3xl", "font-medium")}>
-                    {champion.name()}
-                </h3>
-            </div>
+            <Selector<ChampionId>
+                value={*champion}
+                {callback}
+            />
             <Section text={"Recommended items and runes per position"} />
             <div class={classes!("overflow-auto")}>
                 <table class={classes!("table-fixed")}>

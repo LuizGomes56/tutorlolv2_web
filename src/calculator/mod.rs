@@ -1,4 +1,5 @@
 use crate::{
+    calculator::reducer::push_item,
     model::{
         AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
         ValueException,
@@ -78,15 +79,24 @@ pub struct PlayerData<T> {
 
 impl<T: Default> Default for PlayerData<T> {
     fn default() -> Self {
+        let champion_id = ChampionId::random();
+        let recommended_items = champion_id.recommended_items(champion_id.main_position());
+        let mut items = Vec::with_capacity(recommended_items.len());
+        let mut item_exceptions = ExceptionMap {
+            inner: HashMap::with_capacity(recommended_items.len()),
+        };
+        for &item in recommended_items {
+            push_item(&mut items, &mut item_exceptions, item, true);
+        }
         Self {
             stats: T::default(),
-            items: Default::default(),
-            item_exceptions: Default::default(),
+            items,
+            item_exceptions,
             stacks: 0,
-            level: 1,
+            level: 18,
             infer_stats: true,
             is_mega_gnar: false,
-            champion_id: ChampionId::random(),
+            champion_id,
         }
     }
 }

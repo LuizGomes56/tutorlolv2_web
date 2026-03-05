@@ -5,6 +5,7 @@ use crate::{
             abilities::Abilities,
             banner::Banner,
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
+            infer_stats::InferStats,
             item_selector::ItemButton,
             recommendations::Recommendations,
             stats::{StatCell, Stats},
@@ -81,6 +82,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let item_exception_callback = use_data_callback(player_props, DataAction::ModifyItemExc);
     let rune_exception_callback = use_player_callback(player_props, PlayerAction::ModifyRuneExc);
     let stack_callback = use_data_callback(player_props, DataAction::Stacks);
+    let infer_stats_callback = use_data_callback(player_props, DataAction::InferStats);
 
     html! {
         <>
@@ -105,23 +107,32 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     }}
                     length={player.data.items.len()}
                 />
-                <ChampionExceptionSelector
-                    champion_id={player.data.champion_id}
-                    stacks={player.data.stacks}
-                    callback={stack_callback}
-                    ally={true}
-                />
-                <ExceptionSelector<ItemId>
-                    values={player.data.items.clone()}
-                    exceptions={player.data.item_exceptions.clone()}
-                    callback={item_exception_callback}
-                    filter={ItemId::exceptions(true)}
-                />
-                <ExceptionSelector<RuneId>
-                    values={player.runes.clone()}
-                    exceptions={player.rune_exceptions.clone()}
-                    callback={rune_exception_callback}
-                    filter={RuneId::exceptions()}
+                <div class={classes!(
+                    "grid", "grid-cols-[auto,1fr,1fr]",
+                    "gap-x-2", "px-4", "py-3", "gap-y-1.5"
+                )}>
+                    <ChampionExceptionSelector
+                        champion_id={player.data.champion_id}
+                        stacks={player.data.stacks}
+                        callback={stack_callback}
+                        ally={true}
+                    />
+                    <ExceptionSelector<ItemId>
+                        values={player.data.items.clone()}
+                        exceptions={player.data.item_exceptions.clone()}
+                        callback={item_exception_callback}
+                        filter={ItemId::exceptions(true)}
+                    />
+                    <ExceptionSelector<RuneId>
+                        values={player.runes.clone()}
+                        exceptions={player.rune_exceptions.clone()}
+                        callback={rune_exception_callback}
+                        filter={RuneId::exceptions()}
+                    />
+                </div>
+                <InferStats
+                    infer_stats={data.infer_stats}
+                    callback={infer_stats_callback}
                 />
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",

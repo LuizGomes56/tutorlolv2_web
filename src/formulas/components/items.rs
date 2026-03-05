@@ -1,8 +1,5 @@
 use crate::{
-    components::{
-        image::{Image, ImageType},
-        selector::Selector,
-    },
+    components::selector::Selector,
     formulas::components::{Section, code::Code},
     utils::{EnumCast, use_setter},
 };
@@ -23,15 +20,10 @@ pub fn ItemFormulas() -> Html {
                     "the damage of a given item, and its bonus stats"
                 )}
             </p>
-            <div class={classes!("flex", "items-center", "gap-4")}>
-                <Image
-                    class={classes!("w-12", "h-12")}
-                    src={ImageType::from(*item)}
-                />
-                <h3 class={classes!("text-std-200", "text-3xl", "font-medium")}>
-                    {item.name()}
-                </h3>
-            </div>
+            <Selector<ItemId>
+                value={*item}
+                {callback}
+            />
             <Section text={"Source code definition"} />
             <Code range={item.formula()} />
             <Section text={"Damaging function definition"} />

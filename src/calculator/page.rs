@@ -123,6 +123,9 @@ pub fn Calculator() -> Html {
             // player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
             //     &stats as *const _,
             // )));
+            // player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
+            //     &tutorlolv2_gen::ItemId::VALUES,
+            // )));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::Q(5)));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::W(5)));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::E(5)));
@@ -130,7 +133,9 @@ pub fn Calculator() -> Html {
             player.dispatch(PlayerAction::Data(DataAction::ChampionId(
                 ChampionId::random(),
             )));
-            enemies.dispatch(EnemyAction::Change(0, DataAction::Level(18)));
+            (1..Enemies::MAX_ENEMIES).for_each(|i| {
+                enemies.dispatch(EnemyAction::Insert(ChampionId::random()));
+            });
             // enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
             // enemies.dispatch(EnemyAction::Change(0, {
             //     let champion_id = enemies[0].champion_id;

@@ -3,6 +3,7 @@ use crate::{
         components::inputs::{
             banner::Banner,
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
+            infer_stats::InferStats,
             item_selector::ItemButton,
             recommendations::Recommendations,
             stats::{StatCell, Stats},
@@ -75,7 +76,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     let stats_callback = use_enemy_data_callback(enemy_props, DataAction::Stats);
     let champion_callback = use_enemy_data_callback(enemy_props, DataAction::ChampionId);
     let stack_callback = use_enemy_data_callback(enemy_props, DataAction::Stacks);
-
+    let infer_stats_callback = use_enemy_data_callback(enemy_props, DataAction::InferStats);
     let item_exception_callback = use_enemy_data_callback(enemy_props, DataAction::ModifyItemExc);
 
     let enemy = enemy_props
@@ -86,10 +87,43 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     html! {
         <>
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
-                <Banner
-                    callback={champion_callback}
-                    champion_id={enemy.champion_id}
+                <div class={classes!("mb-2")}>
+                    <Banner
+                        callback={champion_callback}
+                        champion_id={enemy.champion_id}
+                    />
+                </div>
+                <InferStats
+                    infer_stats={enemy.infer_stats}
+                    callback={infer_stats_callback}
                 />
+                <ItemButton
+                    onclick={{
+                        let open_item_menu = open_item_menu.clone();
+                        let index = *enemy_props.enemy_index;
+                        Callback::from(move |_| {
+                            open_item_menu.emit(TargetEntity::Enemy(index));
+                        })
+                    }}
+                    length={enemy.items.len()}
+                />
+                <div class={classes!(
+                    "grid", "grid-cols-[auto,1fr,1fr]",
+                    "gap-x-2", "px-4", "py-3", "gap-y-1.5"
+                )}>
+                    <ChampionExceptionSelector
+                        champion_id={enemy.champion_id}
+                        stacks={enemy.stacks}
+                        callback={stack_callback}
+                        ally={false}
+                    />
+                    <ExceptionSelector<ItemId>
+                        values={enemy.items.clone()}
+                        exceptions={enemy.item_exceptions.clone()}
+                        callback={item_exception_callback}
+                        filter={ItemId::exceptions(false)}
+                    />
+                </div>
                 <div class={classes!(
                     "grid", "grid-cols-[auto_1fr_1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-0.5"
@@ -115,28 +149,6 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         callback={stats_callback}
                     />
                 </div>
-                <ItemButton
-                    onclick={{
-                        let open_item_menu = open_item_menu.clone();
-                        let index = *enemy_props.enemy_index;
-                        Callback::from(move |_| {
-                            open_item_menu.emit(TargetEntity::Enemy(index));
-                        })
-                    }}
-                    length={enemy.items.len()}
-                />
-                <ChampionExceptionSelector
-                    champion_id={enemy.champion_id}
-                    stacks={enemy.stacks}
-                    callback={stack_callback}
-                    ally={true}
-                />
-                <ExceptionSelector<ItemId>
-                    values={enemy.items.clone()}
-                    exceptions={enemy.item_exceptions.clone()}
-                    callback={item_exception_callback}
-                    filter={ItemId::exceptions(false)}
-                />
             </div>
         </>
     }

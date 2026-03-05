@@ -1,8 +1,5 @@
 use crate::{
-    components::{
-        image::{Image, ImageType},
-        selector::Selector,
-    },
+    components::selector::Selector,
     formulas::components::{Section, code::Code},
     utils::{EnumCast, use_setter},
 };
@@ -24,15 +21,10 @@ pub fn RuneFormulas() -> Html {
                     "the damage formula of all runes are manually defined and may be outdated"
                 )}
             </p>
-            <div class={classes!("flex", "items-center", "gap-4")}>
-                <Image
-                    class={classes!("w-12", "h-12")}
-                    src={ImageType::from(*rune)}
-                />
-                <h3 class={classes!("text-std-200", "text-3xl", "font-medium")}>
-                    {rune.name()}
-                </h3>
-            </div>
+            <Selector<RuneId>
+                value={*rune}
+                {callback}
+            />
             <Section text={"Source code definition"} />
             <Code range={rune.formula()} />
             <Section text={"Damaging function definition"} />

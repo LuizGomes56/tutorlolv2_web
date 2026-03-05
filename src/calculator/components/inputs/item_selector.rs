@@ -594,7 +594,6 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     "rounded-2xl",
                     "border", "border-std-800",
                     "bg-[#0b0d12]",
-                    "shadow-[0_24px_80px_rgba(0,0,0,0.6)]",
                     "overflow-hidden",
                     "flex", "flex-col"
                 )}
@@ -636,7 +635,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                                     "text-[13px]", "text-std-100",
                                     "placeholder:text-std-500",
                                     "outline-none",
-                                    "border-0", "ring-0", "shadow-none"
+                                    "border-0", "ring-0",
                                 )}
                             />
                             <span class={classes!(
@@ -860,29 +859,49 @@ pub fn ItemButton(props: &ItemButtonProps) -> Html {
     } = *props;
 
     html! {
-        <button
-            class={classes!(
-                "flex", "items-center", "justify-between", "gap-2",
-                "px-4", "py-2",
-                "rounded-lg",
-                "border", "border-transparent",
-                "text-std-200",
-                "hover:bg-amber-400/8",
-                "hover:border-amber-500/15",
-                "transition-all", "duration-150"
-            )}
-            {onclick}
-        >
-            <span>{"Items"}</span>
-            <span class={classes!(
-                "px-2", "py-1",
-                "rounded-md",
-                "bg-amber-500/20",
-                "text-amber-300",
-                "text-sm", "font-mono"
-            )}>
-                {length}
-            </span>
+        <button {onclick} class={classes!(
+            "transition-all", "duration-150",
+            "hover:bg-zinc-950/20",
+            "border-y", "border-zinc-800",
+            "hover:border-amber-500/20",
+            "p-2", "flex", "items-center", "justify-between",
+            "gap-3", "group", "my-2"
+        )}>
+            <div class={classes!("flex", "items-center", "gap-3", "pl-2")}>
+                <div class={classes!("text-sm", "font-medium", "text-zinc-100")}>
+                    {"Items"}
+                </div>
+                <div class={classes!(
+                    "text-xs", "text-zinc-400"
+                )}>
+                    {"Add / Remove"}
+                </div>
+            </div>
+            <div class={classes!("flex", "items-center", "gap-2", "shrink-0")}>
+                <span class={classes!(
+                    "min-w-[2rem]",
+                    "px-2.5", "py-1",
+                    "bg-amber-500/12",
+                    "border", "border-amber-500/20",
+                    "text-amber-300",
+                    "text-xs", "font-semibold", "font-mono",
+                    "text-center"
+                )}>
+                    {length}
+                </span>
+                <svg
+                    xmlns={"http://www.w3.org/2000/svg"}
+                    class={"h-4 w-4 text-zinc-500 transition-transform duration-150 group-hover:text-zinc-300"}
+                    viewBox={"0 0 20 20"}
+                    fill={"currentColor"}
+                >
+                    <path
+                        fill-rule={"evenodd"}
+                        d={"M7.21 14.77a.75.75 0 010-1.06L10.94 10 7.21 6.29a.75.75 0 111.06-1.06l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0z"}
+                        clip-rule={"evenodd"}
+                    />
+                </svg>
+            </div>
         </button>
     }
 }

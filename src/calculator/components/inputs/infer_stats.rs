@@ -1,0 +1,83 @@
+use web_sys::HtmlInputElement;
+use yew::prelude::*;
+
+#[derive(PartialEq, Properties)]
+pub struct InferStatsProps {
+    pub infer_stats: bool,
+    pub callback: Callback<bool>,
+}
+
+#[component]
+pub fn InferStats(props: &InferStatsProps) -> Html {
+    let InferStatsProps {
+        infer_stats,
+        ref callback,
+    } = *props;
+
+    let onchange = use_callback(callback.clone(), |e: Event, callback| {
+        let target = e.target_unchecked_into::<HtmlInputElement>();
+        callback.emit(target.checked());
+    });
+
+    html! {
+        <label class={classes!(
+            "inline-flex",
+            "items-center",
+            "gap-2",
+            "cursor-pointer",
+            "select-none",
+            "px-4",
+            "py-2",
+            "transition-colors",
+            "hover:bg-zinc-800/60"
+        )}>
+            <input
+                type={"checkbox"}
+                class={classes!("peer", "sr-only")}
+                checked={infer_stats}
+                {onchange}
+            />
+            <span class={classes!(
+                "flex",
+                "h-3.5",
+                "w-3.5",
+                "items-center",
+                "justify-center",
+                "border",
+                "border-zinc-600",
+                "bg-zinc-900",
+                "text-white",
+                "transition-all",
+                "duration-150",
+                "peer-checked:border-violet-500",
+                "peer-checked:bg-violet-600",
+                "peer-focus-visible:outline",
+                "peer-focus-visible:outline-2",
+                "peer-focus-visible:outline-violet-400"
+            )}>
+                if infer_stats {
+                    <svg
+                        xmlns={"http://www.w3.org/2000/svg"}
+                        class={"h-3.5 w-3.5"}
+                        viewBox={"0 0 20 20"}
+                        fill={"currentColor"}
+                    >
+                        <path
+                            fill-rule={"evenodd"}
+                            d={"M16.704 5.29a1 1 0 010 1.414l-7.2 7.2a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l2.293 2.293 6.493-6.493a1 1 0 011.414 0z"}
+                            clip-rule={"evenodd"}
+                        />
+                    </svg>
+                }
+            </span>
+            <span class={classes!(
+                "text-zinc-200",
+                "transition-colors",
+                "peer-checked:text-white",
+                "text-sm"
+            )}>
+                {"Infer Stats"}
+            </span>
+        </label>
+    }
+}

@@ -1,5 +1,5 @@
 use crate::{
-    calculator::{Player, PlayerData},
+    calculator::{ExceptionMap, Player, PlayerData},
     model::{AbilityLevelsAction, EnemyStats, PlayerStats, ValueException},
     utils::traits::{Print, ReduceApply},
 };
@@ -69,6 +69,19 @@ impl core::ops::DerefMut for Enemies {
     }
 }
 
+pub fn push_item(
+    items: &mut Vec<ItemId>,
+    item_exceptions: &mut ExceptionMap<ItemId>,
+    v: ItemId,
+    ally: bool,
+) {
+    if ItemId::exceptions(ally).contains(&v) {
+        let value = ValueException::pack_item_id(v, 0);
+        item_exceptions.inner.insert(v, value);
+    }
+    items.push(v);
+}
+
 impl<T: ReduceApply> PlayerData<T> {
     pub fn reduce_mut(&mut self, ally: bool, action: DataAction<T>) {
         match action {
@@ -79,14 +92,15 @@ impl<T: ReduceApply> PlayerData<T> {
             DataAction::InferStats(v) => self.infer_stats = v,
             DataAction::IsMegaGnar(v) => self.is_mega_gnar = v,
             DataAction::InsertItem(v) => {
-                if ItemId::exceptions(ally).contains(&v) {
-                    let value = ValueException::pack_item_id(v, 0);
-                    self.item_exceptions.inner.insert(v, value);
-                }
-                self.items.push(v);
+                push_item(&mut self.items, &mut self.item_exceptions, v, ally)
             }
             DataAction::ChampionId(v) => self.champion_id = v,
-            DataAction::SetItemVec(v) => self.items = v.into(),
+            DataAction::SetItemVec(v) => {
+                self.items.clear();
+                v.iter().cloned().for_each(|item| {
+                    push_item(&mut self.items, &mut self.item_exceptions, item, ally)
+                });
+            }
             DataAction::RemoveItem(v) => {
                 let value = self.items.swap_remove(v);
                 self.item_exceptions.inner.remove(&value);

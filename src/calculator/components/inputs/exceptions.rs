@@ -30,16 +30,25 @@ where
     } = *props;
 
     let data_offset = value.map(|v| encode_offset(&[v.formula()]));
-    let title = value.map(|v| v.name());
+    let title = value.map(|v| {
+        let name = v.name();
+        format!("Define the amount of stacks for {name}")
+    });
 
     html! {
-        <div class={classes!("flex", "items-center", "gap-2")}>
-            <div {title} {data_offset}>
+        <>
+            <div
+                {data_offset}
+                class={classes!("flex", "items-center", "justify-center", "relative")}
+            >
                 <Image
-                    class={classes!("w-8", "h-8")}
+                    class={classes!("h-6", "w-6")}
                     src={image_type}
                 />
             </div>
+            <span {title} class={classes!("text-sm", "content-center", "truncate")}>
+                {value.map(|v| v.name()).unwrap_or_default()}
+            </span>
             <input
                 type={"number"}
                 class={classes!(
@@ -50,7 +59,7 @@ where
                 value={stacks.to_string()}
                 placeholder={"0"}
             />
-        </div>
+        </>
     }
 }
 

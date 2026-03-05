@@ -16,7 +16,8 @@ pub fn Code(props: &CodeProps) -> Html {
 
     html! {
         <code class={classes!(
-            "bg-#[1f1f1f]", "px-4", "py-3",
+            // "bg-[#1f1f1f]",
+            "px-4", "py-3",
             "border", "border-std-800",
             // "max-h-[calc(100vh-16rem)]",
             // "overflow-auto"

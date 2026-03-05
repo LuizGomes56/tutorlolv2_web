@@ -1,73 +1,139 @@
 use crate::{
-    components::image::Image,
-    utils::{EnumCast, encode_offset},
+    components::image::{Image, ImageType},
+    utils::{EnumCast, hooks::use_clickout},
 };
-use std::cmp::Ordering;
 use tutorlolv2_gen::ItemId;
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct SelectorProps<T: PartialEq> {
     pub callback: Callback<T>,
-    #[prop_or_else(|| Callback::from(|_: T| true))]
-    pub filter: Callback<T, bool>,
-    #[prop_or_default]
-    pub sort_by: Option<Callback<(T, T), Ordering>>,
+    pub value: T,
+    #[prop_or(classes!("gap-4"))]
+    pub box_class: Classes,
+    #[prop_or(classes!("w-12", "h-12"))]
+    pub img_class: Classes,
+    #[prop_or(classes!(
+        "text-std-200", "placeholder:text-std-500",
+        "text-3xl", "font-medium",
+        "bg-transparent", "w-full",
+        "focus:ring-0", "focus:outline-none",
+        "truncate"
+    ))]
+    pub input_class: Classes,
+    #[prop_or(classes!("mt-2", "p-1.5", "gap-1.5", "w-96"))]
+    pub dropdown_class: Classes,
 }
 
 #[component]
-pub fn Selector<T: EnumCast>(props: &SelectorProps<T>) -> Html {
+pub fn Selector<T>(props: &SelectorProps<T>) -> Html
+where
+    T: EnumCast,
+    ImageType: From<T>,
+{
     let SelectorProps {
-        callback,
-        filter,
-        sort_by,
-    } = props;
+        ref callback,
+        ref img_class,
+        ref input_class,
+        ref box_class,
+        ref dropdown_class,
+        value,
+    } = *props;
 
-    let items = use_memo(
-        (callback.clone(), filter.clone(), sort_by.clone()),
-        |(callback, filter, sort_by)| {
-            let mut data = T::VALUES
-                .iter()
-                .filter(|&&value| filter.emit(value))
-                .collect::<Vec<_>>();
+    let is_open = use_state(|| false);
+    let query = use_state(String::new);
 
-            if let Some(sort_by) = sort_by {
-                data.sort_by(|&&a, &&b| sort_by.emit((a, b)));
-            }
+    let close_callback = use_callback(is_open.clone(), move |_, is_open| is_open.set(false));
 
-            data.into_iter()
-                .map(|value| {
-                    let onclick = {
-                        let callback = callback.clone();
-                        Callback::from(move |_| {
-                            callback.emit(*value);
-                        })
-                    };
+    let dropdown_ref = use_node_ref();
+    let button_ref = use_clickout(close_callback.clone(), [dropdown_ref.clone()]);
 
-                    let data_offset = encode_offset(&[value.formula()]);
-
-                    html! {
-                        <button
-                            {data_offset}
-                            {onclick}
-                        >
-                            <div class={classes!("flex", "items-center", "gap-2")}>
-                                <Image src={value.image_type()} class={classes!("w-6", "h-6")} />
-                                <span class={classes!("truncate")}>{value.name()}</span>
-                            </div>
-                        </button>
-                    }
+    let buttons = T::VALUES
+        .iter()
+        .filter(|v| {
+            query.is_empty()
+                || v.name()
+                    .to_ascii_lowercase()
+                    .contains(&query.trim().to_ascii_lowercase())
+        })
+        .map(|v| {
+            let onclick = {
+                let callback = callback.clone();
+                let close_callback = close_callback.clone();
+                let query = query.clone();
+                Callback::from(move |_| {
+                    callback.emit(*v);
+                    close_callback.emit(());
+                    query.set(String::new());
                 })
-                .collect::<Html>()
+            };
+
+            html! {
+                <button {onclick}>
+                    <div class={classes!("flex", "items-center", "gap-2")}>
+                        <Image src={v.image_type()} class={classes!("w-6", "h-6")} />
+                        <span class={classes!("truncate")}>{v.name()}</span>
+                    </div>
+                </button>
+            }
+        })
+        .collect::<Html>();
+
+    let oninput = use_callback(
+        (query.clone(), is_open.clone()),
+        |e: InputEvent, (query, is_open)| {
+            let target = e.target_unchecked_into::<HtmlInputElement>();
+            let value = target.value();
+            is_open.set(!value.is_empty());
+            query.set(value);
         },
     );
 
+    let onfocus = use_callback(is_open.clone(), move |_: FocusEvent, is_open| {
+        is_open.set(true)
+    });
+
     html! {
-        <div class={classes!(
-            "flex", "flex-col", "max-h-48",
-            "overflow-auto", "gap-2"
-        )}>
-            {(*items).clone()}
+        <div class={classes!("relative")}>
+            <div
+                ref={button_ref}
+                class={{
+                    let mut class = classes!("flex", "items-center");
+                    class.push(box_class);
+                    class
+                }}
+            >
+                <Image
+                    class={img_class}
+                    src={ImageType::from(value)}
+                />
+                <input
+                    class={input_class}
+                    value={query.to_string()}
+                    placeholder={value.name()}
+                    {oninput}
+                    {onfocus}
+                />
+            </div>
+            if *is_open {
+                <div
+                    ref={dropdown_ref}
+                    class={{
+                        let mut class = classes!(
+                            "absolute", "bg-std-900",
+                            "flex", "flex-col",
+                            "overflow-auto", "max-h-64",
+                            "border", "border-std-800",
+                            "z-50"
+                        );
+                        class.push(dropdown_class);
+                        class
+                    }}
+                >
+                    {buttons}
+                </div>
+            }
         </div>
     }
 }
