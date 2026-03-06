@@ -50,7 +50,7 @@ impl Enemies {
 impl Default for Enemies {
     fn default() -> Self {
         let mut vector = Vec::with_capacity(Self::MAX_ENEMIES);
-        vector.push(Default::default());
+        (0..3).for_each(|_| vector.push(Default::default()));
         Self(vector)
     }
 }

@@ -104,7 +104,7 @@ table tbody tr:last-child {
 table th,
 table td {
     transition: .2s ease;
-    padding: 8px;
+    padding: 0 8px;
 }
 
 table p {

@@ -46,12 +46,12 @@ fn App() -> Html {
                 html! {
                     <div class={classes!("bg-std-900")}>
                         <div class={classes!(
-                            "grid", "grid-cols-[auto_1fr]",
-                            "max-h-screen", "h-full"
+                            "flex", "max-h-screen", "h-full"
                         )}>
                             <Sidebar />
                             <div class={classes!(
-                                "w-full", "overflow-auto"
+                                "flex-1", "overflow-y-auto",
+                                "overflow-x-hidden"
                             )}>
                                 {component}
                             </div>

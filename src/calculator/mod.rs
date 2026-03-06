@@ -50,12 +50,33 @@ pub struct InputGame<'a> {
     pub dragons: &'a Dragons,
 }
 
-#[derive(Clone, Debug, Default, Encode, PartialEq)]
+#[derive(Clone, Debug, Encode, PartialEq)]
 pub struct Player {
     pub runes: Vec<RuneId>,
     pub rune_exceptions: ExceptionMap<RuneId>,
     pub abilities: AbilityLevels,
     pub data: PlayerData<PlayerStats>,
+}
+
+impl Default for Player {
+    fn default() -> Self {
+        let data = PlayerData::default();
+        let champion_id = data.champion_id;
+
+        Self {
+            runes: champion_id
+                .recommended_runes(champion_id.main_position())
+                .to_vec(),
+            rune_exceptions: Default::default(),
+            abilities: AbilityLevels {
+                q: 5,
+                w: 5,
+                e: 5,
+                r: 3,
+            },
+            data,
+        }
+    }
 }
 
 /// Minimum required data to qualify a valid enemy player, and calculate

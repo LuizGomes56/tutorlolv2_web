@@ -79,6 +79,17 @@ pub enum TargetEntity {
     Enemy(usize),
 }
 
+#[derive(Debug)]
+struct Loading;
+
+impl std::fmt::Display for Loading {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Loading")
+    }
+}
+
+impl std::error::Error for Loading {}
+
 #[component]
 pub fn Calculator() -> Html {
     let player = use_reducer(Player::default);
@@ -86,59 +97,10 @@ pub fn Calculator() -> Html {
     let dragons = use_reducer(Dragons::default);
     let enemy_index = use_state(|| 0);
 
-    let game_data = use_state(|| Err::<Game, _>("Loading...".into()));
+    let game_data = use_state(|| Err::<Game, _>(Loading.into()));
     let controller = use_state(|| None::<AbortController>);
     let last_action = use_mut_ref(|| LastAction::Init);
     let entity = use_state(|| None::<TargetEntity>);
-
-    {
-        let player = player.clone();
-        let enemies = enemies.clone();
-        use_effect_with((), move |_| {
-            // player.dispatch(PlayerAction::Data(DataAction::InferStats(false)));
-            // let random = |i| random_u16(0..i) as _;
-            // let stats = PlayerStats {
-            //     ability_power: random(1600),
-            //     armor: random(350),
-            //     armor_penetration_flat: 0,
-            //     armor_penetration_percent: 0,
-            //     attack_damage: random(600),
-            //     attack_range: random(750),
-            //     attack_speed: random(2),
-            //     crit_chance: random(100),
-            //     crit_damage: random(200),
-            //     current_health: random(5000),
-            //     magic_penetration_flat: 0,
-            //     magic_penetration_percent: 0,
-            //     magic_resist: random(300),
-            //     max_health: random(5000),
-            //     max_mana: random(2000),
-            //     current_mana: random(2000),
-            // };
-            // let champion_id = player.data.champion_id;
-            // player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
-            //     champion_id.recommended_items(champion_id.main_position()),
-            // )));
-            // player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
-            //     &stats as *const _,
-            // )));
-            // player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
-            //     &tutorlolv2_gen::ItemId::VALUES,
-            // )));
-            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::Q(5)));
-            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::W(5)));
-            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::E(5)));
-            player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::R(3)));
-            (1..Enemies::MAX_ENEMIES).for_each(|_| {
-                enemies.dispatch(EnemyAction::Insert(ChampionId::random()));
-            });
-            // enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
-            // enemies.dispatch(EnemyAction::Change(0, {
-            //     let champion_id = enemies[0].champion_id;
-            //     DataAction::SetItemVec(champion_id.recommended_items(champion_id.main_position()))
-            // }));
-        })
-    };
 
     {
         let game_data = game_data.clone();
@@ -359,43 +321,45 @@ pub fn Calculator() -> Html {
 
             html! {
                 <>
-                    <div class={classes!("box")}>
-                        <div class={classes!(
-                            "grid", "grid-cols-2", "gap-6",
-                            "px-6", "py-4", "bg-std-900"
-                        )}>
-                            <div class={classes!("flex", "flex-col", "gap-4")}>
-                                <h2 class={classes!("text-2xl", "text-std-200", "font-medium")}>
-                                    {"Request error"}
-                                </h2>
-                                <ul class={classes!("text-std-400", "ml-8")}>
-                                    <li class={classes!("list-disc")}>
-                                        {"Servers might be down due to an internal error"}
-                                    </li>
-                                    <li class={classes!("list-disc")}>
-                                        {"This application might be outdated"}
-                                    </li>
-                                    <li class={classes!("list-disc")}>
-                                        {"Refresh the page or come back later"}
-                                    </li>
-                                </ul>
-                            </div>
-                            <code class={classes!(
-                                "flex", "flex-col",
-                                "overflow-auto", "p-2",
-                                "leading-6", "text-base", "border",
-                                "border-std-800", "bg-std-900"
+                    if !e.is::<Loading>() {
+                        <div class={classes!("box")}>
+                            <div class={classes!(
+                                "grid", "grid-cols-2", "gap-6",
+                                "px-6", "py-4", "bg-std-900"
                             )}>
-                                <pre>
-                                    {format!("{e:#?}")}
-                                </pre>
-                            </code>
+                                <div class={classes!("flex", "flex-col", "gap-4")}>
+                                    <h2 class={classes!("text-2xl", "text-std-200", "font-medium")}>
+                                        {"Request error"}
+                                    </h2>
+                                    <ul class={classes!("text-std-400", "ml-8")}>
+                                        <li class={classes!("list-disc")}>
+                                            {"Servers might be down due to an internal error"}
+                                        </li>
+                                        <li class={classes!("list-disc")}>
+                                            {"This application might be outdated"}
+                                        </li>
+                                        <li class={classes!("list-disc")}>
+                                            {"Refresh the page or come back later"}
+                                        </li>
+                                    </ul>
+                                </div>
+                                <code class={classes!(
+                                    "flex", "flex-col",
+                                    "overflow-auto", "p-2",
+                                    "leading-6", "text-base", "border",
+                                    "border-std-800", "bg-std-900"
+                                )}>
+                                    <pre>
+                                        {format!("{e:#?}")}
+                                    </pre>
+                                </code>
+                            </div>
                         </div>
-                    </div>
-                    {empty_table(5)}
+                    }
+                    {empty_table(3)}
                     {empty_table(MONSTER_HEADERS.len())}
                     {empty_table(1)}
-                    <div class={classes!("box", "h-96")}></div>
+                    <div class={classes!("box", "h-96")} />
                 </>
             }
         }
