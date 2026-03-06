@@ -1,17 +1,6 @@
-use crate::components::image::ImageType;
-use std::{fmt::Debug, ops::Range};
+use crate::{components::image::ImageType, utils::random_u64};
+use std::fmt::Debug;
 use tutorlolv2_gen::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
-use web_sys::js_sys::Math;
-
-pub fn random_u64(range: Range<u64>) -> u64 {
-    let start = range.start;
-    let end = range.end;
-    let x = getrandom::u64().unwrap_or_else(
-        #[cold]
-        |_| (Math::random() * ((end - start) + start) as f64) as _,
-    );
-    start + (x % (end - start))
-}
 
 pub trait EnumCast: CastId + TryFrom<u16> + Into<ImageType> + PartialEq + Copy {
     fn random() -> Self {

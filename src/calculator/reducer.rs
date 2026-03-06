@@ -1,7 +1,7 @@
 use crate::{
     calculator::{ExceptionMap, Player, PlayerData},
     model::{AbilityLevelsAction, EnemyStats, PlayerStats, ValueException},
-    utils::traits::{Print, ReduceApply},
+    utils::{Print, ReduceApply},
 };
 use std::rc::Rc;
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};

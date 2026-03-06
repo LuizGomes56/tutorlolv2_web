@@ -4,7 +4,7 @@ use crate::{
         page::{EnemyProps, PlayerProps, TargetEntity},
         reducer::DataAction,
     },
-    components::image::{Image, ImageType, Svg},
+    components::image::{Image, ImageType},
     utils::{encode_offset, hooks::use_clickout},
 };
 use tutorlolv2_gen::{CastId, ItemId, Position, StatName};
@@ -842,61 +842,5 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                 </div>
             </div>
         </div>
-    }
-}
-
-#[derive(PartialEq, Properties)]
-pub struct ItemButtonProps {
-    pub onclick: Callback<MouseEvent>,
-    pub length: usize,
-}
-
-#[component]
-pub fn ItemButton(props: &ItemButtonProps) -> Html {
-    let ItemButtonProps {
-        ref onclick,
-        length,
-    } = *props;
-
-    html! {
-        <button {onclick} class={classes!(
-            "transition-all", "duration-150",
-            "hover:bg-zinc-800/60",
-            "hover:border-zinc-700",
-            "border-y", "border-zinc-800",
-            "p-2", "flex", "items-center", "justify-between",
-            "gap-3", "group", "my-2"
-        )}>
-            <div class={classes!("flex", "items-center", "gap-3", "pl-2")}>
-                <div class={classes!("text-sm", "font-medium", "text-zinc-100")}>
-                    {"Items"}
-                </div>
-                <div class={classes!(
-                    "text-xs", "text-zinc-400"
-                )}>
-                    {"Add / Remove"}
-                </div>
-            </div>
-            <div class={classes!("flex", "items-center", "gap-2", "shrink-0")}>
-                <span class={classes!(
-                    "min-w-[2rem]",
-                    "px-1.5", "py-0.5",
-                    "bg-sky-500/15",
-                    "border", "border-sky-500/20",
-                    "text-sky-300",
-                    "text-sm", "font-semibold", "font-mono",
-                    "text-center"
-                )}>
-                    {length}
-                </span>
-                <Svg
-                    class={classes!(
-                        "h-4", "w-4", "text-zinc-500", "transition-transform",
-                        "duration-150", "group-hover:text-zinc-300"
-                    )}
-                    src={format!("/svgs/rchev.svg")}
-                />
-            </div>
-        </button>
     }
 }

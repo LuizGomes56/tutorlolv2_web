@@ -2,7 +2,7 @@ use crate::{
     calculator::FinalEnemy,
     model::{Attacks, Damages},
     realtime::Enemy,
-    utils::{encode_offset, traits::ClassCast},
+    utils::{ClassCast, encode_offset},
 };
 use std::{fmt::Write, ops::Range};
 use tutorlolv2_gen::{

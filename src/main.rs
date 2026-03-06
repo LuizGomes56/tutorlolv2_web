@@ -1,7 +1,6 @@
 #![allow(static_mut_refs)]
 use crate::{
-    calculator::Calculator, components::sidebar::Sidebar, formulas::Formulas,
-    utils::cache::init_cache,
+    calculator::Calculator, components::sidebar::Sidebar, formulas::Formulas, utils::init_cache,
 };
 use yew::prelude::*;
 use yew_router::{BrowserRouter, Routable, Switch};

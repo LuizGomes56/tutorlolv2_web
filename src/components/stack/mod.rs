@@ -1,7 +1,7 @@
 mod selector;
 mod table;
 
-use crate::utils::traits::random_u64;
+use crate::utils::random_u64;
 use std::{collections::HashSet, ops::Deref, rc::Rc};
 use tutorlolv2_gen::{AbilityId, ChampionId, ItemId, RuneId, TypeMetadata};
 use yew::Reducible;

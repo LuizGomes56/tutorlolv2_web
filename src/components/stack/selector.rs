@@ -25,6 +25,8 @@ fn section(title: &str, iterator: impl ExactSizeIterator<Item = Html>) -> Option
 
 #[derive(PartialEq, Properties)]
 pub struct StackSelectorProps<T: Victim + PartialEq + 'static> {
+    #[prop_or_default]
+    pub callback: Option<Callback<usize>>,
     pub enemies: Rc<[T]>,
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
@@ -40,6 +42,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
         ref enemies,
         ref items_meta,
         ref runes_meta,
+        ref callback,
     } = *props;
 
     let stack = use_reducer(Stack::default);
@@ -230,7 +233,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
 
     html! {
         <div class={classes!("grid", "grid-cols-3", "gap-4", "items-start")}>
-            <div class={classes!("flex", "flex-col", "gap-2", "px-5", "py-4")}>
+            <div class={classes!("flex", "flex-col", "gap-4", "px-5", "py-4")}>
                 {(*selector).clone()}
                 {(*other).clone()}
             </div>
@@ -242,6 +245,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
             </div>
             <div class={classes!("overflow-auto")}>
                 <StackTable<T>
+                    callback={callback.clone()}
                     enemies={enemies.clone()}
                     stack={safe_stack}
                     level={level}

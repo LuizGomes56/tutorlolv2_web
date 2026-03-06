@@ -5,15 +5,14 @@ use crate::{
             banner::Banner,
             checkbox::Checkbox,
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
-            item_selector::ItemButton,
             stats::{StatCell, Stats},
         },
         page::{PlayerProps, TargetEntity},
         reducer::{DataAction, LastAction, PlayerAction},
     },
-    components::image::ImageType,
+    components::{image::ImageType, selector::SelectorButton},
     model::PlayerStats,
-    utils::traits::Print,
+    utils::Print,
 };
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
 use web_sys::HtmlInputElement;
@@ -96,15 +95,29 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         champion_id={data.champion_id}
                     />
                 </div>
-                <ItemButton
-                    onclick={{
-                        let open_item_menu = open_item_menu.clone();
-                        Callback::from(move |_| {
-                            open_item_menu.emit(TargetEntity::Player);
-                        })
-                    }}
-                    length={player.data.items.len()}
-                />
+                <div class={classes!("flex", "flex-col", "gap-2", "my-2", "w-full")}>
+                    <SelectorButton
+                        title={"Items"}
+                        onclick={{
+                            let open_item_menu = open_item_menu.clone();
+                            Callback::from(move |_| {
+                                open_item_menu.emit(TargetEntity::Player);
+                            })
+                        }}
+                        length={player.data.items.len()}
+                    />
+                    <SelectorButton
+                        title={"Runes"}
+                        onclick={{
+                            Callback::from(move |_| {})
+                            // let open_item_menu = open_item_menu.clone();
+                            // Callback::from(move |_| {
+                            //     open_item_menu.emit(TargetEntity::Player);
+                            // })
+                        }}
+                        length={player.runes.len()}
+                    />
+                </div>
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-1.5",

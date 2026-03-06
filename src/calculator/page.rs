@@ -12,7 +12,7 @@ use crate::{
         tables::{header::TableHeader, turret::TurretTable},
     },
     model::{AbilityLevelsAction, Dragons, EnemyStats},
-    utils::{ClassCast, EnumCast, encode_offset, fetch::Fetch, traits::Print},
+    utils::{ClassCast, EnumCast, Fetch, Print, encode_offset},
 };
 use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{CastId, ChampionId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
@@ -86,7 +86,7 @@ pub fn Calculator() -> Html {
     let dragons = use_reducer(Dragons::default);
     let enemy_index = use_state(|| 0);
 
-    let game_data = use_state(|| None::<Game>);
+    let game_data = use_state(|| Err::<Game, _>("Loading...".into()));
     let controller = use_state(|| None::<AbortController>);
     let last_action = use_mut_ref(|| LastAction::Init);
     let entity = use_state(|| None::<TargetEntity>);
@@ -209,19 +209,22 @@ pub fn Calculator() -> Html {
                                 _ => {}
                             };
 
-                            data.current_player.log();
+                            // data.current_player.log();
 
-                            game_data.set(Some(data));
+                            game_data.set(Ok(data));
                         }
-                        Err(e) => format!("Failed to request calculator api: {e:?}").err(),
+                        Err(e) => {
+                            format!("Failed to request calculator api: {e:#?}").err();
+                            game_data.set(Err(e))
+                        }
                     }
                 }
             });
         });
     }
 
-    let data = match *game_data {
-        Some(ref data) => {
+    let data = match game_data.as_ref() {
+        Ok(data) => {
             let Game {
                 monster_damages,
                 current_player,
@@ -231,11 +234,7 @@ pub fn Calculator() -> Html {
                 runes_meta,
             } = data;
             html! {
-                <div class={classes!(
-                    "flex", "flex-col", "gap-4",
-                    "p-2", "overflow-hidden",
-                    "flex-1"
-                )}>
+                <>
                     <div class={classes!("box", "overflow-auto")}>
                         <table class={classes!("data-table")}>
                             <TableHeader
@@ -329,16 +328,77 @@ pub fn Calculator() -> Html {
                     <div class={classes!("box", "overflow-auto")}>
                         <StackSelector<FinalEnemy>
                             champion_id={current_player.champion_id}
+                            callback={{
+                                let enemy_index = enemy_index.clone();
+                                Callback::from(move |i| {
+                                    enemy_index.set(i);
+                                })
+                            }}
                             level={current_player.level}
                             enemies={enemies.clone()}
                             items_meta={items_meta.clone()}
                             runes_meta={runes_meta.clone()}
                         />
                     </div>
-                </div>
+                </>
             }
         }
-        None => html!("No data"),
+        Err(e) => {
+            fn empty_table(rows: usize) -> Html {
+                html! {
+                    <div class={classes!("box")}>
+                        <table>
+                            <thead><tr><th></th></tr></thead>
+                            <tbody>
+                                for _ in 0..rows { <tr><td></td></tr> }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+
+            html! {
+                <>
+                    <div class={classes!("box")}>
+                        <div class={classes!(
+                            "grid", "grid-cols-2", "gap-6",
+                            "px-6", "py-4", "bg-std-900"
+                        )}>
+                            <div class={classes!("flex", "flex-col", "gap-4")}>
+                                <h2 class={classes!("text-2xl", "text-std-200", "font-medium")}>
+                                    {"Request error"}
+                                </h2>
+                                <ul class={classes!("text-std-400", "ml-8")}>
+                                    <li class={classes!("list-disc")}>
+                                        {"Servers might be down due to an internal error"}
+                                    </li>
+                                    <li class={classes!("list-disc")}>
+                                        {"This application might be outdated"}
+                                    </li>
+                                    <li class={classes!("list-disc")}>
+                                        {"Refresh the page or come back later"}
+                                    </li>
+                                </ul>
+                            </div>
+                            <code class={classes!(
+                                "flex", "flex-col",
+                                "overflow-auto", "p-2",
+                                "leading-6", "text-base", "border",
+                                "border-std-800", "bg-std-900"
+                            )}>
+                                <pre>
+                                    {format!("{e:#?}")}
+                                </pre>
+                            </code>
+                        </div>
+                    </div>
+                    {empty_table(5)}
+                    {empty_table(MONSTER_HEADERS.len())}
+                    {empty_table(1)}
+                    <div class={classes!("box", "h-96")}></div>
+                </>
+            }
+        }
     };
 
     let player_props = PlayerProps {
@@ -365,7 +425,13 @@ pub fn Calculator() -> Html {
                 {entity}
             />
             <PlayerInput {player_props} open_item_menu={open_item_menu.clone()} />
-            {data}
+            <div class={classes!(
+                "flex", "flex-col", "gap-4",
+                "p-2", "overflow-hidden",
+                "flex-1"
+            )}>
+                {data}
+            </div>
             <EnemiesInput {enemy_props} {open_item_menu} />
         </div>
     }

@@ -12,6 +12,8 @@ use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct StackTableProps<T: Victim + PartialEq + 'static> {
+    #[prop_or_default]
+    pub callback: Option<Callback<usize>>,
     pub enemies: Rc<[T]>,
     pub stack: Stack,
     pub level: u8,
@@ -20,6 +22,7 @@ pub struct StackTableProps<T: Victim + PartialEq + 'static> {
 #[component]
 pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -> Html {
     let StackTableProps {
+        ref callback,
         ref enemies,
         ref stack,
         level,
@@ -37,7 +40,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
             </thead>
             <tbody>
                 {
-                    enemies.iter().map(|enemy| {
+                    enemies.iter().enumerate().map(|(i, enemy)| {
                         let damages = enemy.damages();
                         let enemy_id = enemy.champion_id();
                         let max_health = enemy.max_health();
@@ -46,8 +49,8 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                             .iter()
                             .map(|entry| match entry.value {
                                 StackValue::Ability { slot, .. } => damages.abilities[slot],
-                                StackValue::Item(i, ..) => damages.items[i],
-                                StackValue::Rune(i, ..) => damages.runes[i],
+                                StackValue::Item(j, ..) => damages.items[j],
+                                StackValue::Rune(j, ..) => damages.runes[j],
                                 StackValue::BasicAttack => damages.attacks.basic_attack,
                                 StackValue::CritStrike => damages.attacks.critical_strike,
                                 StackValue::OnhitMin => damages.attacks.onhit_damage.minimum_damage,
@@ -62,10 +65,15 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                         html! {
                             <tr>
                                 <td
-                                    class={classes!("cursor-pointer")}
+                                    class={classes!("w-8", "h-8")}
                                     data_offset={encode_offset(&[enemy_id.formula()])}
                                 >
-                                    <Image src={ImageType::from(enemy_id)} />
+                                    <button
+                                        class={classes!("cursor-pointer")}
+                                        onclick={callback.clone().map(|f| Callback::from(move |_| f.emit(i)))}
+                                    >
+                                        <Image src={ImageType::from(enemy_id)} />
+                                    </button>
                                 </td>
                                 <td>{ total }</td>
                                 <td>{ final_hp }</td>

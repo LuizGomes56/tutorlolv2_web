@@ -4,13 +4,12 @@ use crate::{
             banner::Banner,
             checkbox::Checkbox,
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
-            item_selector::ItemButton,
             stats::{StatCell, Stats},
         },
         page::{EnemyProps, TargetEntity},
         reducer::{DataAction, EnemyAction, EnemyDataAction, LastAction},
     },
-    components::image::ImageType,
+    components::{image::ImageType, selector::SelectorButton},
     model::EnemyStats,
 };
 use tutorlolv2_gen::{ChampionId, ItemId};
@@ -88,16 +87,19 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     callback={champion_callback}
                     champion_id={enemy.champion_id}
                 />
-                <ItemButton
-                    onclick={{
-                        let open_item_menu = open_item_menu.clone();
-                        let index = *enemy_props.enemy_index;
-                        Callback::from(move |_| {
-                            open_item_menu.emit(TargetEntity::Enemy(index));
-                        })
-                    }}
-                    length={enemy.items.len()}
-                />
+                <div class={classes!("w-full", "my-2")}>
+                    <SelectorButton
+                        title={"Items"}
+                        onclick={{
+                            let open_item_menu = open_item_menu.clone();
+                            let index = *enemy_props.enemy_index;
+                            Callback::from(move |_| {
+                                open_item_menu.emit(TargetEntity::Enemy(index));
+                            })
+                        }}
+                        length={enemy.items.len()}
+                    />
+                </div>
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-1.5",
