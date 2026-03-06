@@ -11,7 +11,7 @@ pub struct SelectorProps<T: PartialEq> {
     pub callback: Callback<T>,
     pub value: T,
     #[prop_or(classes!("gap-4"))]
-    pub box_class: Classes,
+    pub label_class: Classes,
     #[prop_or(classes!("w-12", "h-12"))]
     pub img_class: Classes,
     #[prop_or(classes!(
@@ -36,7 +36,7 @@ where
         ref callback,
         ref img_class,
         ref input_class,
-        ref box_class,
+        ref label_class,
         ref dropdown_class,
         value,
     } = *props;
@@ -47,7 +47,7 @@ where
     let close_callback = use_callback(is_open.clone(), move |_, is_open| is_open.set(false));
 
     let dropdown_ref = use_node_ref();
-    let button_ref = use_clickout(close_callback.clone(), [dropdown_ref.clone()]);
+    let label_ref = use_clickout(close_callback.clone(), [dropdown_ref.clone()]);
 
     let buttons = T::VALUES
         .iter()
@@ -96,11 +96,11 @@ where
 
     html! {
         <div class={classes!("relative")}>
-            <div
-                ref={button_ref}
+            <label
+                ref={label_ref}
                 class={{
                     let mut class = classes!("flex", "items-center");
-                    class.push(box_class);
+                    class.push(label_class);
                     class
                 }}
             >
@@ -115,7 +115,7 @@ where
                     {oninput}
                     {onfocus}
                 />
-            </div>
+            </label>
             if *is_open {
                 <div
                     ref={dropdown_ref}
@@ -125,7 +125,7 @@ where
                             "flex", "flex-col",
                             "overflow-auto", "max-h-64",
                             "border", "border-std-800",
-                            "z-50"
+                            "z-50", "empty:hidden"
                         );
                         class.push(dropdown_class);
                         class

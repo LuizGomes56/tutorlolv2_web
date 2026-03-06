@@ -125,7 +125,7 @@ impl ImageType {
             }
             ImageType::Tower => "other/tower.avif".into(),
             ImageType::BasicAttack => "other/basic_attack.png".into(),
-            ImageType::Ignite => "other/ignite.png".into(),
+            ImageType::Ignite => "other/ignite.avif".into(),
             ImageType::CritStrike => "stats/crit_chance.svg".into(),
             ImageType::OnhitAttack => "stats/onhit.svg".into(),
             ImageType::Level => "stats/level.svg".into(),

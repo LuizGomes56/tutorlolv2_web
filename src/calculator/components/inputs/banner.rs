@@ -37,8 +37,8 @@ pub fn Banner(props: &BannerProps) -> Html {
                 <Selector<ChampionId>
                     value={champion_id}
                     callback={callback.clone()}
-                    box_class={classes!("gap-2", "m-2")}
-                    img_class={classes!("w-8", "h-8")}
+                    label_class={classes!("gap-2", "m-2")}
+                    img_class={classes!("w-8", "h-8", "cursor-text")}
                     input_class={classes!(
                         "font-bold", "text-lg", "text-std-400",
                         "text-shadow", "bg-transparent",

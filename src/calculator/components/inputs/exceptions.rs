@@ -47,7 +47,7 @@ where
                 />
             </div>
             <span {title} class={classes!("text-sm", "content-center", "truncate")}>
-                {value.map(|v| v.name()).unwrap_or_default()}
+                {value.map(|v| v.name()).unwrap_or("Stacks")}
             </span>
             <input
                 type={"number"}

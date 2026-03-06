@@ -4,7 +4,7 @@ use crate::{
         page::{EnemyProps, PlayerProps, TargetEntity},
         reducer::DataAction,
     },
-    components::image::{Image, ImageType},
+    components::image::{Image, ImageType, Svg},
     utils::{encode_offset, hooks::use_clickout},
 };
 use tutorlolv2_gen::{CastId, ItemId, Position, StatName};
@@ -861,9 +861,9 @@ pub fn ItemButton(props: &ItemButtonProps) -> Html {
     html! {
         <button {onclick} class={classes!(
             "transition-all", "duration-150",
-            "hover:bg-zinc-950/20",
+            "hover:bg-zinc-800/60",
+            "hover:border-zinc-700",
             "border-y", "border-zinc-800",
-            "hover:border-amber-500/20",
             "p-2", "flex", "items-center", "justify-between",
             "gap-3", "group", "my-2"
         )}>
@@ -880,27 +880,22 @@ pub fn ItemButton(props: &ItemButtonProps) -> Html {
             <div class={classes!("flex", "items-center", "gap-2", "shrink-0")}>
                 <span class={classes!(
                     "min-w-[2rem]",
-                    "px-2.5", "py-1",
-                    "bg-amber-500/12",
-                    "border", "border-amber-500/20",
-                    "text-amber-300",
-                    "text-xs", "font-semibold", "font-mono",
+                    "px-1.5", "py-0.5",
+                    "bg-sky-500/15",
+                    "border", "border-sky-500/20",
+                    "text-sky-300",
+                    "text-sm", "font-semibold", "font-mono",
                     "text-center"
                 )}>
                     {length}
                 </span>
-                <svg
-                    xmlns={"http://www.w3.org/2000/svg"}
-                    class={"h-4 w-4 text-zinc-500 transition-transform duration-150 group-hover:text-zinc-300"}
-                    viewBox={"0 0 20 20"}
-                    fill={"currentColor"}
-                >
-                    <path
-                        fill-rule={"evenodd"}
-                        d={"M7.21 14.77a.75.75 0 010-1.06L10.94 10 7.21 6.29a.75.75 0 111.06-1.06l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0z"}
-                        clip-rule={"evenodd"}
-                    />
-                </svg>
+                <Svg
+                    class={classes!(
+                        "h-4", "w-4", "text-zinc-500", "transition-transform",
+                        "duration-150", "group-hover:text-zinc-300"
+                    )}
+                    src={format!("/svgs/rchev.svg")}
+                />
             </div>
         </button>
     }

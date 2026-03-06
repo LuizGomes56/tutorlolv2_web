@@ -20,7 +20,7 @@ pub fn Sidebar() -> Html {
                     >
                         <Svg
                             class={classes!("h-5", "w-5")}
-                            src={format!("/sidebar/{text}.svg")}
+                            src={format!("/svgs/sidebar/{text}.svg")}
                         />
                         <span class={classes!("text-shadow", "font-medium")}>
                             {text}

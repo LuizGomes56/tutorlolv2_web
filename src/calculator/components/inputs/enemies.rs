@@ -84,12 +84,10 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     html! {
         <>
             <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
-                <div class={classes!("mb-2")}>
-                    <Banner
-                        callback={champion_callback}
-                        champion_id={enemy.champion_id}
-                    />
-                </div>
+                <Banner
+                    callback={champion_callback}
+                    champion_id={enemy.champion_id}
+                />
                 <ItemButton
                     onclick={{
                         let open_item_menu = open_item_menu.clone();
@@ -102,7 +100,8 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                 />
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",
-                    "gap-x-2", "px-4", "py-3", "gap-y-1.5"
+                    "gap-x-2", "px-4", "py-3", "gap-y-1.5",
+                    "empty:hidden"
                 )}>
                     <ChampionExceptionSelector
                         champion_id={enemy.champion_id}

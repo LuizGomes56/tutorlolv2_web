@@ -9,7 +9,6 @@ pub mod macros;
 pub mod traits;
 
 pub const BASE_URL: &str = "http://localhost:8082";
-pub const VOID_MAIN_OFFSET: &str = "0..0";
 
 pub fn encode_offset(range: &[&Range<usize>]) -> String {
     range

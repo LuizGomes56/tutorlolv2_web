@@ -60,9 +60,8 @@ impl Damages {
         items_meta: &[TypeMetadata<ItemId>],
         runes_meta: &[TypeMetadata<RuneId>],
     ) -> Html {
-        let cache = champion_id.cache();
-        let merge_data = cache.merge_data;
-        let abilities_meta = cache.metadata;
+        let merge_data = champion_id.merge_data();
+        let abilities_meta = champion_id.abilities();
         let ability_idents = champion_id.idents();
         let ability_idents_indexes = champion_id.ident_indexes();
         let ability_closures = champion_id.closures();

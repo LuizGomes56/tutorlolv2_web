@@ -107,7 +107,8 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                 />
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",
-                    "gap-x-2", "px-4", "py-3", "gap-y-1.5"
+                    "gap-x-2", "px-4", "py-3", "gap-y-1.5",
+                    "empty:hidden"
                 )}>
                     <ChampionExceptionSelector
                         champion_id={player.data.champion_id}

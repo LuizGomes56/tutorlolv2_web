@@ -28,9 +28,8 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         ref runes_meta,
     } = *props;
 
-    let cache = champion_id.cache();
-    let abilities_meta = cache.metadata;
-    let abilities_to_merge = cache.merge_data;
+    let abilities_meta = champion_id.abilities();
+    let abilities_to_merge = champion_id.merge_data();
 
     let abilities = {
         let meta_len = abilities_meta.len();

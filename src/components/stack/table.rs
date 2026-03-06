@@ -1,7 +1,7 @@
 use crate::{
     components::{
         image::{Image, ImageType},
-        stack::StackValue,
+        stack::{Stack, StackValue},
         tables::body::Victim,
     },
     utils::encode_offset,
@@ -13,12 +13,17 @@ use yew::prelude::*;
 #[derive(PartialEq, Properties)]
 pub struct StackTableProps<T: Victim + PartialEq + 'static> {
     pub enemies: Rc<[T]>,
-    pub stack: Vec<StackValue>,
+    pub stack: Stack,
+    pub level: u8,
 }
 
 #[component]
 pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -> Html {
-    let StackTableProps { enemies, stack } = props;
+    let StackTableProps {
+        ref enemies,
+        ref stack,
+        level,
+    } = *props;
 
     html! {
         <table class={classes!("data-table")}>
@@ -39,16 +44,15 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
 
                         let total = stack
                             .iter()
-                            .copied()
-                            .map(|value| match value {
-                                StackValue::Ability(i, ..) => damages.abilities[i],
+                            .map(|entry| match entry.value {
+                                StackValue::Ability { slot, .. } => damages.abilities[slot],
                                 StackValue::Item(i, ..) => damages.items[i],
                                 StackValue::Rune(i, ..) => damages.runes[i],
                                 StackValue::BasicAttack => damages.attacks.basic_attack,
                                 StackValue::CritStrike => damages.attacks.critical_strike,
                                 StackValue::OnhitMin => damages.attacks.onhit_damage.minimum_damage,
                                 StackValue::OnhitMax => damages.attacks.onhit_damage.maximum_damage,
-                                StackValue::Ignite(i) => ignite(i),
+                                StackValue::Ignite => ignite(level),
                             })
                             .sum::<i32>();
 
