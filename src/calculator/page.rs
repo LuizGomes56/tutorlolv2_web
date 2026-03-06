@@ -115,7 +115,6 @@ pub fn Calculator() -> Html {
             //     max_mana: random(2000),
             //     current_mana: random(2000),
             // };
-            player.dispatch(PlayerAction::Data(DataAction::Level(18)));
             // let champion_id = player.data.champion_id;
             // player.dispatch(PlayerAction::Data(DataAction::SetItemVec(
             //     champion_id.recommended_items(champion_id.main_position()),
@@ -130,10 +129,7 @@ pub fn Calculator() -> Html {
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::W(5)));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::E(5)));
             player.dispatch(PlayerAction::AbilityLevels(AbilityLevelsAction::R(3)));
-            player.dispatch(PlayerAction::Data(DataAction::ChampionId(
-                ChampionId::random(),
-            )));
-            (1..Enemies::MAX_ENEMIES).for_each(|i| {
+            (1..Enemies::MAX_ENEMIES).for_each(|_| {
                 enemies.dispatch(EnemyAction::Insert(ChampionId::random()));
             });
             // enemies.dispatch(EnemyAction::Change(0, DataAction::InferStats(false)));
@@ -213,7 +209,7 @@ pub fn Calculator() -> Html {
                                 _ => {}
                             };
 
-                            // data.current_player.log();
+                            data.current_player.log();
 
                             game_data.set(Some(data));
                         }
@@ -260,15 +256,16 @@ pub fn Calculator() -> Html {
                                             <tr>
                                                 <td
                                                     class={classes!("w-8", "h-8")}
-                                                    onclick={{
+                                                    data_offset={encode_offset(&[enemy_id.formula()])}
+                                                >
+                                                    <button class={classes!("cursor-pointer")} onclick={{
                                                         let enemy_index = enemy_index.clone();
                                                         Callback::from(move |_| {
                                                             enemy_index.set(i);
                                                         })
-                                                    }}
-                                                    data_offset={encode_offset(&[enemy_id.formula()])}
-                                                >
-                                                    <Image src={ImageType::from(enemy_id)} />
+                                                    }}>
+                                                        <Image src={ImageType::from(enemy_id)} />
+                                                    </button>
                                                 </td>
                                                 {damages}
                                             </tr>
@@ -332,6 +329,7 @@ pub fn Calculator() -> Html {
                     <div class={classes!("box", "overflow-auto")}>
                         <StackSelector<FinalEnemy>
                             champion_id={current_player.champion_id}
+                            level={current_player.level}
                             enemies={enemies.clone()}
                             items_meta={items_meta.clone()}
                             runes_meta={runes_meta.clone()}

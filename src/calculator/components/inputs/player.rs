@@ -1,15 +1,12 @@
 use crate::{
     calculator::{
         components::inputs::{
-            _item_selector::ItemSelector,
             abilities::Abilities,
             banner::Banner,
+            checkbox::Checkbox,
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
-            infer_stats::InferStats,
             item_selector::ItemButton,
-            recommendations::Recommendations,
             stats::{StatCell, Stats},
-            tray::Tray,
         },
         page::{PlayerProps, TargetEntity},
         reducer::{DataAction, LastAction, PlayerAction},
@@ -18,7 +15,7 @@ use crate::{
     model::PlayerStats,
     utils::traits::Print,
 };
-use tutorlolv2_gen::{ItemId, RuneId};
+use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -83,6 +80,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let rune_exception_callback = use_player_callback(player_props, PlayerAction::ModifyRuneExc);
     let stack_callback = use_data_callback(player_props, DataAction::Stacks);
     let infer_stats_callback = use_data_callback(player_props, DataAction::InferStats);
+    let is_mega_gnar_callback = use_data_callback(player_props, DataAction::IsMegaGnar);
 
     html! {
         <>
@@ -130,9 +128,17 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         filter={RuneId::exceptions()}
                     />
                 </div>
-                <InferStats
-                    infer_stats={data.infer_stats}
+                if player.data.champion_id == ChampionId::Gnar {
+                    <Checkbox
+                        checked={player.data.is_mega_gnar}
+                        callback={is_mega_gnar_callback}
+                        label={"Mega Gnar"}
+                    />
+                }
+                <Checkbox
+                    checked={data.infer_stats}
                     callback={infer_stats_callback}
+                    label={"Infer Stats"}
                 />
                 <div class={classes!(
                     "grid", "grid-cols-[auto,1fr,1fr]",
@@ -148,7 +154,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                             let callback = level_cb.clone();
                             Callback::from(move |e: InputEvent| {
                                 let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                                let number = value.parse().unwrap_or(1);
+                                let number = value.parse().unwrap_or(1).max(1);
                                 callback.emit(number);
                             })
                         }}

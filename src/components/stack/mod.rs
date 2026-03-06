@@ -9,6 +9,7 @@ pub use selector::StackSelector;
 pub use table::StackTable;
 
 #[derive(Clone, Default, PartialEq)]
+#[repr(transparent)]
 pub struct Stack(Vec<StackValue>);
 
 impl Deref for Stack {
@@ -47,7 +48,7 @@ pub enum StackValue {
     Item(usize, ItemId),
     Rune(usize, RuneId),
     BasicAttack,
-    CriticalStrike,
+    CritStrike,
     OnhitMin,
     OnhitMax,
     Ignite(u8),

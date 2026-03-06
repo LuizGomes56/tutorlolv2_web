@@ -45,7 +45,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                                 StackValue::Item(i, ..) => damages.items[i],
                                 StackValue::Rune(i, ..) => damages.runes[i],
                                 StackValue::BasicAttack => damages.attacks.basic_attack,
-                                StackValue::CriticalStrike => damages.attacks.critical_strike,
+                                StackValue::CritStrike => damages.attacks.critical_strike,
                                 StackValue::OnhitMin => damages.attacks.onhit_damage.minimum_damage,
                                 StackValue::OnhitMax => damages.attacks.onhit_damage.maximum_damage,
                                 StackValue::Ignite(i) => ignite(i),

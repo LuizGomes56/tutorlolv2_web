@@ -2,16 +2,18 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
-pub struct InferStatsProps {
-    pub infer_stats: bool,
+pub struct CheckboxProps {
     pub callback: Callback<bool>,
+    pub checked: bool,
+    pub label: AttrValue,
 }
 
 #[component]
-pub fn InferStats(props: &InferStatsProps) -> Html {
-    let InferStatsProps {
-        infer_stats,
+pub fn Checkbox(props: &CheckboxProps) -> Html {
+    let CheckboxProps {
+        checked,
         ref callback,
+        ref label,
     } = *props;
 
     let onchange = use_callback(callback.clone(), |e: Event, callback| {
@@ -34,7 +36,7 @@ pub fn InferStats(props: &InferStatsProps) -> Html {
             <input
                 type={"checkbox"}
                 class={classes!("peer", "sr-only")}
-                checked={infer_stats}
+                {checked}
                 {onchange}
             />
             <span class={classes!(
@@ -55,7 +57,7 @@ pub fn InferStats(props: &InferStatsProps) -> Html {
                 "peer-focus-visible:outline-2",
                 "peer-focus-visible:outline-violet-400"
             )}>
-                if infer_stats {
+                if checked {
                     <svg
                         xmlns={"http://www.w3.org/2000/svg"}
                         class={"h-3.5 w-3.5"}
@@ -76,7 +78,7 @@ pub fn InferStats(props: &InferStatsProps) -> Html {
                 "peer-checked:text-white",
                 "text-sm"
             )}>
-                {"Infer Stats"}
+                {label}
             </span>
         </label>
     }

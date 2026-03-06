@@ -1,12 +1,10 @@
 pub mod _item_selector;
 pub mod abilities;
 pub mod banner;
+pub mod checkbox;
 pub mod dragon;
 pub mod enemies;
 pub mod exceptions;
-pub mod infer_stats;
 pub mod item_selector;
 pub mod player;
-pub mod recommendations;
 pub mod stats;
-pub mod tray;

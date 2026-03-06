@@ -2,21 +2,17 @@ use crate::{
     calculator::{
         components::inputs::{
             banner::Banner,
+            checkbox::Checkbox,
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
-            infer_stats::InferStats,
             item_selector::ItemButton,
-            recommendations::Recommendations,
             stats::{StatCell, Stats},
-            tray::Tray,
         },
         page::{EnemyProps, TargetEntity},
-        reducer::{DataAction, Enemies, EnemyAction, EnemyDataAction, LastAction},
+        reducer::{DataAction, EnemyAction, EnemyDataAction, LastAction},
     },
     components::image::ImageType,
     model::EnemyStats,
-    utils::EnumCast,
 };
-use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{ChampionId, ItemId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -78,6 +74,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     let stack_callback = use_enemy_data_callback(enemy_props, DataAction::Stacks);
     let infer_stats_callback = use_enemy_data_callback(enemy_props, DataAction::InferStats);
     let item_exception_callback = use_enemy_data_callback(enemy_props, DataAction::ModifyItemExc);
+    let is_mega_gnar_callback = use_enemy_data_callback(enemy_props, DataAction::IsMegaGnar);
 
     let enemy = enemy_props
         .enemies
@@ -93,10 +90,6 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         champion_id={enemy.champion_id}
                     />
                 </div>
-                <InferStats
-                    infer_stats={enemy.infer_stats}
-                    callback={infer_stats_callback}
-                />
                 <ItemButton
                     onclick={{
                         let open_item_menu = open_item_menu.clone();
@@ -124,6 +117,18 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         filter={ItemId::exceptions(false)}
                     />
                 </div>
+                if enemy.champion_id == ChampionId::Gnar {
+                    <Checkbox
+                        checked={enemy.is_mega_gnar}
+                        callback={is_mega_gnar_callback}
+                        label={"Mega Gnar"}
+                    />
+                }
+                <Checkbox
+                    checked={enemy.infer_stats}
+                    callback={infer_stats_callback}
+                    label={"Infer Stats"}
+                />
                 <div class={classes!(
                     "grid", "grid-cols-[auto_1fr_1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-0.5"
@@ -138,7 +143,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                             let callback = level_callback.clone();
                             Callback::from(move |e: InputEvent| {
                                 let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                                let number = value.parse().unwrap_or(1);
+                                let number = value.parse().unwrap_or(1).max(1);
                                 callback.emit(number);
                             })
                         }}

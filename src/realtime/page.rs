@@ -85,6 +85,7 @@ pub fn Realtime() -> Html {
                     <div class={classes!("box", "overflow-auto")}>
                         <StackSelector<Enemy>
                             champion_id={current_player.champion_id}
+                            level={current_player.level}
                             enemies={enemies.clone()}
                             items_meta={items_meta.clone()}
                             runes_meta={runes_meta.clone()}
