@@ -224,7 +224,7 @@ pub fn Calculator() -> Html {
                                                             "cursor-pointer",
                                                             "outline-none",
                                                             "focus:ring-1",
-                                                            "focus:ring-sky-600/50",
+                                                            "focus:ring-blue-500/75",
                                                         )}
                                                         onclick={{
                                                             let enemy_index = enemy_index.clone();

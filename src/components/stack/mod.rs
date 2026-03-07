@@ -70,7 +70,7 @@ impl Stack {
             }
         }
 
-        Stack(out)
+        Self(out)
     }
 }
 
@@ -88,13 +88,11 @@ impl Reducible for Stack {
         let mut new = (*self).clone();
         match action {
             StackAction::Insert(entry) => new.0.push(entry),
-
             StackAction::RemoveById(id) => {
                 if let Some(pos) = new.0.iter().rposition(|e| e.id == id) {
                     new.0.swap_remove(pos);
                 }
             }
-
             StackAction::Replace(stack) => new = stack,
             StackAction::Clear => new.0.clear(),
         }

@@ -73,7 +73,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                                             "cursor-pointer",
                                             "outline-none",
                                             "focus:ring-1",
-                                            "focus:ring-sky-600/50"
+                                            "focus:ring-blue-500/75"
                                         )}
                                         onclick={callback.clone().map(|f| Callback::from(move |_| f.emit(i)))}
                                     >

@@ -31,7 +31,7 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
             "px-4",
             "py-2",
             "transition-colors",
-            "hover:bg-zinc-800/60"
+            "hover:bg-std-800/60"
         )}>
             <input
                 type={"checkbox"}
@@ -46,8 +46,8 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
                 "items-center",
                 "justify-center",
                 "border",
-                "border-zinc-600",
-                "bg-zinc-900",
+                "border-std-600",
+                "bg-std-900",
                 "text-white",
                 "transition-all",
                 "duration-150",
@@ -73,7 +73,7 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
                 }
             </span>
             <span class={classes!(
-                "text-zinc-200",
+                "text-std-200",
                 "transition-colors",
                 "peer-checked:text-white",
                 "text-sm"

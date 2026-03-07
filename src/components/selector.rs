@@ -157,18 +157,18 @@ pub fn SelectorButton(props: &SelectorButtonProps) -> Html {
     html! {
         <button {onclick} class={classes!(
             "transition-all", "duration-150",
-            "hover:bg-zinc-800/60",
-            "hover:border-zinc-700",
-            "border-y", "border-zinc-800",
+            "hover:bg-std-800/60",
+            "hover:border-std-700",
+            "border-y", "border-std-800",
             "p-2", "flex", "items-center", "justify-between",
             "gap-3", "group", "w-full"
         )}>
             <div class={classes!("flex", "items-center", "gap-3", "pl-2")}>
-                <div class={classes!("text-sm", "font-medium", "text-zinc-100")}>
+                <div class={classes!("text-sm", "font-medium", "text-std-100")}>
                     {title}
                 </div>
                 <div class={classes!(
-                    "text-xs", "text-zinc-400"
+                    "text-xs", "text-std-400"
                 )}>
                     {"Add / Remove"}
                 </div>
@@ -187,8 +187,8 @@ pub fn SelectorButton(props: &SelectorButtonProps) -> Html {
                 </span>
                 <Svg
                     class={classes!(
-                        "h-4", "w-4", "text-zinc-500", "transition-transform",
-                        "duration-150", "group-hover:text-zinc-300"
+                        "h-4", "w-4", "text-std-500", "transition-transform",
+                        "duration-150", "group-hover:text-std-300"
                     )}
                     src={format!("/svgs/rchev.svg")}
                 />
