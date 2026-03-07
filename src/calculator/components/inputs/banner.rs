@@ -32,18 +32,19 @@ pub fn Banner(props: &BannerProps) -> Html {
             />
             <div class={classes!(
                 "absolute", "left-0", "bottom-0",
-                "z-10", "w-full"
+                "z-10", "w-full", "h-full", "content-end"
             )}>
                 <Selector<ChampionId>
                     value={champion_id}
                     callback={callback.clone()}
-                    label_class={classes!("gap-2", "m-2")}
-                    img_class={classes!("w-8", "h-8", "cursor-text")}
+                    label_class={classes!("gap-2", "p-2", "overflow-hidden")}
+                    img_class={classes!("w-8", "h-8", "shrink-0")}
                     input_class={classes!(
                         "font-bold", "text-lg", "text-std-400",
                         "text-shadow", "bg-transparent",
                         "focus:ring-0", "focus:outline-none",
-                        "placeholder:text-white"
+                        "placeholder:text-white", "min-w-0",
+                        "truncate"
                     )}
                     dropdown_class={classes!("p-1.5", "gap-1.5", "w-full")}
                 />

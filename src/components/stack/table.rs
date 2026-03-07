@@ -69,7 +69,12 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                                     data_offset={encode_offset(&[enemy_id.formula()])}
                                 >
                                     <button
-                                        class={classes!("cursor-pointer")}
+                                        class={classes!(
+                                            "cursor-pointer",
+                                            "outline-none",
+                                            "focus:ring-1",
+                                            "focus:ring-sky-600/50"
+                                        )}
                                         onclick={callback.clone().map(|f| Callback::from(move |_| f.emit(i)))}
                                     >
                                         <Image src={ImageType::from(enemy_id)} />

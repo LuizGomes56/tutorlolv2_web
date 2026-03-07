@@ -219,12 +219,20 @@ pub fn Calculator() -> Html {
                                                     class={classes!("w-8", "h-8")}
                                                     data_offset={encode_offset(&[enemy_id.formula()])}
                                                 >
-                                                    <button class={classes!("cursor-pointer")} onclick={{
-                                                        let enemy_index = enemy_index.clone();
-                                                        Callback::from(move |_| {
-                                                            enemy_index.set(i);
-                                                        })
-                                                    }}>
+                                                    <button
+                                                        class={classes!(
+                                                            "cursor-pointer",
+                                                            "outline-none",
+                                                            "focus:ring-1",
+                                                            "focus:ring-sky-600/50",
+                                                        )}
+                                                        onclick={{
+                                                            let enemy_index = enemy_index.clone();
+                                                            Callback::from(move |_| {
+                                                                enemy_index.set(i);
+                                                            })
+                                                        }}
+                                                    >
                                                         <Image src={ImageType::from(enemy_id)} />
                                                     </button>
                                                 </td>

@@ -24,6 +24,148 @@ fn section(title: &str, iterator: impl ExactSizeIterator<Item = Html>) -> Option
 }
 
 #[derive(PartialEq, Properties)]
+pub struct StackInsertProps {
+    #[prop_or_default]
+    pub callback: Callback<StackValue>,
+    pub items_meta: Rc<[TypeMetadata<ItemId>]>,
+    pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
+    pub champion_id: ChampionId,
+}
+
+#[component]
+pub fn StackInsert(props: &StackInsertProps) -> Html {
+    let StackInsertProps {
+        ref callback,
+        ref items_meta,
+        ref runes_meta,
+        champion_id,
+    } = *props;
+
+    let other = use_memo(callback.clone(), |callback| {
+        let buttons = [
+            (
+                ImageType::BasicAttack,
+                &BASIC_ATTACK_OFFSET,
+                StackValue::BasicAttack,
+            ),
+            (
+                ImageType::CritStrike,
+                &CRITICAL_STRIKE_OFFSET,
+                StackValue::CritStrike,
+            ),
+            (
+                ImageType::OnhitAttack,
+                &ONHIT_EFFECT_OFFSET,
+                StackValue::OnhitMin,
+            ),
+            (
+                ImageType::OnhitAttack,
+                &ONHIT_EFFECT_OFFSET,
+                StackValue::OnhitMax,
+            ),
+            (ImageType::Ignite, &IGNITE_OFFSET, StackValue::Ignite),
+        ]
+        .into_iter()
+        .map(|(image_type, offset, v)| {
+            let data_offset = encode_offset(&[offset]);
+
+            html! {
+                <button {data_offset} onclick={{
+                    let callback = callback.clone();
+                    Callback::from(move |_| callback.emit(v))
+                }}>
+                    <Image
+                        class={classes!("w-8", "h-8", "cursor-pointer")}
+                        src={image_type}
+                    />
+                </button>
+            }
+        });
+
+        section("Other", buttons)
+    });
+
+    let abilities = use_memo((callback.clone(), champion_id), |(callback, ..)| {
+        let buttons = champion_id
+            .abilities()
+            .iter()
+            .enumerate()
+            .map(|(slot, metadata)| {
+                let ability_id = metadata.kind;
+                let data_offset = encode_offset(&[champion_id.get_ability_formula(slot)]);
+
+                html! {
+                    <button {data_offset} onclick={{
+                        let callback = callback.clone();
+                        Callback::from(move |_| {
+                            callback.emit(StackValue::Ability {
+                                slot,
+                                champion_id,
+                                ability_id,
+                            });
+                        })
+                    }}>
+                        <Image
+                            class={classes!("w-8", "h-8", "cursor-pointer")}
+                            src={ImageType::Ability(champion_id, AbilityKind::Normal(ability_id))}
+                        />
+                    </button>
+                }
+            });
+
+        section("Abilities", buttons)
+    });
+
+    fn buttons<T>(
+        callback: &Callback<StackValue>,
+        meta: &Rc<[TypeMetadata<T>]>,
+        f: fn(usize, T) -> StackValue,
+    ) -> impl ExactSizeIterator<Item = Html>
+    where
+        T: CastId + PartialEq,
+        ImageType: From<T>,
+    {
+        meta.iter().enumerate().map(move |(i, metadata)| {
+            let rune_id = metadata.kind;
+            let data_offset = encode_offset(&[rune_id.formula()]);
+
+            let onclick = {
+                let callback = callback.clone();
+                Callback::from(move |_| callback.emit(f(i, rune_id)))
+            };
+
+            html! {
+                <button {data_offset} {onclick}>
+                    <Image
+                        class={classes!("w-8", "h-8", "cursor-pointer")}
+                        src={ImageType::from(rune_id)}
+                    />
+                </button>
+            }
+        })
+    }
+
+    let items = use_memo(
+        (callback.clone(), items_meta.clone()),
+        |(callback, items_meta)| section("Items", buttons(callback, items_meta, StackValue::Item)),
+    );
+
+    let runes = use_memo(
+        (callback.clone(), runes_meta.clone()),
+        |(callback, runes_meta)| section("Runes", buttons(callback, runes_meta, StackValue::Rune)),
+    );
+
+    html! {
+        <div class={classes!("flex", "flex-col", "gap-4", "px-5", "py-4")}>
+            {(*abilities).clone()}
+            {(*items).clone()}
+            {(*runes).clone()}
+            {(*other).clone()}
+        </div>
+    }
+}
+
+#[derive(PartialEq, Properties)]
 pub struct StackSelectorProps<T: Victim + PartialEq + 'static> {
     #[prop_or_default]
     pub callback: Option<Callback<usize>>,
@@ -61,7 +203,9 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
 
     let clear_stack = {
         let stack = stack.clone();
-        use_callback((), move |_, _| stack.dispatch(StackAction::Clear))
+        use_callback((), move |_: MouseEvent, _| {
+            stack.dispatch(StackAction::Clear)
+        })
     };
 
     let safe_stack = stack.reconcile(champion_id, items_meta, runes_meta);
@@ -81,119 +225,6 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
             },
         );
     }
-
-    let class = classes!("w-8", "h-8", "cursor-pointer");
-
-    let selector = use_memo(
-        (items_meta.clone(), runes_meta.clone(), champion_id),
-        |data| {
-            let (items_meta, runes_meta, ..) = data;
-
-            let abilities = champion_id
-                .abilities()
-                .iter()
-                .enumerate()
-                .map(|(slot, metadata)| {
-                    let ability_id = metadata.kind;
-                    let data_offset = encode_offset(&[champion_id.get_ability_formula(slot)]);
-
-                    html! {
-                        <button {data_offset} onclick={{
-                            let stack_push = stack_push.clone();
-                            Callback::from(move |_| {
-                                stack_push.emit(StackValue::Ability {
-                                    slot,
-                                    champion_id,
-                                    ability_id,
-                                });
-                            })
-                        }}>
-                            <Image
-                                class={class.clone()}
-                                src={ImageType::Ability(champion_id, AbilityKind::Normal(ability_id))}
-                            />
-                        </button>
-                    }
-                });
-
-            let items = items_meta.iter().enumerate().map(|(i, metadata)| {
-                let item_id = metadata.kind;
-                let data_offset = encode_offset(&[item_id.formula()]);
-
-                html! {
-                    <button {data_offset} onclick={{
-                        let stack_push = stack_push.clone();
-                        Callback::from(move |_| stack_push.emit(StackValue::Item(i, item_id)))
-                    }}>
-                        <Image class={class.clone()} src={ImageType::from(item_id)} />
-                    </button>
-                }
-            });
-
-            let runes = runes_meta.iter().enumerate().map(|(i, metadata)| {
-                let rune_id = metadata.kind;
-                let data_offset = encode_offset(&[rune_id.formula()]);
-
-                html! {
-                    <button {data_offset} onclick={{
-                        let stack_push = stack_push.clone();
-                        Callback::from(move |_| stack_push.emit(StackValue::Rune(i, rune_id)))
-                    }}>
-                        <Image class={class.clone()} src={ImageType::from(rune_id)} />
-                    </button>
-                }
-            });
-
-            html! {
-                <>
-                    {section("Abilities", abilities)}
-                    {section("Items", items)}
-                    {section("Runes", runes)}
-                </>
-            }
-        },
-    );
-
-    let other = use_memo(stack_push.clone(), |stack_push| {
-        let buttons = [
-            (
-                ImageType::BasicAttack,
-                &BASIC_ATTACK_OFFSET,
-                StackValue::BasicAttack,
-            ),
-            (
-                ImageType::CritStrike,
-                &CRITICAL_STRIKE_OFFSET,
-                StackValue::CritStrike,
-            ),
-            (
-                ImageType::OnhitAttack,
-                &ONHIT_EFFECT_OFFSET,
-                StackValue::OnhitMin,
-            ),
-            (
-                ImageType::OnhitAttack,
-                &ONHIT_EFFECT_OFFSET,
-                StackValue::OnhitMax,
-            ),
-            (ImageType::Ignite, &IGNITE_OFFSET, StackValue::Ignite),
-        ]
-        .into_iter()
-        .map(|(image_type, offset, v)| {
-            let data_offset = encode_offset(&[offset]);
-
-            html! {
-                <button {data_offset} onclick={{
-                    let stack_push = stack_push.clone();
-                    Callback::from(move |_| stack_push.emit(v))
-                }}>
-                    <Image class={class.clone()} src={image_type} />
-                </button>
-            }
-        });
-
-        section("Other", buttons)
-    });
 
     let remover = safe_stack
         .iter()
@@ -218,14 +249,17 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
             };
 
             let data_offset = encode_offset(&[offset]);
-            let id = entry.id;
 
             html! {
                 <button {data_offset} onclick={{
                     let stack_remove = stack_remove.clone();
+                    let id = entry.id;
                     Callback::from(move |_| stack_remove.emit(id))
                 }}>
-                    <Image class={class.clone()} src={image_type} />
+                    <Image
+                        class={classes!("w-8", "h-8", "cursor-pointer")}
+                        src={image_type}
+                    />
                 </button>
             }
         })
@@ -233,13 +267,15 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
 
     html! {
         <div class={classes!("grid", "grid-cols-3", "gap-4", "items-start")}>
-            <div class={classes!("flex", "flex-col", "gap-4", "px-5", "py-4")}>
-                {(*selector).clone()}
-                {(*other).clone()}
-            </div>
+            <StackInsert
+                callback={stack_push.clone()}
+                items_meta={items_meta.clone()}
+                runes_meta={runes_meta.clone()}
+                {champion_id}
+            />
             <div class={classes!("flex", "gap-2", "flex-wrap")}>
                 {remover}
-                <button onclick={Callback::from(move |_: MouseEvent| clear_stack.emit(()))}>
+                <button onclick={clear_stack}>
                     {"Clear stack"}
                 </button>
             </div>

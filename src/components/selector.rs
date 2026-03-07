@@ -96,25 +96,26 @@ where
 
     html! {
         <div class={classes!("relative")}>
-            <label
-                ref={label_ref}
-                class={{
+            <label ref={label_ref} class={classes!(
+                "h-full", "block", "content-end"
+            )}>
+                <div class={{
                     let mut class = classes!("flex", "items-center");
                     class.push(label_class);
                     class
-                }}
-            >
-                <Image
-                    class={img_class}
-                    src={ImageType::from(value)}
-                />
-                <input
-                    class={input_class}
-                    value={query.to_string()}
-                    placeholder={value.name()}
-                    {oninput}
-                    {onfocus}
-                />
+                }}>
+                    <Image
+                        class={img_class}
+                        src={ImageType::from(value)}
+                    />
+                    <input
+                        class={input_class}
+                        value={query.to_string()}
+                        placeholder={value.name()}
+                        {oninput}
+                        {onfocus}
+                    />
+                </div>
             </label>
             if *is_open {
                 <div

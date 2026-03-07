@@ -23,7 +23,7 @@ pub fn ChampionFormulas() -> Html {
         html! {
             for position in Position::ARRAY {
                 <td class={"content-baseline"}>
-                    <div class={classes!("flex", "flex-col", "gap-2")}>
+                    <div class={classes!("flex", "flex-col", "gap-2", "py-2")}>
                         for item in f(position) {
                             <div data_offset={encode_offset(&[item.formula()])}>
                                 <div class={classes!("flex", "items-center", "gap-3")}>
