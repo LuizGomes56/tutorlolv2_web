@@ -148,11 +148,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 let onclick = {
                     let callback = callback.clone();
                     Callback::from(move |_| {
-                        callback.emit(StackValue::Ability {
-                            slot,
-                            champion_id,
-                            ability_id,
-                        });
+                        callback.emit(StackValue::Ability { slot, ability_id });
                     })
                 };
 
@@ -279,11 +275,15 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                 && let Ok(de) = serde_json::from_str::<StackStore>(&value)
                 && let Some(stored) = de.get(&champion_id)
             {
-                let result = stored
+                let values = stored
                     .iter()
                     .map(|&v| StackEntry::new(v))
                     .collect::<Vec<_>>();
-                return stack.dispatch(StackAction::Replace(Stack(result)));
+
+                return stack.dispatch(StackAction::Replace(Stack {
+                    champion_id,
+                    values,
+                }));
             }
 
             stack.dispatch(StackAction::Replace(Stack::new(
@@ -323,8 +323,13 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
 
     let default_stack = {
         use_callback(
-            (stack.clone(), items_meta.clone(), runes_meta.clone()),
-            move |champion_id, (stack, items_meta, runes_meta)| {
+            (
+                stack.clone(),
+                items_meta.clone(),
+                runes_meta.clone(),
+                champion_id,
+            ),
+            move |champion_id, (stack, items_meta, runes_meta, ..)| {
                 stack.dispatch(StackAction::Replace(Stack::new(
                     champion_id,
                     items_meta,
@@ -376,11 +381,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
         .iter()
         .map(|entry| {
             let (image_type, offset) = match entry.value {
-                StackValue::Ability {
-                    slot,
-                    champion_id,
-                    ability_id,
-                } => (
+                StackValue::Ability { slot, ability_id } => (
                     ImageType::Ability(champion_id, ability_id.into()),
                     champion_id.get_ability_formula(slot),
                 ),

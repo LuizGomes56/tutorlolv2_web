@@ -30,20 +30,22 @@ impl StackEntry {
 }
 
 #[derive(Clone, Default, PartialEq)]
-#[repr(transparent)]
-pub struct Stack(pub Vec<StackEntry>);
+pub struct Stack {
+    champion_id: ChampionId,
+    values: Vec<StackEntry>,
+}
 
 impl Deref for Stack {
     type Target = Vec<StackEntry>;
 
     fn deref(&self) -> &Self::Target {
-        &self.0
+        &self.values
     }
 }
 
 impl DerefMut for Stack {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
+        &mut self.values
     }
 }
 
@@ -65,27 +67,22 @@ impl Stack {
         let combos = champion_id.combos();
         let i = random_u64(0..combos.len() as _) as usize;
 
-        Stack(
-            combos
+        Stack {
+            champion_id,
+            values: combos
                 .get(i)
                 .into_iter()
                 .flat_map(|list| list.iter())
                 .filter_map(|&element| match element {
-                    ComboElement::Ability(ability_id) => {
-                        champion_id.index_of_ability(ability_id).map(|slot| {
-                            StackEntry::new(StackValue::Ability {
-                                slot,
-                                champion_id,
-                                ability_id,
-                            })
-                        })
-                    }
+                    ComboElement::Ability(ability_id) => champion_id
+                        .index_of_ability(ability_id)
+                        .map(|slot| StackEntry::new(StackValue::Ability { slot, ability_id })),
                     ComboElement::Attack => Some(StackEntry::new(StackValue::BasicAttack)),
                 })
                 .chain(chain_meta(items_meta, StackValue::Item))
                 .chain(chain_meta(runes_meta, StackValue::Rune))
                 .collect(),
-        )
+        }
     }
 
     pub fn reconcile(
@@ -97,31 +94,23 @@ impl Stack {
         let items_allowed = items_meta.iter().map(|m| m.kind).collect::<HashSet<_>>();
         let runes_allowed = runes_meta.iter().map(|m| m.kind).collect::<HashSet<_>>();
 
-        let mut out = Vec::with_capacity(self.len());
+        let mut values = Vec::with_capacity(self.len());
 
         for entry in self.iter() {
             if match entry.value {
-                StackValue::Ability {
-                    slot,
-                    champion_id: cid,
-                    ability_id,
-                } => {
-                    cid == champion_id
-                        && slot < champion_id.number_of_abilities()
-                        && champion_id
-                            .abilities()
-                            .get(slot)
-                            .is_some_and(|m| m.kind == ability_id)
-                }
                 StackValue::Item(_, item_id) => items_allowed.contains(&item_id),
                 StackValue::Rune(_, rune_id) => runes_allowed.contains(&rune_id),
+                StackValue::Ability { .. } => champion_id == self.champion_id,
                 _ => true,
             } {
-                out.push(*entry);
+                values.push(*entry);
             }
         }
 
-        Self(out)
+        Self {
+            champion_id,
+            values,
+        }
     }
 }
 
@@ -149,11 +138,7 @@ impl Reducible for Stack {
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum StackValue {
-    Ability {
-        slot: usize,
-        champion_id: ChampionId,
-        ability_id: AbilityId,
-    },
+    Ability { slot: usize, ability_id: AbilityId },
     Item(usize, ItemId),
     Rune(usize, RuneId),
     BasicAttack,
