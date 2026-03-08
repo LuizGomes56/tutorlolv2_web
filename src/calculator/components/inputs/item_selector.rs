@@ -511,6 +511,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                 enemy_champion_ids,
             ),
             |(current_entity, on_select_entity, player_champion_id, enemy_champion_ids)| {
+                let data_offset = encode_offset(&[player_champion_id.formula()]);
                 html! {
                     <div
                         class={classes!("flex", "items-center", "gap-1.5", "flex-wrap")}
@@ -518,6 +519,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     >
                         <button
                             type={"button"}
+                            {data_offset}
                             data-target-player={"1"}
                             class={classes!(
                                 "p-1",
@@ -539,11 +541,12 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
 
                         {for enemy_champion_ids.iter().enumerate().map(|(index, &champion_id)| {
                             let active = matches!(**current_entity, Some(TargetEntity::Enemy(i)) if i == index);
-
+                            let data_offset = encode_offset(&[champion_id.formula()]);
                             html! {
                                 <button
                                     type={"button"}
                                     data-target-enemy-index={index.to_string()}
+                                    {data_offset}
                                     class={classes!(
                                         "p-1",
                                         "rounded-lg",

@@ -2,7 +2,11 @@ use crate::{components::image::ImageType, utils::random_u64};
 use std::fmt::Debug;
 use tutorlolv2_gen::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
 
-pub trait EnumCast: CastId + TryFrom<u16> + Into<ImageType> + PartialEq + Copy {
+pub trait EnumCast
+where
+    Self: CastId + TryFrom<u16> + PartialEq + Copy,
+    ImageType: From<Self>,
+{
     fn random() -> Self {
         let index = random_u64(0..Self::VARIANTS as _);
         unsafe { Self::try_from(index as _).unwrap_unchecked() }

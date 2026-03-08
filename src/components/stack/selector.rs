@@ -5,9 +5,10 @@ use crate::{
         tables::body::Victim,
     },
     model::AbilityKind,
-    utils::encode_offset,
+    utils::{Print, encode_offset},
 };
-use std::rc::Rc;
+use serde_json::Value;
+use std::{collections::HashMap, rc::Rc};
 use tutorlolv2_gen::{
     BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, CastId, ChampionId, IGNITE_OFFSET, ItemId,
     ONHIT_EFFECT_OFFSET, RuneId, TypeMetadata,
@@ -29,7 +30,6 @@ fn section(title: &str, iterator: impl ExactSizeIterator<Item = Html>) -> Option
                     {title}
                 </h2>
             </div>
-
             <div class={classes!(
                 "flex", "gap-2", "flex-wrap",
                 "items-start"
@@ -62,7 +62,6 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         html! {
             <button
                 type={"button"}
-                {data_offset}
                 class={classes!(
                     "group",
                     "relative",
@@ -85,13 +84,15 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 )}
                 {onclick}
             >
-                <Image
-                    class={classes!(
-                        "w-8", "h-8", "pointer-events-none",
-                        "overflow-hidden", "rounded"
-                    )}
-                    {src}
-                />
+                <div {data_offset}>
+                    <Image
+                        class={classes!(
+                            "w-8", "h-8", "pointer-events-none",
+                            "overflow-hidden", "rounded"
+                        )}
+                        {src}
+                    />
+                </div>
             </button>
         }
     }
@@ -262,6 +263,77 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
 
     let stack = use_reducer(Stack::default);
 
+    {
+        let stack = stack.clone();
+        let items_meta = items_meta.clone();
+        let runes_meta = runes_meta.clone();
+
+        type StackStore = HashMap<ChampionId, Vec<StackValue>>;
+
+        use_effect_with(champion_id, move |_| {
+            if let Some(window) = web_sys::window()
+                && let Ok(local) = window.local_storage()
+                && let Some(storage) = local
+                && let Ok(store) = storage.get("stack")
+                && let Some(value) = store
+                && let Ok(de) = serde_json::from_str::<StackStore>(&value)
+                && let Some(stored) = de.get(&champion_id)
+            {
+                let result = stored
+                    .iter()
+                    .map(|&v| StackEntry::new(v))
+                    .collect::<Vec<_>>();
+                return stack.dispatch(StackAction::Replace(Stack(result)));
+            }
+
+            stack.dispatch(StackAction::Replace(Stack::new(
+                champion_id,
+                &items_meta,
+                &runes_meta,
+            )));
+        })
+    }
+
+    let save_stack = {
+        use_callback(
+            (stack.clone(), champion_id),
+            move |_: MouseEvent, (stack, _)| {
+                if let Some(window) = web_sys::window()
+                    && let Ok(local) = window.local_storage()
+                    && let Some(storage) = local
+                {
+                    let entries = stack.iter().map(|entry| entry.value).collect::<Vec<_>>();
+
+                    let mut root: HashMap<ChampionId, Value> = storage
+                        .get_item("stack")
+                        .ok()
+                        .flatten()
+                        .and_then(|s| serde_json::from_str(&s).ok())
+                        .unwrap_or_default();
+
+                    root.insert(champion_id, serde_json::json!(entries));
+
+                    if let Ok(result) = serde_json::to_string(&root) {
+                        storage.set_item("stack", &result).log();
+                    }
+                }
+            },
+        )
+    };
+
+    let default_stack = {
+        use_callback(
+            (stack.clone(), items_meta.clone(), runes_meta.clone()),
+            move |champion_id, (stack, items_meta, runes_meta)| {
+                stack.dispatch(StackAction::Replace(Stack::new(
+                    champion_id,
+                    items_meta,
+                    runes_meta,
+                )));
+            },
+        )
+    };
+
     let stack_push = {
         let stack = stack.clone();
         use_callback((), move |value, _| {
@@ -281,8 +353,6 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
         })
     };
 
-    let safe_stack = stack.reconcile(champion_id, items_meta, runes_meta);
-
     {
         let stack = stack.clone();
         let items_meta = items_meta.clone();
@@ -299,6 +369,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
         );
     }
 
+    let safe_stack = stack.reconcile(champion_id, items_meta, runes_meta);
     let len = safe_stack.len();
 
     let remover = safe_stack
@@ -332,8 +403,8 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
 
             html! {
                 <button
+                    key={id}
                     type={"button"}
-                    {data_offset}
                     class={classes!(
                         "group",
                         "relative",
@@ -356,10 +427,12 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                     )}
                     {onclick}
                 >
-                    <Image
-                        class={classes!("w-8", "h-8", "pointer-events-none")}
-                        src={image_type}
-                    />
+                    <div {data_offset}>
+                        <Image
+                            class={classes!("w-8", "h-8", "pointer-events-none")}
+                            src={image_type}
+                        />
+                    </div>
                 </button>
             }
         })
@@ -400,28 +473,33 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                         )}>
                             {len}
                         </span>
-                        <button
-                            type={"button"}
-                            onclick={clear_stack}
+                        <StackButton
+                            onclick={save_stack}
                             class={classes!(
-                                "px-3", "py-1.5",
-                                "rounded-lg",
-                                "border", "border-std-800",
-                                "bg-std-900/70",
-                                "text-xs", "font-semibold",
-                                "text-std-200",
-                                "hover:bg-std-800/60",
-                                "hover:border-rose-500/20",
-                                "transition-all", "duration-150",
-                                "focus-visible:outline",
-                                "focus-visible:outline-2",
+                                "hover:border-sky-500/75",
+                                "focus-visible:outline-sky-400"
+                            )}
+                            title={"Save current combo definition for this champion"}
+                            text={"Save"}
+                        />
+                        <StackButton
+                            onclick={Callback::from(move |_| default_stack.emit(champion_id))}
+                            class={classes!(
+                                "hover:border-emerald-500/75",
+                                "focus-visible:outline-emerald-400"
+                            )}
+                            title={"Add default combo definition for this champion"}
+                            text={"Default"}
+                        />
+                        <StackButton
+                            onclick={clear_stack}
+                            text={"Clear"}
+                            title={"Remove all selected items"}
+                            class={classes!(
+                                "hover:border-rose-500/75",
                                 "focus-visible:outline-rose-400"
                             )}
-                            title={"Clear stack"}
-                            aria-label={"Clear stack"}
-                        >
-                            {"Clear"}
-                        </button>
+                        />
                     </div>
                 </div>
                 <div class={classes!(
@@ -442,5 +520,55 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                 />
             </div>
         </div>
+    }
+}
+
+#[derive(PartialEq, Properties)]
+pub struct StackButtonProps {
+    pub onclick: Callback<MouseEvent>,
+    pub text: AttrValue,
+    pub title: AttrValue,
+    #[prop_or_default]
+    pub class: Classes,
+}
+
+#[component]
+pub fn StackButton(props: &StackButtonProps) -> Html {
+    let StackButtonProps {
+        onclick,
+        text,
+        title,
+        class,
+    } = props;
+
+    let mut classes = classes!(
+        "px-3",
+        "py-1.5",
+        "rounded-lg",
+        "border",
+        "border-std-800",
+        "bg-std-900/70",
+        "text-xs",
+        "font-semibold",
+        "text-std-200",
+        "hover:bg-std-800/60",
+        "transition-all",
+        "duration-150",
+        "focus-visible:outline",
+        "focus-visible:outline-2",
+    );
+
+    classes.push(class);
+
+    html! {
+        <button
+            type={"button"}
+            {onclick}
+            class={classes}
+            {title}
+            aria-label={title}
+        >
+            {text}
+        </button>
     }
 }

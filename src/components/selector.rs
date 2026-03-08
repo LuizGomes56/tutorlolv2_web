@@ -49,35 +49,46 @@ where
     let dropdown_ref = use_node_ref();
     let label_ref = use_clickout(close_callback.clone(), [dropdown_ref.clone()]);
 
-    let buttons = T::VALUES
+    let buttons =
+        use_memo(
+            (callback.clone(), close_callback.clone(), query.clone()),
+            |(callback, close_callback, query)| {
+                T::VALUES
+                .iter()
+                .map(|&v| {
+                    let onclick = {
+                        let callback = callback.clone();
+                        let close_callback = close_callback.clone();
+                        let query = query.clone();
+                        Callback::from(move |_| {
+                            callback.emit(v);
+                            close_callback.emit(());
+                            query.set(String::new());
+                        })
+                    };
+
+                    (v, html! {
+                        <button key={v.index()} {onclick}>
+                            <div class={classes!("flex", "items-center", "gap-2")}>
+                                <Image src={v.image_type()} class={classes!("w-6", "h-6")} />
+                                <span class={classes!("truncate")}>{v.name()}</span>
+                            </div>
+                        </button>
+                    })
+                })
+                .collect::<Box<[(T, Html)]>>()
+            },
+        );
+
+    let options = buttons
         .iter()
-        .filter(|v| {
+        .filter(|(v, _)| {
             query.is_empty()
                 || v.name()
                     .to_ascii_lowercase()
                     .contains(&query.trim().to_ascii_lowercase())
         })
-        .map(|v| {
-            let onclick = {
-                let callback = callback.clone();
-                let close_callback = close_callback.clone();
-                let query = query.clone();
-                Callback::from(move |_| {
-                    callback.emit(*v);
-                    close_callback.emit(());
-                    query.set(String::new());
-                })
-            };
-
-            html! {
-                <button {onclick}>
-                    <div class={classes!("flex", "items-center", "gap-2")}>
-                        <Image src={v.image_type()} class={classes!("w-6", "h-6")} />
-                        <span class={classes!("truncate")}>{v.name()}</span>
-                    </div>
-                </button>
-            }
-        })
+        .map(|(_, v)| v.clone())
         .collect::<Html>();
 
     let oninput = use_callback(
@@ -122,9 +133,10 @@ where
                     ref={dropdown_ref}
                     class={{
                         let mut class = classes!(
-                            "absolute", "bg-std-900",
+                            "absolute",
+                            "bg-[#16161c]",
                             "flex", "flex-col",
-                            "overflow-auto", "max-h-64",
+                            "overflow-auto", "max-h-72",
                             "border", "border-std-800",
                             "z-50", "empty:hidden"
                         );
@@ -132,7 +144,7 @@ where
                         class
                     }}
                 >
-                    {buttons}
+                    {options}
                 </div>
             }
         </div>

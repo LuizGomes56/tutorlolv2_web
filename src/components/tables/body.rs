@@ -49,7 +49,7 @@ pub struct Cell {
     damage_type: DamageType,
     min_dmg: i32,
     max_dmg: Option<i32>,
-    offsets: Vec<&'static Range<usize>>,
+    offsets: (&'static Range<usize>, Option<&'static Range<usize>>),
     idents: &'static [CtxVar],
 }
 
@@ -63,7 +63,6 @@ impl Damages {
         let merge_data = champion_id.merge_data();
         let abilities_meta = champion_id.abilities();
         let ability_idents = champion_id.idents();
-        let ability_idents_indexes = champion_id.ident_indexes();
         let ability_closures = champion_id.closures();
 
         const BASE_CELLS: usize = 3;
@@ -109,7 +108,7 @@ impl Damages {
         debug_assert_eq!(items_meta.len(), self.items.len() >> 1);
         debug_assert_eq!(runes_meta.len(), self.runes.len());
         debug_assert_eq!(self.abilities.len(), abilities_meta.len());
-        debug_assert_eq!(ability_idents_indexes.len(), abilities_meta.len());
+        debug_assert_eq!(ability_idents.len(), abilities_meta.len());
         debug_assert_eq!(ability_closures.len(), abilities_meta.len());
 
         cells.extend([
@@ -117,21 +116,21 @@ impl Damages {
                 damage_type: DamageType::Physical,
                 min_dmg: basic_attack,
                 max_dmg: None,
-                offsets: vec![&BASIC_ATTACK_FN_OFFSET],
+                offsets: (&BASIC_ATTACK_FN_OFFSET, None),
                 idents: &[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier],
             },
             Cell {
                 damage_type: DamageType::Physical,
                 min_dmg: critical_strike,
                 max_dmg: None,
-                offsets: vec![&CRITICAL_STRIKE_FN_OFFSET],
+                offsets: (&CRITICAL_STRIKE_FN_OFFSET, None),
                 idents: &[CtxVar::AttackDamage, CtxVar::CritDamage],
             },
             Cell {
                 damage_type: DamageType::Mixed,
                 min_dmg: onhit_damage.minimum_damage,
                 max_dmg: (onhit_damage.maximum_damage > 0).then_some(onhit_damage.maximum_damage),
-                offsets: vec![&ONHIT_EFFECT_FN_OFFSET],
+                offsets: (&ONHIT_EFFECT_FN_OFFSET, None),
                 idents: &[],
             },
         ]);
@@ -149,7 +148,7 @@ impl Damages {
                 debug_assert!(target < cells.len(), "Found a max match without min");
 
                 cells[target].max_dmg = Some(abilities_dmg[i]);
-                cells[target].offsets.push(&ability_closures[i]);
+                cells[target].offsets.1 = Some(&ability_closures[i]);
 
                 md_end += 1;
                 continue;
@@ -161,14 +160,13 @@ impl Damages {
 
             let meta = &abilities_meta[i];
 
-            let id_range = ability_idents_indexes[i].clone();
-            let idents = &ability_idents[id_range];
+            let idents = &ability_idents[i];
 
             cells.push(Cell {
                 damage_type: meta.damage_type,
                 min_dmg: abilities_dmg[i],
                 max_dmg: None,
-                offsets: vec![&ability_closures[i]],
+                offsets: (&ability_closures[i], None),
                 idents,
             });
         }
@@ -184,7 +182,7 @@ impl Damages {
                 damage_type: meta.damage_type,
                 min_dmg: min,
                 max_dmg: Some(max),
-                offsets: vec![item_id.closure()],
+                offsets: (item_id.closure(), None),
                 idents: item_id.idents(),
             });
         }
@@ -196,7 +194,7 @@ impl Damages {
                 damage_type: meta.damage_type,
                 min_dmg: self.runes[k],
                 max_dmg: None,
-                offsets: vec![rune_id.closure()],
+                offsets: (rune_id.closure(), None),
                 idents: rune_id.idents(),
             });
         }
@@ -223,7 +221,13 @@ impl Damages {
                     let _ = write!(&mut data_idents, "{ident}:{value}");
                 }
 
-                let data_offset = encode_offset(&offsets);
+                let data_offset = {
+                    let (a, b) = offsets;
+                    match b {
+                        Some(b) => encode_offset(&[a, b]),
+                        None => encode_offset(core::slice::from_ref(&a)),
+                    }
+                };
                 let dmg = match max_dmg {
                     Some(max) if max > 0 && max != min_dmg => html!(
                         <>{min_dmg}{" - "}{max}</>

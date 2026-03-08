@@ -2,8 +2,13 @@ mod selector;
 mod table;
 
 use crate::utils::random_u64;
-use std::{collections::HashSet, ops::Deref, rc::Rc};
-use tutorlolv2_gen::{AbilityId, ChampionId, ItemId, RuneId, TypeMetadata};
+use serde::{Deserialize, Serialize};
+use std::{
+    collections::HashSet,
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
+use tutorlolv2_gen::{AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata};
 use yew::Reducible;
 
 pub use selector::StackSelector;
@@ -36,7 +41,53 @@ impl Deref for Stack {
     }
 }
 
+impl DerefMut for Stack {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl Stack {
+    pub fn new(
+        champion_id: ChampionId,
+        items_meta: &[TypeMetadata<ItemId>],
+        runes_meta: &[TypeMetadata<RuneId>],
+    ) -> Self {
+        fn chain_meta<T: Copy>(
+            meta: &[TypeMetadata<T>],
+            f: fn(usize, T) -> StackValue,
+        ) -> impl IntoIterator<Item = StackEntry> {
+            meta.iter()
+                .enumerate()
+                .map(move |(i, v)| StackEntry::new(f(i, v.kind)))
+        }
+
+        let combos = champion_id.combos();
+        let i = random_u64(0..combos.len() as _) as usize;
+
+        Stack(
+            combos
+                .get(i)
+                .into_iter()
+                .flat_map(|list| list.iter())
+                .filter_map(|&element| match element {
+                    ComboElement::Ability(ability_id) => {
+                        champion_id.index_of_ability(ability_id).map(|slot| {
+                            StackEntry::new(StackValue::Ability {
+                                slot,
+                                champion_id,
+                                ability_id,
+                            })
+                        })
+                    }
+                    ComboElement::Attack => Some(StackEntry::new(StackValue::BasicAttack)),
+                })
+                .chain(chain_meta(items_meta, StackValue::Item))
+                .chain(chain_meta(runes_meta, StackValue::Rune))
+                .collect(),
+        )
+    }
+
     pub fn reconcile(
         &self,
         champion_id: ChampionId,
@@ -87,20 +138,16 @@ impl Reducible for Stack {
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
         match action {
-            StackAction::Insert(entry) => new.0.push(entry),
-            StackAction::RemoveById(id) => {
-                if let Some(pos) = new.0.iter().rposition(|e| e.id == id) {
-                    new.0.swap_remove(pos);
-                }
-            }
+            StackAction::Insert(entry) => new.push(entry),
+            StackAction::RemoveById(id) => new.retain(|e| e.id != id),
             StackAction::Replace(stack) => new = stack,
-            StackAction::Clear => new.0.clear(),
+            StackAction::Clear => new.clear(),
         }
         Rc::new(new)
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum StackValue {
     Ability {
         slot: usize,

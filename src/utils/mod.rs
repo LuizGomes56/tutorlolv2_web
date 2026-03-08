@@ -21,11 +21,17 @@ pub const BASE_URL: &str = "http://localhost:8082";
 pub fn random_u64(range: Range<u64>) -> u64 {
     let start = range.start;
     let end = range.end;
-    let x = getrandom::u64().unwrap_or_else(
-        #[cold]
-        |_| (Math::random() * ((end - start) + start) as f64) as _,
-    );
-    start + (x % (end - start))
+
+    match end - start {
+        0 => 0,
+        gap => {
+            let x = getrandom::u64().unwrap_or_else(
+                #[cold]
+                |_| (Math::random() * (gap + start) as f64) as _,
+            );
+            start + (x % gap)
+        }
+    }
 }
 
 pub fn encode_offset(range: &[&Range<usize>]) -> String {

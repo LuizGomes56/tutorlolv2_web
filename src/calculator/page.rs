@@ -11,11 +11,11 @@ use crate::{
         stack::StackSelector,
         tables::{header::TableHeader, turret::TurretTable},
     },
-    model::{AbilityLevelsAction, Dragons, EnemyStats},
-    utils::{ClassCast, EnumCast, Fetch, Print, encode_offset},
+    model::{Dragons, EnemyStats},
+    utils::{ClassCast, Fetch, Print, encode_offset},
 };
 use std::{cell::RefCell, rc::Rc};
-use tutorlolv2_gen::{CastId, ChampionId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
+use tutorlolv2_gen::{CastId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
@@ -130,7 +130,7 @@ pub fn Calculator() -> Html {
                     dragons: &dragons,
                 };
 
-                input_game.active_player.log();
+                // input_game.active_player.log();
 
                 if let Ok(req) = Fetch::new("/api/games/calculator")
                     .signal(signal)
@@ -170,8 +170,6 @@ pub fn Calculator() -> Html {
                                 LastAction::EnemyPlayer(index) => infer_enemy_player_stats(index),
                                 _ => {}
                             };
-
-                            // data.current_player.log();
 
                             game_data.set(Ok(data));
                         }
