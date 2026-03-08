@@ -26,7 +26,7 @@ pub fn ItemFormulas() -> Html {
             />
             <Section text={"Source code definition"} />
             <Code range={item.formula()} />
-            <Section text={"Damaging function definition"} />
+            <Section text={"Function definition"} />
             <Code range={item.closure()} />
             <Section text={"Item generator implementation"} />
             <Code range={item.generator()} />

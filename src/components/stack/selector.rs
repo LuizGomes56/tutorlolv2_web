@@ -58,7 +58,12 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         champion_id,
     } = *props;
 
-    fn button(onclick: Callback<MouseEvent>, data_offset: String, src: ImageType) -> Html {
+    fn button(
+        onclick: Callback<MouseEvent>,
+        data_offset: String,
+        src: ImageType,
+        max: bool,
+    ) -> Html {
         html! {
             <button
                 type={"button"}
@@ -92,6 +97,11 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                         )}
                         {src}
                     />
+                    if max {
+                        <div class={classes!("img-letter", "text-sm", "z-10")}>
+                            {"MAX"}
+                        </div>
+                    }
                 </div>
             </button>
         }
@@ -103,26 +113,30 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 ImageType::BasicAttack,
                 &BASIC_ATTACK_OFFSET,
                 StackValue::BasicAttack,
+                false,
             ),
             (
                 ImageType::CritStrike,
                 &CRITICAL_STRIKE_OFFSET,
                 StackValue::CritStrike,
+                false,
             ),
             (
                 ImageType::OnhitAttack,
                 &ONHIT_EFFECT_OFFSET,
                 StackValue::OnhitMin,
+                false,
             ),
             (
                 ImageType::OnhitAttack,
                 &ONHIT_EFFECT_OFFSET,
                 StackValue::OnhitMax,
+                true,
             ),
-            (ImageType::Ignite, &IGNITE_OFFSET, StackValue::Ignite),
+            (ImageType::Ignite, &IGNITE_OFFSET, StackValue::Ignite, false),
         ]
         .into_iter()
-        .map(|(src, offset, v)| {
+        .map(|(src, offset, v, max)| {
             let data_offset = encode_offset(&[offset]);
 
             let onclick = {
@@ -130,7 +144,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 Callback::from(move |_| callback.emit(v))
             };
 
-            button(onclick, data_offset, src)
+            button(onclick, data_offset, src, max)
         });
 
         section("Other", buttons)
@@ -156,41 +170,51 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                     onclick,
                     data_offset,
                     ImageType::Ability(champion_id, AbilityKind::Normal(ability_id)),
+                    false,
                 )
             });
 
         section("Abilities", buttons)
     });
 
-    fn make_buttons<T>(
-        callback: &Callback<StackValue>,
-        meta: &Rc<[TypeMetadata<T>]>,
-        f: fn(usize, T) -> StackValue,
-    ) -> impl ExactSizeIterator<Item = Html>
-    where
-        T: CastId + PartialEq + Copy,
-        ImageType: From<T>,
-    {
-        meta.iter().enumerate().map(move |(i, metadata)| {
-            let id = metadata.kind;
-            let data_offset = encode_offset(&[id.formula()]);
-
-            let onclick = {
-                let callback = callback.clone();
-                Callback::from(move |_| callback.emit(f(i, id)))
-            };
-
-            button(onclick, data_offset, ImageType::from(id))
-        })
-    }
-
     let items = use_memo(
         (callback.clone(), items_meta.clone()),
         |(callback, items_meta)| {
-            section(
-                "Items",
-                make_buttons(callback, items_meta, StackValue::Item),
-            )
+            section("Items", {
+                let cursor = std::cell::Cell::new(0usize);
+
+                items_meta.iter().map({
+                    let callback = callback.clone();
+
+                    move |metadata| {
+                        let item_id = metadata.kind;
+                        let has_max = item_id.deals_max_damage();
+
+                        let base = cursor.get();
+                        cursor.set(base + if has_max { 2 } else { 1 });
+
+                        let data_offset = encode_offset(&[item_id.formula()]);
+
+                        let onclick = |j: usize| {
+                            let callback = callback.clone();
+                            Callback::from(move |_| callback.emit(StackValue::Item(j, item_id)))
+                        };
+
+                        html! {
+                            <>
+                                {button(onclick(base), data_offset.clone(), ImageType::from(item_id), false)}
+                                {
+                                    if has_max {
+                                        button(onclick(base + 1), data_offset, ImageType::from(item_id), true)
+                                    } else {
+                                        Html::default()
+                                    }
+                                }
+                            </>
+                        }
+                    }
+                })
+            })
         },
     );
 
@@ -199,7 +223,17 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         |(callback, runes_meta)| {
             section(
                 "Runes",
-                make_buttons(callback, runes_meta, StackValue::Rune),
+                runes_meta.iter().enumerate().map(|(i, metadata)| {
+                    let id = metadata.kind;
+                    let data_offset = encode_offset(&[id.formula()]);
+
+                    let onclick = {
+                        let callback = callback.clone();
+                        Callback::from(move |_| callback.emit(StackValue::Rune(i, id)))
+                    };
+
+                    button(onclick, data_offset, ImageType::from(id), false)
+                }),
             )
         },
     );
@@ -380,18 +414,25 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
     let remover = safe_stack
         .iter()
         .map(|entry| {
-            let (image_type, offset) = match entry.value {
+            let (image_type, offset, max) = match entry.value {
                 StackValue::Ability { slot, ability_id } => (
                     ImageType::Ability(champion_id, ability_id.into()),
                     champion_id.get_ability_formula(slot),
+                    false,
                 ),
-                StackValue::Item(_, item_id) => (ImageType::from(item_id), item_id.formula()),
-                StackValue::Rune(_, rune_id) => (ImageType::from(rune_id), rune_id.formula()),
-                StackValue::BasicAttack => (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET),
-                StackValue::CritStrike => (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET),
-                StackValue::OnhitMin => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET),
-                StackValue::OnhitMax => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET),
-                StackValue::Ignite => (ImageType::Ignite, &IGNITE_OFFSET),
+                StackValue::Item(i, item_id) => (
+                    ImageType::from(item_id),
+                    item_id.formula(),
+                    i % 2 == 1 && item_id.deals_max_damage(),
+                ),
+                StackValue::Rune(_, rune_id) => {
+                    (ImageType::from(rune_id), rune_id.formula(), false)
+                }
+                StackValue::BasicAttack => (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET, false),
+                StackValue::CritStrike => (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET, false),
+                StackValue::OnhitMin => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, false),
+                StackValue::OnhitMax => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, true),
+                StackValue::Ignite => (ImageType::Ignite, &IGNITE_OFFSET, false),
             };
 
             let data_offset = encode_offset(&[offset]);
@@ -402,37 +443,53 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                 Callback::from(move |_| stack_remove.emit(id))
             };
 
+            let class = classes!(
+                "group",
+                "relative",
+                "flex",
+                "items-center",
+                "justify-center",
+                "w-10",
+                "h-10",
+                "rounded-lg",
+                "border",
+                "border-std-800",
+                "bg-std-900/60",
+                "hover:bg-rose-500/10",
+                "hover:border-rose-500/75",
+                "transition-all",
+                "duration-150",
+                "focus-visible:outline",
+                "focus-visible:outline-2",
+                "focus-visible:outline-rose-400"
+            );
+
+            let inner = html! {
+                if max {
+                    <Image
+                        class={classes!("w-8", "h-8", "pointer-events-none")}
+                        src={image_type}
+                    />
+                    <div class={classes!("img-letter", "text-sm", "z-10")}>
+                        {"MAX"}
+                    </div>
+                } else {
+                    <Image
+                        class={classes!("w-8", "h-8", "pointer-events-none")}
+                        src={image_type}
+                    />
+                }
+            };
+
             html! {
                 <button
                     key={id}
                     type={"button"}
-                    class={classes!(
-                        "group",
-                        "relative",
-                        "flex",
-                        "items-center",
-                        "justify-center",
-                        "w-10",
-                        "h-10",
-                        "rounded-lg",
-                        "border",
-                        "border-std-800",
-                        "bg-std-900/60",
-                        "hover:bg-rose-500/10",
-                        "hover:border-rose-500/75",
-                        "transition-all",
-                        "duration-150",
-                        "focus-visible:outline",
-                        "focus-visible:outline-2",
-                        "focus-visible:outline-rose-400"
-                    )}
+                    {class}
                     {onclick}
                 >
                     <div {data_offset}>
-                        <Image
-                            class={classes!("w-8", "h-8", "pointer-events-none")}
-                            src={image_type}
-                        />
+                        {inner}
                     </div>
                 </button>
             }

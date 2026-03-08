@@ -27,7 +27,7 @@ pub fn RuneFormulas() -> Html {
             />
             <Section text={"Source code definition"} />
             <Code range={rune.formula()} />
-            <Section text={"Damaging function definition"} />
+            <Section text={"Function definition"} />
             <Code range={rune.closure()} />
         </div>
     }
