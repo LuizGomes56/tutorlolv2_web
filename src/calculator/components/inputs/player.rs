@@ -119,7 +119,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     />
                 </div>
                 <div class={classes!(
-                    "grid", "grid-cols-[auto,1fr,1fr]",
+                    "grid", "grid-cols-[auto_1fr_1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-1.5",
                     "empty:hidden"
                 )}>
@@ -129,13 +129,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         callback={stack_callback}
                         ally={true}
                     />
-                    <ExceptionSelector<ItemId>
+                    <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
                         values={player.data.items.clone()}
                         exceptions={player.data.item_exceptions.clone()}
                         callback={item_exception_callback}
                         filter={ItemId::exceptions(true)}
                     />
-                    <ExceptionSelector<RuneId>
+                    <ExceptionSelector<{ RuneId::SIZE_OF_EXCEPTIONS }, RuneId>
                         values={player.runes.clone()}
                         exceptions={player.rune_exceptions.clone()}
                         callback={rune_exception_callback}

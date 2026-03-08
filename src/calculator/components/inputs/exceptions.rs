@@ -4,7 +4,7 @@ use crate::{
     utils::encode_offset,
 };
 use std::hash::Hash;
-use tutorlolv2_gen::{CastId, ChampionId};
+use tutorlolv2_gen::{BitSetArray, CastId, ChampionId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -64,15 +64,15 @@ where
 }
 
 #[derive(PartialEq, Properties)]
-pub struct ExceptionSelectorProps<T: Default + Eq + Hash + 'static> {
+pub struct ExceptionSelectorProps<const N: usize, T: Default + Eq + Hash + 'static> {
     pub values: Vec<T>,
     pub exceptions: ExceptionMap<T>,
     pub callback: Callback<(T, u32)>,
-    pub filter: &'static [T],
+    pub filter: BitSetArray<N>,
 }
 
 #[component]
-pub fn ExceptionSelector<T>(props: &ExceptionSelectorProps<T>) -> Html
+pub fn ExceptionSelector<const N: usize, T>(props: &ExceptionSelectorProps<N, T>) -> Html
 where
     T: CastId + Default + Eq + Hash,
     ImageType: From<T>,
@@ -86,7 +86,7 @@ where
 
     values
         .iter()
-        .filter(|value| filter.contains(value))
+        .filter(|value| filter.contains(value.index()))
         .filter_map(|&value| {
             exceptions.inner.get(&value).map(|v| {
                 let oninput = {

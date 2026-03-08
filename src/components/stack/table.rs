@@ -65,7 +65,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                         html! {
                             <tr>
                                 <td
-                                    class={classes!("w-8", "h-8")}
+                                    class={classes!("w-12")}
                                     data_offset={encode_offset(&[enemy_id.formula()])}
                                 >
                                     <button

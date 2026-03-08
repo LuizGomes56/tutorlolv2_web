@@ -1,11 +1,8 @@
-use crate::{
-    components::{
-        image::{Image, ImageType},
-        selector::Selector,
-    },
-    utils::encode_offset,
+use crate::components::{
+    image::{Image, ImageType},
+    selector::Selector,
 };
-use tutorlolv2_gen::{CastId, ChampionId};
+use tutorlolv2_gen::ChampionId;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

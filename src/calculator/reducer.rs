@@ -75,7 +75,7 @@ pub fn push_item(
     v: ItemId,
     ally: bool,
 ) {
-    if ItemId::exceptions(ally).contains(&v) {
+    if ItemId::exceptions(ally).contains(v.index()) {
         let value = ValueException::pack_item_id(v, 0);
         item_exceptions.inner.insert(v, value);
     }
@@ -121,7 +121,7 @@ impl Reducible for Player {
         match action {
             Self::Action::SetRuneVec(v) => new.runes = v.into(),
             Self::Action::InsertRune(v) => {
-                if RuneId::exceptions().contains(&v) {
+                if RuneId::exceptions().contains(v.index()) {
                     let value = ValueException::pack_rune_id(v, 0);
                     new.rune_exceptions.inner.insert(v, value);
                 }

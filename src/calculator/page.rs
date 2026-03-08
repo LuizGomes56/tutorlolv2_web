@@ -216,7 +216,7 @@ pub fn Calculator() -> Html {
                                         html! {
                                             <tr>
                                                 <td
-                                                    class={classes!("w-8", "h-8")}
+                                                    class={classes!("w-12")}
                                                     data_offset={encode_offset(&[enemy_id.formula()])}
                                                 >
                                                     <button
@@ -267,7 +267,13 @@ pub fn Calculator() -> Html {
                                             let cell = MONSTER_HEADERS[i].get(j).map(|&value| {
                                                 html!(<Image src={ImageType::Other(value)} />)
                                             });
-                                            images.push(html!(<td class={classes!("w-8", "h-8")}>{cell}</td>));
+                                            images.push(html!(
+                                                <td class={classes!(
+                                                    "px-1", "w-8", "first:pl-2", "last:pr-2"
+                                                )}>
+                                                    {cell}
+                                                </td>
+                                            ));
                                         }
 
                                         html!(<tr>{images}{damages}</tr>)
