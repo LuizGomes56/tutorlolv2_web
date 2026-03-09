@@ -180,7 +180,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     label={"Infer Stats"}
                 />
                 <div class={classes!(
-                    "grid", "grid-cols-[auto,1fr,1fr]",
+                    "grid", "grid-cols-[auto_1fr_1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-0.5"
                 )}>
                     <StatCell

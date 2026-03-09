@@ -1,4 +1,4 @@
-use crate::utils::get_cache;
+use crate::utils::hoverdocs;
 use std::ops::Range;
 use yew::prelude::*;
 
@@ -11,7 +11,7 @@ pub struct CodeProps {
 pub fn Code(props: &CodeProps) -> Html {
     let CodeProps { range } = *props;
 
-    let cache = get_cache(range.clone());
+    let cache = hoverdocs(range.clone());
     let code = Html::from_html_unchecked(cache.into());
 
     html! {

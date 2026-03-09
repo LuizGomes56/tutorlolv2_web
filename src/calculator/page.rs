@@ -130,8 +130,6 @@ pub fn Calculator() -> Html {
         use_effect_with(
             (player.clone(), enemies.clone(), dragons.clone()),
             move |(player, enemies, dragons)| {
-                last_action.log();
-
                 if *last_action.borrow() == LastAction::Replace {
                     last_action.replace(LastAction::Any);
                     return;

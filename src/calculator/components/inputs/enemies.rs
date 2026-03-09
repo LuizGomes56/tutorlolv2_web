@@ -128,7 +128,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     />
                 </div>
                 <div class={classes!(
-                    "grid", "grid-cols-[auto,1fr,1fr]",
+                    "grid", "grid-cols-[auto_1fr_1fr]",
                     "gap-x-2", "px-4", "py-3", "gap-y-1.5",
                     "empty:hidden"
                 )}>
