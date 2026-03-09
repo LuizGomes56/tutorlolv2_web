@@ -84,13 +84,6 @@ impl_index! {
     }
 }
 
-#[derive(PartialEq, Properties)]
-pub struct StatsProps<T: ReduceApply> {
-    pub infer: bool,
-    pub stats: T,
-    pub callback: Callback<T::Action>,
-}
-
 pub trait StatDisplay
 where
     Self: Index<StatType, Output = i32> + ReduceApply,
@@ -137,6 +130,13 @@ impl_stat_display!(EnemyStats {
     Armor,
     MagicResist,
 });
+
+#[derive(PartialEq, Properties)]
+pub struct StatsProps<T: ReduceApply> {
+    pub infer: bool,
+    pub stats: T,
+    pub callback: Callback<T::Action>,
+}
 
 #[component]
 pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {

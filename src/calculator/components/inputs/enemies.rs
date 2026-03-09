@@ -3,14 +3,18 @@ use crate::{
         components::inputs::{
             banner::Banner,
             checkbox::Checkbox,
+            dragon::{DragonInput, use_dragons},
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
             stats::{StatCell, Stats},
         },
         page::{EnemyProps, TargetEntity},
         reducer::{DataAction, EnemyAction, EnemyDataAction, LastAction},
     },
-    components::{image::ImageType, selector::SelectorButton},
-    model::EnemyStats,
+    components::{
+        image::{DragonImage, ImageType},
+        selector::SelectorButton,
+    },
+    model::{Dragons, DragonsAction, EnemyStats},
 };
 use tutorlolv2_gen::{ChampionId, ItemId};
 use web_sys::HtmlInputElement;
@@ -20,6 +24,7 @@ use yew::prelude::*;
 pub struct EnemiesInputProps {
     pub enemy_props: EnemyProps,
     pub open_item_menu: Callback<TargetEntity>,
+    pub dragons: UseReducerHandle<Dragons>,
 }
 
 #[hook]
@@ -31,7 +36,9 @@ pub fn use_enemy_callback<T: 'static>(
         enemies,
         last_action,
         enemy_index,
+        ..
     } = props.clone();
+
     use_callback(enemy_index.clone(), move |v, enemy_index| {
         let value = callback(v);
         last_action.replace(LastAction::EnemyPlayer(**enemy_index));
@@ -48,7 +55,9 @@ pub fn use_enemy_data_callback<T: 'static>(
         enemies,
         enemy_index,
         last_action,
+        ..
     } = props.clone();
+
     use_callback(enemy_index.clone(), move |v, enemy_index| {
         let index = **enemy_index;
         let value = callback(v);
@@ -62,6 +71,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     let EnemiesInputProps {
         enemy_props,
         open_item_menu,
+        dragons,
     } = props;
 
     let add_enemy = use_enemy_callback(enemy_props, EnemyAction::Insert);
@@ -74,6 +84,23 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     let infer_stats_callback = use_enemy_data_callback(enemy_props, DataAction::InferStats);
     let item_exception_callback = use_enemy_data_callback(enemy_props, DataAction::ModifyItemExc);
     let is_mega_gnar_callback = use_enemy_data_callback(enemy_props, DataAction::IsMegaGnar);
+    let enemy_earth = {
+        let dragons = dragons.clone();
+        let last_action = enemy_props.last_action.clone();
+
+        use_callback(
+            enemy_props.enemy_index.clone(),
+            move |e: InputEvent, enemy_index| {
+                let index = **enemy_index;
+                last_action.replace(LastAction::EnemyPlayer(index));
+
+                let target = e.target_unchecked_into::<HtmlInputElement>();
+                let value = target.value().parse::<u16>().unwrap_or(0);
+
+                dragons.dispatch(DragonsAction::EnemyEarth(value));
+            },
+        )
+    };
 
     let enemy = enemy_props
         .enemies
@@ -105,6 +132,14 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     "gap-x-2", "px-4", "py-3", "gap-y-1.5",
                     "empty:hidden"
                 )}>
+                    if enemy.infer_stats {
+                        <DragonInput
+                            title={"Earth dragons"}
+                            oninput={enemy_earth}
+                            src={DragonImage::Earth}
+                            value={dragons.enemy_earth}
+                        />
+                    }
                     <ChampionExceptionSelector
                         champion_id={enemy.champion_id}
                         stacks={enemy.stacks}

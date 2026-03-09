@@ -19,6 +19,26 @@ use tutorlolv2_gen::{CastId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
+#[derive(PartialEq, Properties)]
+pub struct EmptyTableProps {
+    rows: usize,
+}
+
+#[component]
+pub fn EmptyTable(props: &EmptyTableProps) -> Html {
+    let EmptyTableProps { rows } = *props;
+    html! {
+        <div class={classes!("box")}>
+            <table>
+                <thead><tr><th></th></tr></thead>
+                <tbody>
+                    for _ in 0..rows { <tr><td></td></tr> }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
 #[derive(Clone, PartialEq, Properties)]
 pub struct PlayerProps {
     pub player: UseReducerHandle<Player>,
@@ -105,82 +125,95 @@ pub fn Calculator() -> Html {
     {
         let game_data = game_data.clone();
         let controller = controller.clone();
-        let player = player.clone();
-        let enemies = enemies.clone();
-        let dragons = dragons.clone();
         let last_action = last_action.clone();
-        use_effect_with((player.clone(), enemies.clone()), move |_| {
-            if *last_action.borrow() == LastAction::Replace {
-                last_action.replace(LastAction::Any);
-                return;
-            };
 
-            if let Some(controller) = &*controller {
-                controller.abort();
-            }
+        use_effect_with(
+            (player.clone(), enemies.clone(), dragons.clone()),
+            move |(player, enemies, dragons)| {
+                last_action.log();
 
-            let new_controller = AbortController::new().ok();
-            let signal = new_controller.as_ref().map(|c| c.signal());
-            controller.set(new_controller);
-
-            spawn_local(async move {
-                let input_game = InputGame {
-                    active_player: &player,
-                    enemy_players: enemies.as_slice(),
-                    dragons: &dragons,
+                if *last_action.borrow() == LastAction::Replace {
+                    last_action.replace(LastAction::Any);
+                    return;
                 };
 
-                // input_game.active_player.log();
+                if let Some(controller) = &*controller {
+                    controller.abort();
+                }
 
-                if let Ok(req) = Fetch::new("/api/games/calculator")
-                    .signal(signal)
-                    .body_with_bincode(&input_game)
-                {
-                    match req.post::<Game>().await {
-                        Ok(data) => {
-                            let infer_enemy_player_stats = |index| {
-                                if let Some(enemy) = &data.enemies.get(index)
-                                    && let Some(input_enemy) =
-                                        enemies.get(index) as Option<&Rc<PlayerData<EnemyStats>>>
-                                    && input_enemy.infer_stats
-                                {
-                                    last_action.replace(LastAction::Replace);
-                                    enemies.dispatch(EnemyAction::Change(
-                                        index,
-                                        DataAction::ReplaceStats(&enemy.current_stats as _),
-                                    ));
-                                }
-                            };
-                            let action = *last_action.borrow();
-                            match action {
-                                LastAction::Init | LastAction::CurrentPlayer => {
-                                    if player.data.infer_stats {
-                                        // data.current_player.log();
+                let new_controller = AbortController::new().ok();
+                let signal = new_controller.as_ref().map(|c| c.signal());
+                controller.set(new_controller);
+
+                let player = player.clone();
+                let enemies = enemies.clone();
+                let dragons = dragons.clone();
+
+                spawn_local(async move {
+                    let input_game = InputGame {
+                        active_player: &player,
+                        enemy_players: enemies.as_slice(),
+                        dragons: &dragons,
+                    };
+
+                    // input_game.active_player.log();
+
+                    if let Ok(req) = Fetch::new("/api/games/calculator")
+                        .signal(signal)
+                        .body_with_bincode(&input_game)
+                    {
+                        match req.post::<Game>().await {
+                            Ok(data) => {
+                                let infer_enemy_player_stats = |index| {
+                                    if let Some(enemy) = &data.enemies.get(index)
+                                        && let Some(input_enemy) = enemies.get(index)
+                                            as Option<&Rc<PlayerData<EnemyStats>>>
+                                        && input_enemy.infer_stats
+                                    {
                                         last_action.replace(LastAction::Replace);
-                                        player.dispatch(PlayerAction::Data(
-                                            DataAction::ReplaceStats(
-                                                &data.current_player.current_stats as _,
-                                            ),
+                                        enemies.dispatch(EnemyAction::Change(
+                                            index,
+                                            DataAction::ReplaceStats(&enemy.current_stats as _),
                                         ));
                                     }
-                                    if action == LastAction::Init {
-                                        (0..data.enemies.len()).for_each(infer_enemy_player_stats);
+                                };
+                                let action = *last_action.borrow();
+                                match action {
+                                    LastAction::Init | LastAction::CurrentPlayer => {
+                                        if player.data.infer_stats {
+                                            // data.current_player.log();
+                                            last_action.replace(LastAction::Replace);
+                                            player.dispatch(PlayerAction::Data(
+                                                DataAction::ReplaceStats(
+                                                    &data.current_player.current_stats as _,
+                                                ),
+                                            ));
+                                        }
+                                        if action == LastAction::Init {
+                                            (0..data.enemies.len())
+                                                .for_each(infer_enemy_player_stats);
+                                        }
                                     }
-                                }
-                                LastAction::EnemyPlayer(index) => infer_enemy_player_stats(index),
-                                _ => {}
-                            };
+                                    LastAction::EnemyPlayer(index) => {
+                                        infer_enemy_player_stats(index)
+                                    }
+                                    _ => {}
+                                };
 
-                            game_data.set(Ok(data));
-                        }
-                        Err(e) => {
-                            format!("Failed to request calculator api: {e:#?}").err();
-                            game_data.set(Err(e))
+                                game_data.set(Ok(data));
+                            }
+                            Err(e) => {
+                                let error = e.to_string();
+                                if error != "AbortError: signal is aborted without reason" {
+                                    format!("Failed to request calculator api: {e}").log();
+                                    game_data.set(Err(e));
+                                }
+                            }
                         }
                     }
-                }
-            });
-        });
+                });
+            },
+        );
     }
 
     let data = match game_data.as_ref() {
@@ -318,19 +351,6 @@ pub fn Calculator() -> Html {
             }
         }
         Err(e) => {
-            fn empty_table(rows: usize) -> Html {
-                html! {
-                    <div class={classes!("box")}>
-                        <table>
-                            <thead><tr><th></th></tr></thead>
-                            <tbody>
-                                for _ in 0..rows { <tr><td></td></tr> }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            }
-
             html! {
                 <>
                     if !e.is::<Loading>() {
@@ -368,9 +388,9 @@ pub fn Calculator() -> Html {
                             </div>
                         </div>
                     }
-                    {empty_table(3)}
-                    {empty_table(MONSTER_HEADERS.len())}
-                    {empty_table(1)}
+                    <EmptyTable rows={3} />
+                    <EmptyTable rows={MONSTER_HEADERS.len()} />
+                    <EmptyTable rows={1} />
                     <div class={classes!("box", "h-96")} />
                 </>
             }
@@ -400,7 +420,11 @@ pub fn Calculator() -> Html {
                 enemy_props={enemy_props.clone()}
                 {entity}
             />
-            <PlayerInput {player_props} open_item_menu={open_item_menu.clone()} />
+            <PlayerInput
+                {player_props}
+                dragons={dragons.clone()}
+                open_item_menu={open_item_menu.clone()}
+            />
             <div class={classes!(
                 "flex", "flex-col", "gap-4",
                 "p-2", "overflow-hidden",
@@ -408,7 +432,11 @@ pub fn Calculator() -> Html {
             )}>
                 {data}
             </div>
-            <EnemiesInput {enemy_props} {open_item_menu} />
+            <EnemiesInput
+                {dragons}
+                {enemy_props}
+                {open_item_menu}
+            />
         </div>
     }
 }

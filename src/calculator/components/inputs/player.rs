@@ -4,14 +4,18 @@ use crate::{
             abilities::Abilities,
             banner::Banner,
             checkbox::Checkbox,
+            dragon::{DragonInput, use_dragons},
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
             stats::{StatCell, Stats},
         },
         page::{PlayerProps, TargetEntity},
         reducer::{DataAction, LastAction, PlayerAction},
     },
-    components::{image::ImageType, selector::SelectorButton},
-    model::PlayerStats,
+    components::{
+        image::{DragonImage, ImageType},
+        selector::SelectorButton,
+    },
+    model::{Dragons, DragonsAction, PlayerStats},
     utils::Print,
 };
 use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
@@ -27,6 +31,7 @@ pub fn use_player_callback<T: 'static>(
         player,
         last_action,
     } = props.clone();
+
     use_callback((), move |v, _| {
         let value = callback(v);
         last_action.replace(LastAction::CurrentPlayer);
@@ -43,6 +48,7 @@ pub fn use_data_callback<T: 'static>(
         player,
         last_action,
     } = props.clone();
+
     use_callback((), move |v, _| {
         let value = callback(v);
         last_action.replace(value.action(LastAction::CurrentPlayer));
@@ -54,6 +60,7 @@ pub fn use_data_callback<T: 'static>(
 pub struct PlayerInputProps {
     pub player_props: PlayerProps,
     pub open_item_menu: Callback<TargetEntity>,
+    pub dragons: UseReducerHandle<Dragons>,
 }
 
 #[component]
@@ -61,6 +68,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let PlayerInputProps {
         player_props,
         open_item_menu,
+        dragons,
     } = props;
 
     let player = &player_props.player;
@@ -80,6 +88,9 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let stack_callback = use_data_callback(player_props, DataAction::Stacks);
     let infer_stats_callback = use_data_callback(player_props, DataAction::InferStats);
     let is_mega_gnar_callback = use_data_callback(player_props, DataAction::IsMegaGnar);
+
+    let ally_fire = use_dragons(dragons, &player_props.last_action, DragonsAction::AllyFire);
+    let ally_earth = use_dragons(dragons, &player_props.last_action, DragonsAction::AllyEarth);
 
     html! {
         <>
@@ -123,6 +134,20 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     "gap-x-2", "px-4", "py-3", "gap-y-1.5",
                     "empty:hidden"
                 )}>
+                    if data.infer_stats {
+                        <DragonInput
+                            title={"Fire dragons"}
+                            oninput={ally_fire}
+                            src={DragonImage::Fire}
+                            value={dragons.ally_fire}
+                        />
+                        <DragonInput
+                            title={"Earth dragons"}
+                            oninput={ally_earth}
+                            src={DragonImage::Earth}
+                            value={dragons.ally_earth}
+                        />
+                    }
                     <ChampionExceptionSelector
                         champion_id={player.data.champion_id}
                         stacks={player.data.stacks}

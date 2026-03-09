@@ -22,7 +22,7 @@ pub struct SelectorProps<T: PartialEq> {
         "truncate"
     ))]
     pub input_class: Classes,
-    #[prop_or(classes!("mt-2", "p-1.5", "gap-1.5", "w-96"))]
+    #[prop_or(classes!("mt-2", "px-1.5", "py-1", "w-96"))]
     pub dropdown_class: Classes,
 }
 
@@ -69,7 +69,7 @@ where
 
                     (v, html! {
                         <button key={v.index()} {onclick}>
-                            <div class={classes!("flex", "items-center", "gap-2")}>
+                            <div class={classes!("flex", "items-center", "gap-2", "py-0.5")}>
                                 <Image src={v.image_type()} class={classes!("w-6", "h-6")} />
                                 <span class={classes!("truncate")}>{v.name()}</span>
                             </div>

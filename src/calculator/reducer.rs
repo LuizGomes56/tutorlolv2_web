@@ -182,7 +182,7 @@ impl Reducible for Enemies {
     }
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LastAction {
     Init,
     Any,

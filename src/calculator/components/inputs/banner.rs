@@ -43,7 +43,7 @@ pub fn Banner(props: &BannerProps) -> Html {
                         "placeholder:text-white", "min-w-0",
                         "truncate"
                     )}
-                    dropdown_class={classes!("p-1.5", "gap-1.5", "w-full")}
+                    dropdown_class={classes!("px-1.5", "py-1", "w-full")}
                 />
             </div>
         </div>

@@ -203,12 +203,8 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                         html! {
                             <>
                                 {button(onclick(base), data_offset.clone(), ImageType::from(item_id), false)}
-                                {
-                                    if has_max {
-                                        button(onclick(base + 1), data_offset, ImageType::from(item_id), true)
-                                    } else {
-                                        Html::default()
-                                    }
+                                if has_max {
+                                    {button(onclick(base + 1), data_offset, ImageType::from(item_id), true)}
                                 }
                             </>
                         }

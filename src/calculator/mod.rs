@@ -7,12 +7,7 @@ use crate::{
     utils::EnumCast,
 };
 use bincode::{Decode, Encode};
-use std::{
-    collections::HashMap,
-    hash::Hash,
-    ops::{Deref, DerefMut},
-    rc::Rc,
-};
+use std::{collections::HashMap, hash::Hash, rc::Rc};
 use tutorlolv2_gen::{AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
 
 mod components;
