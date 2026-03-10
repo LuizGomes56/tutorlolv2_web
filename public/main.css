@@ -32,11 +32,6 @@ body {
     object-position: 0% 15%;
 }
 
-.hover-docs {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(153, 153, 153, 0.4) transparent;
-}
-
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -68,7 +63,12 @@ input[type="number"] {
     appearance: textfield;
 }
 
-tr>:nth-child(n+7) .hover-docs {
+.documentation {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(153, 153, 153, 0.4) transparent;
+}
+
+tr>:nth-child(n+7) .documentation {
     transform: translateX(calc(-100% + 32px));
 }
 

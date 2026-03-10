@@ -467,28 +467,27 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                         {for owned_items.iter().enumerate().map(|(index, &item_id)| {
                             let data_offset = encode_offset(&[item_id.formula()]);
                             html! {
-                                <span {data_offset}>
-                                    <button
-                                        type={"button"}
-                                        data-remove-index={index.to_string()}
-                                        class={classes!(
-                                            "flex", "items-center", "justify-center",
-                                            "rounded-lg",
-                                            "p-1.5",
-                                            "border", "border-std-800",
-                                            "bg-std-900/80",
-                                            "hover:border-red-500/35",
-                                            "hover:bg-red-500/8",
-                                            "transition-all", "duration-150",
-                                            "cursor-pointer"
-                                        )}
-                                    >
-                                        <Image
-                                            class={classes!("w-7", "h-7")}
-                                            src={ImageType::from(item_id)}
-                                        />
-                                    </button>
-                                </span>
+                                <button
+                                    {data_offset}
+                                    type={"button"}
+                                    data-remove-index={index.to_string()}
+                                    class={classes!(
+                                        "flex", "items-center", "justify-center",
+                                        "rounded-lg",
+                                        "p-1.5",
+                                        "border", "border-std-800",
+                                        "bg-std-900/80",
+                                        "hover:border-red-500/35",
+                                        "hover:bg-red-500/8",
+                                        "transition-all", "duration-150",
+                                        "cursor-pointer"
+                                    )}
+                                >
+                                    <Image
+                                        class={classes!("w-7", "h-7")}
+                                        src={ImageType::from(item_id)}
+                                    />
+                                </button>
                             }
                         })}
                     </div>

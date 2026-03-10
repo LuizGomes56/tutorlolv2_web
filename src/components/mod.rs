@@ -1,3 +1,4 @@
+pub mod hoverdocs;
 pub mod image;
 pub mod selector;
 pub mod sidebar;

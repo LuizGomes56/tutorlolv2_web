@@ -6,4 +6,4 @@ open = false
 release = false
 minify = "never"
 open = false
-public_url = "/"
+public_url = "./"

@@ -1,6 +1,9 @@
 #![allow(static_mut_refs)]
 use crate::{
-    calculator::Calculator, components::sidebar::Sidebar, formulas::Formulas, utils::init_cache,
+    calculator::Calculator,
+    components::{hoverdocs::HoverDocs, sidebar::Sidebar},
+    formulas::Formulas,
+    utils::init_cache,
 };
 use yew::prelude::*;
 use yew_router::{BrowserRouter, Routable, Switch};
@@ -44,19 +47,22 @@ fn App() -> Html {
                     _ => html!(<Calculator />),
                 };
                 html! {
-                    <div class={classes!("bg-std-900")}>
-                        <div class={classes!(
-                            "flex", "max-h-screen", "h-full"
-                        )}>
-                            <Sidebar />
+                    <>
+                        <div class={classes!("bg-std-900")}>
                             <div class={classes!(
-                                "flex-1", "overflow-y-auto",
-                                "overflow-x-hidden"
+                                "flex", "max-h-screen", "h-full"
                             )}>
-                                {component}
+                                <Sidebar />
+                                <div class={classes!(
+                                    "flex-1", "overflow-y-auto",
+                                    "overflow-x-hidden"
+                                )}>
+                                    {component}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        <HoverDocs />
+                    </>
                 }
             }} />
         </BrowserRouter>

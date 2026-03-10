@@ -67,42 +67,22 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         html! {
             <button
                 type={"button"}
-                class={classes!(
-                    "group",
-                    "relative",
-                    "flex",
-                    "items-center",
-                    "justify-center",
-                    "w-10",
-                    "h-10",
-                    "rounded-lg",
-                    "border",
-                    "border-std-800",
-                    "bg-std-900/60",
-                    "hover:bg-std-800/60",
-                    "hover:border-blue-500/75",
-                    "transition-all",
-                    "duration-150",
-                    "focus-visible:outline",
-                    "focus-visible:outline-2",
-                    "focus-visible:outline-blue-400"
-                )}
+                class={classes!("btn-stack", "group")}
                 {onclick}
+                {data_offset}
             >
-                <div {data_offset}>
-                    <Image
-                        class={classes!(
-                            "w-8", "h-8", "pointer-events-none",
-                            "overflow-hidden", "rounded"
-                        )}
-                        {src}
-                    />
-                    if max {
-                        <div class={classes!("img-letter", "text-sm", "z-10")}>
-                            {"MAX"}
-                        </div>
-                    }
-                </div>
+                <Image
+                    class={classes!(
+                        "w-8", "h-8", "pointer-events-none",
+                        "overflow-hidden", "rounded"
+                    )}
+                    {src}
+                />
+                if max {
+                    <div class={classes!("img-letter", "text-sm", "z-10")}>
+                        {"MAX"}
+                    </div>
+                }
             </button>
         }
     }
@@ -483,10 +463,9 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                     type={"button"}
                     {class}
                     {onclick}
+                    {data_offset}
                 >
-                    <div {data_offset}>
-                        {inner}
-                    </div>
+                    {inner}
                 </button>
             }
         })
