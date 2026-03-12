@@ -66,3 +66,21 @@ pub fn use_clickout<const N: usize>(callback: Callback<()>, exceptions: [NodeRef
 
     node_ref
 }
+
+pub fn on_keydown(mut f: impl FnMut() + 'static, key: u32) -> impl TearDown {
+    let window = web_sys::window().unwrap();
+    let closure = Closure::wrap(Box::new(move |event: KeyboardEvent| {
+        if event.key_code() == key {
+            f();
+        }
+    }) as Box<dyn FnMut(_)>);
+
+    window
+        .add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref())
+        .expect("failed to add keydown listener");
+
+    move || {
+        let _ =
+            window.remove_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
+    }
+}

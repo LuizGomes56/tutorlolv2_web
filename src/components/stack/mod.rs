@@ -1,7 +1,10 @@
 mod selector;
 mod table;
 
-use crate::utils::random_u64;
+use crate::{
+    components::tray::{Tray, TrayAction, TrayEntry},
+    utils::random_u64,
+};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashSet,
@@ -14,29 +17,8 @@ use yew::Reducible;
 pub use selector::StackSelector;
 pub use table::StackTable;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct StackEntry {
-    pub id: u64,
-    pub value: StackValue,
-}
-
-impl StackEntry {
-    pub fn new(value: StackValue) -> Self {
-        Self {
-            id: random_u64(0..u64::MAX),
-            value,
-        }
-    }
-}
-
-#[derive(Clone, Default, PartialEq)]
-pub struct Stack {
-    champion_id: ChampionId,
-    values: Vec<StackEntry>,
-}
-
 impl Deref for Stack {
-    type Target = Vec<StackEntry>;
+    type Target = Tray<StackValue>;
 
     fn deref(&self) -> &Self::Target {
         &self.values
@@ -49,6 +31,12 @@ impl DerefMut for Stack {
     }
 }
 
+#[derive(Clone, Default, PartialEq)]
+pub struct Stack {
+    champion_id: ChampionId,
+    values: Tray<StackValue>,
+}
+
 impl Stack {
     pub fn new(
         champion_id: ChampionId,
@@ -58,10 +46,10 @@ impl Stack {
         fn chain_meta<T: Copy>(
             meta: &[TypeMetadata<T>],
             f: fn(usize, T) -> StackValue,
-        ) -> impl IntoIterator<Item = StackEntry> {
+        ) -> impl IntoIterator<Item = TrayEntry<StackValue>> {
             meta.iter()
                 .enumerate()
-                .map(move |(i, v)| StackEntry::new(f(i, v.kind)))
+                .map(move |(i, v)| TrayEntry::new(f(i, v.kind)))
         }
 
         let combos = champion_id.combos();
@@ -69,19 +57,21 @@ impl Stack {
 
         Stack {
             champion_id,
-            values: combos
-                .get(i)
-                .into_iter()
-                .flat_map(|list| list.iter())
-                .filter_map(|&element| match element {
-                    ComboElement::Ability(ability_id) => champion_id
-                        .index_of_ability(ability_id)
-                        .map(|slot| StackEntry::new(StackValue::Ability { slot, ability_id })),
-                    ComboElement::Attack => Some(StackEntry::new(StackValue::BasicAttack)),
-                })
-                .chain(chain_meta(items_meta, StackValue::Item))
-                .chain(chain_meta(runes_meta, StackValue::Rune))
-                .collect(),
+            values: Tray::new(
+                combos
+                    .get(i)
+                    .into_iter()
+                    .flat_map(|list| list.iter())
+                    .filter_map(|&element| match element {
+                        ComboElement::Ability(ability_id) => champion_id
+                            .index_of_ability(ability_id)
+                            .map(|slot| TrayEntry::new(StackValue::Ability { slot, ability_id })),
+                        ComboElement::Attack => Some(TrayEntry::new(StackValue::BasicAttack)),
+                    })
+                    .chain(chain_meta(items_meta, StackValue::Item))
+                    .chain(chain_meta(runes_meta, StackValue::Rune))
+                    .collect(),
+            ),
         }
     }
 
@@ -94,7 +84,7 @@ impl Stack {
         let items_allowed = items_meta.iter().map(|m| m.kind).collect::<HashSet<_>>();
         let runes_allowed = runes_meta.iter().map(|m| m.kind).collect::<HashSet<_>>();
 
-        let mut values = Vec::with_capacity(self.len());
+        let mut values = Tray::new(Vec::with_capacity(self.len()));
 
         for entry in self.iter() {
             if match entry.value {
@@ -114,24 +104,12 @@ impl Stack {
     }
 }
 
-pub enum StackAction {
-    Insert(StackEntry),
-    RemoveById(u64),
-    Replace(Stack),
-    Clear,
-}
-
 impl Reducible for Stack {
-    type Action = StackAction;
+    type Action = TrayAction<Self, StackValue>;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
-        match action {
-            StackAction::Insert(entry) => new.push(entry),
-            StackAction::RemoveById(id) => new.retain(|e| e.id != id),
-            StackAction::Replace(stack) => new = stack,
-            StackAction::Clear => new.clear(),
-        }
+        action.apply(&mut new);
         Rc::new(new)
     }
 }

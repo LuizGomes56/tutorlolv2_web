@@ -142,3 +142,10 @@ img {
     object-position: 15% 15%;
     display: block;
 }
+
+.bright {
+    background: linear-gradient(90deg,
+            rgba(0, 0, 0, 0) 50%,
+            rgba(90, 255, 255, 0.15) 90%,
+            rgba(90, 255, 255, 1));
+}

@@ -76,9 +76,9 @@ macro_rules! impl_index {
 
 #[macro_export]
 macro_rules! impl_reducible {
-    ($type:ident $fty:ty { $($field:ident),* $(,)? }) => {
+    (#[$meta:meta] $type:ident $fty:ty { $($field:ident),* $(,)? }) => {
         pastey::paste! {
-            #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
+            #[$meta]
             pub struct $type {
                 $(pub $field: $fty,)*
             }
@@ -107,6 +107,12 @@ macro_rules! impl_reducible {
                     std::rc::Rc::new(new)
                 }
             }
+        }
+    };
+    ($type:ident $fty:ty { $($field:ident),* $(,)? }) => {
+        $crate::impl_reducible! {
+            #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
+            $type $fty { $($field),* }
         }
     };
 }

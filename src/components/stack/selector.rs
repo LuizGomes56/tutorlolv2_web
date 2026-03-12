@@ -1,7 +1,7 @@
 use crate::{
     components::{
         image::{Image, ImageType},
-        stack::{Stack, StackAction, StackEntry, StackTable, StackValue},
+        stack::{Stack, StackTable, StackValue, Tray, TrayAction, TrayEntry},
         tables::body::Victim,
     },
     model::AbilityKind,
@@ -285,18 +285,20 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                 && let Ok(de) = serde_json::from_str::<StackStore>(&value)
                 && let Some(stored) = de.get(&champion_id)
             {
-                let values = stored
-                    .iter()
-                    .map(|&v| StackEntry::new(v))
-                    .collect::<Vec<_>>();
+                let values = Tray::new(
+                    stored
+                        .iter()
+                        .map(|&v| TrayEntry::new(v))
+                        .collect::<Vec<_>>(),
+                );
 
-                return stack.dispatch(StackAction::Replace(Stack {
+                return stack.dispatch(TrayAction::Replace(Stack {
                     champion_id,
                     values,
                 }));
             }
 
-            stack.dispatch(StackAction::Replace(Stack::new(
+            stack.dispatch(TrayAction::Replace(Stack::new(
                 champion_id,
                 &items_meta,
                 &runes_meta,
@@ -340,7 +342,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
                 champion_id,
             ),
             move |champion_id, (stack, items_meta, runes_meta, ..)| {
-                stack.dispatch(StackAction::Replace(Stack::new(
+                stack.dispatch(TrayAction::Replace(Stack::new(
                     champion_id,
                     items_meta,
                     runes_meta,
@@ -352,19 +354,19 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
     let stack_push = {
         let stack = stack.clone();
         use_callback((), move |value, _| {
-            stack.dispatch(StackAction::Insert(StackEntry::new(value)))
+            stack.dispatch(TrayAction::Insert(value))
         })
     };
 
     let stack_remove = {
         let stack = stack.clone();
-        use_callback((), move |id, _| stack.dispatch(StackAction::RemoveById(id)))
+        use_callback((), move |id, _| stack.dispatch(TrayAction::RemoveById(id)))
     };
 
     let clear_stack = {
         let stack = stack.clone();
         use_callback((), move |_: MouseEvent, _| {
-            stack.dispatch(StackAction::Clear)
+            stack.dispatch(TrayAction::Clear)
         })
     };
 
@@ -378,7 +380,7 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
             move |(items_meta, runes_meta, ..)| {
                 let next = stack.reconcile(champion_id, items_meta, runes_meta);
                 if *stack != next {
-                    stack.dispatch(StackAction::Replace(next));
+                    stack.dispatch(TrayAction::Replace(next));
                 }
             },
         );

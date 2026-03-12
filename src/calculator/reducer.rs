@@ -1,5 +1,6 @@
 use crate::{
     calculator::{ExceptionMap, Player, PlayerData},
+    components::tray::{Tray, TrayAction, TrayEntry},
     model::{AbilityLevelsAction, EnemyStats, PlayerStats, ValueException},
     utils::{Print, ReduceApply},
 };
@@ -11,9 +12,7 @@ pub type EnemyDataAction = DataAction<EnemyStats>;
 pub type PlayerDataAction = DataAction<PlayerStats>;
 
 pub enum PlayerAction {
-    InsertRune(RuneId),
-    RemoveRune(usize),
-    SetRuneVec(&'static [RuneId]),
+    Tray(TrayAction<Tray<RuneId>, RuneId>),
     ModifyRuneExc((RuneId, u32)),
     Data(PlayerDataAction),
     AbilityLevels(AbilityLevelsAction),
@@ -26,9 +25,7 @@ pub enum DataAction<T: ReduceApply> {
     Stacks(u32),
     InferStats(bool),
     IsMegaGnar(bool),
-    InsertItem(ItemId),
-    RemoveItem(usize),
-    SetItemVec(&'static [ItemId]),
+    Tray(TrayAction<Tray<ItemId>, ItemId>),
     ChampionId(ChampionId),
     ModifyItemExc((ItemId, u32)),
 }
@@ -70,16 +67,16 @@ impl core::ops::DerefMut for Enemies {
 }
 
 pub fn push_item(
-    items: &mut Vec<ItemId>,
     item_exceptions: &mut ExceptionMap<ItemId>,
     v: ItemId,
     ally: bool,
+    mut f: impl FnMut(ItemId),
 ) {
     if ItemId::exceptions(ally).contains(v.index()) {
         let value = ValueException::pack_item_id(v, 0);
         item_exceptions.inner.insert(v, value);
     }
-    items.push(v);
+    f(v);
 }
 
 impl<T: ReduceApply> PlayerData<T> {
@@ -91,20 +88,12 @@ impl<T: ReduceApply> PlayerData<T> {
             DataAction::Stacks(v) => self.stacks = v,
             DataAction::InferStats(v) => self.infer_stats = v,
             DataAction::IsMegaGnar(v) => self.is_mega_gnar = v,
-            DataAction::InsertItem(v) => {
-                push_item(&mut self.items, &mut self.item_exceptions, v, ally)
-            }
             DataAction::ChampionId(v) => self.champion_id = v,
-            DataAction::SetItemVec(v) => {
-                self.items.clear();
-                v.iter().cloned().for_each(|item| {
-                    push_item(&mut self.items, &mut self.item_exceptions, item, ally)
-                });
-            }
-            DataAction::RemoveItem(v) => {
-                let value = self.items.swap_remove(v);
-                self.item_exceptions.inner.remove(&value);
-            }
+            DataAction::Tray(v) => v.custom_apply(&mut self.items, |c, v| {
+                push_item(&mut self.item_exceptions, v, ally, |v| {
+                    c.push(TrayEntry::new(v))
+                })
+            }),
             DataAction::ModifyItemExc((item_id, stacks)) => {
                 let value = ValueException::pack_item_id(item_id, stacks);
                 self.item_exceptions.inner.insert(item_id, value);
@@ -119,18 +108,8 @@ impl Reducible for Player {
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
         match action {
-            Self::Action::SetRuneVec(v) => new.runes = v.into(),
-            Self::Action::InsertRune(v) => {
-                if RuneId::exceptions().contains(v.index()) {
-                    let value = ValueException::pack_rune_id(v, 0);
-                    new.rune_exceptions.inner.insert(v, value);
-                }
-                new.runes.push(v);
-            }
+            Self::Action::Tray(v) => v.apply(&mut new.runes),
             Self::Action::AbilityLevels(v) => new.abilities.apply(v),
-            Self::Action::RemoveRune(v) => {
-                new.runes.swap_remove(v);
-            }
             Self::Action::ModifyRuneExc((rune_id, stacks)) => {
                 let value = ValueException::pack_rune_id(rune_id, stacks);
                 new.rune_exceptions.inner.insert(rune_id, value);

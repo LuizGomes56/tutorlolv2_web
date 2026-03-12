@@ -79,10 +79,6 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let abilities_cb = use_player_callback(player_props, PlayerAction::AbilityLevels);
     let champion_cb = use_data_callback(player_props, DataAction::ChampionId);
 
-    let insert_rune = use_player_callback(player_props, PlayerAction::InsertRune);
-    let remove_rune = use_player_callback(player_props, PlayerAction::RemoveRune);
-    let recommended_runes = use_player_callback(player_props, PlayerAction::SetRuneVec);
-
     let item_exception_callback = use_data_callback(player_props, DataAction::ModifyItemExc);
     let rune_exception_callback = use_player_callback(player_props, PlayerAction::ModifyRuneExc);
     let stack_callback = use_data_callback(player_props, DataAction::Stacks);
@@ -155,13 +151,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         ally={true}
                     />
                     <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
-                        values={player.data.items.clone()}
+                        values={player.data.items.clone_into_vec()}
                         exceptions={player.data.item_exceptions.clone()}
                         callback={item_exception_callback}
                         filter={ItemId::exceptions(true)}
                     />
                     <ExceptionSelector<{ RuneId::SIZE_OF_EXCEPTIONS }, RuneId>
-                        values={player.runes.clone()}
+                        values={player.runes.clone_into_vec()}
                         exceptions={player.rune_exceptions.clone()}
                         callback={rune_exception_callback}
                         filter={RuneId::exceptions()}

@@ -91,10 +91,10 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         <thead>
             <tr>
                 {for (0..skip).map(|_| html!(<th></th>))}
-                {for headers.into_iter().enumerate().map(|(i, (src, offsets))| {
+                {for headers.into_iter().map(|(src, offsets)| {
                     let data_offset = encode_offset(&[offsets]);
                     html! {
-                        <th key={i} {data_offset}>
+                        <th {data_offset}>
                             <Image
                                 {src}
                                 class={classes!(

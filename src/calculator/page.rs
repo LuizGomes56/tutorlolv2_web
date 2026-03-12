@@ -120,7 +120,8 @@ pub fn Calculator() -> Html {
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
     let controller = use_state(|| None::<AbortController>);
     let last_action = use_mut_ref(|| LastAction::Init);
-    let entity = use_state(|| None::<TargetEntity>);
+    let entity = use_state(|| TargetEntity::Player);
+    let is_item_modal_open = use_state(|| false);
 
     {
         let game_data = game_data.clone();
@@ -154,7 +155,7 @@ pub fn Calculator() -> Html {
                         dragons: &dragons,
                     };
 
-                    // input_game.active_player.log();
+                    input_game.active_player.data.items.log();
 
                     if let Ok(req) = Fetch::new("/api/games/calculator")
                         .signal(signal)
@@ -408,7 +409,11 @@ pub fn Calculator() -> Html {
 
     let open_item_menu = {
         let entity = entity.clone();
-        use_callback((), move |v, _| entity.set(Some(v)))
+        let is_item_modal_open = is_item_modal_open.clone();
+        use_callback((), move |v, _| {
+            entity.set(v);
+            is_item_modal_open.set(true);
+        })
     };
 
     html! {
@@ -417,6 +422,7 @@ pub fn Calculator() -> Html {
                 player_props={player_props.clone()}
                 enemy_props={enemy_props.clone()}
                 {entity}
+                is_open={is_item_modal_open}
             />
             <PlayerInput
                 {player_props}

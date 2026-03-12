@@ -38,7 +38,7 @@ const init_hover = () => {
 
     function applyExtraClasses(host) {
         clearExtraClasses();
-        const extra = (host.getAttribute("data-classes") || "").trim();
+        const extra = (host.getAttribute("data_classes") || "").trim();
         if (!extra) return;
 
         for (const cls of extra.split(/\s+/).filter(Boolean)) {

@@ -128,25 +128,26 @@ where
                     />
                 </div>
             </label>
-            if *is_open {
-                <div
-                    ref={dropdown_ref}
-                    class={{
-                        let mut class = classes!(
-                            "absolute",
-                            "bg-[#16161c]",
-                            "flex", "flex-col",
-                            "overflow-auto", "max-h-72",
-                            "border", "border-std-800",
-                            "z-50", "empty:hidden"
-                        );
-                        class.push(dropdown_class);
-                        class
-                    }}
-                >
-                    {options}
-                </div>
-            }
+            <div
+                ref={dropdown_ref}
+                class={{
+                    let mut class = classes!(
+                        match *is_open {
+                            true => "flex",
+                            false => "hidden",
+                        },
+                        "absolute",
+                        "bg-[#16161c]", "flex-col",
+                        "overflow-auto", "max-h-72",
+                        "border", "border-std-800",
+                        "z-50", "empty:hidden"
+                    );
+                    class.push(dropdown_class);
+                    class
+                }}
+            >
+                {options}
+            </div>
         </div>
     }
 }
@@ -202,7 +203,7 @@ pub fn SelectorButton(props: &SelectorButtonProps) -> Html {
                         "h-4", "w-4", "text-std-500", "transition-transform",
                         "duration-150", "group-hover:text-std-300"
                     )}
-                    src={format!("/svgs/rchev.svg")}
+                    src={"/svgs/rchev.svg"}
                 />
             </div>
         </button>

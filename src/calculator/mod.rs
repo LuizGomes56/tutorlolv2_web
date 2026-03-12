@@ -1,5 +1,6 @@
 use crate::{
     calculator::reducer::push_item,
+    components::tray::Tray,
     model::{
         AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
         ValueException,
@@ -47,7 +48,7 @@ pub struct InputGame<'a> {
 
 #[derive(Clone, Debug, Encode, PartialEq)]
 pub struct Player {
-    pub runes: Vec<RuneId>,
+    pub runes: Tray<RuneId>,
     pub rune_exceptions: ExceptionMap<RuneId>,
     pub abilities: AbilityLevels,
     pub data: PlayerData<PlayerStats>,
@@ -61,7 +62,9 @@ impl Default for Player {
         Self {
             runes: champion_id
                 .recommended_runes(champion_id.main_position())
-                .to_vec(),
+                .iter()
+                .copied()
+                .collect(),
             rune_exceptions: Default::default(),
             abilities: AbilityLevels {
                 q: 5,
@@ -84,7 +87,7 @@ impl Default for Player {
 #[derive(Clone, Debug, Encode, PartialEq)]
 pub struct PlayerData<T> {
     pub stats: T,
-    pub items: Vec<ItemId>,
+    pub items: Tray<ItemId>,
     pub item_exceptions: ExceptionMap<ItemId>,
     pub stacks: u32,
     pub level: u8,
@@ -102,11 +105,11 @@ impl<T: Default> Default for PlayerData<T> {
             inner: HashMap::with_capacity(recommended_items.len()),
         };
         for &item in recommended_items {
-            push_item(&mut items, &mut item_exceptions, item, true);
+            push_item(&mut item_exceptions, item, true, |item| items.push(item));
         }
         Self {
             stats: T::default(),
-            items,
+            items: items.into_iter().collect(),
             item_exceptions,
             stacks: 0,
             level: 18,

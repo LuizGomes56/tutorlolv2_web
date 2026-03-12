@@ -4,3 +4,4 @@ pub mod selector;
 pub mod sidebar;
 pub mod stack;
 pub mod tables;
+pub mod tray;
