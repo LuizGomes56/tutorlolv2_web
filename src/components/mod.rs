@@ -1,3 +1,4 @@
+pub mod errorlog;
 pub mod hoverdocs;
 pub mod image;
 pub mod selector;

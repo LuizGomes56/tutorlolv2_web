@@ -7,37 +7,18 @@ use crate::{
         reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
     },
     components::{
+        errorlog::errorlog,
         image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
         stack::StackSelector,
-        tables::{header::TableHeader, turret::TurretTable},
+        tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
     },
     model::{Dragons, EnemyStats},
-    utils::{ClassCast, Fetch, Print, encode_offset},
+    utils::{ClassCast, Fetch, Loading, Print, encode_offset},
 };
 use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{CastId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
-
-#[derive(PartialEq, Properties)]
-pub struct EmptyTableProps {
-    rows: usize,
-}
-
-#[component]
-pub fn EmptyTable(props: &EmptyTableProps) -> Html {
-    let EmptyTableProps { rows } = *props;
-    html! {
-        <div class={classes!("box")}>
-            <table>
-                <thead><tr><th></th></tr></thead>
-                <tbody>
-                    for _ in 0..rows { <tr><td></td></tr> }
-                </tbody>
-            </table>
-        </div>
-    }
-}
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct PlayerProps {
@@ -99,17 +80,6 @@ pub enum TargetEntity {
     Enemy(usize),
 }
 
-#[derive(Debug)]
-struct Loading;
-
-impl std::fmt::Display for Loading {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Loading")
-    }
-}
-
-impl std::error::Error for Loading {}
-
 #[component]
 pub fn Calculator() -> Html {
     let player = use_reducer(Player::default);
@@ -122,6 +92,15 @@ pub fn Calculator() -> Html {
     let last_action = use_mut_ref(|| LastAction::Init);
     let entity = use_state(|| TargetEntity::Player);
     let is_item_modal_open = use_state(|| false);
+
+    let open_item_menu = {
+        let entity = entity.clone();
+        let is_item_modal_open = is_item_modal_open.clone();
+        use_callback((), move |v, _| {
+            entity.set(v);
+            is_item_modal_open.set(true);
+        })
+    };
 
     {
         let game_data = game_data.clone();
@@ -352,42 +331,7 @@ pub fn Calculator() -> Html {
         Err(e) => {
             html! {
                 <>
-                    if !e.is::<Loading>() {
-                        <div class={classes!("box")}>
-                            <div class={classes!(
-                                "grid", "grid-cols-2", "gap-6",
-                                "px-6", "py-4", "bg-std-900"
-                            )}>
-                                <div class={classes!("flex", "flex-col", "gap-4")}>
-                                    <h2 class={classes!("text-2xl", "text-std-200", "font-medium")}>
-                                        {"Request error"}
-                                    </h2>
-                                    <ul class={classes!("text-std-400", "ml-8")}>
-                                        <li class={classes!("list-disc")}>
-                                            {"Servers might be down due to an internal error"}
-                                        </li>
-                                        <li class={classes!("list-disc")}>
-                                            {"This application might be outdated"}
-                                        </li>
-                                        <li class={classes!("list-disc")}>
-                                            {"Refresh the page or come back later"}
-                                        </li>
-                                    </ul>
-                                </div>
-                                <code class={classes!(
-                                    "flex", "flex-col",
-                                    "overflow-auto", "p-2",
-                                    "leading-6", "text-base", "border",
-                                    "border-std-800", "bg-std-900"
-                                )}>
-                                    <pre>
-                                        {format!("{e:#?}")}
-                                    </pre>
-                                </code>
-                            </div>
-                        </div>
-                    }
-                    <EmptyTable rows={3} />
+                    {errorlog(e)}
                     <EmptyTable rows={MONSTER_HEADERS.len()} />
                     <EmptyTable rows={1} />
                     <div class={classes!("box", "h-96")} />
@@ -405,15 +349,6 @@ pub fn Calculator() -> Html {
         enemies,
         enemy_index,
         last_action,
-    };
-
-    let open_item_menu = {
-        let entity = entity.clone();
-        let is_item_modal_open = is_item_modal_open.clone();
-        use_callback((), move |v, _| {
-            entity.set(v);
-            is_item_modal_open.set(true);
-        })
     };
 
     html! {

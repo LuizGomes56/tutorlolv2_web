@@ -67,7 +67,7 @@ pub fn use_clickout<const N: usize>(callback: Callback<()>, exceptions: [NodeRef
     node_ref
 }
 
-pub fn on_keydown(mut f: impl FnMut() + 'static, key: u32) -> impl TearDown {
+pub fn on_keydown(key: u32, mut f: impl FnMut() + 'static) -> impl TearDown {
     let window = web_sys::window().unwrap();
     let closure = Closure::wrap(Box::new(move |event: KeyboardEvent| {
         if event.key_code() == key {

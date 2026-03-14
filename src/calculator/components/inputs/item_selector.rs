@@ -244,7 +244,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
 
     {
         let is_open = is_open.clone();
-        use_effect_with((), move |_| on_keydown(move || is_open.set(false), 27));
+        use_effect_with((), move |_| on_keydown(27, move || is_open.set(false)));
     }
 
     fn make_row(

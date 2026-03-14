@@ -65,7 +65,7 @@ where
 
 #[derive(PartialEq, Properties)]
 pub struct ExceptionSelectorProps<const N: usize, T: Default + Eq + Hash + 'static> {
-    pub values: Vec<T>,
+    pub values: Box<[T]>,
     pub exceptions: ExceptionMap<T>,
     pub callback: Callback<(T, u32)>,
     pub filter: BitSetArray<N>,

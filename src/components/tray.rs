@@ -40,13 +40,7 @@ impl<T: Copy> Tray<T> {
         Self { inner }
     }
 
-    pub fn with_capacity(capacity: usize) -> Self {
-        Self {
-            inner: Vec::with_capacity(capacity),
-        }
-    }
-
-    pub fn clone_into_vec(&self) -> Vec<T> {
+    pub fn values<U: FromIterator<T>>(&self) -> U {
         self.inner.iter().map(|e| e.value).collect()
     }
 }
@@ -121,12 +115,6 @@ where
 
 impl<T: Copy> TrayAction<Tray<T>, T> {
     pub fn apply(self, container: &mut Tray<T>) {
-        // match self {
-        //     TrayAction::Insert(entry) => container.push(TrayEntry::new(entry)),
-        //     TrayAction::RemoveById(id) => container.retain(|e| e.id != id),
-        //     TrayAction::Replace(stack) => *container = stack,
-        //     TrayAction::Clear => container.clear(),
-        // }
         self.custom_apply(container, |c, v| c.push(TrayEntry::new(v)));
     }
 

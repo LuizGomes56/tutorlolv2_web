@@ -147,7 +147,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         ally={false}
                     />
                     <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
-                        values={enemy.items.clone_into_vec()}
+                        values={enemy.items.values::<Box<_>>()}
                         exceptions={enemy.item_exceptions.clone()}
                         callback={item_exception_callback}
                         filter={ItemId::exceptions(false)}

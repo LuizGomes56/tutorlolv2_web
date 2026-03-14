@@ -45,3 +45,14 @@ pub fn encode_offset(range: &[&Range<usize>]) -> String {
 pub fn hoverdocs(offsets: Range<usize>) -> &'static str {
     unsafe { core::str::from_utf8_unchecked(CACHE.get_unchecked(offsets)) }
 }
+
+#[derive(Debug)]
+pub struct Loading;
+
+impl std::fmt::Display for Loading {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Loading")
+    }
+}
+
+impl std::error::Error for Loading {}
