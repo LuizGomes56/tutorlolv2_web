@@ -1,7 +1,7 @@
 use crate::{
     calculator::FinalEnemy,
+    livegame::Enemy,
     model::{Attacks, Damages},
-    realtime::Enemy,
     utils::{ClassCast, encode_offset},
 };
 use std::{fmt::Write, ops::Range};

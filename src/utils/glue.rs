@@ -1,5 +1,5 @@
 use crate::{
-    realtime::Game,
+    livegame::Game,
     utils::{fetch::Fetch, traits::Print},
 };
 use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
@@ -19,8 +19,8 @@ pub async fn get_data() -> Result<Game, String> {
     match bytes {
         Ok(response) => {
             let bytes = response.to_vec();
-            let bytes =
-                include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.json")).to_vec();
+            // let bytes =
+            //     include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.json")).to_vec();
             match bytes.is_empty() {
                 true => Err("Desktop application required to use the overlay feature".into()),
                 false => Ok(Fetch::new("/api/games/realtime")

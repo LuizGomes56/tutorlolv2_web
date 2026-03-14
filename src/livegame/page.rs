@@ -4,7 +4,7 @@ use crate::{
         stack::StackSelector,
         tables::header::TableHeader,
     },
-    realtime::{Enemy, Game},
+    livegame::{Enemy, Game},
     utils::{encode_offset, glue::get_data},
 };
 use std::time::Duration;
@@ -15,7 +15,7 @@ use yew::{
 };
 
 #[component]
-pub fn Realtime() -> Html {
+pub fn Livegame() -> Html {
     let game = use_state(|| Err("Loading...".into()));
 
     {
@@ -46,11 +46,11 @@ pub fn Realtime() -> Html {
             html! {
                 <div class={classes!(
                     "flex", "flex-col", "gap-4",
-                    "p-2", "overflow-hidden",
+                    "p-4", "overflow-hidden",
                     "flex-1"
                 )}>
                     <div class={classes!("box", "overflow-auto")}>
-                        <table>
+                        <table class={classes!("data-table")}>
                             <TableHeader
                                 champion_id={current_player.champion_id}
                                 items_meta={items_meta.clone()}
@@ -68,7 +68,7 @@ pub fn Realtime() -> Html {
                                         html! {
                                             <tr>
                                                 <td
-                                                    class={classes!("w-8", "h-8")}
+                                                    class={classes!("w-12")}
                                                     data_offset={encode_offset(&[enemy_id.formula()])}
                                                 >
                                                     <Image src={ImageType::from(enemy_id)} />

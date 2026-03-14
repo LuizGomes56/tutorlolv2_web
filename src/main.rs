@@ -3,6 +3,7 @@ use crate::{
     calculator::Calculator,
     components::{hoverdocs::HoverDocs, sidebar::Sidebar},
     formulas::Formulas,
+    livegame::Livegame,
     utils::init_cache,
 };
 use yew::prelude::*;
@@ -11,8 +12,8 @@ use yew_router::{BrowserRouter, Routable, Switch};
 mod calculator;
 mod components;
 mod formulas;
+mod livegame;
 mod model;
-mod realtime;
 mod utils;
 
 #[derive(Clone, Debug, PartialEq, Routable)]
@@ -44,6 +45,7 @@ fn App() -> Html {
                 let component = match route {
                     Route::Calculator => html!(<Calculator />),
                     Route::Formulas => html!(<Formulas />),
+                    Route::Livegame => html!(<Livegame />),
                     _ => html!(<Calculator />),
                 };
                 html! {
