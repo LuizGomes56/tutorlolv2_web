@@ -33,7 +33,7 @@ impl ClassCast for DamageType {
             DamageType::Mixed => "text-indigo-500",
             DamageType::True => "text-white",
             DamageType::Adaptive => "text-purple-500",
-            DamageType::Unknown => "text-emerald-500",
+            DamageType::Unknown => "text-std-300",
         }
     }
 }

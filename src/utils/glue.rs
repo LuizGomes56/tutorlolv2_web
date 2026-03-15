@@ -24,7 +24,6 @@ async fn realtime(bytes: Vec<u8>) -> Result<Game, String> {
 
 pub async fn get_data() -> Result<Game, Box<dyn core::error::Error>> {
     let bytes = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.json")).to_vec();
-
     return realtime(bytes).await.map_err(|e: String| e.into());
 
     let bytes = get_live_game().await;

@@ -9,8 +9,9 @@ use crate::{
     components::{
         errorlog::errorlog,
         image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
-        stack::StackSelector,
+        stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
+        tray::TrayAction,
     },
     model::{Dragons, EnemyStats},
     utils::{ClassCast, Fetch, Loading, Print, encode_offset},
@@ -86,6 +87,14 @@ pub fn Calculator() -> Html {
     let enemies = use_reducer(Enemies::default);
     let dragons = use_reducer(Dragons::default);
     let enemy_index = use_state(|| 0);
+    let stack = use_reducer(Stack::default);
+
+    let stack_push = {
+        let stack = stack.clone();
+        use_callback((), move |value, _| {
+            stack.dispatch(TrayAction::Insert(value))
+        })
+    };
 
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
     let controller = use_state(|| None::<AbortController>);
@@ -311,19 +320,37 @@ pub fn Calculator() -> Html {
                         />
                     </div>
                     <div class={classes!("box", "overflow-auto")}>
-                        <StackSelector<FinalEnemy>
-                            champion_id={current_player.champion_id}
-                            callback={{
-                                let enemy_index = enemy_index.clone();
-                                Callback::from(move |i| {
-                                    enemy_index.set(i);
-                                })
-                            }}
-                            level={current_player.level}
-                            enemies={enemies.clone()}
-                            items_meta={items_meta.clone()}
-                            runes_meta={runes_meta.clone()}
-                        />
+                        <div class={classes!(
+                            "grid", "grid-cols-1",
+                            "items-start", "gap-4",
+                            "2xl:grid-cols-3",
+                        )}>
+                            <StackInsert
+                                callback={stack_push.clone()}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                                champion_id={current_player.champion_id}
+                            />
+                            <StackRemover
+                                stack={stack.clone()}
+                                champion_id={current_player.champion_id}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                            />
+                            <div class={classes!("overflow-auto")}>
+                                <StackTable<FinalEnemy>
+                                    callback={{
+                                        let enemy_index = enemy_index.clone();
+                                        Callback::from(move |i| {
+                                            enemy_index.set(i);
+                                        })
+                                    }}
+                                    enemies={enemies.clone()}
+                                    stack={stack.reconcile(current_player.champion_id, items_meta, runes_meta)}
+                                    level={current_player.level}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </>
             }

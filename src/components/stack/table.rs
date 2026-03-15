@@ -16,6 +16,8 @@ pub struct StackTableProps<T: Victim + PartialEq + 'static> {
     pub callback: Option<Callback<usize>>,
     pub enemies: Rc<[T]>,
     pub stack: Stack,
+    #[prop_or_default]
+    pub index: Option<usize>,
     pub level: u8,
 }
 
@@ -25,11 +27,12 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
         ref callback,
         ref enemies,
         ref stack,
+        index,
         level,
     } = *props;
 
     html! {
-        <table class={classes!("data-table")}>
+        <table class={classes!("data-table", if index.is_some() { Some("overlay") } else { None })}>
             <thead>
                 <tr>
                     <th class={classes!("w-0")}></th>
@@ -40,7 +43,11 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
             </thead>
             <tbody>
                 {
-                    enemies.iter().enumerate().map(|(i, enemy)| {
+                    enemies.iter().enumerate().filter_map(|(i, enemy)| {
+                        if let Some(j) = index && i != j {
+                            return None;
+                        }
+
                         let damages = enemy.damages();
                         let enemy_id = enemy.champion_id();
                         let max_health = enemy.max_health();
@@ -62,7 +69,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                         let final_hp = max_health - total;
                         let hp_damage = ((total as f32 / max_health as f32) * 100.0) as i32;
 
-                        html! {
+                        Some(html! {
                             <tr>
                                 <td
                                     class={classes!("w-12")}
@@ -84,7 +91,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                                 <td>{ final_hp }</td>
                                 <td>{ hp_damage }{ "%" }</td>
                             </tr>
-                        }
+                        })
                     })
                     .collect::<Html>()
                 }

@@ -1,4 +1,5 @@
-mod selector;
+mod insert;
+mod remover;
 mod table;
 
 use crate::{
@@ -14,7 +15,8 @@ use std::{
 use tutorlolv2_gen::{AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata};
 use yew::Reducible;
 
-pub use selector::StackSelector;
+pub use insert::StackInsert;
+pub use remover::StackRemover;
 pub use table::StackTable;
 
 impl Deref for Stack {

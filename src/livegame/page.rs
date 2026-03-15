@@ -2,8 +2,9 @@ use crate::{
     components::{
         errorlog::errorlog,
         image::{Image, ImageType},
-        stack::StackSelector,
+        stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::{empty::EmptyTable, header::TableHeader},
+        tray::TrayAction,
     },
     livegame::{Enemy, Game},
     utils::{Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
@@ -18,6 +19,14 @@ use yew::{
 #[component]
 pub fn Livegame() -> Html {
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
+    let stack = use_reducer(Stack::default);
+
+    let stack_push = {
+        let stack = stack.clone();
+        use_callback((), move |value, _| {
+            stack.dispatch(TrayAction::Insert(value))
+        })
+    };
 
     {
         let game_data = game_data.clone();
@@ -80,13 +89,31 @@ pub fn Livegame() -> Html {
                         </table>
                     </div>
                     <div class={classes!("box", "overflow-auto")}>
-                        <StackSelector<Enemy>
-                            champion_id={current_player.champion_id}
-                            level={current_player.level}
-                            enemies={enemies.clone()}
-                            items_meta={items_meta.clone()}
-                            runes_meta={runes_meta.clone()}
-                        />
+                        <div class={classes!(
+                            "grid", "grid-cols-1",
+                            "items-start", "gap-4",
+                            "2xl:grid-cols-3",
+                        )}>
+                            <StackInsert
+                                callback={stack_push.clone()}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                                champion_id={current_player.champion_id}
+                            />
+                            <StackRemover
+                                stack={stack.clone()}
+                                champion_id={current_player.champion_id}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                            />
+                            <div class={classes!("overflow-auto")}>
+                                <StackTable<Enemy>
+                                    enemies={enemies.clone()}
+                                    stack={stack.reconcile(current_player.champion_id, items_meta, runes_meta)}
+                                    level={current_player.level}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </>
             }

@@ -26,7 +26,7 @@ export async function listen(event, callback) {
 
     return await f(event, (e) => {
         console.log(`Listener for ${event} triggered with`, e);
-        callback();
+        callback(e.payload);
     });
 }
 

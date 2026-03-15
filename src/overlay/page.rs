@@ -3,14 +3,18 @@ use crate::{
         dynamic::Dynamic,
         errorlog::errorlog,
         image::{Image, ImageType},
-        stack::StackSelector,
+        stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::{empty::EmptyTable, header::TableHeader},
+        tray::TrayAction,
     },
     livegame::{Enemy, Game},
-    utils::{Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
+    utils::{ClassCast, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
 };
 use std::time::Duration;
-use tutorlolv2_gen::CastId;
+use tutorlolv2_gen::{
+    BitSetArray, CastId, ChampionId, ItemsBitSet, L_SIML, Position, SIMULATED_ITEMS_METADATA,
+    sizeof_bitset,
+};
 use wasm_bindgen::{
     JsCast, JsValue,
     prelude::{Closure, wasm_bindgen},
@@ -40,14 +44,23 @@ unsafe extern "C" {
 #[component]
 pub fn Overlay() -> Html {
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
-    let enemy_index = use_state(|| 0);
+    let enemy_index = use_state(|| usize::MAX);
     let enemy_count = use_state(|| 0);
     let focused = use_state(|| false);
 
     let latest_enemy_index = use_mut_ref(|| 0usize);
     let latest_enemy_count = use_mut_ref(|| 0usize);
     let change_unlisten = use_mut_ref(|| None::<Function>);
-    let change_callback = use_mut_ref(|| None::<Closure<dyn FnMut()>>);
+    let change_callback = use_mut_ref(|| None::<Closure<dyn FnMut(bool)>>);
+
+    let stack = use_reducer(Stack::default);
+
+    let stack_push = {
+        let stack = stack.clone();
+        use_callback((), move |value, _| {
+            stack.dispatch(TrayAction::Insert(value))
+        })
+    };
 
     {
         let latest_enemy_index = latest_enemy_index.clone();
@@ -73,7 +86,7 @@ pub fn Overlay() -> Html {
                 let change_unlisten = change_unlisten.clone();
                 let change_callback = change_callback.clone();
                 spawn_local(async move {
-                    let callback = Closure::wrap(Box::new(move || {
+                    let callback = Closure::wrap(Box::new(move |_| {
                         let count = *latest_enemy_count.borrow();
                         if count == 0 {
                             return;
@@ -82,7 +95,7 @@ pub fn Overlay() -> Html {
                         let current = *latest_enemy_index.borrow();
                         let new = (current + 1) % count;
                         enemy_index.set(new);
-                    }) as Box<dyn FnMut()>);
+                    }) as Box<dyn FnMut(bool)>);
 
                     let js_fn: Function = callback.as_ref().unchecked_ref::<Function>().clone();
 
@@ -114,19 +127,9 @@ pub fn Overlay() -> Html {
     {
         let focused = focused.clone();
         use_effect_with((), move |_| {
-            on_keydown(27, move || {
-                focused.set(false);
-                blur_overlay();
-            })
-        });
-    }
-
-    {
-        let focused = focused.clone();
-        use_effect_with((), move |_| {
             spawn_local(async move {
                 let callback =
-                    Closure::wrap(Box::new(move || focused.set(true)) as Box<dyn FnMut()>);
+                    Closure::wrap(Box::new(move |v| focused.set(v)) as Box<dyn FnMut(bool)>);
                 let _ = listen("focus".to_string(), callback.as_ref().unchecked_ref()).await;
                 callback.forget();
             });
@@ -136,6 +139,7 @@ pub fn Overlay() -> Html {
     {
         let game_data = game_data.clone();
         let enemy_count = enemy_count.clone();
+        let enemy_index = enemy_index.clone();
         use_effect_with((), |_| {
             spawn_local(async move {
                 loop {
@@ -143,6 +147,17 @@ pub fn Overlay() -> Html {
 
                     if let Ok(ref game) = data {
                         enemy_count.set(game.enemies.len());
+
+                        if game_data.is_err() && *enemy_index == usize::MAX {
+                            enemy_index.set(
+                                game.enemies
+                                    .iter()
+                                    .position(|enemy| {
+                                        enemy.position == game.current_player.position
+                                    })
+                                    .unwrap_or(0),
+                            );
+                        }
                     }
 
                     game_data.set(data);
@@ -151,6 +166,16 @@ pub fn Overlay() -> Html {
             });
         });
     };
+
+    {
+        let focused = focused.clone();
+        use_effect_with((), move |_| {
+            on_keydown(27, move || {
+                focused.set(false);
+                blur_overlay();
+            })
+        });
+    }
 
     let data = match &*game_data {
         Ok(data) => {
@@ -165,20 +190,16 @@ pub fn Overlay() -> Html {
                 dragons,
             } = data;
 
-            let damages = enemies
-                .get(*enemy_index)
-                .or_else(|| {
-                    enemies
-                        .iter()
-                        .find(|enemy| enemy.position == current_player.position)
-                })
-                .or_else(|| enemies.first())
+            let enemy = enemies.get(*enemy_index).or_else(|| enemies.first());
+
+            let damages = enemy
                 .map(|enemy| {
                     let damages =
                         enemy
                             .damages
                             .to_html(current_player.champion_id, items_meta, runes_meta);
                     let enemy_id = enemy.champion_id;
+
                     html! {
                         <tr>
                             <td
@@ -193,22 +214,110 @@ pub fn Overlay() -> Html {
                 })
                 .unwrap_or_default();
 
+            let recommendation = enemy.map(|enemy| {
+                let array: [i32; L_SIML] = std::array::from_fn(|i| {
+                    let damage = &enemy.siml_items[i];
+                    damage.attacks.basic_attack
+                        + damage.attacks.onhit_damage.minimum_damage
+                        + damage.attacks.onhit_damage.maximum_damage
+                        + damage.attacks.critical_strike
+                        + damage.abilities.iter().sum::<i32>()
+                        + damage.items.iter().sum::<i32>()
+                        + damage.runes.iter().sum::<i32>()
+                });
+
+                let mut seen = ItemsBitSet::EMPTY;
+
+                let mut list = Position::ARRAY
+                    .into_iter()
+                    .flat_map(|position| current_player.champion_id.recommended_items(position))
+                    .filter_map(|&item| {
+                        SIMULATED_ITEMS_METADATA
+                            .iter()
+                            .position(|m| m.kind == item)
+                            .map(|index| (array[index], item))
+                    })
+                    .filter(|&(_, item)| seen.insert(item.index()))
+                    .collect::<Vec<_>>();
+
+                list.sort_unstable();
+
+                list.into_iter()
+                    .map(|(damage, item)| {
+                        html! {
+                            <div class={classes!("flex", "items-center", "gap-2")}>
+                                <span class={classes!("text-sm", item.damage_type().class())}>
+                                    {damage}
+                                </span>
+                                <Image
+                                    class={classes!("w-7", "h-7")}
+                                    src={ImageType::from(item)}
+                                />
+                            </div>
+                        }
+                    })
+                    .collect::<Html>()
+            });
+
             html! {
-                <Dynamic panel_id={"damage-table"} focused={*focused}>
-                    <div
-                        data-panel-content={true}
-                        class={classes!("overflow-auto", "w-fit", "origin-top-left")}
-                    >
-                        <table class={classes!("data-table", "overlay")}>
-                            <TableHeader
+                <>
+                    <Dynamic panel_id={"damage-table"} focused={*focused}>
+                        <div
+                            data-panel-content={true}
+                            class={classes!("overflow-auto", "w-fit", "origin-top-left")}
+                        >
+                            <table class={classes!("data-table", "overlay")}>
+                                <TableHeader
+                                    champion_id={current_player.champion_id}
+                                    items_meta={items_meta.clone()}
+                                    runes_meta={runes_meta.clone()}
+                                />
+                                <tbody>{damages}</tbody>
+                            </table>
+                        </div>
+                    </Dynamic>
+                    <Dynamic panel_id={"recommendations-table"} focused={*focused}>
+                        <div
+                            data-panel-content={true}
+                            class={classes!("flex", "flex-col", "gap-1")}
+                        >
+                            {recommendation}
+                        </div>
+                    </Dynamic>
+                    <Dynamic panel_id={"stack-insert"} focused={*focused}>
+                        <div data-panel-content={true}>
+                            <StackInsert
+                                callback={stack_push.clone()}
+                                items_meta={items_meta.clone()}
+                                runes_meta={runes_meta.clone()}
+                                champion_id={current_player.champion_id}
+                            />
+                        </div>
+                    </Dynamic>
+                    <Dynamic panel_id={"stack-remover"} focused={*focused}>
+                        <div
+                            data-panel-content={true}
+                            class={classes!("max-w-96")}
+                        >
+                            <StackRemover
+                                stack={stack.clone()}
                                 champion_id={current_player.champion_id}
                                 items_meta={items_meta.clone()}
                                 runes_meta={runes_meta.clone()}
                             />
-                            <tbody>{damages}</tbody>
-                        </table>
-                    </div>
-                </Dynamic>
+                        </div>
+                    </Dynamic>
+                    <Dynamic panel_id={"stack-table"} focused={*focused}>
+                        <div data-panel-content={true}>
+                            <StackTable<Enemy>
+                                index={*enemy_index}
+                                enemies={enemies.clone()}
+                                stack={stack.reconcile(current_player.champion_id, items_meta, runes_meta)}
+                                level={current_player.level}
+                            />
+                        </div>
+                    </Dynamic>
+                </>
             }
         }
         Err(e) => {
