@@ -1,3 +1,7 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+.btn-stack {
+    @apply relative flex items-center justify-center w-10 h-10 border border-std-800 bg-std-900/60 hover:bg-std-800/60 hover:border-blue-500 transition-all duration-150 outline-none;
+}

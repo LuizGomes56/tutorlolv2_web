@@ -1,26 +1,26 @@
+use crate::impl_reducible;
 use bincode::{Decode, Encode};
-use tutorlolv2_gen::{ItemId, RuneId};
+use std::fmt::Display;
+use tutorlolv2_gen::{AbilityId, Ctx, ItemId, Key, MergeData, RuneId};
 
-/// Holds all champion stats provided by Riot's API
-#[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
-pub struct PlayerStats {
-    pub ability_power: i32,
-    pub armor: i32,
-    pub armor_penetration_flat: i32,
-    pub armor_penetration_percent: i32,
-    pub attack_damage: i32,
-    pub attack_range: i32,
-    pub attack_speed: i32,
-    pub crit_chance: i32,
-    pub crit_damage: i32,
-    pub current_health: i32,
-    pub magic_penetration_flat: i32,
-    pub magic_penetration_percent: i32,
-    pub magic_resist: i32,
-    pub health: i32,
-    pub mana: i32,
-    pub current_mana: i32,
-}
+impl_reducible!(PlayerStats i32 {
+    ability_power,
+    armor,
+    armor_penetration_flat,
+    armor_penetration_percent,
+    attack_damage,
+    attack_range,
+    attack_speed,
+    crit_chance,
+    crit_damage,
+    current_health,
+    magic_penetration_flat,
+    magic_penetration_percent,
+    magic_resist,
+    max_health,
+    max_mana,
+    current_mana
+});
 
 /// Enum that defines the team of some player.
 /// - `CHAOS` is converted to [`Team::Red`],
@@ -42,10 +42,10 @@ pub struct RangeDamage {
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
 pub struct BasicStats {
     pub armor: i32,
-    pub health: i32,
+    pub max_health: i32,
     pub attack_damage: i32,
     pub magic_resist: i32,
-    pub mana: i32,
+    pub max_mana: i32,
 }
 
 /// Holds the damage of the basic attack, critical strike damage, and onhits
@@ -69,7 +69,7 @@ pub struct Attacks {
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
 pub struct SimpleStats {
     pub armor: i32,
-    pub health: i32,
+    pub max_health: i32,
     pub magic_resist: i32,
 }
 
@@ -79,27 +79,33 @@ pub struct Damages {
     pub abilities: Box<[i32]>,
     pub items: Box<[i32]>,
     pub runes: Box<[i32]>,
+    pub ctx: Ctx,
 }
 
-#[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
-pub struct AbilityLevels {
-    pub q: u8,
-    pub w: u8,
-    pub e: u8,
-    pub r: u8,
+impl_reducible!(AbilityLevels u8 { q, w, e, r });
+
+impl AbilityLevels {
+    pub const ABILITIES: [Key; 4] = [Key::Q, Key::W, Key::E, Key::R];
+
+    pub const ACTIONS: [fn(u8) -> AbilityLevelsAction; 4] = [
+        AbilityLevelsAction::Q,
+        AbilityLevelsAction::W,
+        AbilityLevelsAction::E,
+        AbilityLevelsAction::R,
+    ];
 }
 
 /// Wrapper around the type [`u32`], whose first [`Self::DISC_BITS`] are used to
 /// identify the enum type of the current value, which is either [`ItemId`] or [`RuneId`],
 /// and the remaining [`Self::VAL_BITS`] are used to store the actual number of stacks held
-#[derive(Clone, Copy, Debug, Encode, PartialEq)]
+#[derive(Clone, Copy, Debug, Encode, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct ValueException(u32);
 
 impl ValueException {
     pub const DISC_BITS: u32 =
         Self::find_disc_bits(ItemId::VARIANTS as u32, RuneId::VARIANTS as u32);
-    pub const VAL_BITS: u32 = 32 - Self::DISC_BITS;
+    pub const VAL_BITS: u32 = u32::BITS - Self::DISC_BITS;
     pub const VAL_MASK: u32 = (1u32 << Self::VAL_BITS) - 1;
     pub const DISC_MASK: u32 = !Self::VAL_MASK;
     pub const DISC_LOW_MASK: u32 = (1u32 << Self::DISC_BITS) - 1;
@@ -150,11 +156,89 @@ impl ValueException {
     }
 }
 
-/// Holds the number of dragons and their types, associated to the ally or enemy team.
-#[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
-pub struct Dragons {
-    pub ally_fire_dragons: u16,
-    pub ally_earth_dragons: u16,
-    pub ally_chemtech_dragons: u16,
-    pub enemy_earth_dragons: u16,
+impl_reducible!(Dragons u16 {
+    ally_fire,
+    ally_earth,
+    ally_chemtech,
+    enemy_earth
+});
+
+impl_reducible!(EnemyStats i32 {
+    armor,
+    current_health,
+    magic_resist,
+    max_health,
+    missing_health
+});
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum AbilityKind {
+    Alias(MergeData),
+    Normal(AbilityId),
+}
+
+impl AbilityKind {
+    pub const fn ability_id(&self) -> AbilityId {
+        match self {
+            AbilityKind::Alias(merge) => merge.alias,
+            AbilityKind::Normal(ability_id) => *ability_id,
+        }
+    }
+
+    pub const fn as_char(&self) -> char {
+        self.ability_id().as_char()
+    }
+}
+
+impl From<Key> for AbilityKind {
+    fn from(value: Key) -> Self {
+        AbilityId::from(value).into()
+    }
+}
+
+impl From<AbilityId> for AbilityKind {
+    fn from(value: AbilityId) -> Self {
+        AbilityKind::Normal(value)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum StatType {
+    AbilityPower,
+    Armor,
+    ArmorPenetrationFlat,
+    ArmorPenetrationPercent,
+    AttackDamage,
+    AttackSpeed,
+    CritChance,
+    CritDamage,
+    CurrentHealth,
+    MagicPenetrationFlat,
+    MagicPenetrationPercent,
+    MagicResist,
+    MaxMana,
+    MaxHealth,
+    CurrentMana,
+}
+
+impl Display for StatType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StatType::AbilityPower => write!(f, "Ability Power"),
+            StatType::Armor => write!(f, "Armor"),
+            StatType::ArmorPenetrationFlat => write!(f, "Armor Pen. Flat"),
+            StatType::ArmorPenetrationPercent => write!(f, "Armor Pen. %"),
+            StatType::AttackDamage => write!(f, "Attack Damage"),
+            StatType::AttackSpeed => write!(f, "Attack Speed"),
+            StatType::CritChance => write!(f, "Crit Chance"),
+            StatType::CritDamage => write!(f, "Crit Damage"),
+            StatType::CurrentHealth => write!(f, "Current Health"),
+            StatType::MagicPenetrationFlat => write!(f, "Magic Pen. Flat"),
+            StatType::MagicPenetrationPercent => write!(f, "Magic Pen. %"),
+            StatType::MagicResist => write!(f, "Magic Resist"),
+            StatType::MaxHealth => write!(f, "Max Health"),
+            StatType::MaxMana => write!(f, "Max Mana"),
+            StatType::CurrentMana => write!(f, "Current Mana"),
+        }
+    }
 }

@@ -1,22 +1,22 @@
-export default {
-    content: [
-        "./index.html",
-        "./src/**/*.rs",
-    ],
+const plugin = require("tailwindcss/plugin");
+
+module.exports = {
+    content: ["./index.html", "./src/**/*.rs"],
     plugins: [
-        function ({ matchUtilities, theme }) {
-            const zinc = theme('colors.zinc') || {};
-            const values = Object.fromEntries(
-                Object.entries(zinc).filter(([, v]) => typeof v === 'string')
-            );
+        plugin(function ({ matchUtilities, theme }) {
+            const zinc = theme("colors.zinc") || {};
+
             matchUtilities(
                 {
                     "bg-std": (v) => ({ backgroundColor: v }),
                     "text-std": (v) => ({ color: v }),
                     "border-std": (v) => ({ borderColor: v }),
                 },
-                { values }
+                {
+                    values: zinc,
+                    type: "color"
+                }
             );
-        },
+        }),
     ],
-}
+};

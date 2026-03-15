@@ -1,19 +1,20 @@
-use std::rc::Rc;
-use tutorlolv2_gen::{AbilityId, ChampionId, ItemId, MergeData, RuneId, TypeMetadata};
-use yew::prelude::*;
-
 use crate::{
-    components::image::Image,
-    utils::{AbilityKind, ImageType},
+    components::image::{Image, ImageType},
+    model::AbilityKind,
+    utils::encode_offset,
 };
+use std::{ops::Range, rc::Rc};
+use tutorlolv2_gen::{
+    BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, CastId, ChampionId, ItemId, ONHIT_EFFECT_OFFSET,
+    RuneId, TypeMetadata,
+};
+use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct TableHeaderProps {
     #[prop_or(1)]
-    pub skip: u8,
+    pub skip: usize,
     pub champion_id: ChampionId,
-    pub abilities_meta: Rc<[TypeMetadata<AbilityId>]>,
-    pub abilities_to_merge: Rc<[MergeData]>,
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
 }
@@ -23,11 +24,12 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     let TableHeaderProps {
         skip,
         champion_id,
-        abilities_meta,
-        abilities_to_merge,
-        items_meta,
-        runes_meta,
-    } = props;
+        ref items_meta,
+        ref runes_meta,
+    } = *props;
+
+    let abilities_meta = champion_id.abilities();
+    let abilities_to_merge = champion_id.merge_data();
 
     let abilities = {
         let meta_len = abilities_meta.len();
@@ -37,7 +39,8 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         let mut i = 0;
         'outer: while i < meta_len {
             let metadata = abilities_meta[i];
-            let mut ability_kind = AbilityKind::Normal(metadata.kind);
+            let kind = metadata.kind;
+            let mut ability_kind = AbilityKind::Normal(kind);
             let mut j = 0;
             'inner: while j < merge_len {
                 let merge = abilities_to_merge[j];
@@ -52,30 +55,33 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 }
             }
 
-            result.push(ImageType::Ability(*champion_id, ability_kind));
+            result.push((
+                ImageType::Ability(champion_id, ability_kind),
+                champion_id.get_ability_formula(i),
+            ));
             i += 1;
         }
 
         result
     };
 
-    let mut headers = Vec::with_capacity(
-        *skip as usize + 2 + abilities.len() + items_meta.len() + runes_meta.len(),
-    );
+    let mut headers =
+        Vec::with_capacity(skip + 3 + abilities.len() + items_meta.len() + runes_meta.len());
 
-    fn header<T: Copy + Into<ImageType>>(
-        headers: &mut Vec<ImageType>,
+    fn header<T: Copy + Into<ImageType> + CastId>(
+        headers: &mut Vec<(ImageType, &'static Range<usize>)>,
         slice: &Rc<[TypeMetadata<T>]>,
     ) {
-        for metadata in slice.into_iter() {
-            headers.push(metadata.kind.into())
+        for metadata in slice.iter() {
+            let kind = metadata.kind;
+            headers.push((kind.into(), kind.formula()))
         }
     }
 
     headers.extend([
-        ImageType::BasicAttack,
-        ImageType::CritStrike,
-        ImageType::OnhitAttack,
+        (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET),
+        (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET),
+        (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET),
     ]);
     headers.extend(abilities);
     header(&mut headers, items_meta);
@@ -84,14 +90,18 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     html! {
         <thead>
             <tr>
-                {for (0..*skip).map(|_| html!(<th></th>))}
-                {for headers.into_iter().enumerate().map(|(i, value)| {
+                {for (0..skip).map(|_| html!(<th></th>))}
+                {for headers.into_iter().map(|(src, offsets)| {
+                    let data_offset = encode_offset(&[offsets]);
                     html! {
-                        <th key={i}>
+                        <th {data_offset}>
                             <Image
-                                src={value}
+                                {src}
                                 class={classes!(
-                                    "w-fit", "justify-self-center"
+                                    "flex", "items-center",
+                                    "justify-center",
+                                    "place-self-center",
+                                    "w-8", "h-8"
                                 )}
                             />
                         </th>

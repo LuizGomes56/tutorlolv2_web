@@ -1,0 +1,750 @@
+{
+    "activePlayer": {
+        "abilities": {
+            "E": {
+                "abilityLevel": 1,
+                "displayName": "Spirit Fire",
+                "id": "NasusE",
+                "rawDescription": "GeneratedTip_Spell_NasusE_Description",
+                "rawDisplayName": "GeneratedTip_Spell_NasusE_DisplayName"
+            },
+            "Passive": {
+                "displayName": "Soul Eater",
+                "id": "NasusPassive",
+                "rawDescription": "GeneratedTip_Passive_NasusPassive_Description",
+                "rawDisplayName": "GeneratedTip_Passive_NasusPassive_DisplayName"
+            },
+            "Q": {
+                "abilityLevel": 1,
+                "displayName": "Siphoning Strike",
+                "id": "NasusQ",
+                "rawDescription": "GeneratedTip_Spell_NasusQ_Description",
+                "rawDisplayName": "GeneratedTip_Spell_NasusQ_DisplayName"
+            },
+            "R": {
+                "abilityLevel": 0,
+                "displayName": "Fury of the Sands",
+                "id": "NasusR",
+                "rawDescription": "GeneratedTip_Spell_NasusR_Description",
+                "rawDisplayName": "GeneratedTip_Spell_NasusR_DisplayName"
+            },
+            "W": {
+                "abilityLevel": 1,
+                "displayName": "Wither",
+                "id": "NasusW",
+                "rawDescription": "GeneratedTip_Spell_NasusW_Description",
+                "rawDisplayName": "GeneratedTip_Spell_NasusW_DisplayName"
+            }
+        },
+        "championStats": {
+            "abilityHaste": 21,
+            "abilityPower": 0,
+            "armor": 55.932498931884766,
+            "armorPenetrationFlat": 0,
+            "armorPenetrationPercent": 1,
+            "attackDamage": 72.9000015258789,
+            "attackRange": 125,
+            "attackSpeed": 0.6707485318183899,
+            "bonusArmorPenetrationPercent": 1,
+            "bonusMagicPenetrationPercent": 1,
+            "critChance": 0,
+            "critDamage": 200,
+            "currentHealth": 1041.63525390625,
+            "healShieldPower": 0,
+            "healthRegenRate": 2.065500020980835,
+            "lifeSteal": 0.11999999731779099,
+            "magicLethality": 0,
+            "magicPenetrationFlat": 0,
+            "magicPenetrationPercent": 1,
+            "magicResist": 50.02375030517578,
+            "maxHealth": 1041.63525390625,
+            "moveSpeed": 350,
+            "omnivamp": 0,
+            "physicalLethality": 0,
+            "physicalVamp": 0,
+            "resourceMax": 417.45001220703125,
+            "resourceRegenRate": 2.4578990936279297,
+            "resourceType": "MANA",
+            "resourceValue": 417.45001220703125,
+            "spellVamp": 0,
+            "tenacity": 5
+        },
+        "currentGold": 100,
+        "fullRunes": {},
+        "level": 3,
+        "riotId": "Giga Gnar#BRZL",
+        "riotIdGameName": "Giga Gnar",
+        "riotIdTagLine": "BRZL",
+        "summonerName": "Giga Gnar#BRZL",
+        "teamRelativeColors": true
+    },
+    "allPlayers": [
+        {
+            "championName": "Sion",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Giant's Belt",
+                    "itemID": 1011,
+                    "price": 500,
+                    "rawDescription": "GeneratedTip_Item_1011_Description",
+                    "rawDisplayName": "Item_1011_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Ruby Crystal",
+                    "itemID": 1028,
+                    "price": 400,
+                    "rawDescription": "GeneratedTip_Item_1028_Description",
+                    "rawDisplayName": "Item_1028_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 2,
+                    "displayName": "Health Potion",
+                    "itemID": 2003,
+                    "price": 50,
+                    "rawDescription": "GeneratedTip_Item_2003_Description",
+                    "rawDisplayName": "Item_2003_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 1,
+                    "displayName": "Poro-Snax",
+                    "itemID": 2052,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_2052_Description",
+                    "rawDisplayName": "Item_2052_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 3,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Sion",
+            "rawSkinName": "game_character_displayname_Sion",
+            "respawnTimer": 0,
+            "riotId": "8Sha0yne8#twink",
+            "riotIdGameName": "8Sha0yne8",
+            "riotIdTagLine": "twink",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 0,
+            "skinName": "Sion",
+            "summonerName": "8Sha0yne8#twink",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Mark",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Jayce",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Serrated Dirk",
+                    "itemID": 3134,
+                    "price": 300,
+                    "rawDescription": "GeneratedTip_Item_3134_Description",
+                    "rawDisplayName": "Item_3134_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Tear of the Goddess",
+                    "itemID": 3070,
+                    "price": 400,
+                    "rawDescription": "GeneratedTip_Item_3070_Description",
+                    "rawDisplayName": "Item_3070_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Glowing Mote",
+                    "itemID": 2022,
+                    "price": 250,
+                    "rawDescription": "GeneratedTip_Item_2022_Description",
+                    "rawDisplayName": "Item_2022_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 1,
+                    "displayName": "Poro-Snax",
+                    "itemID": 2052,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_2052_Description",
+                    "rawDisplayName": "Item_2052_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 3,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Jayce",
+            "rawSkinName": "game_character_skin_displayname_Jayce_35",
+            "respawnTimer": 0,
+            "riotId": "Aether#twink",
+            "riotIdGameName": "Aether",
+            "riotIdTagLine": "twink",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 35,
+            "skinName": "Arcane Survivor Jayce",
+            "summonerName": "Aether#twink",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Mark",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Rammus",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Giant's Belt",
+                    "itemID": 1011,
+                    "price": 500,
+                    "rawDescription": "GeneratedTip_Item_1011_Description",
+                    "rawDisplayName": "Item_1011_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Ruby Crystal",
+                    "itemID": 1028,
+                    "price": 400,
+                    "rawDescription": "GeneratedTip_Item_1028_Description",
+                    "rawDisplayName": "Item_1028_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 1,
+                    "displayName": "Poro-Snax",
+                    "itemID": 2052,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_2052_Description",
+                    "rawDisplayName": "Item_2052_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 3,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Rammus",
+            "rawSkinName": "game_character_skin_displayname_Rammus_7",
+            "respawnTimer": 0,
+            "riotId": "KittyTea#uwu",
+            "riotIdGameName": "KittyTea",
+            "riotIdTagLine": "uwu",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 7,
+            "skinName": "Guardian of the Sands Rammus",
+            "summonerName": "KittyTea#uwu",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Mark",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Caitlyn",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Guardian's Hammer",
+                    "itemID": 3184,
+                    "price": 950,
+                    "rawDescription": "GeneratedTip_Item_3184_Description",
+                    "rawDisplayName": "game_item_displayname_3184",
+                    "slot": 0
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Refillable Potion",
+                    "itemID": 2031,
+                    "price": 150,
+                    "rawDescription": "GeneratedTip_Item_2031_Description",
+                    "rawDisplayName": "Item_2031_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Boots",
+                    "itemID": 1001,
+                    "price": 300,
+                    "rawDescription": "GeneratedTip_Item_1001_Description",
+                    "rawDisplayName": "Item_1001_Name",
+                    "slot": 5
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 1,
+                    "displayName": "Poro-Snax",
+                    "itemID": 2052,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_2052_Description",
+                    "rawDisplayName": "Item_2052_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 3,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Caitlyn",
+            "rawSkinName": "game_character_skin_displayname_Caitlyn_13",
+            "respawnTimer": 0,
+            "riotId": "Euphoria#074",
+            "riotIdGameName": "Euphoria",
+            "riotIdTagLine": "074",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 13,
+            "skinName": "Pool Party Caitlyn",
+            "summonerName": "Euphoria#074",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Mark",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Nasus",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Sheen",
+                    "itemID": 3057,
+                    "price": 650,
+                    "rawDescription": "GeneratedTip_Item_3057_Description",
+                    "rawDisplayName": "Item_3057_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Ruby Crystal",
+                    "itemID": 1028,
+                    "price": 400,
+                    "rawDescription": "GeneratedTip_Item_1028_Description",
+                    "rawDisplayName": "Item_1028_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 1,
+                    "displayName": "Poro-Snax",
+                    "itemID": 2052,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_2052_Description",
+                    "rawDisplayName": "Item_2052_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 3,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Nasus",
+            "rawSkinName": "game_character_skin_displayname_Nasus_1",
+            "respawnTimer": 0,
+            "riotId": "Giga Gnar#BRZL",
+            "riotIdGameName": "Giga Gnar",
+            "riotIdTagLine": "BRZL",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 1,
+            "skinName": "Galactic Nasus",
+            "summonerName": "Giga Gnar#BRZL",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Ghost",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Aurelion Sol",
+            "isBot": false,
+            "isDead": false,
+            "items": [],
+            "level": 1,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_AurelionSol",
+            "rawSkinName": "game_character_displayname_AurelionSol",
+            "respawnTimer": 0,
+            "riotId": "imraidy#NA1",
+            "riotIdGameName": "imraidy",
+            "riotIdTagLine": "NA1",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 0,
+            "skinName": "Aurelion Sol",
+            "summonerName": "imraidy#NA1",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Ghost",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "CHAOS"
+        },
+        {
+            "championName": "Graves",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Serrated Dirk",
+                    "itemID": 3134,
+                    "price": 300,
+                    "rawDescription": "GeneratedTip_Item_3134_Description",
+                    "rawDisplayName": "Item_3134_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Boots",
+                    "itemID": 1001,
+                    "price": 300,
+                    "rawDescription": "GeneratedTip_Item_1001_Description",
+                    "rawDisplayName": "Item_1001_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 2,
+                    "displayName": "Health Potion",
+                    "itemID": 2003,
+                    "price": 50,
+                    "rawDescription": "GeneratedTip_Item_2003_Description",
+                    "rawDisplayName": "Item_2003_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 1,
+                    "displayName": "Poro-Snax",
+                    "itemID": 2052,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_2052_Description",
+                    "rawDisplayName": "Item_2052_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 3,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Graves",
+            "rawSkinName": "game_character_displayname_Graves",
+            "respawnTimer": 0,
+            "riotId": "Lucky#Clo",
+            "riotIdGameName": "Lucky",
+            "riotIdTagLine": "Clo",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 0,
+            "skinName": "Graves",
+            "summonerName": "Lucky#Clo",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Mark",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "CHAOS"
+        },
+        {
+            "championName": "Riven",
+            "isBot": false,
+            "isDead": false,
+            "items": [],
+            "level": 1,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Riven",
+            "rawSkinName": "game_character_skin_displayname_Riven_16",
+            "respawnTimer": 0,
+            "riotId": "umboday#NA1",
+            "riotIdGameName": "umboday",
+            "riotIdTagLine": "NA1",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 16,
+            "skinName": "Dawnbringer Riven",
+            "summonerName": "umboday#NA1",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Mark",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "CHAOS"
+        },
+        {
+            "championName": "Soraka",
+            "isBot": false,
+            "isDead": false,
+            "items": [],
+            "level": 1,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Soraka",
+            "rawSkinName": "game_character_skin_displayname_Soraka_9",
+            "respawnTimer": 0,
+            "riotId": "Azami P#NA1",
+            "riotIdGameName": "Azami P",
+            "riotIdTagLine": "NA1",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 9,
+            "skinName": "Winter Wonder Soraka",
+            "summonerName": "Azami P#NA1",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Ghost",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
+                }
+            },
+            "team": "CHAOS"
+        },
+        {
+            "championName": "Gragas",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Lost Chapter",
+                    "itemID": 3802,
+                    "price": 250,
+                    "rawDescription": "GeneratedTip_Item_3802_Description",
+                    "rawDisplayName": "Item_3802_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": true,
+                    "consumable": true,
+                    "count": 1,
+                    "displayName": "Poro-Snax",
+                    "itemID": 2052,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_2052_Description",
+                    "rawDisplayName": "Item_2052_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 3,
+            "position": "NONE",
+            "rawChampionName": "game_character_displayname_Gragas",
+            "rawSkinName": "game_character_displayname_Gragas",
+            "respawnTimer": 0,
+            "riotId": "MessyWalcott#123",
+            "riotIdGameName": "MessyWalcott",
+            "riotIdTagLine": "123",
+            "runes": null,
+            "scores": {
+                "assists": 0,
+                "creepScore": 0,
+                "deaths": 0,
+                "kills": 0,
+                "wardScore": 0
+            },
+            "skinID": 0,
+            "skinName": "Gragas",
+            "summonerName": "MessyWalcott#123",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Mark",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                }
+            },
+            "team": "CHAOS"
+        }
+    ],
+    "events": {
+        "Events": [
+            {
+                "EventID": 0,
+                "EventName": "GameStart",
+                "EventTime": 0.030299700796604156
+            }
+        ]
+    },
+    "gameData": {
+        "gameMode": "KIWI",
+        "gameTime": 41.56141662597656,
+        "mapName": "Map12",
+        "mapNumber": 12,
+        "mapTerrain": "Default"
+    }
+}

@@ -1,57 +1,49 @@
-use crate::{components::image::Image, model::AbilityLevels, utils::ImageType};
-use std::hint::unreachable_unchecked;
-use tutorlolv2_gen::{AbilityId, AbilityName, ChampionId};
+use crate::{
+    components::image::{Image, ImageType},
+    impl_index,
+    model::AbilityLevels,
+    utils::ReduceApply,
+};
+use std::ops::{Index, IndexMut};
+use tutorlolv2_gen::{ChampionId, Key};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct AbilitiesProps {
     pub ability_levels: AbilityLevels,
-    pub callback: Callback<AbilityLevels>,
+    pub callback: Callback<<AbilityLevels as ReduceApply>::Action>,
     pub champion_id: ChampionId,
 }
 
-impl AbilityLevels {
-    pub const fn field(&mut self, ability_id: AbilityId) -> &mut u8 {
-        match ability_id {
-            AbilityId::Q(_) => &mut self.q,
-            AbilityId::W(_) => &mut self.w,
-            AbilityId::E(_) => &mut self.e,
-            AbilityId::R(_) => &mut self.r,
-            _ => unsafe { unreachable_unchecked() },
-        }
-    }
-
-    pub const fn get(&mut self, ability_id: AbilityId) -> u8 {
-        *self.field(ability_id)
-    }
-
-    pub const fn set(mut self, ability_id: AbilityId, value: u8) -> Self {
-        *self.field(ability_id) = value;
-        self
+impl_index! {
+    AbilityLevels[Key] u8 {
+        Key::Q => q,
+        Key::W => w,
+        Key::E => e,
+        Key::R => r,
     }
 }
 
 #[component]
 pub fn Abilities(props: &AbilitiesProps) -> Html {
     let AbilitiesProps {
-        mut ability_levels,
+        ability_levels,
         champion_id,
-        ..
+        ref callback,
     } = *props;
 
-    let callback = &props.callback;
-
-    [AbilityId::Q, AbilityId::W, AbilityId::E, AbilityId::R]
+    AbilityLevels::ABILITIES
         .into_iter()
-        .map(|func| {
-            let ability_id = func(AbilityName::Void);
-            let value = ability_levels.get(ability_id);
+        .enumerate()
+        .map(|(i, key)| {
+            let value = ability_levels[key];
+            let prototype = AbilityLevels::ACTIONS[i];
             html! {
                 <label class={classes!("grid", "grid-cols-2")}>
                     <Image
-                        src={ImageType::Ability(champion_id, ability_id.into())}
-                        class={classes!("h-8", "w-8", "rounded")}
+                        src={ImageType::Ability(champion_id, key.into())}
+                        class={classes!("flex", "items-center", "justify-center")}
                     />
                     <input
                         value={value.to_string()}
@@ -61,7 +53,7 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                             Callback::from(move |e: InputEvent| {
                                 let target = e.target_unchecked_into::<HtmlInputElement>();
                                 let value = target.value().parse::<u8>().unwrap_or(0);
-                                callback.emit(ability_levels.set(ability_id, value));
+                                callback.emit(prototype(value));
                             })
                         }}
                         type={"number"}

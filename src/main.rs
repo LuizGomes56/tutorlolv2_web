@@ -1,17 +1,19 @@
-#[cfg(not(feature = "overlay"))]
-use crate::components::sidebar::Sidebar;
+#![allow(static_mut_refs)]
 use crate::{
-    calculator::Calculator, components::header::Header, docs::Docs, overlay::Overlay,
-    utils::cache::init_cache,
+    calculator::Calculator,
+    components::{hoverdocs::HoverDocs, sidebar::Sidebar},
+    formulas::Formulas,
+    livegame::Livegame,
+    overlay::Overlay,
+    utils::init_cache,
 };
 use yew::prelude::*;
-#[cfg(not(feature = "overlay"))]
-use yew_router::Switch;
-use yew_router::{BrowserRouter, Routable};
+use yew_router::{BrowserRouter, Routable, Switch};
 
 mod calculator;
 mod components;
-mod docs;
+mod formulas;
+mod livegame;
 mod model;
 mod overlay;
 mod utils;
@@ -21,12 +23,14 @@ pub enum Route {
     #[not_found]
     #[at("/")]
     Homepage,
+    #[at("/overlay")]
+    Overlay,
     #[at("/calculator")]
     Calculator,
     #[at("/livegame")]
     Livegame,
-    #[at("/docs")]
-    Docs,
+    #[at("/formulas")]
+    Formulas,
     #[at("/help")]
     Help,
     #[at("/about")]
@@ -39,29 +43,37 @@ pub enum Route {
 
 #[component]
 fn App() -> Html {
-    #[cfg(not(feature = "overlay"))]
     return html! {
         <BrowserRouter>
             <Switch<Route> render={|route| {
                 let component = match route {
                     Route::Calculator => html!(<Calculator />),
+                    Route::Formulas => html!(<Formulas />),
+                    Route::Livegame => html!(<Livegame />),
+                    Route::Overlay => return html!(<Overlay />),
                     _ => html!(<Calculator />),
                 };
                 html! {
-                    <div class={classes!("bg-std-900")}>
-                        // <Header />
-                        // <Sidebar />
-                        <div class={classes!("flex", "w-full")}>
-                            {component}
+                    <>
+                        <div class={classes!("bg-std-900")}>
+                            <div class={classes!(
+                                "flex", "max-h-screen", "h-full"
+                            )}>
+                                <Sidebar />
+                                <div class={classes!(
+                                    "flex-1", "overflow-y-auto",
+                                    "overflow-x-hidden"
+                                )}>
+                                    {component}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <HoverDocs />
+                    </>
                 }
             }} />
         </BrowserRouter>
     };
-
-    #[cfg(feature = "overlay")]
-    html!(<div class={classes!("bg-transparent")}><Overlay /></div>)
 }
 
 fn main() {

@@ -1,18 +1,16 @@
-@font-face {
-    font-family: "Oxanium";
-    font-style: normal;
-    font-weight: 400;
-    src: url("./Oxanium-VariableFont_wght.ttf") format("truetype");
-    font-weight: 200 800;
-}
-
 body {
     color: #ffffff;
     background-color: #121212;
 }
 
-.oxanium {
-    font-family: Oxanium, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+[data-panel="true"] [data-resize-handle] {
+    opacity: 0;
+    pointer-events: none;
+}
+
+[data-panel="true"][data-active="true"] [data-resize-handle] {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .text-shadow {
@@ -25,24 +23,23 @@ body {
     color: white;
     height: 100%;
     width: 100%;
-    transform: translate(0, -100%);
     align-content: center;
     font-weight: 700;
     text-align: center;
     font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     filter: drop-shadow(1.25px 1.25px 0px black);
     text-shadow: 0px 0px 4px black;
+    white-space: nowrap;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .img-clipped {
     width: 100%;
     object-fit: cover;
     object-position: 0% 15%;
-}
-
-.hover-docs {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(153, 153, 153, 0.4) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -76,7 +73,12 @@ input[type="number"] {
     appearance: textfield;
 }
 
-tr>:nth-child(n+7) .hover-docs {
+.documentation {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(153, 153, 153, 0.4) transparent;
+}
+
+tr>:nth-child(n+7) .documentation {
     transform: translateX(calc(-100% + 32px));
 }
 
@@ -87,40 +89,37 @@ table {
     width: 100%;
 }
 
-table thead tr {
+table:not(.overlay) thead tr {
     background-color: #18181b;
+}
+
+table:not(.overlay) tbody tr:nth-child(odd) {
+    background-color: #16161c;
+}
+
+table:not(.overlay) tbody tr:nth-child(even) {
+    background-color: #1c1c21;
+    border-bottom: 1px solid #3f3f46;
+    border-top: 1px solid #3f3f46;
 }
 
 table tr {
     height: 48px;
 }
 
-table tbody tr:nth-child(even) {
-    background-color: #242427;
-    border-bottom: 1px solid #525252;
-    border-top: 1px solid #525252;
-}
-
-table tbody tr:nth-child(odd) {
-    background-color: #1c1917;
+table tbody tr:last-child {
+    border-bottom: none;
 }
 
 table th,
 table td {
     transition: .2s ease;
-    padding: 8px;
+    padding: 0 8px;
 }
 
-table p {
-    text-wrap: nowrap;
-    filter: drop-shadow(0px 0px 1px black);
-    text-shadow: 0px 1.25px 0px black;
-}
-
-table img {
+table.data-table img {
     height: 32px;
     min-width: 32px;
-    box-shadow: 0 0 10px #0f0f0f;
     justify-self: center;
 }
 
@@ -146,4 +145,11 @@ img {
     object-fit: cover;
     object-position: 15% 15%;
     display: block;
+}
+
+.bright {
+    background: linear-gradient(90deg,
+            rgba(0, 0, 0, 0) 50%,
+            rgba(90, 255, 255, 0.15) 90%,
+            rgba(90, 255, 255, 1));
 }

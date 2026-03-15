@@ -12,3 +12,21 @@ export async function invoke_get_live_game() {
 
     return new Uint8Array(data);
 }
+
+export function blur_overlay() {
+    invoke?.("blur_overlay");
+}
+
+export async function listen(event, callback) {
+    const f = window?.__TAURI__?.event?.listen;
+
+    if (!callback || !f) {
+        return null;
+    }
+
+    return await f(event, (e) => {
+        console.log(`Listener for ${event} triggered with`, e);
+        callback(e.payload);
+    });
+}
+

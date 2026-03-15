@@ -1,8 +1,10 @@
 use crate::{
-    components::image::Image,
-    model::PlayerStats,
-    utils::{ImageType, StatType},
+    components::image::{Image, ImageType},
+    impl_index,
+    model::{EnemyStats, PlayerStats, StatType},
+    utils::ReduceApply,
 };
+use std::ops::{Index, IndexMut};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -18,12 +20,14 @@ pub struct StatCellProps {
 
 #[component]
 pub fn StatCell(props: &StatCellProps) -> Html {
-    let image_type = props.image_type;
-    let disabled = props.disabled;
-    let name = &props.name;
-    let value = &props.value;
-    let oninput = &props.oninput;
-    let placeholder = props.placeholder;
+    let StatCellProps {
+        image_type,
+        disabled,
+        ref name,
+        value,
+        ref oninput,
+        placeholder,
+    } = *props;
     html! {
         <>
             <span class={classes!("flex", "items-center", "justify-center", "relative")}>
@@ -45,94 +49,122 @@ pub fn StatCell(props: &StatCellProps) -> Html {
                 {disabled}
                 placeholder={placeholder.to_string()}
                 value={value.to_string()}
-                oninput={oninput}
+                {oninput}
             />
         </>
     }
 }
 
-impl PlayerStats {
-    pub const fn field(&mut self, stat: StatType) -> &mut i32 {
-        match stat {
-            StatType::AbilityPower => &mut self.ability_power,
-            StatType::Armor => &mut self.armor,
-            StatType::ArmorPenetrationFlat => &mut self.armor_penetration_flat,
-            StatType::ArmorPenetrationPercent => &mut self.armor_penetration_percent,
-            StatType::AttackDamage => &mut self.attack_damage,
-            StatType::AttackRange => &mut self.attack_range,
-            StatType::AttackSpeed => &mut self.attack_speed,
-            StatType::CritChance => &mut self.crit_chance,
-            StatType::CritDamage => &mut self.crit_damage,
-            StatType::CurrentHealth => &mut self.current_health,
-            StatType::MagicPenetrationFlat => &mut self.magic_penetration_flat,
-            StatType::MagicPenetrationPercent => &mut self.magic_penetration_percent,
-            StatType::MagicResist => &mut self.magic_resist,
-            StatType::Health => &mut self.health,
-            StatType::Mana => &mut self.mana,
-            StatType::CurrentMana => &mut self.current_mana,
-        }
-    }
-
-    pub const fn get(&mut self, stat: StatType) -> i32 {
-        *self.field(stat)
-    }
-
-    pub const fn set(mut self, stat: StatType, value: i32) -> Self {
-        *self.field(stat) = value;
-        self
+impl_index! {
+    @PlayerStats[StatType] i32 {
+        AbilityPower,
+        Armor,
+        ArmorPenetrationFlat,
+        ArmorPenetrationPercent,
+        AttackDamage,
+        AttackSpeed,
+        CritChance,
+        CritDamage,
+        CurrentHealth,
+        MagicPenetrationFlat,
+        MagicPenetrationPercent,
+        MagicResist,
+        MaxHealth,
+        MaxMana,
+        CurrentMana,
     }
 }
 
+impl_index! {
+    @EnemyStats[StatType] i32 {
+        Armor,
+        CurrentHealth,
+        MagicResist,
+        MaxHealth,
+    }
+}
+
+pub trait StatDisplay
+where
+    Self: Index<StatType, Output = i32> + ReduceApply,
+{
+    const VALUES: &[StatType];
+    fn prototype(value: StatType) -> fn(i32) -> Self::Action;
+}
+
+macro_rules! impl_stat_display {
+    ($type:ty { $($stat:ident),+$(,)? }) => {
+        impl StatDisplay for $type {
+            const VALUES: &[StatType] = &[$(StatType::$stat),+];
+            fn prototype(value: StatType) -> fn(i32) -> Self::Action {
+                match value {
+                    $(StatType::$stat => Self::Action::$stat,)+
+                    _ => unreachable!(),
+                }
+            }
+        }
+    };
+}
+
+impl_stat_display!(PlayerStats {
+    AbilityPower,
+    AttackDamage,
+    MaxHealth,
+    CurrentHealth,
+    Armor,
+    ArmorPenetrationFlat,
+    ArmorPenetrationPercent,
+    MagicResist,
+    MagicPenetrationFlat,
+    MagicPenetrationPercent,
+    CritChance,
+    CritDamage,
+    MaxMana,
+    CurrentMana,
+    AttackSpeed,
+});
+
+impl_stat_display!(EnemyStats {
+    MaxHealth,
+    CurrentHealth,
+    Armor,
+    MagicResist,
+});
+
 #[derive(PartialEq, Properties)]
-pub struct StatsProps {
+pub struct StatsProps<T: ReduceApply> {
     pub infer: bool,
-    pub stats: PlayerStats,
-    pub callback: Callback<*const PlayerStats>,
+    pub stats: T,
+    pub callback: Callback<T::Action>,
 }
 
 #[component]
-pub fn Stats(props: &StatsProps) -> Html {
+pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {
     let infer = props.infer;
-    let mut stats = props.stats;
+    let stats = props.stats;
     let callback = &props.callback;
 
-    [
-        StatType::AbilityPower,
-        StatType::AttackDamage,
-        StatType::Health,
-        StatType::CurrentHealth,
-        StatType::Armor,
-        StatType::ArmorPenetrationFlat,
-        StatType::ArmorPenetrationPercent,
-        StatType::MagicResist,
-        StatType::MagicPenetrationFlat,
-        StatType::MagicPenetrationPercent,
-        StatType::CritChance,
-        StatType::CritDamage,
-        StatType::Mana,
-        StatType::CurrentMana,
-        StatType::AttackRange,
-        StatType::AttackSpeed,
-    ]
-    .into_iter()
-    .map(|stat| {
-        html! {
-            <StatCell
-                image_type={ImageType::Stats(stat)}
-                name={stat.to_string()}
-                disabled={infer}
-                placeholder={0}
-                value={stats.get(stat)}
-                oninput={{
-                    let callback = callback.clone();
-                    Callback::from(move |e: InputEvent| {
-                        let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                        let number = value.parse().unwrap_or(0);
-                        callback.emit(&stats.set(stat, number) as _);
-                    })
-                }}
-            />
-        }
-    })
-    .collect::<Html>()
+    T::VALUES
+        .iter()
+        .map(|&stat| {
+            html! {
+                <StatCell
+                    image_type={ImageType::Stats(stat)}
+                    name={stat.to_string()}
+                    disabled={infer}
+                    placeholder={0}
+                    value={stats[stat]}
+                    oninput={{
+                        let callback = callback.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                            let number = value.parse().unwrap_or(0);
+                            let prototype = T::prototype(stat);
+                            callback.emit(prototype(number));
+                        })
+                    }}
+                />
+            }
+        })
+        .collect::<Html>()
 }

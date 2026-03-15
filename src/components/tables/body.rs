@@ -1,407 +1,249 @@
 use crate::{
     calculator::FinalEnemy,
-    components::image::Image,
-    model::{Attacks, Damages, RangeDamage},
-    overlay::Enemy,
-    utils::{EnumCast, encode_offset},
+    livegame::Enemy,
+    model::{Attacks, Damages},
+    utils::{ClassCast, encode_offset},
 };
-use std::{collections::HashSet, ops::Range, rc::Rc};
+use std::{fmt::Write, ops::Range};
 use tutorlolv2_gen::{
-    ABILITY_IDENTS, AbilityId, ChampionId, Ctx, DamageType, EvalIdent, ITEM_IDENTS, ItemId,
-    MergeData, RUNE_CLOSURES, RUNE_IDENTS, RuneId, TypeMetadata,
+    BASIC_ATTACK_FN_OFFSET, CRITICAL_STRIKE_FN_OFFSET, ChampionId, CtxVar, DamageType, ItemId,
+    ONHIT_EFFECT_FN_OFFSET, RuneId, TypeMetadata,
 };
 use yew::prelude::*;
 
-const CTX_VARIANTS: usize = size_of::<Ctx>() / size_of::<f32>();
+pub trait Victim {
+    fn max_health(&self) -> i32;
+    fn champion_id(&self) -> ChampionId;
+    fn damages(&self) -> &Damages;
+}
+
+impl Victim for FinalEnemy {
+    fn champion_id(&self) -> ChampionId {
+        self.champion_id
+    }
+
+    fn max_health(&self) -> i32 {
+        self.current_stats.max_health
+    }
+
+    fn damages(&self) -> &Damages {
+        &self.damages
+    }
+}
+
+impl Victim for Enemy {
+    fn champion_id(&self) -> ChampionId {
+        self.champion_id
+    }
+
+    fn damages(&self) -> &Damages {
+        &self.damages
+    }
+
+    fn max_health(&self) -> i32 {
+        self.current_stats.max_health
+    }
+}
 
 pub struct Cell {
     damage_type: DamageType,
     min_dmg: i32,
     max_dmg: Option<i32>,
-    offset_main: Option<u64>,
-    offset_exc: Option<u64>,
-    idents: &'static [EvalIdent],
-    key: usize,
+    offsets: (&'static Range<usize>, Option<&'static Range<usize>>),
+    idents: &'static [CtxVar],
 }
 
-fn rdmg(metadata: &Rc<[TypeMetadata<RuneId>]>, damages: Box<[i32]>) -> Box<[Cell]> {
-    let mlen = metadata.len();
-    let dlen = damages.len();
+impl Damages {
+    pub fn to_html(
+        &self,
+        champion_id: ChampionId,
+        items_meta: &[TypeMetadata<ItemId>],
+        runes_meta: &[TypeMetadata<RuneId>],
+    ) -> Html {
+        let merge_data = champion_id.merge_data();
+        let abilities_meta = champion_id.abilities();
+        let ability_idents = champion_id.idents();
+        let ability_closures = champion_id.closures();
 
-    assert!(
-        mlen == dlen,
-        "Incompatible metadata vs box i32 len: [{mlen}m] [{dlen}d]"
-    );
+        const BASE_CELLS: usize = 3;
 
-    let mut cells = Box::<[Cell]>::new_uninit_slice(mlen);
-    let mut i = 0;
+        let ability_cell_index = {
+            let len = abilities_meta.len();
 
-    while i < mlen {
-        let TypeMetadata {
-            kind, damage_type, ..
-        } = metadata[i];
-        let text = damages[i];
-        let closure_range = &RUNE_CLOSURES[kind.index()];
-        let offset_main = encode_offset(Some(closure_range.clone()));
-        let idents = RUNE_IDENTS[kind.index()];
-        cells[i].write(Cell {
-            damage_type,
-            min_dmg: text,
-            offset_main,
-            offset_exc: None,
-            max_dmg: None,
-            idents,
-            key: i,
-        });
-        i += 1;
-    }
+            let mut indexes = vec![usize::MAX; len];
+            let mut max_iterator = merge_data
+                .iter()
+                .map(|m| m.maximum_damage as usize)
+                .peekable();
 
-    unsafe { cells.assume_init() }
-}
+            let mut pos = BASE_CELLS;
+            (0..len).for_each(|i| match max_iterator.peek() {
+                Some(&max) if max == i => {
+                    max_iterator.next();
+                }
+                _ => {
+                    indexes[i] = pos;
+                    pos += 1;
+                }
+            });
 
-impl Cell {
-    pub fn display(self, ctx: Ctx) -> Html {
-        let Self {
-            damage_type,
-            min_dmg,
-            max_dmg,
-            offset_main,
-            offset_exc,
-            idents,
-            key,
-        } = self;
-        let ctx_array = unsafe { core::mem::transmute::<_, [f32; CTX_VARIANTS]>(ctx) };
-
-        let class = classes!(
-            "text-xs",
-            "text-center",
-            match damage_type {
-                DamageType::Physical => "text-orange-500",
-                DamageType::Magic => "text-sky-500",
-                DamageType::Mixed => "text-indigo-500",
-                DamageType::True => "text-white",
-                DamageType::Adaptative => "text-purple-500",
-                DamageType::Unknown => "text-emerald-500",
-            }
-        );
-
-        let enc64 = |value: Option<u64>| value.as_ref().map(ToString::to_string);
-        let data_idents = idents
-            .into_iter()
-            .map(|&ident| {
-                let value = ctx_array[ident as usize];
-                format!("[{ident}:{value}]")
-            })
-            .collect::<String>();
-
-        let text = match max_dmg {
-            Some(max) => format!("{min_dmg} - {max}"),
-            None => min_dmg.to_string(),
+            debug_assert_eq!(pos, BASE_CELLS + len - merge_data.len());
+            indexes
         };
 
-        html! {
-            <td
-                {key}
-                {class}
-                data-offset-main={enc64(offset_main)}
-                data-offset-exc={enc64(offset_exc)}
-                data-idents={data_idents}
-            >
-                {text}
-            </td>
-        }
-    }
-}
+        let len = BASE_CELLS + abilities_meta.len() - merge_data.len()
+            + items_meta.len()
+            + runes_meta.len();
 
-fn admg(
-    metadata: &Rc<[TypeMetadata<AbilityId>]>,
-    merge_data: &Rc<[MergeData]>,
-    damages: Box<[i32]>,
-) -> Box<[Cell]> {
-    let mlen = metadata.len();
-    let dlen = damages.len();
-    let glen = merge_data.len();
+        let mut cells = Vec::<Cell>::with_capacity(len);
 
-    assert!(
-        mlen == dlen,
-        "[a] Lenght of damage cells must have the same amount of metadata"
-    );
+        let ctx = self.ctx;
 
-    struct ACell {
-        min: i32,
-        max: Option<i32>,
-        min_i: u8,
-        max_i: Option<u8>,
-    }
+        let Attacks {
+            basic_attack,
+            critical_strike,
+            onhit_damage,
+        } = self.attacks;
 
-    let len = dlen - glen;
-    let mut data = Box::<[ACell]>::new_uninit_slice(len);
-    let mut to_remove = Box::<[u8]>::new_uninit_slice(glen);
+        debug_assert_eq!(items_meta.len(), self.items.len() >> 1);
+        debug_assert_eq!(runes_meta.len(), self.runes.len());
+        debug_assert_eq!(self.abilities.len(), abilities_meta.len());
+        debug_assert_eq!(ability_idents.len(), abilities_meta.len());
+        debug_assert_eq!(ability_closures.len(), abilities_meta.len());
 
-    let mut c = 0;
-    let mut g = 0;
-    let mut t = 0;
-    while g < glen {
-        let MergeData {
-            minimum_damage,
-            maximum_damage,
-            alias,
-        } = merge_data[g];
+        cells.extend([
+            Cell {
+                damage_type: DamageType::Physical,
+                min_dmg: basic_attack,
+                max_dmg: None,
+                offsets: (&BASIC_ATTACK_FN_OFFSET, None),
+                idents: &[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier],
+            },
+            Cell {
+                damage_type: DamageType::Physical,
+                min_dmg: critical_strike,
+                max_dmg: None,
+                offsets: (&CRITICAL_STRIKE_FN_OFFSET, None),
+                idents: &[CtxVar::AttackDamage, CtxVar::CritDamage],
+            },
+            Cell {
+                damage_type: DamageType::Mixed,
+                min_dmg: onhit_damage.minimum_damage,
+                max_dmg: (onhit_damage.maximum_damage > 0).then_some(onhit_damage.maximum_damage),
+                offsets: (&ONHIT_EFFECT_FN_OFFSET, None),
+                idents: &[],
+            },
+        ]);
 
-        let min_i = minimum_damage as usize;
-        let max_i = maximum_damage as usize;
-        let min = damages[min_i];
-        let max = damages[max_i];
+        let abilities_dmg = &self.abilities;
+        let mut md_end = 0usize;
 
-        if max != 0 && min != max {
-            let ptr = data[min_i].as_mut_ptr();
-            unsafe {
-                (*ptr).max_i = Some(maximum_damage);
-                (*ptr).max = Some(damages[max_i])
+        for i in 0..abilities_meta.len() {
+            if md_end < merge_data.len() && (merge_data[md_end].maximum_damage as usize) == i {
+                let md = &merge_data[md_end];
+                let min_i = md.minimum_damage as usize;
+
+                let target = ability_cell_index[min_i];
+                debug_assert!(target != usize::MAX);
+                debug_assert!(target < cells.len(), "Found a max match without min");
+
+                cells[target].max_dmg = Some(abilities_dmg[i]);
+                cells[target].offsets.1 = Some(&ability_closures[i]);
+
+                md_end += 1;
+                continue;
             }
+
+            let cell_i = ability_cell_index[i];
+            debug_assert!(cell_i != usize::MAX);
+            debug_assert_eq!(cell_i, cells.len());
+
+            let meta = &abilities_meta[i];
+
+            let idents = &ability_idents[i];
+
+            cells.push(Cell {
+                damage_type: meta.damage_type,
+                min_dmg: abilities_dmg[i],
+                max_dmg: None,
+                offsets: (&ability_closures[i], None),
+                idents,
+            });
         }
 
-        to_remove[t].write(maximum_damage);
-    }
+        for (k, meta) in items_meta.iter().enumerate() {
+            let min_i = k << 1;
+            let min = self.items[min_i];
+            let max = self.items[min_i + 1];
 
-    while c < len {
-        unsafe {
-            let acell_ptr = data[c].as_mut_ptr();
-            let ptr_deref = &(*acell_ptr);
-            (*acell_ptr).min = damages[ptr_deref.min_i as usize];
-            c += 1;
+            let item_id = meta.kind;
+
+            cells.push(Cell {
+                damage_type: meta.damage_type,
+                min_dmg: min,
+                max_dmg: Some(max),
+                offsets: (item_id.closure(), None),
+                idents: item_id.idents(),
+            });
         }
-    }
 
-    unsafe { data.assume_init() };
+        for (k, meta) in runes_meta.iter().enumerate() {
+            let rune_id = meta.kind;
 
-    todo!()
-}
+            cells.push(Cell {
+                damage_type: meta.damage_type,
+                min_dmg: self.runes[k],
+                max_dmg: None,
+                offsets: (rune_id.closure(), None),
+                idents: rune_id.idents(),
+            });
+        }
 
-#[derive(PartialEq, Properties)]
-pub struct TableBodyProps<T: PartialEq + 'static + DisplayDamage> {
-    pub enemies: Rc<[T]>,
-    pub ability_offsets: &'static [Range<usize>],
-    pub abilities_meta: Rc<[TypeMetadata<AbilityId>]>,
-    pub abilities_to_merge: Rc<[MergeData]>,
-    pub items_meta: Rc<[TypeMetadata<ItemId>]>,
-    pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
-}
+        debug_assert_eq!(cells.len(), len);
 
-pub trait DisplayDamage {
-    fn get_eval_ctx(&self) -> &Ctx;
-    fn get_damages(&self) -> &Damages;
-    fn get_champion_id(&self) -> ChampionId;
-}
+        cells
+            .into_iter()
+            .map(|cell| {
+                let Cell {
+                    damage_type,
+                    min_dmg,
+                    max_dmg,
+                    offsets,
+                    idents,
+                } = cell;
 
-impl DisplayDamage for FinalEnemy {
-    fn get_damages(&self) -> &Damages {
-        &self.damages
-    }
-    fn get_champion_id(&self) -> ChampionId {
-        self.champion_id
-    }
-    fn get_eval_ctx(&self) -> &Ctx {
-        &self.eval_ctx
-    }
-}
-
-impl DisplayDamage for Enemy {
-    fn get_damages(&self) -> &Damages {
-        &self.damages
-    }
-    fn get_champion_id(&self) -> ChampionId {
-        self.champion_id
-    }
-    fn get_eval_ctx(&self) -> &Ctx {
-        &self.eval_ctx
-    }
-}
-
-#[component]
-pub fn TableBody<T: PartialEq + 'static + DisplayDamage>(props: &TableBodyProps<T>) -> Html {
-    let TableBodyProps {
-        enemies,
-        abilities_meta,
-        abilities_to_merge,
-        items_meta,
-        runes_meta,
-        ability_offsets,
-    } = props;
-
-    enemies
-        .iter()
-        .map(|enemy| {
-            let damages = enemy.get_damages();
-            let champion_id = enemy.get_champion_id();
-            let eval_ctx = enemy.get_eval_ctx();
-            let eval_meta = unsafe { core::mem::transmute::<_, &[f32; CTX_VARIANTS]>(eval_ctx) };
-
-            let abilities = {
-                let damages = &damages.abilities;
-                let mut data = damages.iter().map(|&v| (v, None)).collect::<Vec<_>>();
-
-                let mut to_remove = HashSet::with_capacity(abilities_to_merge.len());
-
-                for merge in abilities_to_merge.iter() {
-                    let min_idx = merge.minimum_damage as usize;
-                    let max_idx = merge.maximum_damage as usize;
-
-                    if let (Some(min_val), Some(max_val)) =
-                        (damages.get(min_idx), damages.get(max_idx))
-                    {
-                        if *max_val != 0 && min_val != max_val {
-                            data[min_idx].1 = Some(max_idx);
-                        }
-                        to_remove.insert(max_idx);
+                let mut data_idents = String::new();
+                for (i, &ident) in idents.iter().enumerate() {
+                    if i > 0 {
+                        data_idents.push('|');
                     }
+                    let value = ctx[ident];
+                    let _ = write!(&mut data_idents, "{ident}:{value}");
                 }
 
-                data.into_iter()
-                    .enumerate()
-                    .filter_map(|(i, (min_val, max_idx))| {
-                        if to_remove.contains(&i) {
-                            return None;
-                        }
-
-                        let text = match max_idx {
-                            Some(max_i) => {
-                                let max_val = damages[max_i];
-                                format!("{min_val} - {max_val}")
-                            }
-                            None => min_val.to_string(),
-                        };
-
-                        Some((i, max_idx, text))
-                    })
-                    .collect::<Vec<_>>()
-            };
-
-            fn get_classes(damage_type: DamageType) -> Classes {
-                classes!(
-                    "text-xs",
-                    "text-center",
-                    match damage_type {
-                        DamageType::Physical => "text-orange-500",
-                        DamageType::Magic => "text-sky-500",
-                        DamageType::Mixed => "text-indigo-500",
-                        DamageType::True => "text-white",
-                        DamageType::Adaptative => "text-purple-500",
-                        DamageType::Unknown => "text-emerald-500",
+                let data_offset = {
+                    let (a, b) = offsets;
+                    match b {
+                        Some(b) => encode_offset(&[a, b]),
+                        None => encode_offset(core::slice::from_ref(&a)),
                     }
-                )
-            }
+                };
+                let dmg = match max_dmg {
+                    Some(max) if max > 0 && max != min_dmg => html!(
+                        <>{min_dmg}{" - "}{max}</>
+                    ),
+                    _ => html!(min_dmg),
+                };
 
-            let rune_damages = damages
-                .runes
-                .iter()
-                .enumerate()
-                .map(|(i, item)| {
-                    let damage_type = runes_meta[i].damage_type;
-                    let offsets = RUNE_CLOSURES[runes_meta[i].kind.index()].clone();
-                    let encoded = encode_offset(Some(offsets))
-                        .as_ref()
-                        .map(ToString::to_string);
-                    html! {
-                        <td key={i} data-offset-main={encoded} class={get_classes(damage_type)}>
-                            {*item}
-                        </td>
-                    }
-                })
-                .collect::<Html>();
-
-            let attacks = |value, damage_type| {
                 html! {
-                    <td class={get_classes(damage_type)}>
-                        {value}
+                    <td
+                        {data_idents}
+                        {data_offset}
+                        class={classes!("whitespace-nowrap", damage_type.class())}>
+                        {dmg}
                     </td>
                 }
-            };
-
-            let Attacks {
-                basic_attack,
-                critical_strike,
-                onhit_damage:
-                    RangeDamage {
-                        minimum_damage: onhit_min,
-                        maximum_damage: onhit_max,
-                    },
-            } = damages.attacks;
-
-            let item_damages = items_meta
-                .into_iter()
-                .enumerate()
-                .map(|(i, metadata)| {
-                    let TypeMetadata {
-                        kind, damage_type, ..
-                    } = *metadata;
-                    let minimum_damage = damages.items[i];
-                    let maximum_damage = damages.items[i + 1];
-
-                    let data = ITEM_IDENTS[kind.index()]
-                        .into_iter()
-                        .map(|ident| {
-                            let value = eval_meta[*ident as usize];
-                            format!("{ident}: {value}, ")
-                        })
-                        .collect::<String>();
-
-                    html! {
-                        <td
-                            key={i}
-                            data-eval={data}
-                            class={get_classes(damage_type)}
-                        >
-                            {minimum_damage}{(
-                                maximum_damage != 0
-                                    && minimum_damage
-                                    != maximum_damage
-                                ).then_some(
-                                html!(<>{" - "}{maximum_damage}</>)
-                            )}
-                        </td>
-                    }
-                })
-                .collect::<Html>();
-
-            html! {
-                <tr>
-                    <td>
-                        <Image src={champion_id.image_type()} />
-                    </td>
-                    {attacks(basic_attack, DamageType::Physical)}
-                    {attacks(critical_strike, DamageType::Physical)}
-                    <td class={get_classes(DamageType::Mixed)}>
-                        {onhit_min}{(onhit_max != 0 && onhit_max != onhit_min).then_some(
-                            html!(<>{" - "}{onhit_max}</>)
-                        )}
-                    </td>
-                    {abilities.into_iter().map(|(i, j, damage)| {
-                        let damage_type = abilities_meta[i].damage_type;
-                        let main_offset = encode_offset(Some(ability_offsets[i].clone()))
-                            .as_ref()
-                            .map(ToString::to_string);
-                        let exc_offset = j.and_then(|j| {
-                            encode_offset(Some(ability_offsets[j].clone()))
-                                .as_ref()
-                                .map(ToString::to_string)
-                        });
-
-                        html! {
-                            <td
-                                key={i}
-                                data-offset-main={main_offset}
-                                data-offset-exc={exc_offset}
-                                class={get_classes(damage_type)}
-                            >
-                                {damage}
-                            </td>
-                        }
-                    }).collect::<Html>()}
-                    {item_damages}
-                    {rune_damages}
-                </tr>
-            }
-        })
-        .collect::<Html>()
+            })
+            .collect::<Html>()
+    }
 }
