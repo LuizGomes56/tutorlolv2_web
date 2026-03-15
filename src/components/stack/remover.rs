@@ -226,7 +226,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
 
     html! {
         <div class={classes!(
-            "flex", "flex-col", "py-4", "gap-4", "h-full", "px-4", "2xl:px-0"
+            "flex", "flex-col", "py-4", "min-h-0", "gap-4", "h-full", "px-4", "2xl:px-0"
         )}>
             <div class={classes!("flex", "items-center", "justify-between", "gap-3")}>
                 <div class={classes!("flex", "flex-col", "gap-1")}>
@@ -278,10 +278,12 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                 </div>
             </div>
             <div class={classes!(
-                "min-h-32", "rounded-lg", "border", "border-dashed",
-                "border-std-800", "p-2", "h-full", "text-sm",
-                "text-std-400", "flex", "gap-2", "flex-wrap",
-                "content-start"
+                "flex-1", "w-full", "min-h-32",
+                "rounded-lg", "border", "border-dashed",
+                "border-std-800", "p-2",
+                "text-sm", "text-std-400",
+                "flex", "gap-2", "flex-wrap",
+                "content-start", "overflow-auto"
             )}>
                 {remover}
             </div>

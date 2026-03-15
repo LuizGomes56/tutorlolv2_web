@@ -297,7 +297,7 @@ pub fn Overlay() -> Html {
                     <Dynamic panel_id={"stack-remover"} focused={*focused}>
                         <div
                             data-panel-content={true}
-                            class={classes!("max-w-96")}
+                            class={classes!("h-full")}
                         >
                             <StackRemover
                                 stack={stack.clone()}
