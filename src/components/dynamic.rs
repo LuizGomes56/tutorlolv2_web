@@ -48,10 +48,12 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
             )}
         >
             {children}
-            {circle("nw", classes!("-left-1.5", "-top-1.5", "cursor-nwse-resize"))}
-            {circle("ne", classes!("-right-1.5", "-top-1.5", "cursor-nesw-resize"))}
-            {circle("sw", classes!("-left-1.5", "-bottom-1.5", "cursor-nesw-resize"))}
-            {circle("se", classes!("-right-1.5", "-bottom-1.5", "cursor-nwse-resize"))}
+            if *focused {
+                {circle("nw", classes!("-left-1.5", "-top-1.5", "cursor-nwse-resize"))}
+                {circle("ne", classes!("-right-1.5", "-top-1.5", "cursor-nesw-resize"))}
+                {circle("sw", classes!("-left-1.5", "-bottom-1.5", "cursor-nesw-resize"))}
+                {circle("se", classes!("-right-1.5", "-bottom-1.5", "cursor-nwse-resize"))}
+            }
         </div>
     }
 }
