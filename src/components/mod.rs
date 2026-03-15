@@ -1,3 +1,4 @@
+pub mod dynamic;
 pub mod errorlog;
 pub mod hoverdocs;
 pub mod image;

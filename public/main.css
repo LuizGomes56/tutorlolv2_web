@@ -3,6 +3,16 @@ body {
     background-color: #121212;
 }
 
+[data-panel="true"] [data-resize-handle] {
+    opacity: 0;
+    pointer-events: none;
+}
+
+[data-panel="true"][data-active="true"] [data-resize-handle] {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 .text-shadow {
     filter: drop-shadow(1.25px 1.25px 0px black);
     text-shadow: 0px 0px 4px black;
@@ -79,22 +89,22 @@ table {
     width: 100%;
 }
 
-table thead tr {
+table:not(.overlay) thead tr {
     background-color: #18181b;
+}
+
+table:not(.overlay) tbody tr:nth-child(odd) {
+    background-color: #16161c;
+}
+
+table:not(.overlay) tbody tr:nth-child(even) {
+    background-color: #1c1c21;
+    border-bottom: 1px solid #3f3f46;
+    border-top: 1px solid #3f3f46;
 }
 
 table tr {
     height: 48px;
-}
-
-table tbody tr:nth-child(odd) {
-    background-color: #16161c;
-}
-
-table tbody tr:nth-child(even) {
-    background-color: #1c1c21;
-    border-bottom: 1px solid #3f3f46;
-    border-top: 1px solid #3f3f46;
 }
 
 table tbody tr:last-child {
@@ -105,12 +115,6 @@ table th,
 table td {
     transition: .2s ease;
     padding: 0 8px;
-}
-
-table p {
-    text-wrap: nowrap;
-    filter: drop-shadow(0px 0px 1px black);
-    text-shadow: 0px 1.25px 0px black;
 }
 
 table.data-table img {

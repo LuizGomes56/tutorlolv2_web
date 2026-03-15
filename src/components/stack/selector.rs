@@ -79,9 +79,9 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                     {src}
                 />
                 if max {
-                    <div class={classes!("img-letter", "text-sm", "z-10")}>
+                    <span class={classes!("img-letter", "text-sm", "z-10")}>
                         {"MAX"}
-                    </div>
+                    </span>
                 }
             </button>
         }
@@ -443,20 +443,17 @@ pub fn StackSelector<T: Victim + PartialEq + 'static>(props: &StackSelectorProps
             );
 
             let inner = html! {
-                if max {
+                <>
                     <Image
                         class={classes!("w-8", "h-8", "pointer-events-none")}
                         src={image_type}
                     />
-                    <div class={classes!("img-letter", "text-sm", "z-10")}>
-                        {"MAX"}
-                    </div>
-                } else {
-                    <Image
-                        class={classes!("w-8", "h-8", "pointer-events-none")}
-                        src={image_type}
-                    />
-                }
+                    if max {
+                        <span class={classes!("img-letter", "text-sm", "z-10")}>
+                            {"MAX"}
+                        </span>
+                    }
+                </>
             };
 
             html! {

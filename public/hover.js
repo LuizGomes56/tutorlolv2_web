@@ -1,4 +1,4 @@
-const init_hover = () => {
+function init_hover() {
     let shiftDown = false;
     let currentHost = null;
 

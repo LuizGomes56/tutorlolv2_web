@@ -1,4 +1,4 @@
-const init_events = (wasm) => {
+function init_events(wasm) {
     window.wasm = wasm || null;
     if (wasm && typeof wasm.cache_ptr === "function" && typeof wasm.cache_len === "function") {
         const ptr = wasm.cache_ptr();

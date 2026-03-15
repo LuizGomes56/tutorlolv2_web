@@ -12,3 +12,11 @@ export async function invoke_get_live_game() {
 
     return new Uint8Array(data);
 }
+
+export async function blur_overlay(callback) {
+    if (callback) {
+        callback();
+    }
+
+    invoke?.("blur_overlay");
+}

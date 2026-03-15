@@ -99,7 +99,8 @@ impl ImageType {
                 let name = ability_id.ability_name().display();
                 Some(html! {
                     <div class={classes!("img-letter", "text-sm")}>
-                        {char}{name.map(|name| html!(<sub>{name}</sub>))}
+                        <span>{char}</span>
+                        {name.map(|name| html!(<sub>{name}</sub>))}
                     </div>
                 })
             }

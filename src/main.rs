@@ -4,6 +4,7 @@ use crate::{
     components::{hoverdocs::HoverDocs, sidebar::Sidebar},
     formulas::Formulas,
     livegame::Livegame,
+    overlay::Overlay,
     utils::init_cache,
 };
 use yew::prelude::*;
@@ -14,6 +15,7 @@ mod components;
 mod formulas;
 mod livegame;
 mod model;
+mod overlay;
 mod utils;
 
 #[derive(Clone, Debug, PartialEq, Routable)]
@@ -21,6 +23,8 @@ pub enum Route {
     #[not_found]
     #[at("/")]
     Homepage,
+    #[at("/overlay")]
+    Overlay,
     #[at("/calculator")]
     Calculator,
     #[at("/livegame")]
@@ -46,6 +50,7 @@ fn App() -> Html {
                     Route::Calculator => html!(<Calculator />),
                     Route::Formulas => html!(<Formulas />),
                     Route::Livegame => html!(<Livegame />),
+                    Route::Overlay => return html!(<Overlay />),
                     _ => html!(<Calculator />),
                 };
                 html! {
