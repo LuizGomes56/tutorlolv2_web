@@ -7,9 +7,8 @@ use crate::{
         tray::TrayAction,
     },
     livegame::{Enemy, Game},
-    utils::{Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
+    utils::{Fetch, Loading, encode_offset, glue::get_data},
 };
-use std::time::Duration;
 use tutorlolv2_gen::CastId;
 use yew::{
     platform::{spawn_local, time::sleep},
@@ -35,7 +34,7 @@ pub fn Livegame() -> Html {
                 loop {
                     let data = get_data().await;
                     game_data.set(data);
-                    sleep(Duration::from_millis(1000)).await;
+                    sleep(Fetch::REFRESH_RATE).await;
                 }
             });
         });

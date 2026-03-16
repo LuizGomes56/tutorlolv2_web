@@ -1,7 +1,7 @@
 use crate::utils::BASE_URL;
 use bincode::{Decode, Encode, config::Configuration};
 use gloo_net::http::Headers;
-use std::error::Error;
+use std::{error::Error, time::Duration};
 use web_sys::AbortSignal;
 
 const CONFIG: Configuration = bincode::config::standard();
@@ -13,6 +13,8 @@ pub struct Fetch<'a> {
 }
 
 impl<'a> Fetch<'a> {
+    pub const REFRESH_RATE: Duration = Duration::from_millis(1000);
+
     pub const fn new(url: &'a str) -> Self {
         Self {
             url,

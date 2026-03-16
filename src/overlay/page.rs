@@ -1,25 +1,20 @@
 use crate::{
     components::{
         dynamic::Dynamic,
-        errorlog::errorlog,
         image::{Image, ImageType},
         stack::{Stack, StackInsert, StackRemover, StackTable},
-        tables::{empty::EmptyTable, header::TableHeader},
+        tables::header::TableHeader,
         tray::TrayAction,
     },
     livegame::{Enemy, Game},
-    utils::{ClassCast, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
+    utils::{ClassCast, Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
 };
-use std::time::Duration;
-use tutorlolv2_gen::{
-    BitSetArray, CastId, ChampionId, ItemsBitSet, L_SIML, Position, SIMULATED_ITEMS_METADATA,
-    sizeof_bitset,
-};
+use tutorlolv2_gen::{CastId, ItemsBitSet, L_SIML, Position, SIMULATED_ITEMS_METADATA};
 use wasm_bindgen::{
     JsCast, JsValue,
     prelude::{Closure, wasm_bindgen},
 };
-use web_sys::js_sys::{Boolean, Function};
+use web_sys::js_sys::Function;
 use yew::{
     platform::{spawn_local, time::sleep},
     prelude::*,
@@ -29,7 +24,6 @@ use yew::{
 unsafe extern "C" {
     #[wasm_bindgen(js_name = "mouse_events")]
     pub fn mouse_events();
-
 }
 
 #[wasm_bindgen(module = "/public/invoke.js")]
@@ -161,11 +155,11 @@ pub fn Overlay() -> Html {
                     }
 
                     game_data.set(data);
-                    sleep(Duration::from_millis(1000)).await;
+                    sleep(Fetch::REFRESH_RATE).await;
                 }
             });
         });
-    };
+    }
 
     {
         let focused = focused.clone();
@@ -284,29 +278,31 @@ pub fn Overlay() -> Html {
                             {recommendation}
                         </div>
                     </Dynamic>
-                    <Dynamic panel_id={"stack-insert"} focused={*focused}>
-                        <div data-panel-content={true}>
-                            <StackInsert
-                                callback={stack_push.clone()}
-                                items_meta={items_meta.clone()}
-                                runes_meta={runes_meta.clone()}
-                                champion_id={current_player.champion_id}
-                            />
-                        </div>
-                    </Dynamic>
-                    <Dynamic panel_id={"stack-remover"} focused={*focused}>
-                        <div
-                            data-panel-content={true}
-                            class={classes!("h-full")}
-                        >
-                            <StackRemover
-                                stack={stack.clone()}
-                                champion_id={current_player.champion_id}
-                                items_meta={items_meta.clone()}
-                                runes_meta={runes_meta.clone()}
-                            />
-                        </div>
-                    </Dynamic>
+                    if *focused {
+                        <Dynamic panel_id={"stack-insert"} focused={*focused}>
+                            <div data-panel-content={true}>
+                                <StackInsert
+                                    callback={stack_push.clone()}
+                                    items_meta={items_meta.clone()}
+                                    runes_meta={runes_meta.clone()}
+                                    champion_id={current_player.champion_id}
+                                />
+                            </div>
+                        </Dynamic>
+                        <Dynamic panel_id={"stack-remover"} focused={*focused}>
+                            <div
+                                data-panel-content={true}
+                                class={classes!("h-full")}
+                            >
+                                <StackRemover
+                                    stack={stack.clone()}
+                                    champion_id={current_player.champion_id}
+                                    items_meta={items_meta.clone()}
+                                    runes_meta={runes_meta.clone()}
+                                />
+                            </div>
+                        </Dynamic>
+                    }
                     <Dynamic panel_id={"stack-table"} focused={*focused}>
                         <div data-panel-content={true}>
                             <StackTable<Enemy>

@@ -9,7 +9,6 @@ impl_reducible!(PlayerStats i32 {
     armor_penetration_flat,
     armor_penetration_percent,
     attack_damage,
-    attack_range,
     attack_speed,
     crit_chance,
     crit_damage,
