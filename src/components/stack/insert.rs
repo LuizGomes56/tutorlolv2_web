@@ -228,7 +228,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                         {"Add to combo list"}
                     </h1>
                     <p class={classes!("text-xs", "text-std-400")}>
-                        {"Click icons to add effects. Use the middle tray to remove."}
+                        {"Click icons to add effects"}
                     </p>
                 </div>
             </div>

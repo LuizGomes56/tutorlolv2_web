@@ -2,76 +2,147 @@
     "activePlayer": {
         "abilities": {
             "E": {
-                "abilityLevel": 1,
-                "displayName": "Spirit Fire",
-                "id": "NasusE",
-                "rawDescription": "GeneratedTip_Spell_NasusE_Description",
-                "rawDisplayName": "GeneratedTip_Spell_NasusE_DisplayName"
+                "abilityLevel": 3,
+                "displayName": "Hop / Crunch",
+                "id": "GnarE",
+                "rawDescription": "GeneratedTip_Spell_GnarE_Description",
+                "rawDisplayName": "GeneratedTip_Spell_GnarE_DisplayName"
             },
             "Passive": {
-                "displayName": "Soul Eater",
-                "id": "NasusPassive",
-                "rawDescription": "GeneratedTip_Passive_NasusPassive_Description",
-                "rawDisplayName": "GeneratedTip_Passive_NasusPassive_DisplayName"
+                "displayName": "Rage Gene",
+                "id": "GnarPassive",
+                "rawDescription": "GeneratedTip_Passive_GnarPassive_Description",
+                "rawDisplayName": "GeneratedTip_Passive_GnarPassive_DisplayName"
             },
             "Q": {
-                "abilityLevel": 1,
-                "displayName": "Siphoning Strike",
-                "id": "NasusQ",
-                "rawDescription": "GeneratedTip_Spell_NasusQ_Description",
-                "rawDisplayName": "GeneratedTip_Spell_NasusQ_DisplayName"
+                "abilityLevel": 5,
+                "displayName": "Boomerang Throw / Boulder Toss",
+                "id": "GnarQ",
+                "rawDescription": "GeneratedTip_Spell_GnarQ_Description",
+                "rawDisplayName": "GeneratedTip_Spell_GnarQ_DisplayName"
             },
             "R": {
-                "abilityLevel": 0,
-                "displayName": "Fury of the Sands",
-                "id": "NasusR",
-                "rawDescription": "GeneratedTip_Spell_NasusR_Description",
-                "rawDisplayName": "GeneratedTip_Spell_NasusR_DisplayName"
+                "abilityLevel": 2,
+                "displayName": "GNAR!",
+                "id": "GnarR",
+                "rawDescription": "GeneratedTip_Spell_GnarR_Description",
+                "rawDisplayName": "GeneratedTip_Spell_GnarR_DisplayName"
             },
             "W": {
-                "abilityLevel": 1,
-                "displayName": "Wither",
-                "id": "NasusW",
-                "rawDescription": "GeneratedTip_Spell_NasusW_Description",
-                "rawDisplayName": "GeneratedTip_Spell_NasusW_DisplayName"
+                "abilityLevel": 5,
+                "displayName": "Hyper / Wallop",
+                "id": "GnarW",
+                "rawDescription": "GeneratedTip_Spell_GnarW_Description",
+                "rawDisplayName": "GeneratedTip_Spell_GnarW_DisplayName"
             }
         },
         "championStats": {
-            "abilityHaste": 21,
-            "abilityPower": 0,
-            "armor": 55.932498931884766,
-            "armorPenetrationFlat": 0,
-            "armorPenetrationPercent": 1,
-            "attackDamage": 72.9000015258789,
-            "attackRange": 125,
-            "attackSpeed": 0.6707485318183899,
-            "bonusArmorPenetrationPercent": 1,
-            "bonusMagicPenetrationPercent": 1,
-            "critChance": 0,
-            "critDamage": 200,
-            "currentHealth": 1041.63525390625,
-            "healShieldPower": 0,
-            "healthRegenRate": 2.065500020980835,
-            "lifeSteal": 0.11999999731779099,
-            "magicLethality": 0,
-            "magicPenetrationFlat": 0,
-            "magicPenetrationPercent": 1,
-            "magicResist": 50.02375030517578,
-            "maxHealth": 1041.63525390625,
-            "moveSpeed": 350,
-            "omnivamp": 0,
-            "physicalLethality": 0,
-            "physicalVamp": 0,
-            "resourceMax": 417.45001220703125,
-            "resourceRegenRate": 2.4578990936279297,
-            "resourceType": "MANA",
-            "resourceValue": 417.45001220703125,
-            "spellVamp": 0,
-            "tenacity": 5
+            "abilityHaste": 37.0,
+            "abilityPower": 30.0,
+            "armor": 116.08050537109375,
+            "armorPenetrationFlat": 0.0,
+            "armorPenetrationPercent": 1.0,
+            "attackDamage": 262.8479919433594,
+            "attackRange": 482.6000061035156,
+            "attackSpeed": 1.4880626201629639,
+            "bonusArmorPenetrationPercent": 1.0,
+            "bonusMagicPenetrationPercent": 1.0,
+            "critChance": 0.0,
+            "critDamage": 200.0,
+            "currentHealth": 1815.637451171875,
+            "healShieldPower": 0.0,
+            "healthRegenRate": 4.216250419616699,
+            "lifeSteal": 0.0,
+            "magicLethality": 0.0,
+            "magicPenetrationFlat": 0.0,
+            "magicPenetrationPercent": 1.0,
+            "magicResist": 87.24449920654297,
+            "maxHealth": 2401.1328125,
+            "moveSpeed": 499.5895690917969,
+            "omnivamp": 0.02500000037252903,
+            "physicalLethality": 0.0,
+            "physicalVamp": 0.0,
+            "resourceMax": 100.0,
+            "resourceRegenRate": 0.0,
+            "resourceType": "GNARFURY",
+            "resourceValue": 0.0,
+            "spellVamp": 0.0,
+            "tenacity": 5.0
         },
-        "currentGold": 100,
-        "fullRunes": {},
-        "level": 3,
+        "currentGold": 532.6893310546875,
+        "fullRunes": {
+            "generalRunes": [
+                {
+                    "displayName": "Press the Attack",
+                    "id": 8005,
+                    "rawDescription": "perk_tooltip_PressTheAttack",
+                    "rawDisplayName": "perk_displayname_PressTheAttack"
+                },
+                {
+                    "displayName": "Triumph",
+                    "id": 9111,
+                    "rawDescription": "perk_tooltip_9111",
+                    "rawDisplayName": "perk_displayname_9111"
+                },
+                {
+                    "displayName": "Legend: Alacrity",
+                    "id": 9104,
+                    "rawDescription": "perk_tooltip_9104",
+                    "rawDisplayName": "perk_displayname_9104"
+                },
+                {
+                    "displayName": "Last Stand",
+                    "id": 8299,
+                    "rawDescription": "perk_tooltip_8234",
+                    "rawDisplayName": "perk_displayname_8234"
+                },
+                {
+                    "displayName": "Overgrowth",
+                    "id": 8451,
+                    "rawDescription": "perk_tooltip_Overgrowth",
+                    "rawDisplayName": "perk_displayname_Overgrowth"
+                },
+                {
+                    "displayName": "Bone Plating",
+                    "id": 8473,
+                    "rawDescription": "perk_tooltip_BonePlatingTooltip",
+                    "rawDisplayName": "perk_displayname_BonePlating"
+                }
+            ],
+            "keystone": {
+                "displayName": "Press the Attack",
+                "id": 8005,
+                "rawDescription": "perk_tooltip_PressTheAttack",
+                "rawDisplayName": "perk_displayname_PressTheAttack"
+            },
+            "primaryRuneTree": {
+                "displayName": "Precision",
+                "id": 8000,
+                "rawDescription": "perkstyle_tooltip_7201",
+                "rawDisplayName": "perkstyle_displayname_7201"
+            },
+            "secondaryRuneTree": {
+                "displayName": "Resolve",
+                "id": 8400,
+                "rawDescription": "perkstyle_tooltip_7204",
+                "rawDisplayName": "perkstyle_displayname_7204"
+            },
+            "statRunes": [
+                {
+                    "id": 5005,
+                    "rawDescription": "perk_tooltip_StatModAttackSpeed"
+                },
+                {
+                    "id": 5008,
+                    "rawDescription": "perk_tooltip_StatModAdaptive"
+                },
+                {
+                    "id": 5001,
+                    "rawDescription": "perk_tooltip_StatModHealthScaling"
+                }
+            ]
+        },
+        "level": 15,
         "riotId": "Giga Gnar#BRZL",
         "riotIdGameName": "Giga Gnar",
         "riotIdTagLine": "BRZL",
@@ -80,234 +151,131 @@
     },
     "allPlayers": [
         {
-            "championName": "Sion",
+            "championName": "Darius",
             "isBot": false,
-            "isDead": false,
+            "isDead": true,
             "items": [
                 {
                     "canUse": false,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Giant's Belt",
-                    "itemID": 1011,
-                    "price": 500,
-                    "rawDescription": "GeneratedTip_Item_1011_Description",
-                    "rawDisplayName": "Item_1011_Name",
+                    "displayName": "Sterak's Gage",
+                    "itemID": 3053,
+                    "price": 775,
+                    "rawDescription": "GeneratedTip_Item_3053_Description",
+                    "rawDisplayName": "Item_3053_Name",
                     "slot": 0
                 },
                 {
                     "canUse": false,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Ruby Crystal",
-                    "itemID": 1028,
-                    "price": 400,
-                    "rawDescription": "GeneratedTip_Item_1028_Description",
-                    "rawDisplayName": "Item_1028_Name",
-                    "slot": 1
-                },
-                {
-                    "canUse": true,
-                    "consumable": true,
-                    "count": 2,
-                    "displayName": "Health Potion",
-                    "itemID": 2003,
-                    "price": 50,
-                    "rawDescription": "GeneratedTip_Item_2003_Description",
-                    "rawDisplayName": "Item_2003_Name",
-                    "slot": 2
-                },
-                {
-                    "canUse": true,
-                    "consumable": true,
-                    "count": 1,
-                    "displayName": "Poro-Snax",
-                    "itemID": 2052,
-                    "price": 0,
-                    "rawDescription": "GeneratedTip_Item_2052_Description",
-                    "rawDisplayName": "Item_2052_Name",
-                    "slot": 6
-                }
-            ],
-            "level": 3,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Sion",
-            "rawSkinName": "game_character_displayname_Sion",
-            "respawnTimer": 0,
-            "riotId": "8Sha0yne8#twink",
-            "riotIdGameName": "8Sha0yne8",
-            "riotIdTagLine": "twink",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
-            },
-            "skinID": 0,
-            "skinName": "Sion",
-            "summonerName": "8Sha0yne8#twink",
-            "summonerSpells": {
-                "summonerSpellOne": {
-                    "displayName": "Mark",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
-                },
-                "summonerSpellTwo": {
-                    "displayName": "Flash",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
-                }
-            },
-            "team": "ORDER"
-        },
-        {
-            "championName": "Jayce",
-            "isBot": false,
-            "isDead": false,
-            "items": [
-                {
-                    "canUse": false,
-                    "consumable": false,
-                    "count": 1,
-                    "displayName": "Serrated Dirk",
-                    "itemID": 3134,
-                    "price": 300,
-                    "rawDescription": "GeneratedTip_Item_3134_Description",
-                    "rawDisplayName": "Item_3134_Name",
+                    "displayName": "Bramble Vest",
+                    "itemID": 3076,
+                    "price": 200,
+                    "rawDescription": "GeneratedTip_Item_3076_Description",
+                    "rawDisplayName": "Item_3076_Name",
                     "slot": 1
                 },
                 {
                     "canUse": false,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Tear of the Goddess",
-                    "itemID": 3070,
-                    "price": 400,
-                    "rawDescription": "GeneratedTip_Item_3070_Description",
-                    "rawDisplayName": "Item_3070_Name",
+                    "displayName": "Plated Steelcaps",
+                    "itemID": 3047,
+                    "price": 600,
+                    "rawDescription": "GeneratedTip_Item_3047_Description",
+                    "rawDisplayName": "Item_3047_Name",
                     "slot": 2
                 },
                 {
-                    "canUse": false,
+                    "canUse": true,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Glowing Mote",
-                    "itemID": 2022,
-                    "price": 250,
-                    "rawDescription": "GeneratedTip_Item_2022_Description",
-                    "rawDisplayName": "Item_2022_Name",
+                    "displayName": "Stridebreaker",
+                    "itemID": 6631,
+                    "price": 750,
+                    "rawDescription": "GeneratedTip_Item_6631_Description",
+                    "rawDisplayName": "Item_6631_Name",
                     "slot": 3
                 },
                 {
-                    "canUse": true,
-                    "consumable": true,
-                    "count": 1,
-                    "displayName": "Poro-Snax",
-                    "itemID": 2052,
-                    "price": 0,
-                    "rawDescription": "GeneratedTip_Item_2052_Description",
-                    "rawDisplayName": "Item_2052_Name",
-                    "slot": 6
-                }
-            ],
-            "level": 3,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Jayce",
-            "rawSkinName": "game_character_skin_displayname_Jayce_35",
-            "respawnTimer": 0,
-            "riotId": "Aether#twink",
-            "riotIdGameName": "Aether",
-            "riotIdTagLine": "twink",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
-            },
-            "skinID": 35,
-            "skinName": "Arcane Survivor Jayce",
-            "summonerName": "Aether#twink",
-            "summonerSpells": {
-                "summonerSpellOne": {
-                    "displayName": "Mark",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
-                },
-                "summonerSpellTwo": {
-                    "displayName": "Flash",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
-                }
-            },
-            "team": "ORDER"
-        },
-        {
-            "championName": "Rammus",
-            "isBot": false,
-            "isDead": false,
-            "items": [
-                {
                     "canUse": false,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Giant's Belt",
-                    "itemID": 1011,
-                    "price": 500,
-                    "rawDescription": "GeneratedTip_Item_1011_Description",
-                    "rawDisplayName": "Item_1011_Name",
-                    "slot": 1
-                },
-                {
-                    "canUse": false,
-                    "consumable": false,
-                    "count": 1,
-                    "displayName": "Ruby Crystal",
-                    "itemID": 1028,
+                    "displayName": "Winged Moonplate",
+                    "itemID": 3066,
                     "price": 400,
-                    "rawDescription": "GeneratedTip_Item_1028_Description",
-                    "rawDisplayName": "Item_1028_Name",
-                    "slot": 2
+                    "rawDescription": "GeneratedTip_Item_3066_Description",
+                    "rawDisplayName": "Item_3066_Name",
+                    "slot": 4
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Chain Vest",
+                    "itemID": 1031,
+                    "price": 500,
+                    "rawDescription": "GeneratedTip_Item_1031_Description",
+                    "rawDisplayName": "Item_1031_Name",
+                    "slot": 5
                 },
                 {
                     "canUse": true,
-                    "consumable": true,
+                    "consumable": false,
                     "count": 1,
-                    "displayName": "Poro-Snax",
-                    "itemID": 2052,
+                    "displayName": "Oracle Lens",
+                    "itemID": 3364,
                     "price": 0,
-                    "rawDescription": "GeneratedTip_Item_2052_Description",
-                    "rawDisplayName": "Item_2052_Name",
+                    "rawDescription": "GeneratedTip_Item_3364_Description",
+                    "rawDisplayName": "Item_3364_Name",
                     "slot": 6
                 }
             ],
-            "level": 3,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Rammus",
-            "rawSkinName": "game_character_skin_displayname_Rammus_7",
-            "respawnTimer": 0,
-            "riotId": "KittyTea#uwu",
-            "riotIdGameName": "KittyTea",
-            "riotIdTagLine": "uwu",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
+            "level": 15,
+            "position": "TOP",
+            "rawChampionName": "game_character_displayname_Darius",
+            "rawSkinName": "game_character_skin_displayname_Darius_13",
+            "respawnTimer": 23.71739387512207,
+            "riotId": "feedthefatman#NA1",
+            "riotIdGameName": "feedthefatman",
+            "riotIdTagLine": "NA1",
+            "runes": {
+                "keystone": {
+                    "displayName": "Conqueror",
+                    "id": 8010,
+                    "rawDescription": "perk_tooltip_Conqueror",
+                    "rawDisplayName": "perk_displayname_Conqueror"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Resolve",
+                    "id": 8400,
+                    "rawDescription": "perkstyle_tooltip_7204",
+                    "rawDisplayName": "perkstyle_displayname_7204"
+                }
             },
-            "skinID": 7,
-            "skinName": "Guardian of the Sands Rammus",
-            "summonerName": "KittyTea#uwu",
+            "scores": {
+                "assists": 2,
+                "creepScore": 180,
+                "deaths": 8,
+                "kills": 7,
+                "wardScore": 18.24826431274414
+            },
+            "skinID": 13,
+            "skinName": "Dunkmaster Darius (Aquamarine)",
+            "summonerName": "feedthefatman#NA1",
             "summonerSpells": {
                 "summonerSpellOne": {
-                    "displayName": "Mark",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                    "displayName": "Ghost",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
                 },
                 "summonerSpellTwo": {
                     "displayName": "Flash",
@@ -318,31 +286,447 @@
             "team": "ORDER"
         },
         {
-            "championName": "Caitlyn",
+            "championName": "Ambessa",
             "isBot": false,
-            "isDead": false,
+            "isDead": true,
             "items": [
                 {
                     "canUse": false,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Guardian's Hammer",
-                    "itemID": 3184,
-                    "price": 950,
-                    "rawDescription": "GeneratedTip_Item_3184_Description",
-                    "rawDisplayName": "game_item_displayname_3184",
+                    "displayName": "Axiom Arc",
+                    "itemID": 6696,
+                    "price": 363,
+                    "rawDescription": "GeneratedTip_Item_6696_Description",
+                    "rawDisplayName": "Item_6696_Name",
                     "slot": 0
                 },
                 {
                     "canUse": true,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Refillable Potion",
-                    "itemID": 2031,
-                    "price": 150,
-                    "rawDescription": "GeneratedTip_Item_2031_Description",
-                    "rawDisplayName": "Item_2031_Name",
+                    "displayName": "Profane Hydra",
+                    "itemID": 6698,
+                    "price": 313,
+                    "rawDescription": "GeneratedTip_Item_6698_Description",
+                    "rawDisplayName": "Item_6698_Name",
                     "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Plated Steelcaps",
+                    "itemID": 3047,
+                    "price": 600,
+                    "rawDescription": "GeneratedTip_Item_3047_Description",
+                    "rawDisplayName": "Item_3047_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Spear of Shojin",
+                    "itemID": 3161,
+                    "price": 675,
+                    "rawDescription": "GeneratedTip_Item_3161_Description",
+                    "rawDisplayName": "Item_3161_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Death's Dance",
+                    "itemID": 6333,
+                    "price": 275,
+                    "rawDescription": "GeneratedTip_Item_6333_Description",
+                    "rawDisplayName": "Item_6333_Name",
+                    "slot": 4
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Oracle Lens",
+                    "itemID": 3364,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3364_Description",
+                    "rawDisplayName": "Item_3364_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 16,
+            "position": "JUNGLE",
+            "rawChampionName": "game_character_displayname_Ambessa",
+            "rawSkinName": "game_character_displayname_Ambessa",
+            "respawnTimer": 25.417966842651368,
+            "riotId": "CANCAN NEED#2608",
+            "riotIdGameName": "CANCAN NEED",
+            "riotIdTagLine": "2608",
+            "runes": {
+                "keystone": {
+                    "displayName": "First Strike",
+                    "id": 8369,
+                    "rawDescription": "perk_tooltip_FirstStrike",
+                    "rawDisplayName": "perk_displayname_FirstStrike"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Inspiration",
+                    "id": 8300,
+                    "rawDescription": "perkstyle_tooltip_7203",
+                    "rawDisplayName": "perkstyle_displayname_7203"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                }
+            },
+            "scores": {
+                "assists": 10,
+                "creepScore": 210,
+                "deaths": 5,
+                "kills": 5,
+                "wardScore": 29.22907066345215
+            },
+            "skinID": 0,
+            "skinName": "Ambessa",
+            "summonerName": "CANCAN NEED#2608",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Primal Smite",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSmiteAvatarOffensive_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSmiteAvatarOffensive_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Gnar",
+            "isBot": false,
+            "isDead": false,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Doran's Blade",
+                    "itemID": 1055,
+                    "price": 450,
+                    "rawDescription": "GeneratedTip_Item_1055_Description",
+                    "rawDisplayName": "Item_1055_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Maw of Malmortius",
+                    "itemID": 3156,
+                    "price": 750,
+                    "rawDescription": "GeneratedTip_Item_3156_Description",
+                    "rawDisplayName": "Item_3156_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Armored Advance",
+                    "itemID": 3174,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3174_Description",
+                    "rawDisplayName": "Item_3174_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Guinsoo's Rageblade",
+                    "itemID": 3124,
+                    "price": 1025,
+                    "rawDescription": "GeneratedTip_Item_3124_Description",
+                    "rawDisplayName": "Item_3124_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Black Cleaver",
+                    "itemID": 3071,
+                    "price": 225,
+                    "rawDescription": "GeneratedTip_Item_3071_Description",
+                    "rawDisplayName": "Item_3071_Name",
+                    "slot": 4
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Executioner's Calling",
+                    "itemID": 3123,
+                    "price": 450,
+                    "rawDescription": "GeneratedTip_Item_3123_Description",
+                    "rawDisplayName": "Item_3123_Name",
+                    "slot": 5
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Stealth Ward",
+                    "itemID": 3340,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3340_Description",
+                    "rawDisplayName": "Item_3340_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 15,
+            "position": "MIDDLE",
+            "rawChampionName": "game_character_displayname_Gnar",
+            "rawSkinName": "game_character_skin_displayname_Gnar_11",
+            "respawnTimer": 0.0,
+            "riotId": "Giga Gnar#BRZL",
+            "riotIdGameName": "Giga Gnar",
+            "riotIdTagLine": "BRZL",
+            "runes": {
+                "keystone": {
+                    "displayName": "Press the Attack",
+                    "id": 8005,
+                    "rawDescription": "perk_tooltip_PressTheAttack",
+                    "rawDisplayName": "perk_displayname_PressTheAttack"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Resolve",
+                    "id": 8400,
+                    "rawDescription": "perkstyle_tooltip_7204",
+                    "rawDisplayName": "perkstyle_displayname_7204"
+                }
+            },
+            "scores": {
+                "assists": 6,
+                "creepScore": 210,
+                "deaths": 6,
+                "kills": 8,
+                "wardScore": 23.186159133911134
+            },
+            "skinID": 11,
+            "skinName": "Dino Gnar (Aquamarine)",
+            "summonerName": "Giga Gnar#BRZL",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Ignite",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerDot_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerDot_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Kai'Sa",
+            "isBot": false,
+            "isDead": true,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Dusk and Dawn",
+                    "itemID": 2510,
+                    "price": 300,
+                    "rawDescription": "GeneratedTip_Item_2510_Description",
+                    "rawDisplayName": "Item_2510_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Kraken Slayer",
+                    "itemID": 6672,
+                    "price": 325,
+                    "rawDescription": "GeneratedTip_Item_6672_Description",
+                    "rawDisplayName": "Item_6672_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Shattered Armguard",
+                    "itemID": 2421,
+                    "price": 500,
+                    "rawDescription": "GeneratedTip_Item_2421_Description",
+                    "rawDisplayName": "Item_2421_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Doran's Blade",
+                    "itemID": 1055,
+                    "price": 450,
+                    "rawDescription": "GeneratedTip_Item_1055_Description",
+                    "rawDisplayName": "Item_1055_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Guinsoo's Rageblade",
+                    "itemID": 3124,
+                    "price": 1025,
+                    "rawDescription": "GeneratedTip_Item_3124_Description",
+                    "rawDisplayName": "Item_3124_Name",
+                    "slot": 5
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Farsight Alteration",
+                    "itemID": 3363,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3363_Description",
+                    "rawDisplayName": "Item_3363_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 14,
+            "position": "BOTTOM",
+            "rawChampionName": "game_character_displayname_Kaisa",
+            "rawSkinName": "game_character_displayname_Kaisa",
+            "respawnTimer": 11.910053253173829,
+            "riotId": "Apeiro#gh4st",
+            "riotIdGameName": "Apeiro",
+            "riotIdTagLine": "gh4st",
+            "runes": {
+                "keystone": {
+                    "displayName": "Lethal Tempo",
+                    "id": 8008,
+                    "rawDescription": "perk_tooltip_LethalTempo",
+                    "rawDisplayName": "perk_displayname_LethalTempo"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Inspiration",
+                    "id": 8300,
+                    "rawDescription": "perkstyle_tooltip_7203",
+                    "rawDisplayName": "perkstyle_displayname_7203"
+                }
+            },
+            "scores": {
+                "assists": 5,
+                "creepScore": 170,
+                "deaths": 9,
+                "kills": 8,
+                "wardScore": 14.598380088806153
+            },
+            "skinID": 0,
+            "skinName": "Kai'Sa",
+            "summonerName": "Apeiro#gh4st",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Barrier",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerBarrier_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerBarrier_DisplayName"
+                }
+            },
+            "team": "ORDER"
+        },
+        {
+            "championName": "Morgana",
+            "isBot": false,
+            "isDead": true,
+            "items": [
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Celestial Opposition",
+                    "itemID": 3869,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3869_Description",
+                    "rawDisplayName": "Item_3869_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Dark Seal",
+                    "itemID": 1082,
+                    "price": 350,
+                    "rawDescription": "GeneratedTip_Item_1082_Description",
+                    "rawDisplayName": "Item_1082_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Oblivion Orb",
+                    "itemID": 3916,
+                    "price": 400,
+                    "rawDescription": "GeneratedTip_Item_3916_Description",
+                    "rawDisplayName": "Item_3916_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Liandry's Torment",
+                    "itemID": 6653,
+                    "price": 800,
+                    "rawDescription": "GeneratedTip_Item_6653_Description",
+                    "rawDisplayName": "Item_6653_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Shattered Armguard",
+                    "itemID": 2421,
+                    "price": 500,
+                    "rawDescription": "GeneratedTip_Item_2421_Description",
+                    "rawDisplayName": "Item_2421_Name",
+                    "slot": 4
                 },
                 {
                     "canUse": false,
@@ -357,40 +741,59 @@
                 },
                 {
                     "canUse": true,
-                    "consumable": true,
+                    "consumable": false,
                     "count": 1,
-                    "displayName": "Poro-Snax",
-                    "itemID": 2052,
+                    "displayName": "Oracle Lens",
+                    "itemID": 3364,
                     "price": 0,
-                    "rawDescription": "GeneratedTip_Item_2052_Description",
-                    "rawDisplayName": "Item_2052_Name",
+                    "rawDescription": "GeneratedTip_Item_3364_Description",
+                    "rawDisplayName": "Item_3364_Name",
                     "slot": 6
                 }
             ],
-            "level": 3,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Caitlyn",
-            "rawSkinName": "game_character_skin_displayname_Caitlyn_13",
-            "respawnTimer": 0,
-            "riotId": "Euphoria#074",
-            "riotIdGameName": "Euphoria",
-            "riotIdTagLine": "074",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
+            "level": 12,
+            "position": "UTILITY",
+            "rawChampionName": "game_character_displayname_Morgana",
+            "rawSkinName": "game_character_skin_displayname_Morgana_4",
+            "respawnTimer": 9.783302307128907,
+            "riotId": "#",
+            "riotIdGameName": "",
+            "riotIdTagLine": "",
+            "runes": {
+                "keystone": {
+                    "displayName": "Arcane Comet",
+                    "id": 8229,
+                    "rawDescription": "perk_tooltip_ArcaneComet",
+                    "rawDisplayName": "perk_displayname_ArcaneComet"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Sorcery",
+                    "id": 8200,
+                    "rawDescription": "perkstyle_tooltip_7202",
+                    "rawDisplayName": "perkstyle_displayname_7202"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Domination",
+                    "id": 8100,
+                    "rawDescription": "perkstyle_tooltip_7200",
+                    "rawDisplayName": "perkstyle_displayname_7200"
+                }
             },
-            "skinID": 13,
-            "skinName": "Pool Party Caitlyn",
-            "summonerName": "Euphoria#074",
+            "scores": {
+                "assists": 10,
+                "creepScore": 30,
+                "deaths": 8,
+                "kills": 2,
+                "wardScore": 87.99325561523438
+            },
+            "skinID": 4,
+            "skinName": "Blackthorn Morgana",
+            "summonerName": "Morgana",
             "summonerSpells": {
                 "summonerSpellOne": {
-                    "displayName": "Mark",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                    "displayName": "Heal",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHeal_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHeal_DisplayName"
                 },
                 "summonerSpellTwo": {
                     "displayName": "Flash",
@@ -401,20 +804,42 @@
             "team": "ORDER"
         },
         {
-            "championName": "Nasus",
+            "championName": "Sett",
             "isBot": false,
             "isDead": false,
             "items": [
                 {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Stridebreaker",
+                    "itemID": 6631,
+                    "price": 750,
+                    "rawDescription": "GeneratedTip_Item_6631_Description",
+                    "rawDisplayName": "Item_6631_Name",
+                    "slot": 1
+                },
+                {
                     "canUse": false,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Sheen",
-                    "itemID": 3057,
-                    "price": 650,
-                    "rawDescription": "GeneratedTip_Item_3057_Description",
-                    "rawDisplayName": "Item_3057_Name",
-                    "slot": 0
+                    "displayName": "Plated Steelcaps",
+                    "itemID": 3047,
+                    "price": 600,
+                    "rawDescription": "GeneratedTip_Item_3047_Description",
+                    "rawDisplayName": "Item_3047_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Doran's Shield",
+                    "itemID": 1054,
+                    "price": 450,
+                    "rawDescription": "GeneratedTip_Item_1054_Description",
+                    "rawDisplayName": "Item_1054_Name",
+                    "slot": 3
                 },
                 {
                     "canUse": false,
@@ -425,93 +850,85 @@
                     "price": 400,
                     "rawDescription": "GeneratedTip_Item_1028_Description",
                     "rawDisplayName": "Item_1028_Name",
-                    "slot": 1
+                    "slot": 4
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Blade of The Ruined King",
+                    "itemID": 3153,
+                    "price": 725,
+                    "rawDescription": "GeneratedTip_Item_3153_Description",
+                    "rawDisplayName": "Item_3153_Name",
+                    "slot": 5
                 },
                 {
                     "canUse": true,
-                    "consumable": true,
+                    "consumable": false,
                     "count": 1,
-                    "displayName": "Poro-Snax",
-                    "itemID": 2052,
+                    "displayName": "Farsight Alteration",
+                    "itemID": 3363,
                     "price": 0,
-                    "rawDescription": "GeneratedTip_Item_2052_Description",
-                    "rawDisplayName": "Item_2052_Name",
+                    "rawDescription": "GeneratedTip_Item_3363_Description",
+                    "rawDisplayName": "Item_3363_Name",
                     "slot": 6
                 }
             ],
-            "level": 3,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Nasus",
-            "rawSkinName": "game_character_skin_displayname_Nasus_1",
-            "respawnTimer": 0,
-            "riotId": "Giga Gnar#BRZL",
-            "riotIdGameName": "Giga Gnar",
-            "riotIdTagLine": "BRZL",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
-            },
-            "skinID": 1,
-            "skinName": "Galactic Nasus",
-            "summonerName": "Giga Gnar#BRZL",
-            "summonerSpells": {
-                "summonerSpellOne": {
-                    "displayName": "Flash",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+            "level": 17,
+            "position": "TOP",
+            "rawChampionName": "game_character_displayname_Sett",
+            "rawSkinName": "game_character_displayname_Sett",
+            "respawnTimer": 0.0,
+            "riotId": "Korean pilot#NA1",
+            "riotIdGameName": "Korean pilot",
+            "riotIdTagLine": "NA1",
+            "runes": {
+                "keystone": {
+                    "displayName": "Conqueror",
+                    "id": 8010,
+                    "rawDescription": "perk_tooltip_Conqueror",
+                    "rawDisplayName": "perk_displayname_Conqueror"
                 },
-                "summonerSpellTwo": {
-                    "displayName": "Ghost",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
+                "primaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Resolve",
+                    "id": 8400,
+                    "rawDescription": "perkstyle_tooltip_7204",
+                    "rawDisplayName": "perkstyle_displayname_7204"
                 }
             },
-            "team": "ORDER"
-        },
-        {
-            "championName": "Aurelion Sol",
-            "isBot": false,
-            "isDead": false,
-            "items": [],
-            "level": 1,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_AurelionSol",
-            "rawSkinName": "game_character_displayname_AurelionSol",
-            "respawnTimer": 0,
-            "riotId": "imraidy#NA1",
-            "riotIdGameName": "imraidy",
-            "riotIdTagLine": "NA1",
-            "runes": null,
             "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
+                "assists": 1,
+                "creepScore": 150,
+                "deaths": 4,
+                "kills": 6,
+                "wardScore": 21.293216705322267
             },
             "skinID": 0,
-            "skinName": "Aurelion Sol",
-            "summonerName": "imraidy#NA1",
+            "skinName": "Sett",
+            "summonerName": "Korean pilot#NA1",
             "summonerSpells": {
                 "summonerSpellOne": {
-                    "displayName": "Ghost",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
-                },
-                "summonerSpellTwo": {
                     "displayName": "Flash",
                     "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
                     "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Ghost",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
                 }
             },
             "team": "CHAOS"
         },
         {
-            "championName": "Graves",
+            "championName": "Nocturne",
             "isBot": false,
             "isDead": false,
             "items": [
@@ -519,71 +936,123 @@
                     "canUse": false,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Serrated Dirk",
-                    "itemID": 3134,
-                    "price": 300,
-                    "rawDescription": "GeneratedTip_Item_3134_Description",
-                    "rawDisplayName": "Item_3134_Name",
+                    "displayName": "Plated Steelcaps",
+                    "itemID": 3047,
+                    "price": 600,
+                    "rawDescription": "GeneratedTip_Item_3047_Description",
+                    "rawDisplayName": "Item_3047_Name",
                     "slot": 0
                 },
                 {
-                    "canUse": false,
+                    "canUse": true,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Boots",
-                    "itemID": 1001,
-                    "price": 300,
-                    "rawDescription": "GeneratedTip_Item_1001_Description",
-                    "rawDisplayName": "Item_1001_Name",
+                    "displayName": "Stridebreaker",
+                    "itemID": 6631,
+                    "price": 750,
+                    "rawDescription": "GeneratedTip_Item_6631_Description",
+                    "rawDisplayName": "Item_6631_Name",
                     "slot": 1
                 },
                 {
                     "canUse": true,
                     "consumable": true,
-                    "count": 2,
-                    "displayName": "Health Potion",
-                    "itemID": 2003,
-                    "price": 50,
-                    "rawDescription": "GeneratedTip_Item_2003_Description",
-                    "rawDisplayName": "Item_2003_Name",
+                    "count": 1,
+                    "displayName": "Control Ward",
+                    "itemID": 2055,
+                    "price": 75,
+                    "rawDescription": "GeneratedTip_Item_2055_Description",
+                    "rawDisplayName": "Item_2055_Name",
                     "slot": 2
                 },
                 {
-                    "canUse": true,
-                    "consumable": true,
+                    "canUse": false,
+                    "consumable": false,
                     "count": 1,
-                    "displayName": "Poro-Snax",
-                    "itemID": 2052,
+                    "displayName": "Experimental Hexplate",
+                    "itemID": 3073,
+                    "price": 500,
+                    "rawDescription": "GeneratedTip_Item_3073_Description",
+                    "rawDisplayName": "Item_3073_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Black Cleaver",
+                    "itemID": 3071,
+                    "price": 225,
+                    "rawDescription": "GeneratedTip_Item_3071_Description",
+                    "rawDisplayName": "Item_3071_Name",
+                    "slot": 4
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Steel Sigil",
+                    "itemID": 2019,
+                    "price": 150,
+                    "rawDescription": "GeneratedTip_Item_2019_Description",
+                    "rawDisplayName": "Item_2019_Name",
+                    "slot": 5
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Oracle Lens",
+                    "itemID": 3364,
                     "price": 0,
-                    "rawDescription": "GeneratedTip_Item_2052_Description",
-                    "rawDisplayName": "Item_2052_Name",
+                    "rawDescription": "GeneratedTip_Item_3364_Description",
+                    "rawDisplayName": "Item_3364_Name",
                     "slot": 6
                 }
             ],
-            "level": 3,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Graves",
-            "rawSkinName": "game_character_displayname_Graves",
-            "respawnTimer": 0,
-            "riotId": "Lucky#Clo",
-            "riotIdGameName": "Lucky",
-            "riotIdTagLine": "Clo",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
+            "level": 16,
+            "position": "JUNGLE",
+            "rawChampionName": "game_character_displayname_Nocturne",
+            "rawSkinName": "game_character_skin_displayname_Nocturne_4",
+            "respawnTimer": 0.0,
+            "riotId": "Abell#URMOM",
+            "riotIdGameName": "Abell",
+            "riotIdTagLine": "URMOM",
+            "runes": {
+                "keystone": {
+                    "displayName": "Lethal Tempo",
+                    "id": 8008,
+                    "rawDescription": "perk_tooltip_LethalTempo",
+                    "rawDisplayName": "perk_displayname_LethalTempo"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Domination",
+                    "id": 8100,
+                    "rawDescription": "perkstyle_tooltip_7200",
+                    "rawDisplayName": "perkstyle_displayname_7200"
+                }
             },
-            "skinID": 0,
-            "skinName": "Graves",
-            "summonerName": "Lucky#Clo",
+            "scores": {
+                "assists": 14,
+                "creepScore": 90,
+                "deaths": 4,
+                "kills": 6,
+                "wardScore": 33.548912048339847
+            },
+            "skinID": 4,
+            "skinName": "Haunting Nocturne",
+            "summonerName": "Abell#URMOM",
             "summonerSpells": {
                 "summonerSpellOne": {
-                    "displayName": "Mark",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+                    "displayName": "Primal Smite",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSmiteAvatarOffensive_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSmiteAvatarOffensive_DisplayName"
                 },
                 "summonerSpellTwo": {
                     "displayName": "Flash",
@@ -594,39 +1063,249 @@
             "team": "CHAOS"
         },
         {
-            "championName": "Riven",
+            "championName": "Orianna",
             "isBot": false,
             "isDead": false,
-            "items": [],
-            "level": 1,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Riven",
-            "rawSkinName": "game_character_skin_displayname_Riven_16",
-            "respawnTimer": 0,
-            "riotId": "umboday#NA1",
-            "riotIdGameName": "umboday",
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Blackfire Torch",
+                    "itemID": 2503,
+                    "price": 700,
+                    "rawDescription": "GeneratedTip_Item_2503_Description",
+                    "rawDisplayName": "Item_2503_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Shadowflame",
+                    "itemID": 4645,
+                    "price": 900,
+                    "rawDescription": "GeneratedTip_Item_4645_Description",
+                    "rawDisplayName": "Item_4645_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Needlessly Large Rod",
+                    "itemID": 1058,
+                    "price": 1200,
+                    "rawDescription": "GeneratedTip_Item_1058_Description",
+                    "rawDisplayName": "Item_1058_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Doran's Ring",
+                    "itemID": 1056,
+                    "price": 400,
+                    "rawDescription": "GeneratedTip_Item_1056_Description",
+                    "rawDisplayName": "Item_1056_Name",
+                    "slot": 4
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Spellslinger's Shoes",
+                    "itemID": 3175,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3175_Description",
+                    "rawDisplayName": "Item_3175_Name",
+                    "slot": 5
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Stealth Ward",
+                    "itemID": 3340,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3340_Description",
+                    "rawDisplayName": "Item_3340_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 14,
+            "position": "MIDDLE",
+            "rawChampionName": "game_character_displayname_Orianna",
+            "rawSkinName": "game_character_skin_displayname_Orianna_8",
+            "respawnTimer": 0.0,
+            "riotId": "Mergen#NA1",
+            "riotIdGameName": "Mergen",
             "riotIdTagLine": "NA1",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
+            "runes": {
+                "keystone": {
+                    "displayName": "Summon Aery",
+                    "id": 8214,
+                    "rawDescription": "perk_tooltip_SummonAery",
+                    "rawDisplayName": "perk_displayname_SummonAery"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Sorcery",
+                    "id": 8200,
+                    "rawDescription": "perkstyle_tooltip_7202",
+                    "rawDisplayName": "perkstyle_displayname_7202"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                }
             },
-            "skinID": 16,
-            "skinName": "Dawnbringer Riven",
-            "summonerName": "umboday#NA1",
+            "scores": {
+                "assists": 4,
+                "creepScore": 180,
+                "deaths": 9,
+                "kills": 4,
+                "wardScore": 16.88573455810547
+            },
+            "skinID": 8,
+            "skinName": "Victorious Orianna",
+            "summonerName": "Mergen#NA1",
             "summonerSpells": {
                 "summonerSpellOne": {
-                    "displayName": "Mark",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
-                },
-                "summonerSpellTwo": {
                     "displayName": "Flash",
                     "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
                     "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Unleashed Teleport",
+                    "rawDescription": "GeneratedTip_SummonerSpell_S12_SummonerTeleportUpgrade_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_S12_SummonerTeleportUpgrade_DisplayName"
+                }
+            },
+            "team": "CHAOS"
+        },
+        {
+            "championName": "Jinx",
+            "isBot": false,
+            "isDead": true,
+            "items": [
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Doran's Blade",
+                    "itemID": 1055,
+                    "price": 450,
+                    "rawDescription": "GeneratedTip_Item_1055_Description",
+                    "rawDisplayName": "Item_1055_Name",
+                    "slot": 0
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Yun Tal Wildarrows",
+                    "itemID": 3032,
+                    "price": 850,
+                    "rawDescription": "GeneratedTip_Item_3032_Description",
+                    "rawDisplayName": "Item_3032_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Lord Dominik's Regards",
+                    "itemID": 3036,
+                    "price": 550,
+                    "rawDescription": "GeneratedTip_Item_3036_Description",
+                    "rawDisplayName": "Item_3036_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Infinity Edge",
+                    "itemID": 3031,
+                    "price": 725,
+                    "rawDescription": "GeneratedTip_Item_3031_Description",
+                    "rawDisplayName": "Item_3031_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Runaan's Hurricane",
+                    "itemID": 3085,
+                    "price": 850,
+                    "rawDescription": "GeneratedTip_Item_3085_Description",
+                    "rawDisplayName": "Item_3085_Name",
+                    "slot": 4
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Stealth Ward",
+                    "itemID": 3340,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3340_Description",
+                    "rawDisplayName": "Item_3340_Name",
+                    "slot": 6
+                }
+            ],
+            "level": 15,
+            "position": "BOTTOM",
+            "rawChampionName": "game_character_displayname_Jinx",
+            "rawSkinName": "game_character_skin_displayname_Jinx_29",
+            "respawnTimer": 32.170013427734378,
+            "riotId": "THANOS ORBWALKER#ashe",
+            "riotIdGameName": "THANOS ORBWALKER",
+            "riotIdTagLine": "ashe",
+            "runes": {
+                "keystone": {
+                    "displayName": "Lethal Tempo",
+                    "id": 8008,
+                    "rawDescription": "perk_tooltip_LethalTempo",
+                    "rawDisplayName": "perk_displayname_LethalTempo"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Precision",
+                    "id": 8000,
+                    "rawDescription": "perkstyle_tooltip_7201",
+                    "rawDisplayName": "perkstyle_displayname_7201"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Inspiration",
+                    "id": 8300,
+                    "rawDescription": "perkstyle_tooltip_7203",
+                    "rawDisplayName": "perkstyle_displayname_7203"
+                }
+            },
+            "scores": {
+                "assists": 6,
+                "creepScore": 220,
+                "deaths": 10,
+                "kills": 19,
+                "wardScore": 29.188142776489259
+            },
+            "skinID": 29,
+            "skinName": "Heartseeker Jinx",
+            "summonerName": "THANOS ORBWALKER#ashe",
+            "summonerSpells": {
+                "summonerSpellOne": {
+                    "displayName": "Flash",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Barrier",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerBarrier_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerBarrier_DisplayName"
                 }
             },
             "team": "CHAOS"
@@ -634,98 +1313,123 @@
         {
             "championName": "Soraka",
             "isBot": false,
-            "isDead": false,
-            "items": [],
-            "level": 1,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Soraka",
-            "rawSkinName": "game_character_skin_displayname_Soraka_9",
-            "respawnTimer": 0,
-            "riotId": "Azami P#NA1",
-            "riotIdGameName": "Azami P",
-            "riotIdTagLine": "NA1",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
-            },
-            "skinID": 9,
-            "skinName": "Winter Wonder Soraka",
-            "summonerName": "Azami P#NA1",
-            "summonerSpells": {
-                "summonerSpellOne": {
-                    "displayName": "Flash",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
-                },
-                "summonerSpellTwo": {
-                    "displayName": "Ghost",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
-                }
-            },
-            "team": "CHAOS"
-        },
-        {
-            "championName": "Gragas",
-            "isBot": false,
-            "isDead": false,
+            "isDead": true,
             "items": [
                 {
-                    "canUse": false,
+                    "canUse": true,
                     "consumable": false,
                     "count": 1,
-                    "displayName": "Lost Chapter",
-                    "itemID": 3802,
-                    "price": 250,
-                    "rawDescription": "GeneratedTip_Item_3802_Description",
-                    "rawDisplayName": "Item_3802_Name",
+                    "displayName": "Celestial Opposition",
+                    "itemID": 3869,
+                    "price": 0,
+                    "rawDescription": "GeneratedTip_Item_3869_Description",
+                    "rawDisplayName": "Item_3869_Name",
                     "slot": 0
                 },
                 {
                     "canUse": true,
-                    "consumable": true,
+                    "consumable": false,
                     "count": 1,
-                    "displayName": "Poro-Snax",
-                    "itemID": 2052,
+                    "displayName": "Mikael's Blessing",
+                    "itemID": 3222,
+                    "price": 900,
+                    "rawDescription": "GeneratedTip_Item_3222_Description",
+                    "rawDisplayName": "Item_3222_Name",
+                    "slot": 1
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Redemption",
+                    "itemID": 3107,
+                    "price": 850,
+                    "rawDescription": "GeneratedTip_Item_3107_Description",
+                    "rawDisplayName": "Item_3107_Name",
+                    "slot": 2
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Moonstone Renewer",
+                    "itemID": 6617,
+                    "price": 500,
+                    "rawDescription": "GeneratedTip_Item_6617_Description",
+                    "rawDisplayName": "Item_6617_Name",
+                    "slot": 3
+                },
+                {
+                    "canUse": false,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Ionian Boots of Lucidity",
+                    "itemID": 3158,
+                    "price": 350,
+                    "rawDescription": "GeneratedTip_Item_3158_Description",
+                    "rawDisplayName": "Item_3158_Name",
+                    "slot": 5
+                },
+                {
+                    "canUse": true,
+                    "consumable": false,
+                    "count": 1,
+                    "displayName": "Oracle Lens",
+                    "itemID": 3364,
                     "price": 0,
-                    "rawDescription": "GeneratedTip_Item_2052_Description",
-                    "rawDisplayName": "Item_2052_Name",
+                    "rawDescription": "GeneratedTip_Item_3364_Description",
+                    "rawDisplayName": "Item_3364_Name",
                     "slot": 6
                 }
             ],
-            "level": 3,
-            "position": "NONE",
-            "rawChampionName": "game_character_displayname_Gragas",
-            "rawSkinName": "game_character_displayname_Gragas",
-            "respawnTimer": 0,
-            "riotId": "MessyWalcott#123",
-            "riotIdGameName": "MessyWalcott",
-            "riotIdTagLine": "123",
-            "runes": null,
-            "scores": {
-                "assists": 0,
-                "creepScore": 0,
-                "deaths": 0,
-                "kills": 0,
-                "wardScore": 0
+            "level": 15,
+            "position": "UTILITY",
+            "rawChampionName": "game_character_displayname_Soraka",
+            "rawSkinName": "game_character_skin_displayname_Soraka_16",
+            "respawnTimer": 28.031940460205079,
+            "riotId": "Houki#FAT",
+            "riotIdGameName": "Houki",
+            "riotIdTagLine": "FAT",
+            "runes": {
+                "keystone": {
+                    "displayName": "Summon Aery",
+                    "id": 8214,
+                    "rawDescription": "perk_tooltip_SummonAery",
+                    "rawDisplayName": "perk_displayname_SummonAery"
+                },
+                "primaryRuneTree": {
+                    "displayName": "Sorcery",
+                    "id": 8200,
+                    "rawDescription": "perkstyle_tooltip_7202",
+                    "rawDisplayName": "perkstyle_displayname_7202"
+                },
+                "secondaryRuneTree": {
+                    "displayName": "Resolve",
+                    "id": 8400,
+                    "rawDescription": "perkstyle_tooltip_7204",
+                    "rawDisplayName": "perkstyle_displayname_7204"
+                }
             },
-            "skinID": 0,
-            "skinName": "Gragas",
-            "summonerName": "MessyWalcott#123",
+            "scores": {
+                "assists": 29,
+                "creepScore": 30,
+                "deaths": 3,
+                "kills": 1,
+                "wardScore": 70.25159454345703
+            },
+            "skinID": 16,
+            "skinName": "Nightbringer Soraka",
+            "summonerName": "Houki#FAT",
             "summonerSpells": {
                 "summonerSpellOne": {
-                    "displayName": "Mark",
-                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
-                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
-                },
-                "summonerSpellTwo": {
                     "displayName": "Flash",
                     "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
                     "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+                },
+                "summonerSpellTwo": {
+                    "displayName": "Heal",
+                    "rawDescription": "GeneratedTip_SummonerSpell_SummonerHeal_Description",
+                    "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHeal_DisplayName"
                 }
             },
             "team": "CHAOS"
@@ -736,15 +1440,1021 @@
             {
                 "EventID": 0,
                 "EventName": "GameStart",
-                "EventTime": 0.030299700796604156
+                "EventTime": 0.032789699733257297
+            },
+            {
+                "EventID": 1,
+                "EventName": "MinionsSpawning",
+                "EventTime": 30.040637969970704
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 2,
+                "EventName": "ChampionKill",
+                "EventTime": 78.41980743408203,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Morgana"
+            },
+            {
+                "EventID": 3,
+                "EventName": "FirstBlood",
+                "EventTime": 78.41980743408203,
+                "Recipient": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Morgana"
+                ],
+                "EventID": 4,
+                "EventName": "ChampionKill",
+                "EventTime": 80.26363372802735,
+                "KillerName": "Apeiro",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [],
+                "EventID": 5,
+                "EventName": "ChampionKill",
+                "EventTime": 152.89450073242188,
+                "KillerName": "Giga Gnar",
+                "VictimName": "Mergen"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 6,
+                "EventName": "ChampionKill",
+                "EventTime": 176.54209899902345,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Morgana"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 7,
+                "EventName": "ChampionKill",
+                "EventTime": 181.0478057861328,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Apeiro"
+            },
+            {
+                "EventID": 8,
+                "EventName": "Multikill",
+                "EventTime": 181.0478057861328,
+                "KillStreak": 2,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Morgana"
+                ],
+                "EventID": 9,
+                "EventName": "ChampionKill",
+                "EventTime": 222.9124298095703,
+                "KillerName": "CANCAN NEED",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Abell"
+                ],
+                "EventID": 10,
+                "EventName": "ChampionKill",
+                "EventTime": 238.94625854492188,
+                "KillerName": "Korean pilot",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "Assisters": [],
+                "EventID": 11,
+                "EventName": "ChampionKill",
+                "EventTime": 311.8568115234375,
+                "KillerName": "feedthefatman",
+                "VictimName": "Korean pilot"
+            },
+            {
+                "Assisters": [],
+                "EventID": 12,
+                "EventName": "ChampionKill",
+                "EventTime": 332.47528076171877,
+                "KillerName": "Giga Gnar",
+                "VictimName": "Mergen"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 13,
+                "EventName": "ChampionKill",
+                "EventTime": 339.4256591796875,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 14,
+                "EventName": "ChampionKill",
+                "EventTime": 343.8681335449219,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Morgana"
+            },
+            {
+                "EventID": 15,
+                "EventName": "Multikill",
+                "EventTime": 343.8681335449219,
+                "KillStreak": 2,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 16,
+                "EventName": "ChampionKill",
+                "EventTime": 350.08319091796877,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "CANCAN NEED"
+            },
+            {
+                "EventID": 17,
+                "EventName": "Multikill",
+                "EventTime": 350.08319091796877,
+                "KillStreak": 3,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [],
+                "EventID": 18,
+                "EventName": "ChampionKill",
+                "EventTime": 442.59210205078127,
+                "KillerName": "feedthefatman",
+                "VictimName": "Korean pilot"
+            },
+            {
+                "Assisters": [],
+                "EventID": 19,
+                "EventName": "ChampionKill",
+                "EventTime": 444.66815185546877,
+                "KillerName": "Giga Gnar",
+                "VictimName": "Mergen"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED",
+                    "Giga Gnar"
+                ],
+                "EventID": 20,
+                "EventName": "ChampionKill",
+                "EventTime": 547.8888549804688,
+                "KillerName": "Apeiro",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 21,
+                "EventName": "ChampionKill",
+                "EventTime": 552.7757568359375,
+                "KillerName": "Mergen",
+                "VictimName": "CANCAN NEED"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED",
+                    "Giga Gnar",
+                    "Morgana"
+                ],
+                "EventID": 22,
+                "EventName": "ChampionKill",
+                "EventTime": 556.1126098632813,
+                "KillerName": "Apeiro",
+                "VictimName": "Abell"
+            },
+            {
+                "EventID": 23,
+                "EventName": "Multikill",
+                "EventTime": 556.1126098632813,
+                "KillStreak": 2,
+                "KillerName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "THANOS ORBWALKER",
+                    "Houki"
+                ],
+                "EventID": 24,
+                "EventName": "ChampionKill",
+                "EventTime": 556.7401123046875,
+                "KillerName": "Mergen",
+                "VictimName": "Giga Gnar"
+            },
+            {
+                "EventID": 25,
+                "EventName": "Multikill",
+                "EventTime": 556.7401123046875,
+                "KillStreak": 2,
+                "KillerName": "Mergen"
+            },
+            {
+                "Assisters": [
+                    "Giga Gnar",
+                    "Morgana"
+                ],
+                "EventID": 26,
+                "EventName": "ChampionKill",
+                "EventTime": 560.2163696289063,
+                "KillerName": "Apeiro",
+                "VictimName": "Mergen"
+            },
+            {
+                "EventID": 27,
+                "EventName": "Multikill",
+                "EventTime": 560.2163696289063,
+                "KillStreak": 3,
+                "KillerName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "Morgana"
+                ],
+                "EventID": 28,
+                "EventName": "ChampionKill",
+                "EventTime": 611.6162109375,
+                "KillerName": "Apeiro",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED",
+                    "Giga Gnar"
+                ],
+                "EventID": 29,
+                "EventName": "ChampionKill",
+                "EventTime": 620.8143920898438,
+                "KillerName": "feedthefatman",
+                "VictimName": "Korean pilot"
+            },
+            {
+                "Assisters": [
+                    "THANOS ORBWALKER"
+                ],
+                "EventID": 30,
+                "EventName": "ChampionKill",
+                "EventTime": 621.6502685546875,
+                "KillerName": "Houki",
+                "VictimName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED"
+                ],
+                "EventID": 31,
+                "EventName": "ChampionKill",
+                "EventTime": 622.2899169921875,
+                "KillerName": "feedthefatman",
+                "VictimName": "Mergen"
+            },
+            {
+                "EventID": 32,
+                "EventName": "Multikill",
+                "EventTime": 622.2899169921875,
+                "KillStreak": 2,
+                "KillerName": "feedthefatman"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED",
+                    "Giga Gnar"
+                ],
+                "EventID": 33,
+                "EventName": "ChampionKill",
+                "EventTime": 627.3368530273438,
+                "KillerName": "feedthefatman",
+                "VictimName": "Abell"
+            },
+            {
+                "EventID": 34,
+                "EventName": "Multikill",
+                "EventTime": 627.3368530273438,
+                "KillStreak": 3,
+                "KillerName": "feedthefatman"
+            },
+            {
+                "Assisters": [],
+                "EventID": 35,
+                "EventName": "HordeKill",
+                "EventTime": 657.7340698242188,
+                "KillerName": "CANCAN NEED",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [],
+                "EventID": 36,
+                "EventName": "HordeKill",
+                "EventTime": 665.534423828125,
+                "KillerName": "CANCAN NEED",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [],
+                "EventID": 37,
+                "EventName": "HordeKill",
+                "EventTime": 671.5595092773438,
+                "KillerName": "CANCAN NEED",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [
+                    "Korean pilot",
+                    "THANOS ORBWALKER"
+                ],
+                "DragonType": "Chemtech",
+                "EventID": 38,
+                "EventName": "DragonKill",
+                "EventTime": 688.4387817382813,
+                "KillerName": "Abell",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [],
+                "EventID": 39,
+                "EventName": "ChampionKill",
+                "EventTime": 736.196533203125,
+                "KillerName": "Giga Gnar",
+                "VictimName": "Korean pilot"
+            },
+            {
+                "Assisters": [
+                    "Mergen"
+                ],
+                "EventID": 40,
+                "EventName": "ChampionKill",
+                "EventTime": 765.1920776367188,
+                "KillerName": "Abell",
+                "VictimName": "Giga Gnar"
+            },
+            {
+                "Assisters": [],
+                "EventID": 41,
+                "EventName": "TurretKilled",
+                "EventTime": 788.0191650390625,
+                "KillerName": "feedthefatman",
+                "TurretKilled": "Turret_TChaos_L2_P3_2521511112_0"
+            },
+            {
+                "EventID": 42,
+                "EventName": "FirstBrick",
+                "EventTime": 788.0191650390625,
+                "KillerName": "feedthefatman"
+            },
+            {
+                "Assisters": [
+                    "Korean pilot",
+                    "Houki"
+                ],
+                "EventID": 43,
+                "EventName": "ChampionKill",
+                "EventTime": 815.6195068359375,
+                "KillerName": "Abell",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "Assisters": [
+                    "Morgana"
+                ],
+                "EventID": 44,
+                "EventName": "ChampionKill",
+                "EventTime": 853.547119140625,
+                "KillerName": "Apeiro",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "feedthefatman",
+                    "Morgana"
+                ],
+                "EventID": 45,
+                "EventName": "HeraldKill",
+                "EventTime": 927.7352294921875,
+                "KillerName": "CANCAN NEED",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 46,
+                "EventName": "TurretKilled",
+                "EventTime": 956.421142578125,
+                "KillerName": "THANOS ORBWALKER",
+                "TurretKilled": "Turret_TOrder_L0_P3_3795288474_0"
+            },
+            {
+                "Assisters": [],
+                "EventID": 47,
+                "EventName": "ChampionKill",
+                "EventTime": 959.9907836914063,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 48,
+                "EventName": "ChampionKill",
+                "EventTime": 981.14892578125,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Morgana"
+            },
+            {
+                "Assisters": [],
+                "EventID": 49,
+                "EventName": "ChampionKill",
+                "EventTime": 986.1705322265625,
+                "KillerName": "feedthefatman",
+                "VictimName": "Houki"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 50,
+                "EventName": "ChampionKill",
+                "EventTime": 989.8631591796875,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "EventID": 51,
+                "EventName": "Multikill",
+                "EventTime": 989.8631591796875,
+                "KillStreak": 2,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED"
+                ],
+                "EventID": 52,
+                "EventName": "ChampionKill",
+                "EventTime": 992.1849975585938,
+                "KillerName": "Giga Gnar",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "feedthefatman",
+                    "CANCAN NEED"
+                ],
+                "EventID": 53,
+                "EventName": "ChampionKill",
+                "EventTime": 998.345703125,
+                "KillerName": "Giga Gnar",
+                "VictimName": "Abell"
+            },
+            {
+                "EventID": 54,
+                "EventName": "Multikill",
+                "EventTime": 998.345703125,
+                "KillStreak": 2,
+                "KillerName": "Giga Gnar"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "THANOS ORBWALKER"
+                ],
+                "EventID": 55,
+                "EventName": "ChampionKill",
+                "EventTime": 1001.381591796875,
+                "KillerName": "Mergen",
+                "VictimName": "Giga Gnar"
+            },
+            {
+                "Assisters": [
+                    "Giga Gnar"
+                ],
+                "EventID": 56,
+                "EventName": "ChampionKill",
+                "EventTime": 1002.478759765625,
+                "KillerName": "CANCAN NEED",
+                "VictimName": "Mergen"
+            },
+            {
+                "Assisters": [],
+                "DragonType": "Water",
+                "EventID": 57,
+                "EventName": "DragonKill",
+                "EventTime": 1029.8419189453126,
+                "KillerName": "CANCAN NEED",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [
+                    "Apeiro",
+                    "Morgana"
+                ],
+                "EventID": 58,
+                "EventName": "ChampionKill",
+                "EventTime": 1077.46923828125,
+                "KillerName": "CANCAN NEED",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "THANOS ORBWALKER",
+                    "Houki"
+                ],
+                "EventID": 59,
+                "EventName": "ChampionKill",
+                "EventTime": 1080.2178955078126,
+                "KillerName": "Abell",
+                "VictimName": "CANCAN NEED"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 60,
+                "EventName": "ChampionKill",
+                "EventTime": 1082.9835205078126,
+                "KillerName": "Abell",
+                "VictimName": "Apeiro"
+            },
+            {
+                "EventID": 61,
+                "EventName": "Multikill",
+                "EventTime": 1082.9835205078126,
+                "KillStreak": 2,
+                "KillerName": "Abell"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 62,
+                "EventName": "ChampionKill",
+                "EventTime": 1088.4937744140626,
+                "KillerName": "Abell",
+                "VictimName": "Morgana"
+            },
+            {
+                "EventID": 63,
+                "EventName": "Multikill",
+                "EventTime": 1088.4937744140626,
+                "KillStreak": 3,
+                "KillerName": "Abell"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 64,
+                "EventName": "ChampionKill",
+                "EventTime": 1101.66650390625,
+                "KillerName": "Korean pilot",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 65,
+                "EventName": "TurretKilled",
+                "EventTime": 1123.7833251953126,
+                "KillerName": "Korean pilot",
+                "TurretKilled": "Turret_TOrder_L1_P3_1242677625_0"
+            },
+            {
+                "Assisters": [],
+                "EventID": 66,
+                "EventName": "ChampionKill",
+                "EventTime": 1124.437744140625,
+                "KillerName": "Giga Gnar",
+                "VictimName": "Mergen"
+            },
+            {
+                "Assisters": [
+                    "Morgana"
+                ],
+                "EventID": 67,
+                "EventName": "TurretKilled",
+                "EventTime": 1156.2711181640626,
+                "KillerName": "Apeiro",
+                "TurretKilled": "Turret_TChaos_L1_P3_2254202041_0"
+            },
+            {
+                "Assisters": [],
+                "EventID": 68,
+                "EventName": "TurretKilled",
+                "EventTime": 1158.5675048828126,
+                "KillerName": "THANOS ORBWALKER",
+                "TurretKilled": "Turret_TOrder_L2_P3_1509986696_0"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 69,
+                "EventName": "ChampionKill",
+                "EventTime": 1168.6124267578126,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "Assisters": [
+                    "Apeiro"
+                ],
+                "EventID": 70,
+                "EventName": "ChampionKill",
+                "EventTime": 1172.0902099609376,
+                "KillerName": "Morgana",
+                "VictimName": "Abell"
+            },
+            {
+                "Assisters": [],
+                "EventID": 71,
+                "EventName": "ChampionKill",
+                "EventTime": 1208.8697509765626,
+                "KillerName": "Korean pilot",
+                "VictimName": "Giga Gnar"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 72,
+                "EventName": "TurretKilled",
+                "EventTime": 1220.047119140625,
+                "KillerName": "THANOS ORBWALKER",
+                "TurretKilled": "Turret_TOrder_L2_P2_1526764315_0"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 73,
+                "EventName": "ChampionKill",
+                "EventTime": 1226.5694580078126,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Morgana"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 74,
+                "EventName": "ChampionKill",
+                "EventTime": 1230.03759765625,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "EventID": 75,
+                "EventName": "Multikill",
+                "EventTime": 1230.03759765625,
+                "KillStreak": 2,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Apeiro"
+                ],
+                "EventID": 76,
+                "EventName": "ChampionKill",
+                "EventTime": 1251.038818359375,
+                "KillerName": "CANCAN NEED",
+                "VictimName": "Houki"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED"
+                ],
+                "EventID": 77,
+                "EventName": "ChampionKill",
+                "EventTime": 1253.9022216796876,
+                "KillerName": "Apeiro",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Morgana"
+                ],
+                "EventID": 78,
+                "EventName": "ChampionKill",
+                "EventTime": 1293.0400390625,
+                "KillerName": "Apeiro",
+                "VictimName": "Mergen"
+            },
+            {
+                "Assisters": [],
+                "EventID": 79,
+                "EventName": "TurretKilled",
+                "EventTime": 1311.2652587890626,
+                "KillerName": "Giga Gnar",
+                "TurretKilled": "Turret_TChaos_L0_P3_511845594_0"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 80,
+                "EventName": "ChampionKill",
+                "EventTime": 1331.8111572265626,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Morgana"
+            },
+            {
+                "Assisters": [
+                    "THANOS ORBWALKER",
+                    "Houki"
+                ],
+                "EventID": 81,
+                "EventName": "ChampionKill",
+                "EventTime": 1337.092041015625,
+                "KillerName": "Abell",
+                "VictimName": "CANCAN NEED"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 82,
+                "EventName": "ChampionKill",
+                "EventTime": 1337.8465576171876,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Giga Gnar"
+            },
+            {
+                "EventID": 83,
+                "EventName": "Multikill",
+                "EventTime": 1337.8465576171876,
+                "KillStreak": 2,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 84,
+                "EventName": "ChampionKill",
+                "EventTime": 1338.7254638671876,
+                "KillerName": "Korean pilot",
+                "VictimName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "Korean pilot",
+                    "THANOS ORBWALKER",
+                    "Houki"
+                ],
+                "DragonType": "Fire",
+                "EventID": 85,
+                "EventName": "DragonKill",
+                "EventTime": 1357.505126953125,
+                "KillerName": "Abell",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [
+                    "Korean pilot",
+                    "Abell",
+                    "THANOS ORBWALKER",
+                    "Houki"
+                ],
+                "EventID": 86,
+                "EventName": "BaronKill",
+                "EventTime": 1392.7633056640626,
+                "KillerName": "Mergen",
+                "Stolen": "False"
+            },
+            {
+                "Assisters": [
+                    "THANOS ORBWALKER",
+                    "Houki"
+                ],
+                "EventID": 87,
+                "EventName": "ChampionKill",
+                "EventTime": 1427.6658935546876,
+                "KillerName": "Mergen",
+                "VictimName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "Apeiro",
+                    "Morgana"
+                ],
+                "EventID": 88,
+                "EventName": "ChampionKill",
+                "EventTime": 1428.0347900390626,
+                "KillerName": "CANCAN NEED",
+                "VictimName": "Mergen"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED",
+                    "Apeiro"
+                ],
+                "EventID": 89,
+                "EventName": "ChampionKill",
+                "EventTime": 1429.461181640625,
+                "KillerName": "Morgana",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 90,
+                "EventName": "ChampionKill",
+                "EventTime": 1435.987548828125,
+                "KillerName": "Korean pilot",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 91,
+                "EventName": "ChampionKill",
+                "EventTime": 1483.2366943359376,
+                "KillerName": "Korean pilot",
+                "VictimName": "Giga Gnar"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Mergen"
+                ],
+                "EventID": 92,
+                "EventName": "ChampionKill",
+                "EventTime": 1495.315185546875,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Apeiro"
+            },
+            {
+                "Assisters": [],
+                "EventID": 93,
+                "EventName": "TurretKilled",
+                "EventTime": 1523.6939697265626,
+                "KillerName": "THANOS ORBWALKER",
+                "TurretKilled": "Turret_TOrder_L1_P2_1225900006_0"
+            },
+            {
+                "Assisters": [],
+                "EventID": 94,
+                "EventName": "TurretKilled",
+                "EventTime": 1537.1373291015626,
+                "KillerName": "Korean pilot",
+                "TurretKilled": "Turret_TOrder_L2_P1_1543541934_0"
+            },
+            {
+                "Assisters": [],
+                "EventID": 95,
+                "EventName": "InhibKilled",
+                "EventTime": 1544.1087646484376,
+                "InhibKilled": "Inhib_TOrder_L2_P1_2669080337_0",
+                "KillerName": "Korean pilot"
+            },
+            {
+                "Assisters": [
+                    "Mergen",
+                    "Houki"
+                ],
+                "EventID": 96,
+                "EventName": "TurretKilled",
+                "EventTime": 1556.5767822265626,
+                "KillerName": "THANOS ORBWALKER",
+                "TurretKilled": "Turret_TOrder_L1_P1_1209122387_0"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Houki"
+                ],
+                "EventID": 97,
+                "EventName": "ChampionKill",
+                "EventTime": 1594.249755859375,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Apeiro"
+            },
+            {
+                "Assisters": [
+                    "Houki"
+                ],
+                "EventID": 98,
+                "EventName": "ChampionKill",
+                "EventTime": 1597.596923828125,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "Morgana"
+            },
+            {
+                "EventID": 99,
+                "EventName": "Multikill",
+                "EventTime": 1597.596923828125,
+                "KillStreak": 2,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Mergen",
+                    "Houki"
+                ],
+                "EventID": 100,
+                "EventName": "ChampionKill",
+                "EventTime": 1602.21240234375,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "CANCAN NEED"
+            },
+            {
+                "EventID": 101,
+                "EventName": "Multikill",
+                "EventTime": 1602.21240234375,
+                "KillStreak": 3,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Mergen",
+                    "Houki"
+                ],
+                "EventID": 102,
+                "EventName": "ChampionKill",
+                "EventTime": 1603.2540283203126,
+                "KillerName": "THANOS ORBWALKER",
+                "VictimName": "feedthefatman"
+            },
+            {
+                "EventID": 103,
+                "EventName": "Multikill",
+                "EventTime": 1603.2540283203126,
+                "KillStreak": 4,
+                "KillerName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "CANCAN NEED"
+                ],
+                "EventID": 104,
+                "EventName": "ChampionKill",
+                "EventTime": 1607.541015625,
+                "KillerName": "feedthefatman",
+                "VictimName": "Houki"
+            },
+            {
+                "Assisters": [
+                    "feedthefatman",
+                    "Morgana"
+                ],
+                "EventID": 105,
+                "EventName": "ChampionKill",
+                "EventTime": 1611.65283203125,
+                "KillerName": "Giga Gnar",
+                "VictimName": "THANOS ORBWALKER"
+            },
+            {
+                "Assisters": [
+                    "Abell",
+                    "Mergen"
+                ],
+                "EventID": 106,
+                "EventName": "TurretKilled",
+                "EventTime": 1616.762451171875,
+                "KillerName": "Korean pilot",
+                "TurretKilled": "Turret_TOrder_L1_P5_3625540808_0"
+            },
+            {
+                "EventID": 107,
+                "EventName": "GameEnd",
+                "EventTime": 1626.7911376953126,
+                "Result": "Lose"
             }
         ]
     },
     "gameData": {
-        "gameMode": "KIWI",
-        "gameTime": 41.56141662597656,
-        "mapName": "Map12",
-        "mapNumber": 12,
+        "gameMode": "CLASSIC",
+        "gameTime": 1629.0194091796876,
+        "mapName": "Map11",
+        "mapNumber": 11,
         "mapTerrain": "Default"
     }
 }

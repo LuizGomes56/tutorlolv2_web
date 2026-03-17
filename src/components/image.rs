@@ -2,7 +2,7 @@ use crate::{
     model::{AbilityKind, StatType},
     utils::BASE_URL,
 };
-use tutorlolv2_gen::{ChampionId, ItemId, Position, RuneId, StatName};
+use tutorlolv2_gen::{AbilityName, ChampionId, ItemId, Position, RuneId, StatName};
 use yew::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -111,8 +111,14 @@ impl ImageType {
     pub fn url(&self) -> String {
         let path = match self {
             ImageType::Ability(champion_id, kind) => {
-                let char = kind.as_char();
-                format!("abilities/{champion_id:?}{char}.avif")
+                let ability_id = kind.ability_id();
+                let char = ability_id.as_char();
+                let mut result = format!("abilities/{champion_id:?}{char}");
+                if ability_id.ability_name() == AbilityName::Mega {
+                    result.push_str("Mega");
+                }
+                result.push_str(".avif");
+                result
             }
             ImageType::Champion(champion_id) => format!("champions/{champion_id:?}.avif"),
             ImageType::Centered(champion_id) => format!("centered/{champion_id:?}_0.avif"),

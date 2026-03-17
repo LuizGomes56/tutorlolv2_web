@@ -225,17 +225,15 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
         .collect::<Html>();
 
     html! {
-        <div class={classes!(
-            "flex", "flex-col", "py-4", "min-h-0", "gap-4", "h-full", "px-4", "2xl:px-0"
-        )}>
+        <div class={classes!("flex", "flex-col", "py-4", "min-h-0", "gap-4", "px-4", "2xl:px-0")}>
             <div class={classes!("flex", "items-center", "justify-between", "gap-3")}>
                 <div class={classes!("flex", "flex-col", "gap-1")}>
-                    <div class={classes!("font-semibold", "text-std-100")}>
+                    <span class={classes!("whitespace-nowrap", "font-semibold", "text-std-100")}>
                         {"Defined combo"}
-                    </div>
-                    <div class={classes!("text-xs", "text-std-400")}>
+                    </span>
+                    <span class={classes!("whitespace-nowrap", "text-xs", "text-std-400")}>
                         {"Click icons to remove"}
-                    </div>
+                    </span>
                 </div>
                 <div class={classes!("flex", "items-center", "gap-2")}>
                     <span class={classes!(
@@ -278,7 +276,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                 </div>
             </div>
             <div class={classes!(
-                "flex-1", "w-full", "min-h-32",
+                "flex-1", "w-full",
                 "rounded-lg", "border", "border-dashed",
                 "border-std-800", "p-2",
                 "text-sm", "text-std-400",

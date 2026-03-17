@@ -273,13 +273,13 @@ pub fn Overlay() -> Html {
                     <Dynamic panel_id={"recommendations-table"} focused={*focused}>
                         <div
                             data-panel-content={true}
-                            class={classes!("flex", "flex-col", "gap-1")}
+                            class={classes!("flex", "flex-col", "gap-1", "max-w-fit", "max-h-fit")}
                         >
                             {recommendation}
                         </div>
                     </Dynamic>
                     if *focused {
-                        <Dynamic panel_id={"stack-insert"} focused={*focused}>
+                        <Dynamic panel_id={"stack-insert"} resize={false} focused={*focused}>
                             <div data-panel-content={true}>
                                 <StackInsert
                                     callback={stack_push.clone()}
@@ -289,10 +289,10 @@ pub fn Overlay() -> Html {
                                 />
                             </div>
                         </Dynamic>
-                        <Dynamic panel_id={"stack-remover"} focused={*focused}>
+                        <Dynamic panel_id={"stack-remover"} resize={false} focused={*focused}>
                             <div
                                 data-panel-content={true}
-                                class={classes!("h-full")}
+                                class={classes!("min-h-fit", "min-w-min")}
                             >
                                 <StackRemover
                                     stack={stack.clone()}
@@ -303,8 +303,11 @@ pub fn Overlay() -> Html {
                             </div>
                         </Dynamic>
                     }
-                    <Dynamic panel_id={"stack-table"} focused={*focused}>
-                        <div data-panel-content={true}>
+                    <Dynamic panel_id={"stack-table"} resize={false} focused={*focused}>
+                        <div
+                            data-panel-content={true}
+                            class={classes!("min-h-fit", "min-w-min")}
+                        >
                             <StackTable<Enemy>
                                 index={*enemy_index}
                                 enemies={enemies.clone()}

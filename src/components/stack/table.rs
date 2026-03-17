@@ -38,7 +38,9 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                     <th class={classes!("w-0")}></th>
                     <th>{ "Damage" }</th>
                     <th>{ "Health" }</th>
-                    <th>{ "% HP" }</th>
+                    <th class={classes!("whitespace-nowrap")}>
+                        { "% HP" }
+                    </th>
                 </tr>
             </thead>
             <tbody>

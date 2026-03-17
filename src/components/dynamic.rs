@@ -5,6 +5,8 @@ pub struct DynamicProps {
     pub children: Children,
     pub panel_id: AttrValue,
     pub focused: bool,
+    #[prop_or(true)]
+    pub resize: bool,
 }
 
 #[component]
@@ -13,6 +15,7 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
         children,
         panel_id,
         focused,
+        resize,
     } = props;
 
     let circle = |handle, class| {
@@ -39,7 +42,7 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
             class={classes!(
                 "border", "border-2", "place-self-end",
                 "border-dashed", "select-none",
-                "touch-none", "p-2",
+                "touch-none", "p-2", "min-h-fit",
                 if *focused {
                     classes!("border-std-700", "cursor-move", "bg-std-900/75")
                 } else {
@@ -48,7 +51,7 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
             )}
         >
             {children}
-            if *focused {
+            if *focused && *resize {
                 {circle("nw", classes!("-left-1.5", "-top-1.5", "cursor-nwse-resize"))}
                 {circle("ne", classes!("-right-1.5", "-top-1.5", "cursor-nesw-resize"))}
                 {circle("sw", classes!("-left-1.5", "-bottom-1.5", "cursor-nesw-resize"))}
