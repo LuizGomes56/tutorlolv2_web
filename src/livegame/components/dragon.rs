@@ -13,11 +13,7 @@ pub struct DragonDisplayProps {
 pub fn DragonDisplay(props: &DragonDisplayProps) -> Html {
     let DragonDisplayProps { dragons } = props;
 
-    fn make_(
-        va: impl IntoPropValue<Html>,
-        ve: impl IntoPropValue<Html>,
-        image: DragonImage,
-    ) -> Html {
+    fn row(va: impl IntoPropValue<Html>, ve: impl IntoPropValue<Html>, image: DragonImage) -> Html {
         html! {
             <tr>
                 <td class={classes!("w-10")}>
@@ -40,10 +36,10 @@ pub fn DragonDisplay(props: &DragonDisplayProps) -> Html {
                     </tr>
                 </thead>
                 <tbody>
-                    {make_(dragons.ally_earth, dragons.enemy_earth, DragonImage::Earth)}
-                    {make_(dragons.ally_fire, "\u{2013}", DragonImage::Fire)}
-                    {make_("\u{2013}", "\u{2013}", DragonImage::Ocean)}
-                    {make_("\u{2013}", "\u{2013}", DragonImage::Chemtech)}
+                    {row(dragons.ally_earth, dragons.enemy_earth, DragonImage::Earth)}
+                    {row(dragons.ally_fire, "\u{2013}", DragonImage::Fire)}
+                    {row("\u{2013}", "\u{2013}", DragonImage::Ocean)}
+                    {row("\u{2013}", "\u{2013}", DragonImage::Chemtech)}
                 </tbody>
             </table>
         </div>

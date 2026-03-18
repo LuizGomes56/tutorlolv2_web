@@ -190,6 +190,7 @@ pub fn Overlay() -> Html {
                 .unwrap_or_default();
 
             let recommendation = enemy.map(|enemy| {
+                let base = enemy.total_damage();
                 let list = enemy.item_scores(champion_id);
 
                 list.into_iter()
@@ -197,7 +198,7 @@ pub fn Overlay() -> Html {
                         html! {
                             <div class={classes!("flex", "items-center", "gap-2")}>
                                 <span class={classes!("text-sm", item.damage_type().class())}>
-                                    {damage}
+                                    {damage - base}
                                 </span>
                                 <Image
                                     class={classes!("w-6", "h-6")}

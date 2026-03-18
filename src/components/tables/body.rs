@@ -71,14 +71,16 @@ impl Cell {
 
     fn render_diff_range(min: i32, max: Option<i32>) -> Html {
         match max {
-            Some(max) => html!(
+            Some(max) if min != 0 && max != 0 => html!(
                 <>
                     {Self::render_diff_value(min)}
                     {" - "}
                     {Self::render_diff_value(max)}
                 </>
             ),
-            None => html!(<>{Self::render_diff_value(min)}</>),
+            Some(max) if max == min && min != 0 => html!(Self::render_diff_value(min)),
+            None if min != 0 => html!(Self::render_diff_value(min)),
+            _ => Html::default(),
         }
     }
 
@@ -212,7 +214,7 @@ impl Damages {
             Cell {
                 damage_type: DamageType::Mixed,
                 min_dmg: onhit_damage.minimum_damage,
-                max_dmg: (onhit_damage.maximum_damage > 0).then_some(onhit_damage.maximum_damage),
+                max_dmg: (onhit_damage.maximum_damage != 0).then_some(onhit_damage.maximum_damage),
                 offsets: (&ONHIT_EFFECT_FN_OFFSET, None),
                 idents: &[],
                 diff: None,
@@ -338,17 +340,20 @@ impl Damages {
 
         let mut cells = Vec::<Cell>::with_capacity(len);
 
-        let ctx = self.ctx;
+        let ctx = other.ctx;
 
         let Attacks {
             basic_attack,
             critical_strike,
             onhit_damage,
-        } = self.attacks;
+        } = other.attacks;
 
-        debug_assert_eq!(items_meta.len(), self.items.len() >> 1);
+        debug_assert_eq!(items_meta.len(), self.items.len() >> 1,);
+        debug_assert_eq!(items_meta.len(), other.items.len() >> 1);
         debug_assert_eq!(runes_meta.len(), self.runes.len());
+        debug_assert_eq!(runes_meta.len(), other.runes.len());
         debug_assert_eq!(self.abilities.len(), abilities_meta.len());
+        debug_assert_eq!(other.abilities.len(), abilities_meta.len());
         debug_assert_eq!(ability_idents.len(), abilities_meta.len());
         debug_assert_eq!(ability_closures.len(), abilities_meta.len());
 
@@ -359,7 +364,7 @@ impl Damages {
                 max_dmg: None,
                 offsets: (&BASIC_ATTACK_FN_OFFSET, None),
                 idents: &[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier],
-                diff: Some((other.attacks.basic_attack - basic_attack, None)),
+                diff: Some((basic_attack - self.attacks.basic_attack, None)),
             },
             Cell {
                 damage_type: DamageType::Physical,
@@ -367,26 +372,26 @@ impl Damages {
                 max_dmg: None,
                 offsets: (&CRITICAL_STRIKE_FN_OFFSET, None),
                 idents: &[CtxVar::AttackDamage, CtxVar::CritDamage],
-                diff: Some((other.attacks.critical_strike - critical_strike, None)),
+                diff: Some((critical_strike - self.attacks.critical_strike, None)),
             },
             Cell {
                 damage_type: DamageType::Mixed,
                 min_dmg: onhit_damage.minimum_damage,
-                max_dmg: (onhit_damage.maximum_damage > 0).then_some(onhit_damage.maximum_damage),
+                max_dmg: (onhit_damage.maximum_damage != 0).then_some(onhit_damage.maximum_damage),
                 offsets: (&ONHIT_EFFECT_FN_OFFSET, None),
                 idents: &[],
                 diff: Some((
-                    other.attacks.onhit_damage.minimum_damage - onhit_damage.minimum_damage,
-                    (other.attacks.onhit_damage.maximum_damage > 0
-                        && onhit_damage.maximum_damage > 0)
+                    onhit_damage.minimum_damage - self.attacks.onhit_damage.minimum_damage,
+                    (other.attacks.onhit_damage.maximum_damage != 0
+                        && onhit_damage.maximum_damage != 0)
                         .then_some(
-                            other.attacks.onhit_damage.maximum_damage - onhit_damage.maximum_damage,
+                            onhit_damage.maximum_damage - self.attacks.onhit_damage.maximum_damage,
                         ),
                 )),
             },
         ]);
 
-        let abilities_dmg = &self.abilities;
+        let abilities_dmg = &other.abilities;
         let mut md_end = 0usize;
 
         for i in 0..abilities_meta.len() {
@@ -401,7 +406,7 @@ impl Damages {
                 cells[target].max_dmg = Some(abilities_dmg[i]);
                 cells[target].diff = cells[target]
                     .diff
-                    .map(|(v, _)| (v, Some(other.abilities[i] - abilities_dmg[i])));
+                    .map(|(v, _)| (v, Some(abilities_dmg[i] - self.abilities[i])));
                 cells[target].offsets.1 = Some(&ability_closures[i]);
 
                 md_end += 1;
@@ -422,14 +427,14 @@ impl Damages {
                 max_dmg: None,
                 offsets: (&ability_closures[i], None),
                 idents,
-                diff: Some((other.abilities[i] - abilities_dmg[i], None)),
+                diff: Some((abilities_dmg[i] - self.abilities[i], None)),
             });
         }
 
         for (k, meta) in items_meta.iter().enumerate() {
             let min_i = k << 1;
-            let min = self.items[min_i];
-            let max = self.items[min_i + 1];
+            let min = other.items[min_i];
+            let max = other.items[min_i + 1];
 
             let item_id = meta.kind;
 
@@ -439,20 +444,21 @@ impl Damages {
                 max_dmg: Some(max),
                 offsets: (item_id.closure(), None),
                 idents: item_id.idents(),
-                diff: Some((other.items[min_i] - min, Some(other.items[min_i + 1] - max))),
+                diff: Some((min - self.items[min_i], Some(max - self.items[min_i + 1]))),
             });
         }
 
         for (k, meta) in runes_meta.iter().enumerate() {
             let rune_id = meta.kind;
+            let min = other.runes[k];
 
             cells.push(Cell {
                 damage_type: meta.damage_type,
-                min_dmg: self.runes[k],
+                min_dmg: min,
                 max_dmg: None,
                 offsets: (rune_id.closure(), None),
                 idents: rune_id.idents(),
-                diff: Some((other.runes[k] - self.runes[k], None)),
+                diff: Some((min - self.runes[k], None)),
             });
         }
 

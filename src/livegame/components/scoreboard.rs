@@ -2,8 +2,10 @@ use crate::{
     components::image::{Image, ImageType},
     livegame::Scoreboard,
     model::Team,
+    utils::encode_offset,
 };
 use std::rc::Rc;
+use tutorlolv2_gen::CastId;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -35,12 +37,14 @@ fn render_cell(entry: Option<&Scoreboard>) -> Html {
         ..
     } = entry;
 
+    let data_offset = encode_offset(core::array::from_ref(&champion_id.formula()));
+
     html! {
         <div class={classes!(
             "grid", "grid-cols-[auto_1fr_auto]",
             "gap-2", "items-center"
         )}>
-            <div class={classes!("relative", "shrink-0")}>
+            <div {data_offset} class={classes!("relative", "shrink-0")}>
                 <Image
                     class={classes!("w-8", "h-8", "overflow-hidden")}
                     src={ImageType::from(champion_id)}

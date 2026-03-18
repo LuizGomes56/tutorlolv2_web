@@ -81,6 +81,16 @@ pub struct Damages {
     pub ctx: Ctx,
 }
 
+impl Damages {
+    pub fn sum(&self) -> i32 {
+        self.attacks.onhit_damage.minimum_damage
+            + self.attacks.onhit_damage.maximum_damage
+            + self.abilities.iter().sum::<i32>()
+            + self.items.iter().sum::<i32>()
+            + self.runes.iter().sum::<i32>()
+    }
+}
+
 impl_reducible!(AbilityLevels u8 { q, w, e, r });
 
 impl AbilityLevels {
@@ -182,10 +192,6 @@ impl AbilityKind {
             AbilityKind::Alias(merge) => merge.alias,
             AbilityKind::Normal(ability_id) => *ability_id,
         }
-    }
-
-    pub const fn as_char(&self) -> char {
-        self.ability_id().as_char()
     }
 }
 

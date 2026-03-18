@@ -73,8 +73,25 @@ function init_hover() {
 
     function positionTooltip(host) {
         const r = host.getBoundingClientRect();
-        tip.style.left = `${Math.round(r.left)}px`;
-        tip.style.top = `${Math.round(r.bottom)}px`;
+        const tipRect = tip.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let left = Math.round(r.left);
+        let top = Math.round(r.bottom);
+
+        if (left + tipRect.width > vw - 8) {
+            left = Math.round(r.right) - tipRect.width;
+            left = Math.max(8, left);
+        }
+
+        if (top + tipRect.height > vh - 8) {
+            top = Math.round(r.top) - tipRect.height;
+            top = Math.max(8, top);
+        }
+
+        tip.style.left = `${left}px`;
+        tip.style.top = `${top}px`;
     }
 
     function showOn(host) {
@@ -85,10 +102,14 @@ function init_hover() {
         code.innerHTML = setTooltipContent(host);
 
         currentHost = host;
+
         tip.classList.remove("hidden");
+        tip.style.visibility = "hidden";
         tip.style.display = "";
 
         positionTooltip(host);
+
+        tip.style.visibility = "";
     }
 
     function hideTooltip() {

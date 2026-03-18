@@ -10,7 +10,7 @@ use crate::{
         Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
         scoreboard::ScoreboardDisplay,
     },
-    utils::{ClassCast, Fetch, Loading, encode_offset, glue::get_data, use_setter},
+    utils::{Fetch, Loading, encode_offset, glue::get_data, use_setter},
 };
 use tutorlolv2_gen::{CastId, ChampionId, ItemId, ItemsBitSet, SIMULATED_ITEMS_ENUM};
 use yew::{
@@ -97,13 +97,19 @@ pub fn Livegame() -> Html {
 
             let enemy_rows = enemies
                 .iter()
-                .map(|enemy| (enemy.champion_id, enemy.item_scores(champion_id)))
+                .map(|enemy| {
+                    (
+                        enemy.champion_id,
+                        enemy.total_damage(),
+                        enemy.item_scores(champion_id),
+                    )
+                })
                 .collect::<Vec<_>>();
 
             let mut seen = ItemsBitSet::EMPTY;
             let columns = enemy_rows
                 .iter()
-                .flat_map(|(_, list)| list.iter())
+                .flat_map(|(.., list)| list.iter())
                 .filter_map(|&(_, item_id)| seen.insert(item_id.index()).then_some(item_id))
                 .collect::<Vec<_>>();
 
@@ -123,7 +129,7 @@ pub fn Livegame() -> Html {
 
             let recm_body = enemy_rows
                 .iter()
-                .map(|(enemy_id, list)| {
+                .map(|(enemy_id, base, list)| {
                     let data_offset = encode_offset(core::array::from_ref(&enemy_id.formula()));
 
                     html! {
@@ -136,7 +142,7 @@ pub fn Livegame() -> Html {
                                     let damage = list
                                         .iter()
                                         .find(|(_, id)| *id == item_id)
-                                        .map(|(damage, _)| *damage);
+                                        .map(|(damage, _)| *damage - *base);
 
                                     html! {
                                         <td>
@@ -156,18 +162,16 @@ pub fn Livegame() -> Html {
                 })
                 .collect::<Html>();
 
-            let recommendations = html! {
-                <div class={classes!("box", "overflow-auto")}>
-                    <table class={classes!("data-table")}>
-                        <thead>
-                            <tr>
-                                <th />
-                                {recm_header}
-                            </tr>
-                        </thead>
-                        <tbody>{recm_body}</tbody>
-                    </table>
-                </div>
+            let recm_table = html! {
+                <table class={classes!("data-table")}>
+                    <thead>
+                        <tr>
+                            <th />
+                            {recm_header}
+                        </tr>
+                    </thead>
+                    <tbody>{recm_body}</tbody>
+                </table>
             };
 
             html! {
@@ -231,7 +235,15 @@ pub fn Livegame() -> Html {
                                 </div>
                             </div>
                         </div>
-                        {recommendations}
+                        <div class={classes!("box", "overflow-auto")}>
+                            <div class={classes!(
+                                "text-2xl", "font-medium", "text-std-400",
+                                "px-6", "py-4"
+                            )}>
+                                {"Bonus damage after buying new item"}
+                            </div>
+                            {recm_table}
+                        </div>
                         <div class={classes!("box", "overflow-auto")}>
                             <div class={classes!("h-fit", "p-4")}>
                                 <Selector<ItemId>

@@ -69,17 +69,12 @@ pub struct Enemy {
 }
 
 impl Enemy {
+    pub fn total_damage(&self) -> i32 {
+        self.damages.sum()
+    }
+
     pub fn item_scores(&self, champion_id: ChampionId) -> Vec<(i32, ItemId)> {
-        let array: [i32; L_SIML] = core::array::from_fn(|i| {
-            let damage = &self.siml_items[i];
-            damage.attacks.basic_attack
-                + damage.attacks.onhit_damage.minimum_damage
-                + damage.attacks.onhit_damage.maximum_damage
-                + damage.attacks.critical_strike
-                + damage.abilities.iter().sum::<i32>()
-                + damage.items.iter().sum::<i32>()
-                + damage.runes.iter().sum::<i32>()
-        });
+        let array: [i32; L_SIML] = core::array::from_fn(|i| self.siml_items[i].sum());
 
         let mut seen = ItemsBitSet::EMPTY;
 
