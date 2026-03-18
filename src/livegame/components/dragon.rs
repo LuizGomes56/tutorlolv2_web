@@ -32,7 +32,11 @@ pub fn DragonDisplay(props: &DragonDisplayProps) -> Html {
                     <tr>
                         <th />
                         <th>{"Allies"}</th>
-                        <th>{"Enemies"}</th>
+                        <th>
+                            <span class={classes!("pr-2")}>
+                                {"Enemies"}
+                            </span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>

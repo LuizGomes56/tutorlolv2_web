@@ -1,11 +1,10 @@
 use crate::{
     calculator::reducer::push_item,
-    components::tray::Tray,
     model::{
         AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
         ValueException,
     },
-    utils::EnumCast,
+    utils::{EnumCast, tray::Tray},
 };
 use bincode::{Decode, Encode};
 use std::{collections::HashMap, hash::Hash, rc::Rc};

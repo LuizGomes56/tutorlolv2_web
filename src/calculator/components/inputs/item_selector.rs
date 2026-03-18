@@ -4,13 +4,11 @@ use crate::{
         page::{EnemyProps, PlayerProps, TargetEntity},
         reducer::{DataAction, EnemyAction, LastAction, PlayerAction},
     },
-    components::{
-        image::{Image, ImageType, Svg},
-        tray::{Tray, TrayAction, TrayEntry},
-    },
+    components::image::{Image, ImageType, Svg},
     utils::{
         encode_offset,
         hooks::{on_keydown, use_clickout},
+        tray::{Tray, TrayAction, TrayEntry},
     },
 };
 use tutorlolv2_gen::{

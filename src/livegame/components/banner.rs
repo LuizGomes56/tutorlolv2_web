@@ -35,7 +35,7 @@ pub fn Banner(props: &BannerProps) -> Html {
             />
             <span class={classes!(
                 "flex", "font-bold", "items-center",
-                "justify-between", "text-zinc-300",
+                "justify-between", "text-std-300",
                 "p-4"
             )}>
                 <p>

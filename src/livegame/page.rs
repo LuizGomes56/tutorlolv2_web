@@ -189,7 +189,7 @@ pub fn Livegame() -> Html {
                             ally_team={current_player.team}
                             scoreboard={scoreboard.clone()}
                         />
-                        <div class={classes!("grid", "grid-cols-2", "gap-4")}>
+                        <div class={classes!("grid", "grid-cols-[auto_auto]", "gap-4")}>
                             <DragonDisplay {dragons} />
                             <AbilityLevelsDisplay
                                 {champion_id}

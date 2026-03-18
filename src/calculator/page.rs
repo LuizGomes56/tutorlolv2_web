@@ -11,10 +11,9 @@ use crate::{
         image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
         stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
-        tray::TrayAction,
     },
     model::{Dragons, EnemyStats},
-    utils::{ClassCast, Fetch, Loading, Print, encode_offset},
+    utils::{ClassCast, Fetch, Loading, Print, encode_offset, tray::TrayAction},
 };
 use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{CastId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};

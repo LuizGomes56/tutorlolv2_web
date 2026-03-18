@@ -24,13 +24,17 @@ pub fn AbilityLevelsDisplay(props: &AbilityLevelsDisplayProps) -> Html {
                 <thead>
                     <tr>
                         <th></th>
-                        <th>{"Level"}</th>
+                        <th>
+                            <span class={classes!("pr-2")}>
+                                {"Level"}
+                            </span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     for key in AbilityLevels::ABILITIES {
                         <tr>
-                            <td class={classes!("w-10")}>
+                            <td class={classes!("w-10", "pr-0")}>
                                 <Image src={ImageType::Ability(*champion_id, key.into())} />
                             </td>
                             <td>{ability_levels[key]}</td>

@@ -5,10 +5,12 @@ use crate::{
         image::{Image, ImageType},
         stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::header::TableHeader,
-        tray::TrayAction,
     },
     livegame::{Enemy, Game},
-    utils::{ClassCast, Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
+    utils::{
+        ClassCast, Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown,
+        tray::TrayAction,
+    },
 };
 use tutorlolv2_gen::{CastId, ItemsBitSet, L_SIML, Position, SIMULATED_ITEMS_METADATA};
 use wasm_bindgen::{

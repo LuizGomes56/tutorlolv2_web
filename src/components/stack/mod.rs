@@ -2,9 +2,9 @@ mod insert;
 mod remover;
 mod table;
 
-use crate::{
-    components::tray::{Tray, TrayAction, TrayEntry},
-    utils::random_u64,
+use crate::utils::{
+    random_u64,
+    tray::{Tray, TrayAction, TrayEntry},
 };
 use serde::{Deserialize, Serialize};
 use std::{

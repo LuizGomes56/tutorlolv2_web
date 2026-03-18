@@ -8,6 +8,7 @@ pub mod glue;
 pub mod hooks;
 mod macros;
 mod traits;
+pub mod tray;
 
 pub use self::{
     cache::init_cache,
