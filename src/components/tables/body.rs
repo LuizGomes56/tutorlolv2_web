@@ -4,7 +4,7 @@ use crate::{
     model::{Attacks, Damages},
     utils::{ClassCast, encode_offset},
 };
-use std::{fmt::Write, ops::Range};
+use core::{fmt::Write, ops::Range};
 use tutorlolv2_gen::{
     BASIC_ATTACK_FN_OFFSET, CRITICAL_STRIKE_FN_OFFSET, ChampionId, Ctx, CtxVar, DamageType, ItemId,
     ONHIT_EFFECT_FN_OFFSET, RuneId, TypeMetadata,
@@ -58,14 +58,14 @@ impl Cell {
     fn render_range(min: i32, max: Option<i32>) -> Html {
         match max {
             Some(max) => html!(<>{min}{" - "}{max}</>),
-            None => html!(<>{min}</>),
+            None => html!(min),
         }
     }
 
     fn render_diff_value(value: i32) -> Html {
         match value < 0 {
-            true => html!(<>{"("}{value}{")"} </>),
-            false => html!(<>{value}</>),
+            true => html!(<>{"("}{value}{")"}</>),
+            false => html!(value),
         }
     }
 
@@ -137,71 +137,50 @@ impl Cell {
 }
 
 impl Damages {
-    pub fn to_html(
-        &self,
-        champion_id: ChampionId,
-        items_meta: &[TypeMetadata<ItemId>],
-        runes_meta: &[TypeMetadata<RuneId>],
-    ) -> Html {
+    const BASE_CELLS: usize = 3;
+
+    fn ability_cell_index(champion_id: ChampionId) -> Vec<usize> {
         let merge_data = champion_id.merge_data();
         let abilities_meta = champion_id.abilities();
-        let ability_idents = champion_id.idents();
-        let ability_closures = champion_id.closures();
 
-        const BASE_CELLS: usize = 3;
+        let len = abilities_meta.len();
 
-        let ability_cell_index = {
-            let len = abilities_meta.len();
+        let mut indexes = vec![usize::MAX; len];
+        let mut max_iterator = merge_data
+            .iter()
+            .map(|m| m.maximum_damage as usize)
+            .peekable();
 
-            let mut indexes = vec![usize::MAX; len];
-            let mut max_iterator = merge_data
-                .iter()
-                .map(|m| m.maximum_damage as usize)
-                .peekable();
+        let mut pos = Self::BASE_CELLS;
+        (0..len).for_each(|i| match max_iterator.peek() {
+            Some(&max) if max == i => {
+                max_iterator.next();
+            }
+            _ => {
+                indexes[i] = pos;
+                pos += 1;
+            }
+        });
 
-            let mut pos = BASE_CELLS;
-            (0..len).for_each(|i| match max_iterator.peek() {
-                Some(&max) if max == i => {
-                    max_iterator.next();
-                }
-                _ => {
-                    indexes[i] = pos;
-                    pos += 1;
-                }
-            });
+        debug_assert_eq!(pos, Self::BASE_CELLS + len - merge_data.len());
+        indexes
+    }
 
-            debug_assert_eq!(pos, BASE_CELLS + len - merge_data.len());
-            indexes
-        };
-
-        let len = BASE_CELLS + abilities_meta.len() - merge_data.len()
-            + items_meta.len()
-            + runes_meta.len();
-
-        let mut cells = Vec::<Cell>::with_capacity(len);
-
-        let ctx = self.ctx;
-
+    fn attack_cells(&self, cells: &mut Vec<Cell>, other: Option<&Damages>) {
         let Attacks {
             basic_attack,
             critical_strike,
             onhit_damage,
         } = self.attacks;
 
-        debug_assert_eq!(items_meta.len(), self.items.len() >> 1);
-        debug_assert_eq!(runes_meta.len(), self.runes.len());
-        debug_assert_eq!(self.abilities.len(), abilities_meta.len());
-        debug_assert_eq!(ability_idents.len(), abilities_meta.len());
-        debug_assert_eq!(ability_closures.len(), abilities_meta.len());
-
-        cells.extend([
+        let data = [
             Cell {
                 damage_type: DamageType::Physical,
                 min_dmg: basic_attack,
                 max_dmg: None,
                 offsets: (&BASIC_ATTACK_FN_OFFSET, None),
                 idents: &[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier],
-                diff: None,
+                diff: other.map(|o| (basic_attack - o.attacks.basic_attack, None)),
             },
             Cell {
                 damage_type: DamageType::Physical,
@@ -209,22 +188,50 @@ impl Damages {
                 max_dmg: None,
                 offsets: (&CRITICAL_STRIKE_FN_OFFSET, None),
                 idents: &[CtxVar::AttackDamage, CtxVar::CritDamage],
-                diff: None,
+                diff: other.map(|o| (critical_strike - o.attacks.critical_strike, None)),
             },
             Cell {
                 damage_type: DamageType::Mixed,
                 min_dmg: onhit_damage.minimum_damage,
-                max_dmg: (onhit_damage.maximum_damage != 0).then_some(onhit_damage.maximum_damage),
+                max_dmg: Some(onhit_damage.maximum_damage),
                 offsets: (&ONHIT_EFFECT_FN_OFFSET, None),
                 idents: &[],
-                diff: None,
+                diff: other.map(|o| {
+                    let other_onhit = &o.attacks.onhit_damage;
+                    (
+                        onhit_damage.minimum_damage - other_onhit.minimum_damage,
+                        Some(onhit_damage.maximum_damage - other_onhit.maximum_damage),
+                    )
+                }),
             },
-        ]);
+        ];
 
-        let abilities_dmg = &self.abilities;
-        let mut md_end = 0usize;
+        cells.extend(data);
+    }
 
-        for i in 0..abilities_meta.len() {
+    fn abilities_damage(
+        &self,
+        cells: &mut Vec<Cell>,
+        champion_id: ChampionId,
+        other: Option<&Damages>,
+    ) {
+        let damages = &self.abilities;
+
+        let abilities_meta = champion_id.abilities();
+        let merge_data = champion_id.merge_data();
+        let ability_cell_index = Self::ability_cell_index(champion_id);
+        let ability_idents = champion_id.idents();
+        let ability_closures = champion_id.closures();
+
+        let meta_len = abilities_meta.len();
+
+        debug_assert_eq!(damages.len(), meta_len);
+        debug_assert_eq!(ability_idents.len(), meta_len);
+        debug_assert_eq!(ability_closures.len(), meta_len);
+
+        let mut md_end = 0;
+
+        for i in 0..meta_len {
             if md_end < merge_data.len() && (merge_data[md_end].maximum_damage as usize) == i {
                 let md = &merge_data[md_end];
                 let min_i = md.minimum_damage as usize;
@@ -233,10 +240,21 @@ impl Damages {
                 debug_assert!(target != usize::MAX);
                 debug_assert!(target < cells.len(), "Found a max match without min");
 
-                cells[target].max_dmg = Some(abilities_dmg[i]);
-                cells[target].offsets.1 = Some(&ability_closures[i]);
+                let max_dmg = damages[i];
+                let mut_ref = &mut cells[target];
 
+                mut_ref.max_dmg = Some(max_dmg);
+                mut_ref.offsets.1 = Some(&ability_closures[i]);
+
+                if let Some(o) = other
+                    && let Some((_, max_diff)) = &mut mut_ref.diff
+                {
+                    *max_diff = Some(max_dmg - o.abilities[i]);
+                }
+
+                mut_ref.offsets.1 = Some(&ability_closures[i]);
                 md_end += 1;
+
                 continue;
             }
 
@@ -245,228 +263,118 @@ impl Damages {
             debug_assert_eq!(cell_i, cells.len());
 
             let meta = &abilities_meta[i];
-
             let idents = &ability_idents[i];
 
             cells.push(Cell {
                 damage_type: meta.damage_type,
-                min_dmg: abilities_dmg[i],
+                min_dmg: damages[i],
                 max_dmg: None,
                 offsets: (&ability_closures[i], None),
                 idents,
                 diff: None,
             });
         }
+    }
+
+    fn items_damage(
+        &self,
+        cells: &mut Vec<Cell>,
+        items_meta: &[TypeMetadata<ItemId>],
+        other: Option<&Damages>,
+    ) {
+        let damages = &self.items;
+
+        debug_assert_eq!(items_meta.len(), damages.len() >> 1);
 
         for (k, meta) in items_meta.iter().enumerate() {
             let min_i = k << 1;
-            let min = self.items[min_i];
-            let max = self.items[min_i + 1];
+            let min_dmg = damages[min_i];
+            let max_dmg = damages[min_i + 1];
 
             let item_id = meta.kind;
 
             cells.push(Cell {
                 damage_type: meta.damage_type,
-                min_dmg: min,
-                max_dmg: Some(max),
+                min_dmg,
+                max_dmg: Some(max_dmg),
                 offsets: (item_id.closure(), None),
                 idents: item_id.idents(),
-                diff: None,
+                diff: other.map(|o| {
+                    let diff_min = o.items[min_i];
+                    let diff_max = o.items[min_i + 1];
+                    (min_dmg - diff_min, Some(max_dmg - diff_max))
+                }),
             });
         }
+    }
+
+    fn runes_damage(
+        &self,
+        cells: &mut Vec<Cell>,
+        runes_meta: &[TypeMetadata<RuneId>],
+        other: Option<&Damages>,
+    ) {
+        let damages = &self.runes;
+
+        debug_assert_eq!(runes_meta.len(), damages.len());
 
         for (k, meta) in runes_meta.iter().enumerate() {
             let rune_id = meta.kind;
+            let min_dmg = damages[k];
 
             cells.push(Cell {
                 damage_type: meta.damage_type,
-                min_dmg: self.runes[k],
+                min_dmg,
                 max_dmg: None,
                 offsets: (rune_id.closure(), None),
                 idents: rune_id.idents(),
-                diff: None,
+                diff: other.map(|o| (min_dmg - o.runes[k], None)),
             });
         }
+    }
 
-        debug_assert_eq!(cells.len(), len);
+    pub fn render_cells(&self, cells: Vec<Cell>) -> Html {
+        debug_assert_eq!(cells.len(), cells.capacity());
 
         cells
             .into_iter()
-            .map(|cell| cell.render(&ctx))
+            .map(|cell| cell.render(&self.ctx))
             .collect::<Html>()
     }
 
-    pub fn to_html_with_diff(
+    pub fn make_cells(
+        champion_id: ChampionId,
+        items_meta: &[TypeMetadata<ItemId>],
+        runes_meta: &[TypeMetadata<RuneId>],
+    ) -> Vec<Cell> {
+        let merge_data = champion_id.merge_data();
+        let abilities_meta = champion_id.abilities();
+
+        let len = Self::BASE_CELLS + abilities_meta.len() - merge_data.len()
+            + items_meta.len()
+            + runes_meta.len();
+
+        Vec::<Cell>::with_capacity(len)
+    }
+
+    pub fn to_html(
         &self,
         champion_id: ChampionId,
         items_meta: &[TypeMetadata<ItemId>],
         runes_meta: &[TypeMetadata<RuneId>],
-        other: &Damages,
+        other: Option<&Damages>,
     ) -> Html {
-        let merge_data = champion_id.merge_data();
-        let abilities_meta = champion_id.abilities();
-        let ability_idents = champion_id.idents();
-        let ability_closures = champion_id.closures();
+        let mut cells = Self::make_cells(champion_id, items_meta, runes_meta);
 
-        const BASE_CELLS: usize = 3;
-
-        let ability_cell_index = {
-            let len = abilities_meta.len();
-
-            let mut indexes = vec![usize::MAX; len];
-            let mut max_iterator = merge_data
-                .iter()
-                .map(|m| m.maximum_damage as usize)
-                .peekable();
-
-            let mut pos = BASE_CELLS;
-            (0..len).for_each(|i| match max_iterator.peek() {
-                Some(&max) if max == i => {
-                    max_iterator.next();
-                }
-                _ => {
-                    indexes[i] = pos;
-                    pos += 1;
-                }
-            });
-
-            debug_assert_eq!(pos, BASE_CELLS + len - merge_data.len());
-            indexes
-        };
-
-        let len = BASE_CELLS + abilities_meta.len() - merge_data.len()
-            + items_meta.len()
-            + runes_meta.len();
-
-        let mut cells = Vec::<Cell>::with_capacity(len);
-
-        let ctx = other.ctx;
-
-        let Attacks {
-            basic_attack,
-            critical_strike,
-            onhit_damage,
-        } = other.attacks;
-
-        debug_assert_eq!(items_meta.len(), self.items.len() >> 1,);
-        debug_assert_eq!(items_meta.len(), other.items.len() >> 1);
-        debug_assert_eq!(runes_meta.len(), self.runes.len());
-        debug_assert_eq!(runes_meta.len(), other.runes.len());
-        debug_assert_eq!(self.abilities.len(), abilities_meta.len());
-        debug_assert_eq!(other.abilities.len(), abilities_meta.len());
-        debug_assert_eq!(ability_idents.len(), abilities_meta.len());
-        debug_assert_eq!(ability_closures.len(), abilities_meta.len());
-
-        cells.extend([
-            Cell {
-                damage_type: DamageType::Physical,
-                min_dmg: basic_attack,
-                max_dmg: None,
-                offsets: (&BASIC_ATTACK_FN_OFFSET, None),
-                idents: &[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier],
-                diff: Some((basic_attack - self.attacks.basic_attack, None)),
-            },
-            Cell {
-                damage_type: DamageType::Physical,
-                min_dmg: critical_strike,
-                max_dmg: None,
-                offsets: (&CRITICAL_STRIKE_FN_OFFSET, None),
-                idents: &[CtxVar::AttackDamage, CtxVar::CritDamage],
-                diff: Some((critical_strike - self.attacks.critical_strike, None)),
-            },
-            Cell {
-                damage_type: DamageType::Mixed,
-                min_dmg: onhit_damage.minimum_damage,
-                max_dmg: (onhit_damage.maximum_damage != 0).then_some(onhit_damage.maximum_damage),
-                offsets: (&ONHIT_EFFECT_FN_OFFSET, None),
-                idents: &[],
-                diff: Some((
-                    onhit_damage.minimum_damage - self.attacks.onhit_damage.minimum_damage,
-                    (other.attacks.onhit_damage.maximum_damage != 0
-                        && onhit_damage.maximum_damage != 0)
-                        .then_some(
-                            onhit_damage.maximum_damage - self.attacks.onhit_damage.maximum_damage,
-                        ),
-                )),
-            },
-        ]);
-
-        let abilities_dmg = &other.abilities;
-        let mut md_end = 0usize;
-
-        for i in 0..abilities_meta.len() {
-            if md_end < merge_data.len() && (merge_data[md_end].maximum_damage as usize) == i {
-                let md = &merge_data[md_end];
-                let min_i = md.minimum_damage as usize;
-
-                let target = ability_cell_index[min_i];
-                debug_assert!(target != usize::MAX);
-                debug_assert!(target < cells.len(), "Found a max match without min");
-
-                cells[target].max_dmg = Some(abilities_dmg[i]);
-                cells[target].diff = cells[target]
-                    .diff
-                    .map(|(v, _)| (v, Some(abilities_dmg[i] - self.abilities[i])));
-                cells[target].offsets.1 = Some(&ability_closures[i]);
-
-                md_end += 1;
-                continue;
-            }
-
-            let cell_i = ability_cell_index[i];
-            debug_assert!(cell_i != usize::MAX);
-            debug_assert_eq!(cell_i, cells.len());
-
-            let meta = &abilities_meta[i];
-
-            let idents = &ability_idents[i];
-
-            cells.push(Cell {
-                damage_type: meta.damage_type,
-                min_dmg: abilities_dmg[i],
-                max_dmg: None,
-                offsets: (&ability_closures[i], None),
-                idents,
-                diff: Some((abilities_dmg[i] - self.abilities[i], None)),
-            });
+        if let Some(other) = other {
+            debug_assert_eq!(other.items.len(), self.items.len());
+            debug_assert_eq!(other.runes.len(), self.runes.len());
         }
 
-        for (k, meta) in items_meta.iter().enumerate() {
-            let min_i = k << 1;
-            let min = other.items[min_i];
-            let max = other.items[min_i + 1];
-
-            let item_id = meta.kind;
-
-            cells.push(Cell {
-                damage_type: meta.damage_type,
-                min_dmg: min,
-                max_dmg: Some(max),
-                offsets: (item_id.closure(), None),
-                idents: item_id.idents(),
-                diff: Some((min - self.items[min_i], Some(max - self.items[min_i + 1]))),
-            });
-        }
-
-        for (k, meta) in runes_meta.iter().enumerate() {
-            let rune_id = meta.kind;
-            let min = other.runes[k];
-
-            cells.push(Cell {
-                damage_type: meta.damage_type,
-                min_dmg: min,
-                max_dmg: None,
-                offsets: (rune_id.closure(), None),
-                idents: rune_id.idents(),
-                diff: Some((min - self.runes[k], None)),
-            });
-        }
-
-        debug_assert_eq!(cells.len(), len);
-
-        cells
-            .into_iter()
-            .map(|cell| cell.render(&ctx))
-            .collect::<Html>()
+        self.attack_cells(&mut cells, other);
+        self.abilities_damage(&mut cells, champion_id, other);
+        self.items_damage(&mut cells, items_meta, other);
+        self.runes_damage(&mut cells, runes_meta, other);
+        self.render_cells(cells)
     }
 }

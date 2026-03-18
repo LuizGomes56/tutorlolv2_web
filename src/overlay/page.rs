@@ -174,7 +174,9 @@ pub fn Overlay() -> Html {
 
             let damages = enemy
                 .map(|enemy| {
-                    let damages = enemy.damages.to_html(champion_id, items_meta, runes_meta);
+                    let damages = enemy
+                        .damages
+                        .to_html(champion_id, items_meta, runes_meta, None);
                     let enemy_id = enemy.champion_id;
 
                     html! {

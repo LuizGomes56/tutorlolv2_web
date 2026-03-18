@@ -73,7 +73,9 @@ pub fn Livegame() -> Html {
                 .map(|enemy| {
                     get_damages(
                         enemy.champion_id,
-                        enemy.damages.to_html(champion_id, items_meta, runes_meta),
+                        enemy
+                            .damages
+                            .to_html(champion_id, items_meta, runes_meta, None),
                     )
                 })
                 .collect::<Html>();
@@ -84,11 +86,11 @@ pub fn Livegame() -> Html {
                     .map(|enemy| {
                         get_damages(
                             enemy.champion_id,
-                            enemy.damages.to_html_with_diff(
+                            enemy.siml_items[i].to_html(
                                 champion_id,
                                 items_meta,
                                 runes_meta,
-                                &enemy.siml_items[i],
+                                Some(&enemy.damages),
                             ),
                         )
                     })

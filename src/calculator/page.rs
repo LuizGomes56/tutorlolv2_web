@@ -184,7 +184,9 @@ pub fn Calculator() -> Html {
                             }
                             Err(e) => {
                                 let error = e.to_string();
-                                if error != "AbortError: signal is aborted without reason" {
+                                if error != "AbortError: signal is aborted without reason"
+                                    && error != "AbortError: The user aborted a request."
+                                {
                                     format!("Failed to request calculator api: {e}").log();
                                     game_data.set(Err(e));
                                 }
@@ -221,7 +223,8 @@ pub fn Calculator() -> Html {
                                         let damages = enemy.damages.to_html(
                                             current_player.champion_id,
                                             items_meta,
-                                            runes_meta
+                                            runes_meta,
+                                            None
                                         );
                                         let enemy_id = enemy.champion_id;
                                         html! {
@@ -270,7 +273,8 @@ pub fn Calculator() -> Html {
                                         let damages = damage.to_html(
                                             current_player.champion_id,
                                             items_meta,
-                                            runes_meta
+                                            runes_meta,
+                                            None
                                         );
 
                                         let mut images = Vec::with_capacity(MONSTER_COUNT);
