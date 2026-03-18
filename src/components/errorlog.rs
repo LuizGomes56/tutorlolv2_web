@@ -8,7 +8,7 @@ pub fn errorlog<T: AsRef<dyn core::error::Error>>(error: &T) -> Html {
         if !e.is::<Loading>() {
             <div class={classes!("box")}>
                 <div class={classes!(
-                    "grid", "grid-cols-2", "gap-6",
+                    "grid", "md:grid-cols-2", "gap-6",
                     "px-6", "py-4", "bg-std-900"
                 )}>
                     <div class={classes!("flex", "flex-col", "gap-4")}>
@@ -33,7 +33,7 @@ pub fn errorlog<T: AsRef<dyn core::error::Error>>(error: &T) -> Html {
                         "leading-6", "text-base", "border",
                         "border-std-800", "bg-std-900"
                     )}>
-                        <pre>
+                        <pre class={classes!("whitespace-pre-wrap")}>
                             {format!("{e:#?}")}
                         </pre>
                     </code>

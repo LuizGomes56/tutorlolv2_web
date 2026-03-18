@@ -38,10 +38,7 @@ pub fn Banner(props: &BannerProps) -> Html {
                     img_class={classes!("w-8", "h-8", "shrink-0")}
                     input_class={classes!(
                         "font-bold", "text-lg", "text-std-400",
-                        "text-shadow", "bg-transparent",
-                        "focus:ring-0", "focus:outline-none",
-                        "placeholder:text-white", "min-w-0",
-                        "truncate"
+                        "text-shadow", "placeholder:text-white", "min-w-0",
                     )}
                     dropdown_class={classes!("px-1.5", "py-1", "w-full")}
                 />

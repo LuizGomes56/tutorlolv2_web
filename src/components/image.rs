@@ -11,6 +11,7 @@ pub enum DragonImage {
     Fire,
     Ocean,
     Earth,
+    Chemtech,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -195,6 +196,7 @@ impl ImageType {
                     DragonImage::Elder => "other/elder_dragon.avif",
                     DragonImage::Fire => "other/fire_dragon.avif",
                     DragonImage::Ocean => "other/ocean_dragon.avif",
+                    DragonImage::Chemtech => "other/chemtech_dragon.avif",
                 },
                 OtherImage::Monster(monster) => match monster {
                     MonsterImage::Gromp => "other/gromp.avif",

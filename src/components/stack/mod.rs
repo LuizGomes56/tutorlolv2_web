@@ -13,7 +13,7 @@ use std::{
     rc::Rc,
 };
 use tutorlolv2_gen::{AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata};
-use yew::Reducible;
+use yew::{Callback, Reducible};
 
 pub use insert::StackInsert;
 pub use remover::StackRemover;
@@ -40,6 +40,14 @@ pub struct Stack {
 }
 
 impl Stack {
+    #[yew::hook]
+    pub fn use_push(stack: &yew::UseReducerHandle<Stack>) -> Callback<StackValue> {
+        let stack = stack.clone();
+        yew::use_callback((), move |value, _| {
+            stack.dispatch(TrayAction::Insert(value))
+        })
+    }
+
     pub fn new(
         champion_id: ChampionId,
         items_meta: &[TypeMetadata<ItemId>],

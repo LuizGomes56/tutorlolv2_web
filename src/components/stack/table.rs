@@ -79,11 +79,11 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                                 >
                                     <button
                                         class={classes!(
-                                            "cursor-pointer",
                                             "outline-none",
                                             "focus:ring-1",
                                             "focus:ring-blue-500/75"
                                         )}
+                                        disabled={callback.is_none()}
                                         onclick={callback.clone().map(|f| Callback::from(move |_| f.emit(i)))}
                                     >
                                         <Image src={ImageType::from(enemy_id)} />

@@ -88,13 +88,7 @@ pub fn Calculator() -> Html {
     let dragons = use_reducer(Dragons::default);
     let enemy_index = use_state(|| 0);
     let stack = use_reducer(Stack::default);
-
-    let stack_push = {
-        let stack = stack.clone();
-        use_callback((), move |value, _| {
-            stack.dispatch(TrayAction::Insert(value))
-        })
-    };
+    let stack_push = Stack::use_push(&stack);
 
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
     let controller = use_state(|| None::<AbortController>);

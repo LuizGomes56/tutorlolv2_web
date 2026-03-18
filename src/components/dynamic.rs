@@ -40,7 +40,7 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
             data-scale={1}
             data-active={false}
             class={classes!(
-                "border", "border-2", "place-self-end",
+                "border", "border-2",
                 "border-dashed", "select-none",
                 "touch-none", "p-2", "min-h-fit",
                 if *focused {

@@ -2,12 +2,12 @@ use crate::{
     components::image::{Image, ImageType, Svg},
     utils::{EnumCast, hooks::use_clickout},
 };
-use tutorlolv2_gen::ItemId;
+use tutorlolv2_gen::{CastId, ItemId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
-pub struct SelectorProps<T: PartialEq> {
+pub struct SelectorProps<T: CastId + PartialEq + 'static> {
     pub callback: Callback<T>,
     pub value: T,
     #[prop_or(classes!("gap-4"))]
@@ -16,14 +16,13 @@ pub struct SelectorProps<T: PartialEq> {
     pub img_class: Classes,
     #[prop_or(classes!(
         "text-std-200", "placeholder:text-std-500",
-        "text-3xl", "font-medium",
-        "bg-transparent", "w-full",
-        "focus:ring-0", "focus:outline-none",
-        "truncate"
+        "text-3xl", "font-medium", "w-full",
     ))]
     pub input_class: Classes,
     #[prop_or(classes!("mt-2", "px-1.5", "py-1", "w-96"))]
     pub dropdown_class: Classes,
+    #[prop_or(T::VALUES)]
+    pub array: &'static [T],
 }
 
 #[component]
@@ -38,6 +37,7 @@ where
         ref input_class,
         ref label_class,
         ref dropdown_class,
+        array,
         value,
     } = *props;
 
@@ -53,7 +53,7 @@ where
         use_memo(
             (callback.clone(), close_callback.clone(), query.clone()),
             |(callback, close_callback, query)| {
-                T::VALUES
+                array
                 .iter()
                 .map(|&v| {
                     let onclick = {
@@ -120,7 +120,14 @@ where
                         src={ImageType::from(value)}
                     />
                     <input
-                        class={input_class}
+                        class={{
+                            let mut class = classes!(
+                                "bg-transparent", "focus:ring-0",
+                                "focus:outline-none", "truncate"
+                            );
+                            class.push(input_class);
+                            class
+                        }}
                         value={query.to_string()}
                         placeholder={value.name()}
                         {oninput}

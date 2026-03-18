@@ -4,7 +4,7 @@ use crate::{
     utils::encode_offset,
 };
 use std::hash::Hash;
-use tutorlolv2_gen::{BitSetArray, CastId, ChampionId};
+use tutorlolv2_gen::{BitSetArray, CastId, ChampionId, ItemsBitSet};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -84,29 +84,37 @@ where
         filter,
     } = *props;
 
+    let mut seen = ItemsBitSet::EMPTY;
+
     values
         .iter()
-        .filter(|value| filter.contains(value.index()))
         .filter_map(|&value| {
-            exceptions.inner.get(&value).map(|v| {
-                let oninput = {
-                    let callback = callback.clone();
-                    Callback::from(move |e: InputEvent| {
-                        let target = e.target_unchecked_into::<HtmlInputElement>();
-                        let stacks = target.value().parse::<u32>().unwrap_or(0);
-                        callback.emit((value, stacks));
-                    })
-                };
+            let index = value.index();
 
-                html!(
-                    <ExceptionInput<T>
-                        {oninput}
-                        {value}
-                        image_type={ImageType::from(value)}
-                        stacks={v.stacks()}
-                    />
-                )
-            })
+            exceptions
+                .inner
+                .get(&value)
+                .filter(|_| !(filter.contains(index) && seen.contains(index)))
+                .map(|v| {
+                    seen.insert(index);
+                    let oninput = {
+                        let callback = callback.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let target = e.target_unchecked_into::<HtmlInputElement>();
+                            let stacks = target.value().parse::<u32>().unwrap_or(0);
+                            callback.emit((value, stacks));
+                        })
+                    };
+
+                    html!(
+                        <ExceptionInput<T>
+                            {oninput}
+                            {value}
+                            image_type={ImageType::from(value)}
+                            stacks={v.stacks()}
+                        />
+                    )
+                })
         })
         .collect::<Html>()
 }
