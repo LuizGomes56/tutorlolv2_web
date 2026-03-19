@@ -13,7 +13,7 @@ use crate::{
         tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
     },
     model::{Dragons, EnemyStats},
-    utils::{ClassCast, Fetch, Loading, Print, encode_offset, tray::TrayAction},
+    utils::{ClassCast, Fetch, FetchUrl, Loading, Print, encode_offset, tray::TrayAction},
 };
 use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{CastId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
@@ -138,7 +138,7 @@ pub fn Calculator() -> Html {
 
                     input_game.active_player.data.items.log();
 
-                    if let Ok(req) = Fetch::new("/api/games/calculator")
+                    if let Ok(req) = Fetch::new(FetchUrl::Calculator)
                         .signal(signal)
                         .body_with_bincode(&input_game)
                     {

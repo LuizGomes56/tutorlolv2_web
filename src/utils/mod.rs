@@ -12,7 +12,7 @@ pub mod tray;
 
 pub use self::{
     cache::init_cache,
-    fetch::Fetch,
+    fetch::{Fetch, FetchUrl},
     hooks::use_setter,
     traits::{ClassCast, EnumCast, Print, ReduceApply},
 };

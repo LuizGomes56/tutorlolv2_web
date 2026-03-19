@@ -181,7 +181,7 @@ pub fn Livegame() -> Html {
                     "flex", "gap-4", "mb-96",
                     "p-4", "overflow-hidden", "flex-1"
                 )}>
-                    <div class={classes!("flex", "flex-col", "gap-4")}>
+                    <div class={classes!("flex", "flex-col", "gap-4", "min-w-80")}>
                         <Banner
                             riot_id={current_player.riot_id.clone()}
                             {game_time}
@@ -199,7 +199,7 @@ pub fn Livegame() -> Html {
                             />
                         </div>
                     </div>
-                    <div class={classes!("flex", "flex-col", "gap-4")}>
+                    <div class={classes!("flex", "flex-col", "gap-4", "flex-1")}>
                         <div class={classes!("box", "overflow-auto")}>
                             <table class={classes!("data-table")}>
                                 <TableHeader
@@ -239,8 +239,8 @@ pub fn Livegame() -> Html {
                         </div>
                         <div class={classes!("box", "overflow-auto")}>
                             <div class={classes!(
-                                "text-2xl", "font-medium", "text-std-400",
-                                "px-6", "py-4"
+                                "text-xl", "font-medium", "text-std-400",
+                                "px-6", "py-5"
                             )}>
                                 {"Bonus damage after buying new item"}
                             </div>

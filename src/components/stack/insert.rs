@@ -31,8 +31,8 @@ fn section(title: &str, iterator: impl ExactSizeIterator<Item = Html>) -> Option
                 </h2>
             </div>
             <div class={classes!(
-                "flex", "gap-2", "flex-wrap",
-                "items-start"
+                "grid", "grid-cols-8", "w-fit",
+                "gap-2", "items-start"
             )}>
                 {iterator.collect::<Html>()}
             </div>

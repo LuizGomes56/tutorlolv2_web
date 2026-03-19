@@ -126,7 +126,7 @@ img {
 }
 
 .box {
-    box-shadow: 0 0 10px #08080f;
+    box-shadow: 0 0 10px 2.5px #08080f;
 }
 
 .clip {

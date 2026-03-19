@@ -1,6 +1,6 @@
 use crate::{
     livegame::Game,
-    utils::{fetch::Fetch, traits::Print},
+    utils::{FetchUrl, fetch::Fetch, traits::Print},
 };
 use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
 use web_sys::js_sys::Uint8Array;
@@ -14,7 +14,7 @@ unsafe extern "C" {
 async fn realtime(bytes: Vec<u8>) -> Result<Game, String> {
     match bytes.is_empty() {
         true => Err("Desktop application required to use the overlay feature".into()),
-        false => Ok(Fetch::new("/api/games/realtime")
+        false => Ok(Fetch::new(FetchUrl::Realtime)
             .set_body(bytes)
             .post()
             .await

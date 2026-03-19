@@ -7,12 +7,9 @@ use crate::{
         tables::header::TableHeader,
     },
     livegame::{Enemy, Game},
-    utils::{
-        ClassCast, Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown,
-        tray::TrayAction,
-    },
+    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
 };
-use tutorlolv2_gen::{CastId, ItemsBitSet, L_SIML, Position, SIMULATED_ITEMS_METADATA};
+use tutorlolv2_gen::CastId;
 use wasm_bindgen::{
     JsCast, JsValue,
     prelude::{Closure, wasm_bindgen},
@@ -161,12 +158,9 @@ pub fn Overlay() -> Html {
             let Game {
                 current_player,
                 enemies,
-                scoreboard,
                 items_meta,
                 runes_meta,
-                game_time,
-                ability_levels,
-                dragons,
+                ..
             } = data;
 
             let champion_id = current_player.champion_id;
@@ -201,7 +195,7 @@ pub fn Overlay() -> Html {
                     .map(|(damage, item)| {
                         html! {
                             <div class={classes!("flex", "items-center", "gap-2")}>
-                                <span class={classes!("text-sm", item.damage_type().class())}>
+                                <span class={classes!("text-sm")}>
                                     {damage - base}
                                 </span>
                                 <Image
