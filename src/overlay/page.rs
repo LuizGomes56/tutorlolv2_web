@@ -6,7 +6,9 @@ use crate::{
         stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::header::TableHeader,
     },
+    impl_reducible,
     livegame::{Enemy, Game},
+    overlay::panel::PanelManager,
     utils::{Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
 };
 use tutorlolv2_gen::CastId;
@@ -35,6 +37,29 @@ unsafe extern "C" {
     pub async fn listen(event: String, callback: &Function) -> Result<JsValue, JsValue>;
 }
 
+impl_reducible! {
+    #[derive(Clone, Copy, Debug, PartialEq)]
+    Panel bool {
+        damage_table,
+        recommendations_table,
+        stack_insert,
+        stack_remover,
+        stack_table
+    }
+}
+
+impl Default for Panel {
+    fn default() -> Self {
+        Self {
+            damage_table: true,
+            recommendations_table: true,
+            stack_insert: true,
+            stack_remover: true,
+            stack_table: true,
+        }
+    }
+}
+
 #[component]
 pub fn Overlay() -> Html {
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
@@ -49,6 +74,8 @@ pub fn Overlay() -> Html {
 
     let stack = use_reducer(Stack::default);
     let stack_push = Stack::use_push(&stack);
+
+    let panel_manager = use_reducer_eq(Panel::default);
 
     use_effect_with((), |_| mouse_events());
 
@@ -210,67 +237,84 @@ pub fn Overlay() -> Html {
 
             html! {
                 <>
-                    <Dynamic panel_id={"damage-table"} focused={*focused}>
-                        <div
-                            data-panel-content={true}
-                            class={classes!("overflow-auto", "w-fit", "origin-top-left")}
-                        >
-                            <table class={classes!("data-table", "overlay")}>
-                                <TableHeader
-                                    {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
-                                />
-                                <tbody>{damages}</tbody>
-                            </table>
-                        </div>
-                    </Dynamic>
-                    <Dynamic panel_id={"recommendations-table"} focused={*focused}>
-                        <div
-                            data-panel-content={true}
-                            class={classes!("flex", "flex-col", "gap-1", "max-w-fit", "max-h-fit")}
-                        >
-                            {recommendation}
-                        </div>
-                    </Dynamic>
                     if *focused {
-                        <Dynamic panel_id={"stack-insert"} resize={false} focused={*focused}>
+                        <Dynamic panel_id={"panel-manager"} resize={false} focused={*focused}>
                             <div data-panel-content={true}>
-                                <StackInsert
-                                    callback={stack_push.clone()}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
-                                    {champion_id}
-                                />
+                                <PanelManager handler={panel_manager.clone()} />
                             </div>
                         </Dynamic>
-                        <Dynamic panel_id={"stack-remover"} resize={false} focused={*focused}>
+                    }
+                    if panel_manager.damage_table {
+                        <Dynamic panel_id={"damage-table"} focused={*focused}>
+                            <div
+                                data-panel-content={true}
+                                class={classes!("overflow-auto", "w-fit", "origin-top-left")}
+                            >
+                                <table class={classes!("data-table", "overlay")}>
+                                    <TableHeader
+                                        {champion_id}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                    />
+                                    <tbody>{damages}</tbody>
+                                </table>
+                            </div>
+                        </Dynamic>
+                    }
+                    if panel_manager.recommendations_table {
+                        <Dynamic panel_id={"recommendations-table"} focused={*focused}>
+                            <div
+                                data-panel-content={true}
+                                class={classes!("flex", "flex-col", "gap-1", "max-w-fit", "max-h-fit")}
+                            >
+                                {recommendation}
+                            </div>
+                        </Dynamic>
+                    }
+                    if *focused {
+                        if panel_manager.stack_insert {
+                            <Dynamic panel_id={"stack-insert"} resize={false} focused={*focused}>
+                                <div data-panel-content={true}>
+                                    <StackInsert
+                                        callback={stack_push.clone()}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                        {champion_id}
+                                    />
+                                </div>
+                            </Dynamic>
+                        }
+                        if panel_manager.stack_remover {
+                            <Dynamic panel_id={"stack-remover"} resize={false} focused={*focused}>
+                                <div
+                                    data-panel-content={true}
+                                    class={classes!("min-h-fit", "min-w-min")}
+                                >
+                                    <StackRemover
+                                        stack={stack.clone()}
+                                        {champion_id}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                    />
+                                </div>
+                            </Dynamic>
+                        }
+                    }
+                    if panel_manager.stack_table {
+                        <Dynamic panel_id={"stack-table"} focused={*focused}>
                             <div
                                 data-panel-content={true}
                                 class={classes!("min-h-fit", "min-w-min")}
                             >
-                                <StackRemover
-                                    stack={stack.clone()}
-                                    {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                <StackTable<Enemy>
+                                    index={*enemy_index}
+                                    enemies={enemies.clone()}
+                                    stack={stack.reconcile(champion_id, items_meta, runes_meta)}
+                                    level={current_player.level}
                                 />
                             </div>
                         </Dynamic>
                     }
-                    <Dynamic panel_id={"stack-table"} resize={false} focused={*focused}>
-                        <div
-                            data-panel-content={true}
-                            class={classes!("min-h-fit", "min-w-min")}
-                        >
-                            <StackTable<Enemy>
-                                index={*enemy_index}
-                                enemies={enemies.clone()}
-                                stack={stack.reconcile(champion_id, items_meta, runes_meta)}
-                                level={current_player.level}
-                            />
-                        </div>
-                    </Dynamic>
                 </>
             }
         }

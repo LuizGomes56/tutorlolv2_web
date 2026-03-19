@@ -55,32 +55,34 @@ pub struct Cell {
 }
 
 impl Cell {
-    fn render_range(min: i32, max: Option<i32>) -> Html {
-        match max {
-            Some(max) => html!(<>{min}{" - "}{max}</>),
-            None => html!(min),
-        }
-    }
-
-    fn render_diff_value(value: i32) -> Html {
+    fn render_value(value: i32) -> Html {
         match value < 0 {
             true => html!(<>{"("}{value}{")"}</>),
             false => html!(value),
         }
     }
 
-    fn render_diff_range(min: i32, max: Option<i32>) -> Html {
+    fn render_range(min: i32, max: Option<i32>) -> Option<Html> {
+        const F: fn(i32) -> Html = Cell::render_value;
+
         match max {
-            Some(max) if min != 0 && max != 0 => html!(
+            Some(max) if max != 0 && max > min => Some(html!(
                 <>
-                    {Self::render_diff_value(min)}
+                    {F(min)}
                     {" - "}
-                    {Self::render_diff_value(max)}
+                    {F(max)}
                 </>
-            ),
-            Some(max) if max == min && min != 0 => html!(Self::render_diff_value(min)),
-            None if min != 0 => html!(Self::render_diff_value(min)),
-            _ => Html::default(),
+            )),
+            Some(max) if max != 0 && max < min => Some(html!(
+                <>
+                    {F(max)}
+                    {" - "}
+                    {F(min)}
+                </>
+            )),
+            Some(max) if max == min => Some(Html::from(min)),
+            None if min != 0 => Some(Html::from(min)),
+            _ => None,
         }
     }
 
@@ -111,12 +113,12 @@ impl Cell {
             }
         };
 
-        let main_line = Self::render_range(min_dmg, max_dmg);
+        let main_line = Self::render_range(min_dmg, max_dmg).unwrap_or(Html::from(min_dmg));
 
         let diff_line = diff.map(|(diff_min, diff_max)| {
             html! {
                 <span class={classes!("text-std-400", "text-xs")}>
-                    {Self::render_diff_range(diff_min, diff_max)}
+                    {Self::render_range(diff_min, diff_max).unwrap_or_default()}
                 </span>
             }
         });
