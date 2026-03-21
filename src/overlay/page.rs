@@ -295,6 +295,7 @@ pub fn Overlay() -> Html {
                                         {champion_id}
                                         items_meta={items_meta.clone()}
                                         runes_meta={runes_meta.clone()}
+                                        hmax={false}
                                     />
                                 </div>
                             </Dynamic>
