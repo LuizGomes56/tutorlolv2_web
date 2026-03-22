@@ -11,6 +11,7 @@ pub enum DragonImage {
     Fire,
     Ocean,
     Earth,
+    Chemtech,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -109,8 +110,8 @@ impl ImageType {
     }
 
     pub fn url(&self) -> String {
-        let path = match self {
-            ImageType::Ability(champion_id, kind) => {
+        let path: &dyn core::fmt::Display = match self {
+            ImageType::Ability(champion_id, kind) => &{
                 let ability_id = kind.ability_id();
                 let char = ability_id.as_char();
                 let mut result = format!("abilities/{champion_id:?}{char}");
@@ -119,32 +120,48 @@ impl ImageType {
                 }
                 result.push_str(".avif");
                 result
+            },
+            ImageType::Champion(champion_id) => &format!("champions/{champion_id:?}.avif"),
+            ImageType::Centered(champion_id) => {
+                #[cfg(feature = "server")]
+                {
+                    return format!(
+                        concat!(
+                            "https://ddragon.leagueoflegends.com",
+                            "/cdn/img/champion/centered",
+                            "/{:?}_0.jpg"
+                        ),
+                        champion_id
+                    );
+                }
+
+                #[cfg(not(feature = "server"))]
+                {
+                    &format!("centered/{champion_id:?}_0.avif")
+                }
             }
-            ImageType::Champion(champion_id) => format!("champions/{champion_id:?}.avif"),
-            ImageType::Centered(champion_id) => format!("centered/{champion_id:?}_0.avif"),
-            ImageType::Item(item_id) => {
+            ImageType::Item(item_id) => &{
                 let riot_id = item_id.to_riot_id();
                 format!("items/{riot_id}.avif")
-            }
-            ImageType::Rune(rune_id) => {
+            },
+            ImageType::Rune(rune_id) => &{
                 let riot_id = rune_id.to_riot_id();
                 format!("runes/{riot_id}.avif")
-            }
-            ImageType::Tower => "other/tower.avif".into(),
-            ImageType::BasicAttack => "other/basic_attack.png".into(),
-            ImageType::Ignite => "other/ignite.avif".into(),
-            ImageType::CritStrike => "stats/crit_chance.svg".into(),
-            ImageType::OnhitAttack => "stats/onhit.svg".into(),
-            ImageType::Level => "stats/level.svg".into(),
-            ImageType::Position(pos) => match pos {
+            },
+            ImageType::Tower => &"other/tower.avif",
+            ImageType::BasicAttack => &"other/basic_attack.png",
+            ImageType::Ignite => &"other/ignite.avif",
+            ImageType::CritStrike => &"stats/crit_chance.svg",
+            ImageType::OnhitAttack => &"stats/onhit.svg",
+            ImageType::Level => &"stats/level.svg",
+            ImageType::Position(pos) => &match pos {
                 Position::Top => "other/Top.svg",
                 Position::Jungle => "other/Jungle.svg",
                 Position::Middle => "other/Middle.svg",
                 Position::Bottom => "other/Bottom.svg",
                 Position::Support => "other/Support.svg",
-            }
-            .into(),
-            ImageType::Stats(stat) => match stat {
+            },
+            ImageType::Stats(stat) => &match stat {
                 StatType::AbilityPower => "stats/ability_power.svg",
                 StatType::Armor => "stats/armor.svg",
                 StatType::ArmorPenetrationFlat | StatType::ArmorPenetrationPercent => {
@@ -160,9 +177,8 @@ impl ImageType {
                     "stats/magic_penetration.svg"
                 }
                 StatType::MagicResist => "stats/magic_resist.svg",
-            }
-            .into(),
-            ImageType::StatsFilter(stat) => match stat {
+            },
+            ImageType::StatsFilter(stat) => &match stat {
                 StatName::AbilityHaste => "stats/ability_haste.svg",
                 StatName::AbilityPower => "stats/ability_power.svg",
                 StatName::AdaptiveForce => "stats/adaptive_force.svg",
@@ -184,9 +200,8 @@ impl ImageType {
                 StatName::MoveSpeed => "stats/move_speed.svg",
                 StatName::Omnivamp => "stats/omnivamp.svg",
                 StatName::Tenacity => "stats/tenacity.svg",
-            }
-            .into(),
-            ImageType::Other(other) => match other {
+            },
+            ImageType::Other(other) => &match other {
                 OtherImage::Voidgrubs => "other/voidgrubs.avif",
                 OtherImage::Atakhan => "other/atakhan.avif",
                 OtherImage::Baron => "other/baron.avif",
@@ -195,6 +210,7 @@ impl ImageType {
                     DragonImage::Elder => "other/elder_dragon.avif",
                     DragonImage::Fire => "other/fire_dragon.avif",
                     DragonImage::Ocean => "other/ocean_dragon.avif",
+                    DragonImage::Chemtech => "other/chemtech_dragon.avif",
                 },
                 OtherImage::Monster(monster) => match monster {
                     MonsterImage::Gromp => "other/gromp.avif",
@@ -210,10 +226,18 @@ impl ImageType {
                     MinionImage::Cannon => "other/cannon.avif",
                     MinionImage::Super => "other/super_minion.avif",
                 },
-            }
-            .into(),
+            },
         };
-        format!("{BASE_URL}/img/{path}")
+
+        #[cfg(not(feature = "server"))]
+        {
+            format!("{BASE_URL}/img/{path}")
+        }
+
+        #[cfg(feature = "server")]
+        {
+            format!("/{path}")
+        }
     }
 }
 

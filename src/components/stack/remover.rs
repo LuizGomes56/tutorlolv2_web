@@ -19,21 +19,27 @@ pub struct StackRemoverProps {
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
     pub champion_id: ChampionId,
+    #[prop_or(true)]
+    pub hmax: bool,
 }
 
 #[component]
 pub fn StackRemover(props: &StackRemoverProps) -> Html {
     let StackRemoverProps {
-        champion_id,
         ref stack,
         ref items_meta,
         ref runes_meta,
+        champion_id,
+        hmax,
     } = *props;
+
+    let combo_index = use_state(|| 0);
 
     {
         let stack = stack.clone();
         let items_meta = items_meta.clone();
         let runes_meta = runes_meta.clone();
+        let combo_index = combo_index.clone();
 
         type StackStore = HashMap<ChampionId, Vec<StackValue>>;
 
@@ -60,6 +66,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
             }
 
             stack.dispatch(TrayAction::Replace(Stack::new(
+                &combo_index,
                 champion_id,
                 &items_meta,
                 &runes_meta,
@@ -98,16 +105,19 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
         use_callback(
             (
                 stack.clone(),
+                combo_index,
                 items_meta.clone(),
                 runes_meta.clone(),
                 champion_id,
             ),
-            move |champion_id, (stack, items_meta, runes_meta, ..)| {
+            move |champion_id, (stack, combo_index, items_meta, runes_meta, ..)| {
                 stack.dispatch(TrayAction::Replace(Stack::new(
+                    combo_index,
                     champion_id,
                     items_meta,
                     runes_meta,
                 )));
+                combo_index.set(**combo_index + 1);
             },
         )
     };
@@ -225,8 +235,11 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
         .collect::<Html>();
 
     html! {
-        <div class={classes!("flex", "flex-col", "py-4", "min-h-0", "gap-4", "px-4", "2xl:px-0")}>
-            <div class={classes!("flex", "items-center", "justify-between", "gap-3")}>
+        <div class={classes!(
+            "flex", "flex-col", "py-4", "min-h-0", "gap-4",
+            "px-4", "2xl:px-0", hmax.then_some("h-full")
+        )}>
+            <div class={classes!("flex", "justify-between", "gap-3")}>
                 <div class={classes!("flex", "flex-col", "gap-1")}>
                     <span class={classes!("whitespace-nowrap", "font-semibold", "text-std-100")}>
                         {"Defined combo"}
@@ -235,14 +248,14 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                         {"Click icons to remove"}
                     </span>
                 </div>
-                <div class={classes!("flex", "items-center", "gap-2")}>
+                <div class={classes!("grid", "grid-cols-2", "gap-2")}>
                     <span class={classes!(
                         "px-3", "py-1.5",
                         "rounded-lg",
                         "border", "border-std-800",
                         "bg-std-900/70",
                         "text-xs", "font-mono", "font-semibold",
-                        "text-std-200"
+                        "text-std-200", "text-center"
                     )}>
                         {len}
                     </span>
@@ -281,7 +294,8 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                 "border-std-800", "p-2",
                 "text-sm", "text-std-400",
                 "flex", "gap-2", "flex-wrap",
-                "content-start", "overflow-auto"
+                "content-start", "overflow-auto",
+                hmax.then_some("h-full")
             )}>
                 {remover}
             </div>

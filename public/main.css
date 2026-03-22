@@ -78,10 +78,6 @@ input[type="number"] {
     scrollbar-color: rgba(153, 153, 153, 0.4) transparent;
 }
 
-tr>:nth-child(n+7) .documentation {
-    transform: translateX(calc(-100% + 32px));
-}
-
 table {
     inline-size: fit-content;
     border-collapse: collapse;
@@ -108,7 +104,7 @@ table tr {
 }
 
 table tbody tr:last-child {
-    border-bottom: none;
+    border-bottom: none !important;
 }
 
 table th,
@@ -130,7 +126,7 @@ img {
 }
 
 .box {
-    box-shadow: 0 0 10px #08080f;
+    box-shadow: 0 0 10px 2.5px #08080f;
 }
 
 .clip {

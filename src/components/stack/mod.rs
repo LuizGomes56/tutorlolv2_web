@@ -2,18 +2,16 @@ mod insert;
 mod remover;
 mod table;
 
-use crate::{
-    components::tray::{Tray, TrayAction, TrayEntry},
-    utils::random_u64,
-};
+use crate::utils::tray::{Tray, TrayAction, TrayEntry};
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashSet,
     ops::{Deref, DerefMut},
     rc::Rc,
 };
-use tutorlolv2_gen::{AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata};
-use yew::Reducible;
+use tutorlolv2_gen::{
+    AbilityId, ChampionId, ComboElement, ItemId, ItemsBitSet, RuneId, RunesBitSet, TypeMetadata,
+};
+use yew::{Callback, Reducible, UseReducerHandle, UseStateHandle, hook, use_callback};
 
 pub use insert::StackInsert;
 pub use remover::StackRemover;
@@ -40,7 +38,16 @@ pub struct Stack {
 }
 
 impl Stack {
+    #[hook]
+    pub fn use_push(stack: &UseReducerHandle<Stack>) -> Callback<StackValue> {
+        let stack = stack.clone();
+        use_callback((), move |value, _| {
+            stack.dispatch(TrayAction::Insert(value))
+        })
+    }
+
     pub fn new(
+        combo_index: &UseStateHandle<usize>,
         champion_id: ChampionId,
         items_meta: &[TypeMetadata<ItemId>],
         runes_meta: &[TypeMetadata<RuneId>],
@@ -55,7 +62,9 @@ impl Stack {
         }
 
         let combos = champion_id.combos();
-        let i = random_u64(0..combos.len() as _) as usize;
+        let i = **combo_index % combos.len().max(1);
+
+        combo_index.set(i);
 
         Stack {
             champion_id,
@@ -83,15 +92,21 @@ impl Stack {
         items_meta: &[TypeMetadata<ItemId>],
         runes_meta: &[TypeMetadata<RuneId>],
     ) -> Self {
-        let items_allowed = items_meta.iter().map(|m| m.kind).collect::<HashSet<_>>();
-        let runes_allowed = runes_meta.iter().map(|m| m.kind).collect::<HashSet<_>>();
+        let items_allowed = items_meta
+            .iter()
+            .map(|m| m.kind.index())
+            .collect::<ItemsBitSet>();
+        let runes_allowed = runes_meta
+            .iter()
+            .map(|m| m.kind.index())
+            .collect::<RunesBitSet>();
 
         let mut values = Tray::new(Vec::with_capacity(self.len()));
 
         for entry in self.iter() {
             if match entry.value {
-                StackValue::Item(_, item_id) => items_allowed.contains(&item_id),
-                StackValue::Rune(_, rune_id) => runes_allowed.contains(&rune_id),
+                StackValue::Item(_, item_id) => items_allowed.contains(item_id.index()),
+                StackValue::Rune(_, rune_id) => runes_allowed.contains(rune_id.index()),
                 StackValue::Ability { .. } => champion_id == self.champion_id,
                 _ => true,
             } {

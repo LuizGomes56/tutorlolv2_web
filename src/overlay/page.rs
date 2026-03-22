@@ -1,15 +1,17 @@
 use crate::{
     components::{
         dynamic::Dynamic,
+        errorlog::errorlog,
         image::{Image, ImageType},
         stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::header::TableHeader,
-        tray::TrayAction,
     },
+    impl_reducible,
     livegame::{Enemy, Game},
-    utils::{ClassCast, Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
+    overlay::panel::PanelManager,
+    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
 };
-use tutorlolv2_gen::{CastId, ItemsBitSet, L_SIML, Position, SIMULATED_ITEMS_METADATA};
+use tutorlolv2_gen::CastId;
 use wasm_bindgen::{
     JsCast, JsValue,
     prelude::{Closure, wasm_bindgen},
@@ -35,10 +37,33 @@ unsafe extern "C" {
     pub async fn listen(event: String, callback: &Function) -> Result<JsValue, JsValue>;
 }
 
+impl_reducible! {
+    #[derive(Clone, Copy, Debug, PartialEq)]
+    Panel bool {
+        damage_table,
+        recommendations_table,
+        stack_insert,
+        stack_remover,
+        stack_table
+    }
+}
+
+impl Default for Panel {
+    fn default() -> Self {
+        Self {
+            damage_table: true,
+            recommendations_table: true,
+            stack_insert: true,
+            stack_remover: true,
+            stack_table: true,
+        }
+    }
+}
+
 #[component]
 pub fn Overlay() -> Html {
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
-    let enemy_index = use_state(|| usize::MAX);
+    let enemy_index = use_state(|| 0);
     let enemy_count = use_state(|| 0);
     let focused = use_state(|| false);
 
@@ -48,13 +73,11 @@ pub fn Overlay() -> Html {
     let change_callback = use_mut_ref(|| None::<Closure<dyn FnMut(bool)>>);
 
     let stack = use_reducer(Stack::default);
+    let stack_push = Stack::use_push(&stack);
 
-    let stack_push = {
-        let stack = stack.clone();
-        use_callback((), move |value, _| {
-            stack.dispatch(TrayAction::Insert(value))
-        })
-    };
+    let panel_manager = use_reducer_eq(Panel::default);
+
+    use_effect_with((), |_| mouse_events());
 
     {
         let latest_enemy_index = latest_enemy_index.clone();
@@ -116,8 +139,6 @@ pub fn Overlay() -> Html {
         });
     }
 
-    use_effect_with((), |_| mouse_events());
-
     {
         let focused = focused.clone();
         use_effect_with((), move |_| {
@@ -133,7 +154,6 @@ pub fn Overlay() -> Html {
     {
         let game_data = game_data.clone();
         let enemy_count = enemy_count.clone();
-        let enemy_index = enemy_index.clone();
         use_effect_with((), |_| {
             spawn_local(async move {
                 loop {
@@ -141,17 +161,6 @@ pub fn Overlay() -> Html {
 
                     if let Ok(ref game) = data {
                         enemy_count.set(game.enemies.len());
-
-                        if game_data.is_err() && *enemy_index == usize::MAX {
-                            enemy_index.set(
-                                game.enemies
-                                    .iter()
-                                    .position(|enemy| {
-                                        enemy.position == game.current_player.position
-                                    })
-                                    .unwrap_or(0),
-                            );
-                        }
                     }
 
                     game_data.set(data);
@@ -176,22 +185,19 @@ pub fn Overlay() -> Html {
             let Game {
                 current_player,
                 enemies,
-                scoreboard,
                 items_meta,
                 runes_meta,
-                game_time,
-                ability_levels,
-                dragons,
+                ..
             } = data;
 
+            let champion_id = current_player.champion_id;
             let enemy = enemies.get(*enemy_index).or_else(|| enemies.first());
 
             let damages = enemy
                 .map(|enemy| {
-                    let damages =
-                        enemy
-                            .damages
-                            .to_html(current_player.champion_id, items_meta, runes_meta);
+                    let damages = enemy
+                        .damages
+                        .to_html(champion_id, items_meta, runes_meta, None);
                     let enemy_id = enemy.champion_id;
 
                     html! {
@@ -209,42 +215,18 @@ pub fn Overlay() -> Html {
                 .unwrap_or_default();
 
             let recommendation = enemy.map(|enemy| {
-                let array: [i32; L_SIML] = std::array::from_fn(|i| {
-                    let damage = &enemy.siml_items[i];
-                    damage.attacks.basic_attack
-                        + damage.attacks.onhit_damage.minimum_damage
-                        + damage.attacks.onhit_damage.maximum_damage
-                        + damage.attacks.critical_strike
-                        + damage.abilities.iter().sum::<i32>()
-                        + damage.items.iter().sum::<i32>()
-                        + damage.runes.iter().sum::<i32>()
-                });
-
-                let mut seen = ItemsBitSet::EMPTY;
-
-                let mut list = Position::ARRAY
-                    .into_iter()
-                    .flat_map(|position| current_player.champion_id.recommended_items(position))
-                    .filter_map(|&item| {
-                        SIMULATED_ITEMS_METADATA
-                            .iter()
-                            .position(|m| m.kind == item)
-                            .map(|index| (array[index], item))
-                    })
-                    .filter(|&(_, item)| seen.insert(item.index()))
-                    .collect::<Vec<_>>();
-
-                list.sort_unstable();
+                let base = enemy.total_damage();
+                let list = enemy.item_scores(champion_id);
 
                 list.into_iter()
                     .map(|(damage, item)| {
                         html! {
                             <div class={classes!("flex", "items-center", "gap-2")}>
-                                <span class={classes!("text-sm", item.damage_type().class())}>
-                                    {damage}
+                                <span class={classes!("text-sm")}>
+                                    {damage - base}
                                 </span>
                                 <Image
-                                    class={classes!("w-7", "h-7")}
+                                    class={classes!("w-6", "h-6")}
                                     src={ImageType::from(item)}
                                 />
                             </div>
@@ -255,73 +237,100 @@ pub fn Overlay() -> Html {
 
             html! {
                 <>
-                    <Dynamic panel_id={"damage-table"} focused={*focused}>
-                        <div
-                            data-panel-content={true}
-                            class={classes!("overflow-auto", "w-fit", "origin-top-left")}
-                        >
-                            <table class={classes!("data-table", "overlay")}>
-                                <TableHeader
-                                    champion_id={current_player.champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
-                                />
-                                <tbody>{damages}</tbody>
-                            </table>
-                        </div>
-                    </Dynamic>
-                    <Dynamic panel_id={"recommendations-table"} focused={*focused}>
-                        <div
-                            data-panel-content={true}
-                            class={classes!("flex", "flex-col", "gap-1", "max-w-fit", "max-h-fit")}
-                        >
-                            {recommendation}
-                        </div>
-                    </Dynamic>
                     if *focused {
-                        <Dynamic panel_id={"stack-insert"} resize={false} focused={*focused}>
+                        <Dynamic panel_id={"panel-manager"} resize={false} focused={*focused}>
                             <div data-panel-content={true}>
-                                <StackInsert
-                                    callback={stack_push.clone()}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
-                                    champion_id={current_player.champion_id}
-                                />
+                                <PanelManager handler={panel_manager.clone()} />
                             </div>
                         </Dynamic>
-                        <Dynamic panel_id={"stack-remover"} resize={false} focused={*focused}>
+                    }
+                    if panel_manager.damage_table {
+                        <Dynamic panel_id={"damage-table"} focused={*focused}>
+                            <div
+                                data-panel-content={true}
+                                class={classes!("overflow-auto", "w-fit", "origin-top-left")}
+                            >
+                                <table class={classes!("data-table", "overlay")}>
+                                    <TableHeader
+                                        {champion_id}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                    />
+                                    <tbody>{damages}</tbody>
+                                </table>
+                            </div>
+                        </Dynamic>
+                    }
+                    if panel_manager.recommendations_table {
+                        <Dynamic panel_id={"recommendations-table"} focused={*focused}>
+                            <div
+                                data-panel-content={true}
+                                class={classes!("flex", "flex-col", "gap-1", "max-w-fit", "max-h-fit")}
+                            >
+                                {recommendation}
+                            </div>
+                        </Dynamic>
+                    }
+                    if *focused {
+                        if panel_manager.stack_insert {
+                            <Dynamic panel_id={"stack-insert"} resize={false} focused={*focused}>
+                                <div data-panel-content={true}>
+                                    <StackInsert
+                                        callback={stack_push.clone()}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                        {champion_id}
+                                    />
+                                </div>
+                            </Dynamic>
+                        }
+                        if panel_manager.stack_remover {
+                            <Dynamic panel_id={"stack-remover"} resize={false} focused={*focused}>
+                                <div
+                                    data-panel-content={true}
+                                    class={classes!("min-h-fit", "min-w-min")}
+                                >
+                                    <StackRemover
+                                        stack={stack.clone()}
+                                        {champion_id}
+                                        items_meta={items_meta.clone()}
+                                        runes_meta={runes_meta.clone()}
+                                        hmax={false}
+                                    />
+                                </div>
+                            </Dynamic>
+                        }
+                    }
+                    if panel_manager.stack_table {
+                        <Dynamic panel_id={"stack-table"} focused={*focused}>
                             <div
                                 data-panel-content={true}
                                 class={classes!("min-h-fit", "min-w-min")}
                             >
-                                <StackRemover
-                                    stack={stack.clone()}
-                                    champion_id={current_player.champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                <StackTable<Enemy>
+                                    index={*enemy_index}
+                                    enemies={enemies.clone()}
+                                    stack={stack.reconcile(champion_id, items_meta, runes_meta)}
+                                    level={current_player.level}
                                 />
                             </div>
                         </Dynamic>
                     }
-                    <Dynamic panel_id={"stack-table"} resize={false} focused={*focused}>
-                        <div
-                            data-panel-content={true}
-                            class={classes!("min-h-fit", "min-w-min")}
-                        >
-                            <StackTable<Enemy>
-                                index={*enemy_index}
-                                enemies={enemies.clone()}
-                                stack={stack.reconcile(current_player.champion_id, items_meta, runes_meta)}
-                                level={current_player.level}
-                            />
-                        </div>
-                    </Dynamic>
                 </>
             }
         }
         Err(e) => {
             e.log();
-            Default::default()
+            html! {
+                if *focused {
+                    <div class={classes!(
+                        "absolute", "top-1/2", "left-1/2",
+                        "-translate-x-1/2", "-translate-y-1/2"
+                    )}>
+                        {errorlog(e)}
+                    </div>
+                }
+            }
         }
     };
 

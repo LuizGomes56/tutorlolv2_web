@@ -11,10 +11,9 @@ use crate::{
         image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
         stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
-        tray::TrayAction,
     },
     model::{Dragons, EnemyStats},
-    utils::{ClassCast, Fetch, Loading, Print, encode_offset},
+    utils::{ClassCast, Fetch, FetchUrl, Loading, Print, encode_offset, tray::TrayAction},
 };
 use std::{cell::RefCell, rc::Rc};
 use tutorlolv2_gen::{CastId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
@@ -88,13 +87,7 @@ pub fn Calculator() -> Html {
     let dragons = use_reducer(Dragons::default);
     let enemy_index = use_state(|| 0);
     let stack = use_reducer(Stack::default);
-
-    let stack_push = {
-        let stack = stack.clone();
-        use_callback((), move |value, _| {
-            stack.dispatch(TrayAction::Insert(value))
-        })
-    };
+    let stack_push = Stack::use_push(&stack);
 
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
     let controller = use_state(|| None::<AbortController>);
@@ -145,7 +138,7 @@ pub fn Calculator() -> Html {
 
                     input_game.active_player.data.items.log();
 
-                    if let Ok(req) = Fetch::new("/api/games/calculator")
+                    if let Ok(req) = Fetch::new(FetchUrl::Calculator)
                         .signal(signal)
                         .body_with_bincode(&input_game)
                     {
@@ -191,7 +184,9 @@ pub fn Calculator() -> Html {
                             }
                             Err(e) => {
                                 let error = e.to_string();
-                                if error != "AbortError: signal is aborted without reason" {
+                                if error != "AbortError: signal is aborted without reason"
+                                    && error != "AbortError: The user aborted a request."
+                                {
                                     format!("Failed to request calculator api: {e}").log();
                                     game_data.set(Err(e));
                                 }
@@ -228,7 +223,8 @@ pub fn Calculator() -> Html {
                                         let damages = enemy.damages.to_html(
                                             current_player.champion_id,
                                             items_meta,
-                                            runes_meta
+                                            runes_meta,
+                                            None
                                         );
                                         let enemy_id = enemy.champion_id;
                                         html! {
@@ -277,7 +273,8 @@ pub fn Calculator() -> Html {
                                         let damages = damage.to_html(
                                             current_player.champion_id,
                                             items_meta,
-                                            runes_meta
+                                            runes_meta,
+                                            None
                                         );
 
                                         let mut images = Vec::with_capacity(MONSTER_COUNT);

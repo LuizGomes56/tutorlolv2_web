@@ -111,7 +111,7 @@ macro_rules! impl_reducible {
     };
     ($type:ident $fty:ty { $($field:ident),* $(,)? }) => {
         $crate::impl_reducible! {
-            #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
+            #[derive(Clone, Copy, Debug, bincode::Decode, Default, bincode::Encode, PartialEq)]
             $type $fty { $($field),* }
         }
     };
