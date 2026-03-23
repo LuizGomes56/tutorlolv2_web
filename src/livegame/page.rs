@@ -178,8 +178,9 @@ pub fn Livegame() -> Html {
 
             html! {
                 <div class={classes!(
-                    "flex", "gap-4", "mb-96",
-                    "p-4", "overflow-hidden", "flex-1"
+                    "flex", "flex-col", "gap-4", "mb-96",
+                    "p-4", "overflow-hidden", "flex-1",
+                    "xl:flex-row"
                 )}>
                     <div class={classes!("flex", "flex-col", "gap-4", "min-w-80")}>
                         <Banner

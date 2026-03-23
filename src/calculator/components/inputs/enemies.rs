@@ -108,89 +108,91 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
         .unwrap_or_else(|| &enemy_props.enemies[0]);
 
     html! {
-        <>
-            <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
-                <Banner
-                    callback={champion_callback}
-                    champion_id={enemy.champion_id}
+        <div class={classes!(
+            "flex", "flex-col", "box",
+            "w-full", "max-w-80", "sm:w-64",
+            "m-2", "order-2", "xl:order-3"
+        )}>
+            <Banner
+                callback={champion_callback}
+                champion_id={enemy.champion_id}
+            />
+            <div class={classes!("w-full", "my-2")}>
+                <SelectorButton
+                    title={"Items"}
+                    onclick={{
+                        let open_item_menu = open_item_menu.clone();
+                        let index = *enemy_props.enemy_index;
+                        Callback::from(move |_| {
+                            open_item_menu.emit(TargetEntity::Enemy(index));
+                        })
+                    }}
+                    length={enemy.items.len()}
                 />
-                <div class={classes!("w-full", "my-2")}>
-                    <SelectorButton
-                        title={"Items"}
-                        onclick={{
-                            let open_item_menu = open_item_menu.clone();
-                            let index = *enemy_props.enemy_index;
-                            Callback::from(move |_| {
-                                open_item_menu.emit(TargetEntity::Enemy(index));
-                            })
-                        }}
-                        length={enemy.items.len()}
-                    />
-                </div>
-                <div class={classes!(
-                    "grid", "grid-cols-[auto_1fr_1fr]",
-                    "gap-x-2", "px-4", "py-3", "gap-y-1.5",
-                    "empty:hidden"
-                )}>
-                    if enemy.infer_stats {
-                        <DragonInput
-                            title={"Earth dragons"}
-                            oninput={enemy_earth}
-                            src={DragonImage::Earth}
-                            value={dragons.enemy_earth}
-                        />
-                    }
-                    <ChampionExceptionSelector
-                        champion_id={enemy.champion_id}
-                        stacks={enemy.stacks}
-                        callback={stack_callback}
-                        ally={false}
-                    />
-                    <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
-                        values={enemy.items.values::<Box<_>>()}
-                        exceptions={enemy.item_exceptions.clone()}
-                        callback={item_exception_callback}
-                        filter={ItemId::exceptions(false)}
-                    />
-                </div>
-                if enemy.champion_id == ChampionId::Gnar {
-                    <Checkbox
-                        checked={enemy.is_mega_gnar}
-                        callback={is_mega_gnar_callback}
-                        label={"Mega Gnar"}
+            </div>
+            <div class={classes!(
+                "grid", "grid-cols-[auto_1fr_1fr]",
+                "gap-x-2", "px-4", "py-3", "gap-y-1.5",
+                "empty:hidden"
+            )}>
+                if enemy.infer_stats {
+                    <DragonInput
+                        title={"Earth dragons"}
+                        oninput={enemy_earth}
+                        src={DragonImage::Earth}
+                        value={dragons.enemy_earth}
                     />
                 }
-                <Checkbox
-                    checked={enemy.infer_stats}
-                    callback={infer_stats_callback}
-                    label={"Infer Stats"}
+                <ChampionExceptionSelector
+                    champion_id={enemy.champion_id}
+                    stacks={enemy.stacks}
+                    callback={stack_callback}
+                    ally={false}
                 />
-                <div class={classes!(
-                    "grid", "grid-cols-[auto_1fr_1fr]",
-                    "gap-x-2", "px-4", "py-3", "gap-y-0.5"
-                )}>
-                    <StatCell
-                        image_type={ImageType::Level}
-                        name={"Level"}
-                        disabled={false}
-                        value={enemy.level as i32}
-                        placeholder={1}
-                        oninput={{
-                            let callback = level_callback.clone();
-                            Callback::from(move |e: InputEvent| {
-                                let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                                let number = value.parse().unwrap_or(1).max(1);
-                                callback.emit(number);
-                            })
-                        }}
-                    />
-                    <Stats<EnemyStats>
-                        infer={enemy.infer_stats}
-                        stats={enemy.stats}
-                        callback={stats_callback}
-                    />
-                </div>
+                <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
+                    values={enemy.items.values::<Box<_>>()}
+                    exceptions={enemy.item_exceptions.clone()}
+                    callback={item_exception_callback}
+                    filter={ItemId::exceptions(false)}
+                />
             </div>
-        </>
+            if enemy.champion_id == ChampionId::Gnar {
+                <Checkbox
+                    checked={enemy.is_mega_gnar}
+                    callback={is_mega_gnar_callback}
+                    label={"Mega Gnar"}
+                />
+            }
+            <Checkbox
+                checked={enemy.infer_stats}
+                callback={infer_stats_callback}
+                label={"Infer Stats"}
+            />
+            <div class={classes!(
+                "grid", "grid-cols-[auto_1fr_1fr]",
+                "gap-x-2", "px-4", "py-3", "gap-y-0.5"
+            )}>
+                <StatCell
+                    image_type={ImageType::Level}
+                    name={"Level"}
+                    disabled={false}
+                    value={enemy.level as i32}
+                    placeholder={1}
+                    oninput={{
+                        let callback = level_callback.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                            let number = value.parse().unwrap_or(1).max(1);
+                            callback.emit(number);
+                        })
+                    }}
+                />
+                <Stats<EnemyStats>
+                    infer={enemy.infer_stats}
+                    stats={enemy.stats}
+                    callback={stats_callback}
+                />
+            </div>
+        </div>
     }
 }

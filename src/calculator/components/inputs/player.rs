@@ -89,118 +89,120 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let ally_earth = use_dragons(dragons, &player_props.last_action, DragonsAction::AllyEarth);
 
     html! {
-        <>
-            <div class={classes!("flex", "flex-col", "w-64", "box", "m-2")}>
-                <Banner
-                    callback={champion_cb}
+        <div class={classes!(
+            "flex", "flex-col",
+            "w-full", "max-w-80", "sm:w-64",
+            "box", "m-2", "order-1"
+        )}>
+            <Banner
+                callback={champion_cb}
+                champion_id={data.champion_id}
+            />
+            <div class={classes!("grid", "grid-cols-4")}>
+                <Abilities
+                    ability_levels={player.abilities}
+                    callback={abilities_cb}
                     champion_id={data.champion_id}
                 />
-                <div class={classes!("grid", "grid-cols-4")}>
-                    <Abilities
-                        ability_levels={player.abilities}
-                        callback={abilities_cb}
-                        champion_id={data.champion_id}
+            </div>
+            <div class={classes!("flex", "flex-col", "gap-2", "my-2", "w-full")}>
+                <SelectorButton
+                    title={"Items"}
+                    onclick={{
+                        let open_item_menu = open_item_menu.clone();
+                        Callback::from(move |_| {
+                            open_item_menu.emit(TargetEntity::Player);
+                        })
+                    }}
+                    length={player.data.items.len()}
+                />
+                <SelectorButton
+                    title={"Runes"}
+                    onclick={{
+                        Callback::from(move |_| {})
+                        // let open_item_menu = open_item_menu.clone();
+                        // Callback::from(move |_| {
+                        //     open_item_menu.emit(TargetEntity::Player);
+                        // })
+                    }}
+                    length={player.runes.len()}
+                />
+            </div>
+            <div class={classes!(
+                "grid", "grid-cols-[auto_1fr_1fr]",
+                "gap-x-2", "px-4", "py-3", "gap-y-1.5",
+                "empty:hidden"
+            )}>
+                if data.infer_stats {
+                    <DragonInput
+                        title={"Fire dragons"}
+                        oninput={ally_fire}
+                        src={DragonImage::Fire}
+                        value={dragons.ally_fire}
                     />
-                </div>
-                <div class={classes!("flex", "flex-col", "gap-2", "my-2", "w-full")}>
-                    <SelectorButton
-                        title={"Items"}
-                        onclick={{
-                            let open_item_menu = open_item_menu.clone();
-                            Callback::from(move |_| {
-                                open_item_menu.emit(TargetEntity::Player);
-                            })
-                        }}
-                        length={player.data.items.len()}
-                    />
-                    <SelectorButton
-                        title={"Runes"}
-                        onclick={{
-                            Callback::from(move |_| {})
-                            // let open_item_menu = open_item_menu.clone();
-                            // Callback::from(move |_| {
-                            //     open_item_menu.emit(TargetEntity::Player);
-                            // })
-                        }}
-                        length={player.runes.len()}
-                    />
-                </div>
-                <div class={classes!(
-                    "grid", "grid-cols-[auto_1fr_1fr]",
-                    "gap-x-2", "px-4", "py-3", "gap-y-1.5",
-                    "empty:hidden"
-                )}>
-                    if data.infer_stats {
-                        <DragonInput
-                            title={"Fire dragons"}
-                            oninput={ally_fire}
-                            src={DragonImage::Fire}
-                            value={dragons.ally_fire}
-                        />
-                        <DragonInput
-                            title={"Earth dragons"}
-                            oninput={ally_earth}
-                            src={DragonImage::Earth}
-                            value={dragons.ally_earth}
-                        />
-                    }
-                    <ChampionExceptionSelector
-                        champion_id={player.data.champion_id}
-                        stacks={player.data.stacks}
-                        callback={stack_callback}
-                        ally={true}
-                    />
-                    <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
-                        values={player.data.items.values::<Box<_>>()}
-                        exceptions={player.data.item_exceptions.clone()}
-                        callback={item_exception_callback}
-                        filter={ItemId::exceptions(true)}
-                    />
-                    <ExceptionSelector<{ RuneId::SIZE_OF_EXCEPTIONS }, RuneId>
-                        values={player.runes.values::<Box<_>>()}
-                        exceptions={player.rune_exceptions.clone()}
-                        callback={rune_exception_callback}
-                        filter={RuneId::exceptions()}
-                    />
-                </div>
-                if player.data.champion_id == ChampionId::Gnar {
-                    <Checkbox
-                        checked={player.data.is_mega_gnar}
-                        callback={is_mega_gnar_callback}
-                        label={"Mega Gnar"}
+                    <DragonInput
+                        title={"Earth dragons"}
+                        oninput={ally_earth}
+                        src={DragonImage::Earth}
+                        value={dragons.ally_earth}
                     />
                 }
-                <Checkbox
-                    checked={data.infer_stats}
-                    callback={infer_stats_callback}
-                    label={"Infer Stats"}
+                <ChampionExceptionSelector
+                    champion_id={player.data.champion_id}
+                    stacks={player.data.stacks}
+                    callback={stack_callback}
+                    ally={true}
                 />
-                <div class={classes!(
-                    "grid", "grid-cols-[auto_1fr_1fr]",
-                    "gap-x-2", "px-4", "py-3", "gap-y-0.5"
-                )}>
-                    <StatCell
-                        image_type={ImageType::Level}
-                        name={"Level"}
-                        disabled={false}
-                        value={data.level as i32}
-                        placeholder={1}
-                        oninput={{
-                            let callback = level_cb.clone();
-                            Callback::from(move |e: InputEvent| {
-                                let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                                let number = value.parse().unwrap_or(1).max(1);
-                                callback.emit(number);
-                            })
-                        }}
-                    />
-                    <Stats<PlayerStats>
-                        infer={data.infer_stats}
-                        stats={data.stats}
-                        callback={stats_cb}
-                    />
-                </div>
+                <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
+                    values={player.data.items.values::<Box<_>>()}
+                    exceptions={player.data.item_exceptions.clone()}
+                    callback={item_exception_callback}
+                    filter={ItemId::exceptions(true)}
+                />
+                <ExceptionSelector<{ RuneId::SIZE_OF_EXCEPTIONS }, RuneId>
+                    values={player.runes.values::<Box<_>>()}
+                    exceptions={player.rune_exceptions.clone()}
+                    callback={rune_exception_callback}
+                    filter={RuneId::exceptions()}
+                />
             </div>
-        </>
+            if player.data.champion_id == ChampionId::Gnar {
+                <Checkbox
+                    checked={player.data.is_mega_gnar}
+                    callback={is_mega_gnar_callback}
+                    label={"Mega Gnar"}
+                />
+            }
+            <Checkbox
+                checked={data.infer_stats}
+                callback={infer_stats_callback}
+                label={"Infer Stats"}
+            />
+            <div class={classes!(
+                "grid", "grid-cols-[auto_1fr_1fr]",
+                "gap-x-2", "px-4", "py-3", "gap-y-0.5"
+            )}>
+                <StatCell
+                    image_type={ImageType::Level}
+                    name={"Level"}
+                    disabled={false}
+                    value={data.level as i32}
+                    placeholder={1}
+                    oninput={{
+                        let callback = level_cb.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                            let number = value.parse().unwrap_or(1).max(1);
+                            callback.emit(number);
+                        })
+                    }}
+                />
+                <Stats<PlayerStats>
+                    infer={data.infer_stats}
+                    stats={data.stats}
+                    callback={stats_cb}
+                />
+            </div>
+        </div>
     }
 }

@@ -33,7 +33,8 @@ pub fn Sidebar() -> Html {
 
     html! {
         <aside class={classes!(
-            "w-48", "h-full", "max-h-screen"
+            "w-48", "h-full", "max-h-screen",
+            "hidden", "md:block"
         )}>
             <nav class={classes!(
                 "flex", "flex-col", "h-full",

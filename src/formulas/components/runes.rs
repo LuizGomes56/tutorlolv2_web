@@ -12,7 +12,7 @@ pub fn RuneFormulas() -> Html {
     let callback = use_setter(&rune);
 
     html! {
-        <div class={classes!("flex", "flex-col", "gap-6", "py-4", "px-6", "box")}>
+        <div class={classes!("flex", "flex-col", "gap-6", "p-6", "box")}>
             <Section text={"Runes"} />
             <p class={classes!("text-std-400")}>
                 {concat!(

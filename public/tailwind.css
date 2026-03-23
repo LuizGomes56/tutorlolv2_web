@@ -9,3 +9,7 @@
 .min-w-80 {
     min-width: 320px;
 }
+
+.max-w-80 {
+    max-width: 20rem;
+}

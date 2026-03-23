@@ -12,7 +12,7 @@ pub fn ItemFormulas() -> Html {
     let callback = use_setter(&item);
 
     html! {
-        <div class={classes!("flex", "flex-col", "gap-6", "py-4", "px-6", "box")}>
+        <div class={classes!("flex", "flex-col", "gap-6", "p-6", "box")}>
             <Section text={"Items"} />
             <p class={classes!("text-std-400")}>
                 {concat!(
