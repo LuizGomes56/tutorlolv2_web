@@ -51,9 +51,9 @@ pub fn Sidebar() -> Html {
                 <div class={classes!("flex", "flex-col", "gap-2")}>
                     {buttons([
                         ("Formulas",    Route::Formulas),
-                        ("Help & FAQ",    Route::Formulas),
-                        ("About",   Route::About),
-                        ("GitHub",  Route::Homepage)
+                        ("Help & FAQ",  Route::Formulas),
+                        ("About",       Route::About),
+                        ("GitHub",      Route::Homepage)
                     ])}
                 </div>
             </nav>

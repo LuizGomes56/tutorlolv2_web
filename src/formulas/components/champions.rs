@@ -1,9 +1,10 @@
 use crate::{
     components::{
+        h2::H2,
         image::{Image, ImageType},
         selector::Selector,
     },
-    formulas::components::{Section, code::Code},
+    formulas::components::code::Code,
     utils::{EnumCast, encode_offset, use_setter},
 };
 use tutorlolv2_gen::{CastId, ChampionId, Position};
@@ -55,7 +56,7 @@ pub fn ChampionFormulas() -> Html {
 
     html! {
         <div class={classes!("flex", "flex-col", "gap-6", "p-6", "box")}>
-            <Section text={"Champions"} />
+            <H2 text={"Champions"} />
             <p class={classes!("text-std-400")}>
                 {concat!(
                     "Documentation for formulas being used to calculate the damage of ",
@@ -67,7 +68,7 @@ pub fn ChampionFormulas() -> Html {
                 value={*champion}
                 {callback}
             />
-            <Section text={"Recommended items and runes per position"} />
+            <H2 text={"Recommended items and runes per position"} />
             <div class={classes!("overflow-auto")}>
                 <table class={classes!("table-fixed")}>
                     <thead>
@@ -105,17 +106,17 @@ pub fn ChampionFormulas() -> Html {
                     </tbody>
                 </table>
             </div>
-            <Section text={"Source code definition"} />
+            <H2 text={"Source code definition"} />
             <Code range={champion.formula()} />
-            <Section text={"Abilities virtual definiton"} />
+            <H2 text={"Abilities virtual definiton"} />
             for i in 0..champion.number_of_abilities() {
                 <Code range={champion.get_ability_formula(i)} />
             }
-            <Section text={"Internal ability functions"} />
+            <H2 text={"Internal ability functions"} />
             for i in 0..champion.number_of_abilities() {
                 <Code range={&champion.closures()[i]} />
             }
-            <Section text={"Champion generator implementation"} />
+            <H2 text={"Champion generator implementation"} />
             <Code range={champion.generator()} />
         </div>
     }

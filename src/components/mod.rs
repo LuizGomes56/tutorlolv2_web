@@ -1,5 +1,6 @@
 pub mod dynamic;
 pub mod errorlog;
+pub mod h2;
 pub mod hoverdocs;
 pub mod image;
 pub mod selector;
