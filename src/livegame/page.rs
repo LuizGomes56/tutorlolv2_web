@@ -112,7 +112,9 @@ pub fn Livegame() -> Html {
             let columns = enemy_rows
                 .iter()
                 .flat_map(|(.., list)| list.iter())
-                .filter_map(|&(_, item_id)| seen.insert(item_id.index()).then_some(item_id))
+                .filter_map(|&(_, item_id)| {
+                    seen.insert_const(item_id.index() as _).then_some(item_id)
+                })
                 .collect::<Vec<_>>();
 
             let recm_header = columns

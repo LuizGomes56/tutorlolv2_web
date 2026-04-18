@@ -118,10 +118,10 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
 
     let toggle = use_callback(filters.clone(), move |v: StatName, filters| {
         let mut new = **filters;
-        let index = v as usize;
-        match new.contains(index) {
-            true => new.remove(index),
-            false => new.insert(index),
+        let index = v as _;
+        match new.contains_const(index) {
+            true => new.remove_const(index),
+            false => new.insert_const(index),
         };
         filters.set(new);
     });
@@ -161,7 +161,7 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
             Callback::from(move |_| toggle.emit(stat))
         };
 
-        let contains = filters.contains(stat as usize);
+        let contains = filters.contains_const(stat as _);
 
         html! {
             <button
@@ -462,9 +462,9 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     .contains(query.to_ascii_lowercase().as_str())
         })
         .filter(|item| {
-            filters.is_empty()
+            filters.is_empty_const()
                 || filters
-                    .into_iter()
+                    .iter_const()
                     .all(|v| ItemId::filter(StatName::from_u8_unchecked(v as _)).contains(item))
         })
         .enumerate()

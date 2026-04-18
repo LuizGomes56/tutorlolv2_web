@@ -89,14 +89,14 @@ where
     values
         .iter()
         .filter_map(|&value| {
-            let index = value.index();
+            let index = value.index() as _;
 
             exceptions
                 .inner
                 .get(&value)
-                .filter(|_| !(filter.contains(index) && seen.contains(index)))
+                .filter(|_| !(filter.contains_const(index) && seen.contains_const(index)))
                 .map(|v| {
-                    seen.insert(index);
+                    seen.insert_const(index);
                     let oninput = {
                         let callback = callback.clone();
                         Callback::from(move |e: InputEvent| {
