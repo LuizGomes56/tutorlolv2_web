@@ -175,7 +175,7 @@ impl Enemy {
                     .position(|m| m.kind == item)
                     .map(|index| (array[index], item))
             })
-            .filter(|&(_, item)| seen.insert(item.index()))
+            .filter(|&(_, item)| seen.insert_const(item.index() as _))
             .collect::<Vec<_>>();
 
         list.sort_unstable();

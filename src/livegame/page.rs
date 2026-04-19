@@ -112,7 +112,9 @@ pub fn Livegame() -> Html {
             let columns = enemy_rows
                 .iter()
                 .flat_map(|(.., list)| list.iter())
-                .filter_map(|&(_, item_id)| seen.insert(item_id.index()).then_some(item_id))
+                .filter_map(|&(_, item_id)| {
+                    seen.insert_const(item_id.index() as _).then_some(item_id)
+                })
                 .collect::<Vec<_>>();
 
             let recm_header = columns
@@ -178,8 +180,9 @@ pub fn Livegame() -> Html {
 
             html! {
                 <div class={classes!(
-                    "flex", "gap-4", "mb-96",
-                    "p-4", "overflow-hidden", "flex-1"
+                    "flex", "flex-col", "gap-4", "mb-96",
+                    "p-4", "overflow-hidden", "flex-1",
+                    "xl:flex-row"
                 )}>
                     <div class={classes!("flex", "flex-col", "gap-4", "min-w-80")}>
                         <Banner

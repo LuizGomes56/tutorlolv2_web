@@ -376,30 +376,36 @@ pub fn Calculator() -> Html {
     };
 
     html! {
-        <div class={classes!("flex", "mb-96", "w-full", "px-2", "mt-2")}>
+        <>
             <ItemSelector
                 player_props={player_props.clone()}
                 enemy_props={enemy_props.clone()}
                 {entity}
                 is_open={is_item_modal_open}
             />
-            <PlayerInput
-                {player_props}
-                dragons={dragons.clone()}
-                open_item_menu={open_item_menu.clone()}
-            />
             <div class={classes!(
-                "flex", "flex-col", "gap-4",
-                "p-2", "overflow-hidden",
-                "flex-1"
+                "flex", "flex-wrap", "mb-96",
+                "w-full", "px-2", "mt-2"
             )}>
-                {data}
+                <PlayerInput
+                    {player_props}
+                    dragons={dragons.clone()}
+                    open_item_menu={open_item_menu.clone()}
+                />
+                <div class={classes!(
+                    "flex", "flex-col", "gap-4",
+                    "p-2", "overflow-hidden",
+                    "flex-1", "order-3", "xl:order-2",
+                    "min-w-full", "xl:min-w-0"
+                )}>
+                    {data}
+                </div>
+                <EnemiesInput
+                    {dragons}
+                    {enemy_props}
+                    {open_item_menu}
+                />
             </div>
-            <EnemiesInput
-                {dragons}
-                {enemy_props}
-                {open_item_menu}
-            />
-        </div>
+        </>
     }
 }

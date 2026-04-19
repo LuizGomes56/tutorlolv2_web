@@ -1,5 +1,6 @@
 #![allow(static_mut_refs)]
 use crate::{
+    about::About,
     calculator::Calculator,
     components::{hoverdocs::HoverDocs, sidebar::Sidebar},
     formulas::Formulas,
@@ -10,6 +11,7 @@ use crate::{
 use yew::prelude::*;
 use yew_router::{BrowserRouter, Routable, Switch};
 
+mod about;
 mod calculator;
 mod components;
 mod formulas;
@@ -51,6 +53,7 @@ fn App() -> Html {
                     Route::Formulas => html!(<Formulas />),
                     Route::Livegame => html!(<Livegame />),
                     Route::Overlay => return html!(<Overlay />),
+                    Route::About => html!(<About />),
                     _ => html!(<Calculator />),
                 };
                 html! {

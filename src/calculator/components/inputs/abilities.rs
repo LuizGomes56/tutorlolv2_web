@@ -39,13 +39,16 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
         .map(|(i, key)| {
             let value = ability_levels[key];
             let prototype = AbilityLevels::ACTIONS[i];
+            let id = AttrValue::from(key.as_char().to_string());
+
             html! {
-                <label class={classes!("grid", "grid-cols-2")}>
+                <label for={&id} class={classes!("grid", "grid-cols-2")}>
                     <Image
                         src={ImageType::Ability(champion_id, key.into())}
                         class={classes!("flex", "items-center", "justify-center")}
                     />
                     <input
+                        id={id}
                         value={value.to_string()}
                         placeholder={value.to_string()}
                         oninput={{
@@ -58,8 +61,8 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                         }}
                         type={"number"}
                         class={classes!(
-                            "text-sm", "bg-std-800", "w-8",
-                            "h-8", "text-center", "text-std-200"
+                            "text-sm", "bg-std-800",
+                            "text-center", "text-std-200"
                         )}
                     />
                 </label>

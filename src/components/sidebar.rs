@@ -33,7 +33,8 @@ pub fn Sidebar() -> Html {
 
     html! {
         <aside class={classes!(
-            "w-48", "h-full", "max-h-screen"
+            "w-48", "h-full", "max-h-screen",
+            "hidden", "md:block"
         )}>
             <nav class={classes!(
                 "flex", "flex-col", "h-full",
@@ -50,9 +51,9 @@ pub fn Sidebar() -> Html {
                 <div class={classes!("flex", "flex-col", "gap-2")}>
                     {buttons([
                         ("Formulas",    Route::Formulas),
-                        ("Help & FAQ",    Route::Formulas),
-                        ("About",   Route::About),
-                        ("GitHub",  Route::Homepage)
+                        ("Help & FAQ",  Route::Formulas),
+                        ("About",       Route::About),
+                        ("GitHub",      Route::Homepage)
                     ])}
                 </div>
             </nav>

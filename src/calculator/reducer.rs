@@ -74,7 +74,7 @@ pub fn push_item(
     ally: bool,
     mut f: impl FnMut(ItemId),
 ) {
-    if ItemId::exceptions(ally).contains(v.index()) {
+    if ItemId::exceptions(ally).contains_const(v.index() as _) {
         let value = ValueException::pack_item_id(v, 0);
         item_exceptions.inner.insert(v, value);
     }

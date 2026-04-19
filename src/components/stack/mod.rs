@@ -105,8 +105,8 @@ impl Stack {
 
         for entry in self.iter() {
             if match entry.value {
-                StackValue::Item(_, item_id) => items_allowed.contains(item_id.index()),
-                StackValue::Rune(_, rune_id) => runes_allowed.contains(rune_id.index()),
+                StackValue::Item(_, item_id) => items_allowed.contains_const(item_id.index() as _),
+                StackValue::Rune(_, rune_id) => runes_allowed.contains_const(rune_id.index() as _),
                 StackValue::Ability { .. } => champion_id == self.champion_id,
                 _ => true,
             } {

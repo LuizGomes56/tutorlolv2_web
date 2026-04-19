@@ -1,59 +1,54 @@
-.punctuation {
-    color: #D4D4D4;
-}
-
-.control {
+._r {
     color: #C586C0;
 }
 
-.lifetime,
-.keyword,
-.macro,
-.boolean {
+._l,
+._k,
+._m,
+._b {
     color: #569CD6;
 }
 
-.primitive,
-.type {
+._p,
+._t {
     color: #4EC8B0;
 }
 
-.comment {
+._c {
     color: #959596;
 }
 
-.function {
+._f {
     color: #DCDCAA;
 }
 
-.number,
-.float {
+._n {
     color: #B3CDA8;
 }
 
-.constant,
-.intrinsic {
+._c,
+._i {
     color: #4FC1FF;
 }
 
-.bracket_1 {
+._b1 {
     color: #FFD700;
 }
 
-.bracket_2 {
+._b2 {
     color: #DA70D6;
 }
 
-.bracket_3 {
+._b3 {
     color: #189FFF;
 }
 
-.string {
+._s {
     white-space: break-spaces;
     color: #CE9178;
 }
 
-.variable {
+._v {
     color: #9CDCFE;
 }
 

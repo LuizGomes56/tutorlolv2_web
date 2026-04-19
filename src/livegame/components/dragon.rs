@@ -25,6 +25,8 @@ pub fn DragonDisplay(props: &DragonDisplayProps) -> Html {
         }
     }
 
+    const UNKNOWN: &str = "\u{2013}";
+
     html! {
         <div class={classes!("box", "overflow-auto")}>
             <table class={classes!("data-table")}>
@@ -41,9 +43,9 @@ pub fn DragonDisplay(props: &DragonDisplayProps) -> Html {
                 </thead>
                 <tbody>
                     {row(dragons.ally_earth, dragons.enemy_earth, DragonImage::Earth)}
-                    {row(dragons.ally_fire, "\u{2013}", DragonImage::Fire)}
-                    {row("\u{2013}", "\u{2013}", DragonImage::Ocean)}
-                    {row("\u{2013}", "\u{2013}", DragonImage::Chemtech)}
+                    {row(dragons.ally_fire, UNKNOWN, DragonImage::Fire)}
+                    {row(UNKNOWN, UNKNOWN, DragonImage::Ocean)}
+                    {row(UNKNOWN, UNKNOWN, DragonImage::Chemtech)}
                 </tbody>
             </table>
         </div>

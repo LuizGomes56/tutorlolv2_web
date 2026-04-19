@@ -1,6 +1,6 @@
 use crate::{
-    components::selector::Selector,
-    formulas::components::{Section, code::Code},
+    components::{h2::H2, selector::Selector},
+    formulas::components::code::Code,
     utils::{EnumCast, use_setter},
 };
 use tutorlolv2_gen::{CastId, RuneId};
@@ -12,8 +12,8 @@ pub fn RuneFormulas() -> Html {
     let callback = use_setter(&rune);
 
     html! {
-        <div class={classes!("flex", "flex-col", "gap-6", "py-4", "px-6", "box")}>
-            <Section text={"Runes"} />
+        <div class={classes!("flex", "flex-col", "gap-6", "p-6", "box")}>
+            <H2 text={"Runes"} />
             <p class={classes!("text-std-400")}>
                 {concat!(
                     "Documentation for the internal source code being used to evaluate ",
@@ -25,9 +25,9 @@ pub fn RuneFormulas() -> Html {
                 value={*rune}
                 {callback}
             />
-            <Section text={"Source code definition"} />
+            <H2 text={"Source code definition"} />
             <Code range={rune.formula()} />
-            <Section text={"Function definition"} />
+            <H2 text={"Function definition"} />
             <Code range={rune.closure()} />
         </div>
     }

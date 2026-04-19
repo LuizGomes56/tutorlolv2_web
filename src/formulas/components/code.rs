@@ -20,7 +20,7 @@ pub fn Code(props: &CodeProps) -> Html {
             "px-4", "py-3",
             "border", "border-std-800",
             // "max-h-[calc(100vh-16rem)]",
-            // "overflow-auto"
+            "overflow-auto"
         )}>
             {code}
         </code>
