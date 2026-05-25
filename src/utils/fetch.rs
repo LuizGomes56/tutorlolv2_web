@@ -47,7 +47,8 @@ impl Fetch {
     pub async fn post<T: Decode<()>>(self) -> Result<T, Box<dyn Error>> {
         let Self { url, data, .. } = self;
 
-        #[cfg(not(feature = "server"))]
+        // #[cfg(not(feature = "server"))]
+        /*
         let result = {
             use crate::utils::BASE_URL;
             use gloo_net::http::{Headers, Request};
@@ -76,12 +77,19 @@ impl Fetch {
             .binary()
             .await?
         };
+        */
 
-        #[cfg(feature = "server")]
+        // #[cfg(feature = "server")]
         let result = match url {
             FetchUrl::Realtime => {
+                use tutorlolv2::realtime::RealtimeError;
+
                 let game = serde_json::from_slice(data.as_slice())?;
-                let data = tutorlolv2::realtime(&game).ok_or("Error on tutorlolv2::realtime")?;
+                let data = tutorlolv2::realtime(&game).map_err(|e| match e {
+                    RealtimeError::UnrecognizedCurrentPlayer(p) => {
+                        format!("Unable to recognize current player with name {p:?}")
+                    }
+                })?;
                 bincode::encode_to_vec(data, CONFIG)?
             }
             FetchUrl::Calculator => {

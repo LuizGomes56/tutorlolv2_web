@@ -111,6 +111,7 @@ impl AbilityLevels {
 #[repr(transparent)]
 pub struct ValueException(u32);
 
+#[allow(dead_code)]
 impl ValueException {
     pub const DISC_BITS: u32 =
         Self::find_disc_bits(ItemId::VARIANTS as u32, RuneId::VARIANTS as u32);

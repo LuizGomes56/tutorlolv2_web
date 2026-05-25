@@ -2,12 +2,13 @@ use crate::{
     calculator::FinalEnemy,
     livegame::Enemy,
     model::{Attacks, Damages},
-    utils::{ClassCast, encode_offset},
+    utils::{ClassCast, Print, encode_offset},
 };
 use core::{fmt::Write, ops::Range};
+use tutorlolv2::AttackType;
 use tutorlolv2_gen::{
-    BASIC_ATTACK_FN_OFFSET, CRITICAL_STRIKE_FN_OFFSET, ChampionId, Ctx, CtxVar, DamageType, ItemId,
-    ONHIT_EFFECT_FN_OFFSET, RuneId, TypeMetadata,
+    BASIC_ATTACK_FN_OFFSET, CRITICAL_STRIKE_FN_OFFSET, ChampionId, Ctx, CtxVar, DamageIndex,
+    DamageType, EntityId, ItemId, ONHIT_EFFECT_FN_OFFSET, RuneId, TypeMetadata, ValueId,
 };
 use yew::prelude::*;
 
@@ -102,7 +103,8 @@ impl Cell {
                 data_idents.push('|');
             }
             let value = ctx[ident];
-            let _ = write!(&mut data_idents, "{ident}:{value}");
+            let identifier = &ident.as_var()[4..];
+            let _ = write!(&mut data_idents, "{identifier}:{value}");
         }
 
         let data_offset = {
@@ -222,7 +224,7 @@ impl Damages {
         let abilities_meta = champion_id.abilities();
         let merge_data = champion_id.merge_data();
         let ability_cell_index = Self::ability_cell_index(champion_id);
-        let ability_idents = champion_id.idents();
+        let ability_idents = champion_id.identifiers();
         let ability_closures = champion_id.closures();
 
         let meta_len = abilities_meta.len();
@@ -265,7 +267,7 @@ impl Damages {
             debug_assert_eq!(cell_i, cells.len());
 
             let meta = &abilities_meta[i];
-            let idents = &ability_idents[i];
+            let idents = ability_idents[i];
 
             cells.push(Cell {
                 damage_type: meta.damage_type,
@@ -278,59 +280,44 @@ impl Damages {
         }
     }
 
-    fn items_damage(
+    fn value_damage<T: ValueId>(
         &self,
         cells: &mut Vec<Cell>,
-        items_meta: &[TypeMetadata<ItemId>],
+        metadata: &[TypeMetadata<T>],
+        attack_type: AttackType,
         other: Option<&Damages>,
     ) {
-        let damages = &self.items;
+        let tag = T::default();
+        let damages = match tag.entity() {
+            EntityId::Champion(_) => {
+                panic!("Can't use method value_damage with champions")
+            }
+            EntityId::Item(_) => &self.items,
+            EntityId::Rune(_) => &self.runes,
+        };
 
-        debug_assert_eq!(items_meta.len(), damages.len() >> 1);
+        debug_assert_eq!(metadata.len(), damages.len() >> 1);
 
-        for (k, meta) in items_meta.iter().enumerate() {
+        for (k, meta) in metadata.iter().enumerate() {
             let min_i = k << 1;
             let min_dmg = damages[min_i];
             let max_dmg = damages[min_i + 1];
-
-            let item_id = meta.kind;
+            let id = meta.kind;
 
             cells.push(Cell {
                 damage_type: meta.damage_type,
                 min_dmg,
                 max_dmg: Some(max_dmg),
-                offsets: (item_id.closure(), None),
-                idents: item_id.idents(),
+                offsets: (
+                    &id.functions()[attack_type as usize][DamageIndex::Min as usize],
+                    None,
+                ),
+                idents: &id.identifiers()[attack_type as usize][DamageIndex::Min as usize],
                 diff: other.map(|o| {
                     let diff_min = o.items[min_i];
                     let diff_max = o.items[min_i + 1];
                     (min_dmg - diff_min, Some(max_dmg - diff_max))
                 }),
-            });
-        }
-    }
-
-    fn runes_damage(
-        &self,
-        cells: &mut Vec<Cell>,
-        runes_meta: &[TypeMetadata<RuneId>],
-        other: Option<&Damages>,
-    ) {
-        let damages = &self.runes;
-
-        debug_assert_eq!(runes_meta.len(), damages.len());
-
-        for (k, meta) in runes_meta.iter().enumerate() {
-            let rune_id = meta.kind;
-            let min_dmg = damages[k];
-
-            cells.push(Cell {
-                damage_type: meta.damage_type,
-                min_dmg,
-                max_dmg: None,
-                offsets: (rune_id.closure(), None),
-                idents: rune_id.idents(),
-                diff: other.map(|o| (min_dmg - o.runes[k], None)),
             });
         }
     }
@@ -375,8 +362,8 @@ impl Damages {
 
         self.attack_cells(&mut cells, other);
         self.abilities_damage(&mut cells, champion_id, other);
-        self.items_damage(&mut cells, items_meta, other);
-        self.runes_damage(&mut cells, runes_meta, other);
+        self.value_damage(&mut cells, items_meta, champion_id.attack_type(), other);
+        self.value_damage(&mut cells, runes_meta, champion_id.attack_type(), other);
         self.render_cells(cells)
     }
 }

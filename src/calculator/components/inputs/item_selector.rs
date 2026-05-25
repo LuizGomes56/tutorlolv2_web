@@ -270,7 +270,6 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                         {onclick}
                         {data_offset}
                         key={id}
-                        data_classes={classes!("-translate-x-[calc(100%-36px)]")}
                     >
                         <Image
                             class={classes!(
@@ -302,7 +301,6 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     <button
                         {onclick}
                         {data_offset}
-                        data_classes={classes!("-translate-x-[calc(100%-36px)]")}
                     >
                         <Image
                             class={classes!("w-7", "h-7")}
@@ -454,6 +452,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
     let options = ItemId::VALUES
         .iter()
         .copied()
+        .filter(|item| !item.cache().custom)
         .filter(|item| {
             query.is_empty()
                 || item
@@ -463,9 +462,9 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         })
         .filter(|item| {
             filters.is_empty_const()
-                || filters
-                    .iter_const()
-                    .all(|v| ItemId::filter(StatName::from_u8_unchecked(v as _)).contains(item))
+                || filters.iter_const().all(|v| unsafe {
+                    ItemId::filter(StatName::from_u8_unchecked(v as _)).contains(item)
+                })
         })
         .enumerate()
         .map(|(i, item)| {
@@ -478,7 +477,6 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                 <button
                     {onclick}
                     {data_offset}
-                    data_classes={(i % 17 > 17 / 2).then_some("-translate-x-[calc(100%-36px)]")}
                     class={classes!("flex", "flex-col", "gap-1", "w-fit")}
                 >
                     <Image

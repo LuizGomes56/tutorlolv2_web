@@ -79,6 +79,12 @@
                     "rawDisplayName": "perk_displayname_PressTheAttack"
                 },
                 {
+                    "displayName": "Deathfire Touch",
+                    "id": 8992,
+                    "rawDescription": "perk_tooltip_DeathfireTouch",
+                    "rawDisplayName": "perk_displayname_DeathfireTouch"
+                },
+                {
                     "displayName": "Triumph",
                     "id": 9111,
                     "rawDescription": "perk_tooltip_9111",
@@ -1448,9 +1454,7 @@
                 "EventTime": 30.040637969970704
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 2,
                 "EventName": "ChampionKill",
                 "EventTime": 78.41980743408203,
@@ -1464,9 +1468,7 @@
                 "Recipient": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Morgana"
-                ],
+                "Assisters": ["Morgana"],
                 "EventID": 4,
                 "EventName": "ChampionKill",
                 "EventTime": 80.26363372802735,
@@ -1482,9 +1484,7 @@
                 "VictimName": "Mergen"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 6,
                 "EventName": "ChampionKill",
                 "EventTime": 176.54209899902345,
@@ -1492,9 +1492,7 @@
                 "VictimName": "Morgana"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 7,
                 "EventName": "ChampionKill",
                 "EventTime": 181.0478057861328,
@@ -1509,9 +1507,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Morgana"
-                ],
+                "Assisters": ["Morgana"],
                 "EventID": 9,
                 "EventName": "ChampionKill",
                 "EventTime": 222.9124298095703,
@@ -1519,9 +1515,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Abell"
-                ],
+                "Assisters": ["Abell"],
                 "EventID": 10,
                 "EventName": "ChampionKill",
                 "EventTime": 238.94625854492188,
@@ -1545,10 +1539,7 @@
                 "VictimName": "Mergen"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 13,
                 "EventName": "ChampionKill",
                 "EventTime": 339.4256591796875,
@@ -1556,10 +1547,7 @@
                 "VictimName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 14,
                 "EventName": "ChampionKill",
                 "EventTime": 343.8681335449219,
@@ -1574,10 +1562,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 16,
                 "EventName": "ChampionKill",
                 "EventTime": 350.08319091796877,
@@ -1608,10 +1593,7 @@
                 "VictimName": "Mergen"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED",
-                    "Giga Gnar"
-                ],
+                "Assisters": ["CANCAN NEED", "Giga Gnar"],
                 "EventID": 20,
                 "EventName": "ChampionKill",
                 "EventTime": 547.8888549804688,
@@ -1619,10 +1601,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 21,
                 "EventName": "ChampionKill",
                 "EventTime": 552.7757568359375,
@@ -1630,11 +1609,7 @@
                 "VictimName": "CANCAN NEED"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED",
-                    "Giga Gnar",
-                    "Morgana"
-                ],
+                "Assisters": ["CANCAN NEED", "Giga Gnar", "Morgana"],
                 "EventID": 22,
                 "EventName": "ChampionKill",
                 "EventTime": 556.1126098632813,
@@ -1649,11 +1624,7 @@
                 "KillerName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "THANOS ORBWALKER",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "THANOS ORBWALKER", "Houki"],
                 "EventID": 24,
                 "EventName": "ChampionKill",
                 "EventTime": 556.7401123046875,
@@ -1668,10 +1639,7 @@
                 "KillerName": "Mergen"
             },
             {
-                "Assisters": [
-                    "Giga Gnar",
-                    "Morgana"
-                ],
+                "Assisters": ["Giga Gnar", "Morgana"],
                 "EventID": 26,
                 "EventName": "ChampionKill",
                 "EventTime": 560.2163696289063,
@@ -1686,9 +1654,7 @@
                 "KillerName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "Morgana"
-                ],
+                "Assisters": ["Morgana"],
                 "EventID": 28,
                 "EventName": "ChampionKill",
                 "EventTime": 611.6162109375,
@@ -1696,10 +1662,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED",
-                    "Giga Gnar"
-                ],
+                "Assisters": ["CANCAN NEED", "Giga Gnar"],
                 "EventID": 29,
                 "EventName": "ChampionKill",
                 "EventTime": 620.8143920898438,
@@ -1707,9 +1670,7 @@
                 "VictimName": "Korean pilot"
             },
             {
-                "Assisters": [
-                    "THANOS ORBWALKER"
-                ],
+                "Assisters": ["THANOS ORBWALKER"],
                 "EventID": 30,
                 "EventName": "ChampionKill",
                 "EventTime": 621.6502685546875,
@@ -1717,9 +1678,7 @@
                 "VictimName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED"
-                ],
+                "Assisters": ["CANCAN NEED"],
                 "EventID": 31,
                 "EventName": "ChampionKill",
                 "EventTime": 622.2899169921875,
@@ -1734,10 +1693,7 @@
                 "KillerName": "feedthefatman"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED",
-                    "Giga Gnar"
-                ],
+                "Assisters": ["CANCAN NEED", "Giga Gnar"],
                 "EventID": 33,
                 "EventName": "ChampionKill",
                 "EventTime": 627.3368530273438,
@@ -1776,10 +1732,7 @@
                 "Stolen": "False"
             },
             {
-                "Assisters": [
-                    "Korean pilot",
-                    "THANOS ORBWALKER"
-                ],
+                "Assisters": ["Korean pilot", "THANOS ORBWALKER"],
                 "DragonType": "Chemtech",
                 "EventID": 38,
                 "EventName": "DragonKill",
@@ -1796,9 +1749,7 @@
                 "VictimName": "Korean pilot"
             },
             {
-                "Assisters": [
-                    "Mergen"
-                ],
+                "Assisters": ["Mergen"],
                 "EventID": 40,
                 "EventName": "ChampionKill",
                 "EventTime": 765.1920776367188,
@@ -1820,10 +1771,7 @@
                 "KillerName": "feedthefatman"
             },
             {
-                "Assisters": [
-                    "Korean pilot",
-                    "Houki"
-                ],
+                "Assisters": ["Korean pilot", "Houki"],
                 "EventID": 43,
                 "EventName": "ChampionKill",
                 "EventTime": 815.6195068359375,
@@ -1831,9 +1779,7 @@
                 "VictimName": "feedthefatman"
             },
             {
-                "Assisters": [
-                    "Morgana"
-                ],
+                "Assisters": ["Morgana"],
                 "EventID": 44,
                 "EventName": "ChampionKill",
                 "EventTime": 853.547119140625,
@@ -1841,10 +1787,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "feedthefatman",
-                    "Morgana"
-                ],
+                "Assisters": ["feedthefatman", "Morgana"],
                 "EventID": 45,
                 "EventName": "HeraldKill",
                 "EventTime": 927.7352294921875,
@@ -1852,9 +1795,7 @@
                 "Stolen": "False"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 46,
                 "EventName": "TurretKilled",
                 "EventTime": 956.421142578125,
@@ -1870,9 +1811,7 @@
                 "VictimName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 48,
                 "EventName": "ChampionKill",
                 "EventTime": 981.14892578125,
@@ -1888,10 +1827,7 @@
                 "VictimName": "Houki"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 50,
                 "EventName": "ChampionKill",
                 "EventTime": 989.8631591796875,
@@ -1906,9 +1842,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED"
-                ],
+                "Assisters": ["CANCAN NEED"],
                 "EventID": 52,
                 "EventName": "ChampionKill",
                 "EventTime": 992.1849975585938,
@@ -1916,10 +1850,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "feedthefatman",
-                    "CANCAN NEED"
-                ],
+                "Assisters": ["feedthefatman", "CANCAN NEED"],
                 "EventID": 53,
                 "EventName": "ChampionKill",
                 "EventTime": 998.345703125,
@@ -1934,10 +1865,7 @@
                 "KillerName": "Giga Gnar"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "THANOS ORBWALKER"
-                ],
+                "Assisters": ["Abell", "THANOS ORBWALKER"],
                 "EventID": 55,
                 "EventName": "ChampionKill",
                 "EventTime": 1001.381591796875,
@@ -1945,9 +1873,7 @@
                 "VictimName": "Giga Gnar"
             },
             {
-                "Assisters": [
-                    "Giga Gnar"
-                ],
+                "Assisters": ["Giga Gnar"],
                 "EventID": 56,
                 "EventName": "ChampionKill",
                 "EventTime": 1002.478759765625,
@@ -1964,10 +1890,7 @@
                 "Stolen": "False"
             },
             {
-                "Assisters": [
-                    "Apeiro",
-                    "Morgana"
-                ],
+                "Assisters": ["Apeiro", "Morgana"],
                 "EventID": 58,
                 "EventName": "ChampionKill",
                 "EventTime": 1077.46923828125,
@@ -1975,10 +1898,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "THANOS ORBWALKER",
-                    "Houki"
-                ],
+                "Assisters": ["THANOS ORBWALKER", "Houki"],
                 "EventID": 59,
                 "EventName": "ChampionKill",
                 "EventTime": 1080.2178955078126,
@@ -1986,9 +1906,7 @@
                 "VictimName": "CANCAN NEED"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 60,
                 "EventName": "ChampionKill",
                 "EventTime": 1082.9835205078126,
@@ -2003,9 +1921,7 @@
                 "KillerName": "Abell"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 62,
                 "EventName": "ChampionKill",
                 "EventTime": 1088.4937744140626,
@@ -2020,10 +1936,7 @@
                 "KillerName": "Abell"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 64,
                 "EventName": "ChampionKill",
                 "EventTime": 1101.66650390625,
@@ -2031,10 +1944,7 @@
                 "VictimName": "feedthefatman"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 65,
                 "EventName": "TurretKilled",
                 "EventTime": 1123.7833251953126,
@@ -2050,9 +1960,7 @@
                 "VictimName": "Mergen"
             },
             {
-                "Assisters": [
-                    "Morgana"
-                ],
+                "Assisters": ["Morgana"],
                 "EventID": 67,
                 "EventName": "TurretKilled",
                 "EventTime": 1156.2711181640626,
@@ -2068,9 +1976,7 @@
                 "TurretKilled": "Turret_TOrder_L2_P3_1509986696_0"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 69,
                 "EventName": "ChampionKill",
                 "EventTime": 1168.6124267578126,
@@ -2078,9 +1984,7 @@
                 "VictimName": "feedthefatman"
             },
             {
-                "Assisters": [
-                    "Apeiro"
-                ],
+                "Assisters": ["Apeiro"],
                 "EventID": 70,
                 "EventName": "ChampionKill",
                 "EventTime": 1172.0902099609376,
@@ -2096,9 +2000,7 @@
                 "VictimName": "Giga Gnar"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 72,
                 "EventName": "TurretKilled",
                 "EventTime": 1220.047119140625,
@@ -2106,9 +2008,7 @@
                 "TurretKilled": "Turret_TOrder_L2_P2_1526764315_0"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 73,
                 "EventName": "ChampionKill",
                 "EventTime": 1226.5694580078126,
@@ -2116,9 +2016,7 @@
                 "VictimName": "Morgana"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 74,
                 "EventName": "ChampionKill",
                 "EventTime": 1230.03759765625,
@@ -2133,9 +2031,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Apeiro"
-                ],
+                "Assisters": ["Apeiro"],
                 "EventID": 76,
                 "EventName": "ChampionKill",
                 "EventTime": 1251.038818359375,
@@ -2143,9 +2039,7 @@
                 "VictimName": "Houki"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED"
-                ],
+                "Assisters": ["CANCAN NEED"],
                 "EventID": 77,
                 "EventName": "ChampionKill",
                 "EventTime": 1253.9022216796876,
@@ -2153,9 +2047,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Morgana"
-                ],
+                "Assisters": ["Morgana"],
                 "EventID": 78,
                 "EventName": "ChampionKill",
                 "EventTime": 1293.0400390625,
@@ -2171,9 +2063,7 @@
                 "TurretKilled": "Turret_TChaos_L0_P3_511845594_0"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 80,
                 "EventName": "ChampionKill",
                 "EventTime": 1331.8111572265626,
@@ -2181,10 +2071,7 @@
                 "VictimName": "Morgana"
             },
             {
-                "Assisters": [
-                    "THANOS ORBWALKER",
-                    "Houki"
-                ],
+                "Assisters": ["THANOS ORBWALKER", "Houki"],
                 "EventID": 81,
                 "EventName": "ChampionKill",
                 "EventTime": 1337.092041015625,
@@ -2192,9 +2079,7 @@
                 "VictimName": "CANCAN NEED"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 82,
                 "EventName": "ChampionKill",
                 "EventTime": 1337.8465576171876,
@@ -2209,9 +2094,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 84,
                 "EventName": "ChampionKill",
                 "EventTime": 1338.7254638671876,
@@ -2219,11 +2102,7 @@
                 "VictimName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "Korean pilot",
-                    "THANOS ORBWALKER",
-                    "Houki"
-                ],
+                "Assisters": ["Korean pilot", "THANOS ORBWALKER", "Houki"],
                 "DragonType": "Fire",
                 "EventID": 85,
                 "EventName": "DragonKill",
@@ -2245,10 +2124,7 @@
                 "Stolen": "False"
             },
             {
-                "Assisters": [
-                    "THANOS ORBWALKER",
-                    "Houki"
-                ],
+                "Assisters": ["THANOS ORBWALKER", "Houki"],
                 "EventID": 87,
                 "EventName": "ChampionKill",
                 "EventTime": 1427.6658935546876,
@@ -2256,10 +2132,7 @@
                 "VictimName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "Apeiro",
-                    "Morgana"
-                ],
+                "Assisters": ["Apeiro", "Morgana"],
                 "EventID": 88,
                 "EventName": "ChampionKill",
                 "EventTime": 1428.0347900390626,
@@ -2267,10 +2140,7 @@
                 "VictimName": "Mergen"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED",
-                    "Apeiro"
-                ],
+                "Assisters": ["CANCAN NEED", "Apeiro"],
                 "EventID": 89,
                 "EventName": "ChampionKill",
                 "EventTime": 1429.461181640625,
@@ -2278,10 +2148,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 90,
                 "EventName": "ChampionKill",
                 "EventTime": 1435.987548828125,
@@ -2289,9 +2156,7 @@
                 "VictimName": "feedthefatman"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 91,
                 "EventName": "ChampionKill",
                 "EventTime": 1483.2366943359376,
@@ -2299,10 +2164,7 @@
                 "VictimName": "Giga Gnar"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Mergen"
-                ],
+                "Assisters": ["Abell", "Mergen"],
                 "EventID": 92,
                 "EventName": "ChampionKill",
                 "EventTime": 1495.315185546875,
@@ -2334,10 +2196,7 @@
                 "KillerName": "Korean pilot"
             },
             {
-                "Assisters": [
-                    "Mergen",
-                    "Houki"
-                ],
+                "Assisters": ["Mergen", "Houki"],
                 "EventID": 96,
                 "EventName": "TurretKilled",
                 "EventTime": 1556.5767822265626,
@@ -2345,10 +2204,7 @@
                 "TurretKilled": "Turret_TOrder_L1_P1_1209122387_0"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Houki"],
                 "EventID": 97,
                 "EventName": "ChampionKill",
                 "EventTime": 1594.249755859375,
@@ -2356,9 +2212,7 @@
                 "VictimName": "Apeiro"
             },
             {
-                "Assisters": [
-                    "Houki"
-                ],
+                "Assisters": ["Houki"],
                 "EventID": 98,
                 "EventName": "ChampionKill",
                 "EventTime": 1597.596923828125,
@@ -2373,11 +2227,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Mergen",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Mergen", "Houki"],
                 "EventID": 100,
                 "EventName": "ChampionKill",
                 "EventTime": 1602.21240234375,
@@ -2392,11 +2242,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Mergen",
-                    "Houki"
-                ],
+                "Assisters": ["Abell", "Mergen", "Houki"],
                 "EventID": 102,
                 "EventName": "ChampionKill",
                 "EventTime": 1603.2540283203126,
@@ -2411,9 +2257,7 @@
                 "KillerName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "CANCAN NEED"
-                ],
+                "Assisters": ["CANCAN NEED"],
                 "EventID": 104,
                 "EventName": "ChampionKill",
                 "EventTime": 1607.541015625,
@@ -2421,10 +2265,7 @@
                 "VictimName": "Houki"
             },
             {
-                "Assisters": [
-                    "feedthefatman",
-                    "Morgana"
-                ],
+                "Assisters": ["feedthefatman", "Morgana"],
                 "EventID": 105,
                 "EventName": "ChampionKill",
                 "EventTime": 1611.65283203125,
@@ -2432,10 +2273,7 @@
                 "VictimName": "THANOS ORBWALKER"
             },
             {
-                "Assisters": [
-                    "Abell",
-                    "Mergen"
-                ],
+                "Assisters": ["Abell", "Mergen"],
                 "EventID": 106,
                 "EventName": "TurretKilled",
                 "EventTime": 1616.762451171875,

@@ -45,7 +45,7 @@ pub enum Route {
 
 #[component]
 fn App() -> Html {
-    return html! {
+    html! {
         <BrowserRouter>
             <Switch<Route> render={|route| {
                 let component = match route {
@@ -76,7 +76,7 @@ fn App() -> Html {
                 }
             }} />
         </BrowserRouter>
-    };
+    }
 }
 
 fn main() {

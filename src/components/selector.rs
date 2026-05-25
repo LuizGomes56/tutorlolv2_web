@@ -2,7 +2,7 @@ use crate::{
     components::image::{Image, ImageType, Svg},
     utils::{EnumCast, hooks::use_clickout},
 };
-use tutorlolv2_gen::{CastId, ItemId};
+use tutorlolv2_gen::{CastId, GameMap, ItemId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -219,8 +219,8 @@ pub fn SelectorButton(props: &SelectorButtonProps) -> Html {
 
 pub const fn item_filter(item: ItemId) -> bool {
     let cache = item.cache();
-    cache.maps.summoners_rift
+    item.has_map(GameMap::SummonersRift)
         && cache.purchasable
-        && !cache.prettified_stats.is_empty()
+        && !cache.stats.is_empty()
         && cache.riot_id < 100000
 }

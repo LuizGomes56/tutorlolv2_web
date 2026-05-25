@@ -17,7 +17,7 @@ function init_hover() {
         return (host.getAttribute("data_offset") || "")
             .split("|")
             .filter(Boolean)
-            .map(r => r.split("..").map(Number))
+            .map((r) => r.split("..").map(Number))
             .filter(([s, e]) => Number.isFinite(s) && Number.isFinite(e));
     }
 
@@ -28,7 +28,9 @@ function init_hover() {
     }
 
     function ensureAllDataOffsetHostsPositioned() {
-        document.querySelectorAll("[data_offset]").forEach(ensureHostPositioned);
+        document
+            .querySelectorAll("[data_offset]")
+            .forEach(ensureHostPositioned);
     }
 
     function clearExtraClasses() {
@@ -56,13 +58,15 @@ function init_hover() {
         const identsHtml = data_idents
             .split("|")
             .filter(Boolean)
-            .map(entry => {
+            .map((entry) => {
                 const [ctx_var, ctx_value] = entry.split(":");
-                return `<div class="whitespace-nowrap"><span class="variable">${ctx_var}</span> = <span class="number">${ctx_value ?? "?"}</span></div>`;
+                return `<div class="whitespace-nowrap"><span class="_v">${ctx_var}</span> = <span class="_n">${ctx_value ?? "?"}</span></div>`;
             })
             .join("");
 
-        let html = identsHtml ? `<div class="flex flex-col">${identsHtml}</div>` : "";
+        let html = identsHtml
+            ? `<div class="flex flex-col">${identsHtml}</div>`
+            : "";
 
         for (const [s, e] of offsets) {
             html += window.decodeCacheSlice(s, e);
@@ -126,45 +130,61 @@ function init_hover() {
         return false;
     }
 
-    window.addEventListener("keydown", (e) => {
-        if (e.key !== "Shift") return;
-        if (shiftDown) return;
-        shiftDown = true;
+    window.addEventListener(
+        "keydown",
+        (e) => {
+            if (e.key !== "Shift") return;
+            if (shiftDown) return;
+            shiftDown = true;
 
-        ensureAllDataOffsetHostsPositioned();
+            ensureAllDataOffsetHostsPositioned();
 
-        const hovered = document.querySelectorAll("[data_offset]:hover");
-        if (!hovered.length) return;
+            const hovered = document.querySelectorAll("[data_offset]:hover");
+            if (!hovered.length) return;
 
-        showOn(hovered[hovered.length - 1]);
-    }, true);
+            showOn(hovered[hovered.length - 1]);
+        },
+        true,
+    );
 
-    window.addEventListener("keyup", (e) => {
-        if (e.key === "Shift") shiftDown = false;
-    }, true);
+    window.addEventListener(
+        "keyup",
+        (e) => {
+            if (e.key === "Shift") shiftDown = false;
+        },
+        true,
+    );
 
-    document.addEventListener("mouseover", (e) => {
-        if (!shiftDown) return;
+    document.addEventListener(
+        "mouseover",
+        (e) => {
+            if (!shiftDown) return;
 
-        const el = e.target;
-        if (!(el instanceof Element)) return;
+            const el = e.target;
+            if (!(el instanceof Element)) return;
 
-        const host = el.closest?.("[data_offset]");
-        if (!host) return;
+            const host = el.closest?.("[data_offset]");
+            if (!host) return;
 
-        const from = e.relatedTarget;
-        if (from && from instanceof Node && host.contains(from)) return;
+            const from = e.relatedTarget;
+            if (from && from instanceof Node && host.contains(from)) return;
 
-        showOn(host);
-    }, { capture: true });
+            showOn(host);
+        },
+        { capture: true },
+    );
 
-    document.addEventListener("pointerout", (ev) => {
-        const from = ev.target;
-        const to = ev.relatedTarget;
-        if (!isInsideSafe(from)) return;
-        if (to && isInsideSafe(to)) return;
-        hideTooltip();
-    }, true);
+    document.addEventListener(
+        "pointerout",
+        (ev) => {
+            const from = ev.target;
+            const to = ev.relatedTarget;
+            if (!isInsideSafe(from)) return;
+            if (to && isInsideSafe(to)) return;
+            hideTooltip();
+        },
+        true,
+    );
 
     window.addEventListener("blur", hideTooltip, true);
 
@@ -184,15 +204,21 @@ function init_hover() {
             for (const n of m.addedNodes) {
                 if (!(n instanceof Element)) continue;
                 if (n.matches?.("[data_offset]")) ensureHostPositioned(n);
-                n.querySelectorAll?.("[data_offset]").forEach(ensureHostPositioned);
+                n.querySelectorAll?.("[data_offset]").forEach(
+                    ensureHostPositioned,
+                );
             }
 
             for (const n of m.removedNodes) {
                 if (!(n instanceof Element)) continue;
-                if (currentHost && (n === currentHost || n.contains(currentHost))) hideTooltip();
+                if (
+                    currentHost &&
+                    (n === currentHost || n.contains(currentHost))
+                )
+                    hideTooltip();
             }
         }
     });
 
     mo.observe(document.documentElement, { childList: true, subtree: true });
-};
+}

@@ -14,10 +14,6 @@
     color: #4EC8B0;
 }
 
-._c {
-    color: #959596;
-}
-
 ._f {
     color: #DCDCAA;
 }
@@ -52,10 +48,16 @@
     color: #9CDCFE;
 }
 
+._x {
+    color: #969696;
+    background-color: #262626;
+    padding: 1px 0;
+}
+
 code,
 pre {
     color: #D4D4D4;
     line-height: 1.5;
     background: transparent;
-    font-family: Consolas, Monaco, 'AndaleMono', 'UbuntuMono', monospace;
+    font-family: "SF Mono", Consolas, Monaco, 'AndaleMono', 'UbuntuMono', monospace;
 }
