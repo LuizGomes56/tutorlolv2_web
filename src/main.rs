@@ -52,7 +52,7 @@ fn App() -> Html {
                     Route::Calculator => html!(<Calculator />),
                     Route::Formulas => html!(<Formulas />),
                     Route::Livegame => html!(<Livegame />),
-                    Route::Overlay => return html!(<Overlay />),
+                    Route::Overlay => html!(<Overlay />),
                     Route::About => html!(<About />),
                     _ => html!(<Calculator />),
                 };

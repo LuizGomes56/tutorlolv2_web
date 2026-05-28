@@ -14,8 +14,8 @@ impl<const N: usize> Write for FixedBuffer<N> {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         unsafe {
             let destination_ptr = self.buffer.as_mut_ptr().add(self.position);
-            let source_ptr = buf.as_ptr();
-            core::ptr::copy_nonoverlapping(source_ptr, destination_ptr, buf.len());
+            buf.as_ptr()
+                .copy_to_nonoverlapping(destination_ptr, buf.len());
             self.position += buf.len();
             Ok(buf.len())
         }
