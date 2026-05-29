@@ -123,7 +123,7 @@ impl ImageType {
             },
             ImageType::Champion(champion_id) => &format!("champions/{champion_id:?}.avif"),
             ImageType::Centered(champion_id) => {
-                // #[cfg(feature = "server")]
+                #[cfg(feature = "server")]
                 {
                     return format!(
                         concat!(
@@ -135,10 +135,10 @@ impl ImageType {
                     );
                 }
 
-                /*
                 #[cfg(not(feature = "server"))]
-                { &format!("centered/{champion_id:?}_0.avif") }
-                */
+                {
+                    &format!("centered/{champion_id:?}_0.avif")
+                }
             }
             ImageType::Item(item_id) => &{
                 let riot_id = item_id.to_riot_id();
@@ -231,15 +231,15 @@ impl ImageType {
             },
         };
 
-        /*
         #[cfg(not(feature = "server"))]
         {
             format!("{BASE_URL}/img/{path}")
         }
-        */
 
-        // #[cfg(feature = "server")]
-        { format!("/{path}") }
+        #[cfg(feature = "server")]
+        {
+            format!("/{path}")
+        }
     }
 }
 

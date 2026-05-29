@@ -19,7 +19,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 tutorlolv2 = {
   path = "../tutorlolv2"
-  # , optional = true
+  , optional = true
 }
 tutorlolv2_gen = { path = "../tutorlolv2/tutorlolv2_gen" }
 wasm-bindgen = "0.2.101"
@@ -28,8 +28,8 @@ web-sys = { version = "0.3.78", features = ["AbortController"] }
 yew = { version = "0.22.0", features = ["csr"] }
 yew-router = "0.19.0"
 
-# [features]
+[features]
 # default = []
-# default = ["server"]
+default = ["server"]
 # server = []
-# server = ["dep:tutorlolv2"]
+server = ["dep:tutorlolv2"]

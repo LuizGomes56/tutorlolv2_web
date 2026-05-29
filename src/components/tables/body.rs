@@ -150,10 +150,7 @@ impl Damages {
         let len = abilities_meta.len();
 
         let mut indexes = vec![usize::MAX; len];
-        let mut max_iterator = merge_data
-            .iter()
-            .map(|m| m.maximum_damage as usize)
-            .peekable();
+        let mut max_iterator = merge_data.iter().map(|m| m.max as usize).peekable();
 
         let mut pos = Self::BASE_CELLS;
         (0..len).for_each(|i| match max_iterator.peek() {
@@ -236,9 +233,9 @@ impl Damages {
         let mut md_end = 0;
 
         for i in 0..meta_len {
-            if md_end < merge_data.len() && (merge_data[md_end].maximum_damage as usize) == i {
+            if md_end < merge_data.len() && (merge_data[md_end].max as usize) == i {
                 let md = &merge_data[md_end];
-                let min_i = md.minimum_damage as usize;
+                let min_i = md.min as usize;
 
                 let target = ability_cell_index[min_i];
                 debug_assert!(target != usize::MAX);

@@ -47,8 +47,7 @@ impl Fetch {
     pub async fn post<T: Decode<()>>(self) -> Result<T, Box<dyn Error>> {
         let Self { url, data, .. } = self;
 
-        // #[cfg(not(feature = "server"))]
-        /*
+        #[cfg(not(feature = "server"))]
         let result = {
             use crate::utils::BASE_URL;
             use gloo_net::http::{Headers, Request};
@@ -77,9 +76,8 @@ impl Fetch {
             .binary()
             .await?
         };
-        */
 
-        // #[cfg(feature = "server")]
+        #[cfg(feature = "server")]
         let result = match url {
             FetchUrl::Realtime => {
                 use tutorlolv2::realtime::RealtimeError;

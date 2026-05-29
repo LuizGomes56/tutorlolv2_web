@@ -45,11 +45,11 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
             'inner: while j < merge_len {
                 let merge = abilities_to_merge[j];
                 j += 1;
-                if merge.maximum_damage == i as u8 {
+                if merge.max == i as u8 {
                     i += 1;
                     continue 'outer;
                 }
-                if merge.minimum_damage == i as u8 {
+                if merge.min == i as u8 {
                     ability_kind = AbilityKind::Alias(merge);
                     break 'inner;
                 }
