@@ -10,7 +10,7 @@ use crate::{
         Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
         scoreboard::ScoreboardDisplay,
     },
-    utils::{Fetch, Loading, encode_offset, glue::get_data, use_setter},
+    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, use_setter},
 };
 use tutorlolv2_gen::{CastId, ChampionId, ItemId, ItemsBitSet, SIMULATED_ITEMS_ENUM};
 use yew::{
@@ -32,6 +32,9 @@ pub fn Livegame() -> Html {
             spawn_local(async move {
                 loop {
                     let data = get_data().await;
+
+                    data.log();
+
                     game_data.set(data);
                     sleep(Fetch::REFRESH_RATE).await;
                 }
@@ -99,13 +102,7 @@ pub fn Livegame() -> Html {
 
             let enemy_rows = enemies
                 .iter()
-                .map(|enemy| {
-                    (
-                        enemy.champion_id,
-                        enemy.total_damage(),
-                        enemy.item_scores(champion_id),
-                    )
-                })
+                .map(|enemy| (enemy.champion_id, enemy.total_damage(), enemy.item_scores()))
                 .collect::<Vec<_>>();
 
             let mut seen = ItemsBitSet::EMPTY;
@@ -180,11 +177,14 @@ pub fn Livegame() -> Html {
 
             html! {
                 <div class={classes!(
-                    "flex", "flex-col", "gap-4", "mb-96",
-                    "p-4", "overflow-hidden", "flex-1",
+                    "flex", "flex-col", "mb-96",
+                    "overflow-hidden", "flex-1",
                     "xl:flex-row"
                 )}>
-                    <div class={classes!("flex", "flex-col", "gap-4", "min-w-80")}>
+                    <div class={classes!(
+                        "flex", "py-4", "pl-4", "pr-2",
+                        "flex-col", "gap-4", "min-w-80"
+                    )}>
                         <Banner
                             riot_id={current_player.riot_id.clone()}
                             {game_time}
@@ -202,7 +202,10 @@ pub fn Livegame() -> Html {
                             />
                         </div>
                     </div>
-                    <div class={classes!("flex", "flex-col", "gap-4", "flex-1")}>
+                    <div class={classes!(
+                        "flex", "flex-col", "py-4", "pl-2",
+                        "pr-4", "gap-4", "flex-1", "overflow-auto"
+                    )}>
                         <div class={classes!("box", "overflow-auto")}>
                             <table class={classes!("data-table")}>
                                 <TableHeader

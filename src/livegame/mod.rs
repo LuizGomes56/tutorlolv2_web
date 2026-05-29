@@ -12,7 +12,7 @@ use bincode::Decode;
 use std::rc::Rc;
 use tutorlolv2_gen::{
     AdaptiveType, CastId, ChampionId, GameMap, ItemId, ItemsBitSet, L_SIML, Position, RuneId,
-    SIMULATED_ITEMS_METADATA, TypeMetadata,
+    SIMULATED_ITEMS_ENUM, SIMULATED_ITEMS_METADATA, TypeMetadata,
 };
 use yew::prelude::*;
 
@@ -161,25 +161,16 @@ impl Enemy {
         self.damages.sum()
     }
 
-    pub fn item_scores(&self, champion_id: ChampionId) -> Vec<(i32, ItemId)> {
-        let array: [i32; L_SIML] = core::array::from_fn(|i| self.siml_items[i].sum());
-
-        let mut seen = ItemsBitSet::EMPTY;
-
-        let mut list = Position::ARRAY
-            .into_iter()
-            .flat_map(|position| champion_id.recommended_items(position))
-            .filter_map(|&item| {
-                SIMULATED_ITEMS_METADATA
-                    .iter()
-                    .position(|m| m.kind == item)
-                    .map(|index| (array[index], item))
-            })
-            .filter(|&(_, item)| seen.insert_const(item.index() as _))
+    pub fn item_scores(&self) -> Vec<(i32, ItemId)> {
+        let mut list = self
+            .siml_items
+            .iter()
+            .zip(SIMULATED_ITEMS_ENUM)
+            .map(|(s, item)| (s.sum(), item))
             .collect::<Vec<_>>();
 
         list.sort_unstable();
-
+        list.reverse();
         list
     }
 }

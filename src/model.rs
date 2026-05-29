@@ -41,9 +41,10 @@ pub struct RangeDamage {
 #[derive(Clone, Copy, Debug, Decode, Default, Encode, PartialEq)]
 pub struct BasicStats {
     pub armor: i32,
-    pub max_health: i32,
     pub attack_damage: i32,
+    pub attack_speed: i32,
     pub magic_resist: i32,
+    pub max_health: i32,
     pub max_mana: i32,
 }
 

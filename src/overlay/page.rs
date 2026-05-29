@@ -216,7 +216,7 @@ pub fn Overlay() -> Html {
 
             let recommendation = enemy.map(|enemy| {
                 let base = enemy.total_damage();
-                let list = enemy.item_scores(champion_id);
+                let list = enemy.item_scores();
 
                 list.into_iter()
                     .map(|(damage, item)| {

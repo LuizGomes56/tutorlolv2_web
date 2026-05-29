@@ -452,7 +452,11 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
     let options = ItemId::VALUES
         .iter()
         .copied()
-        .filter(|item| !item.cache().custom)
+        .filter(|item| {
+            !item.cache().custom
+                && item.cache().purchasable
+                && item.has_map(tutorlolv2::GameMap::SummonersRift)
+        })
         .filter(|item| {
             query.is_empty()
                 || item

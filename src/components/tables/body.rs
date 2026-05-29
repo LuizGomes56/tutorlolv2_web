@@ -2,7 +2,7 @@ use crate::{
     calculator::FinalEnemy,
     livegame::Enemy,
     model::{Attacks, Damages},
-    utils::{ClassCast, Print, encode_offset},
+    utils::{ClassCast, encode_offset},
 };
 use core::{fmt::Write, ops::Range};
 use tutorlolv2::AttackType;
@@ -81,7 +81,7 @@ impl Cell {
                     {F(min)}
                 </>
             )),
-            Some(max) if max == min => Some(Html::from(min)),
+            Some(max) if max == min && min != 0 => Some(Html::from(min)),
             None if min != 0 => Some(Html::from(min)),
             _ => None,
         }

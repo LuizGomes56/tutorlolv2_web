@@ -208,6 +208,7 @@ pub fn Calculator() -> Html {
                 items_meta,
                 runes_meta,
             } = data;
+
             html! {
                 <>
                     <div class={classes!("box", "overflow-auto")}>
