@@ -8,8 +8,9 @@ use std::{
     ops::{Deref, DerefMut},
     rc::Rc,
 };
-use tutorlolv2_gen::{
-    AbilityId, ChampionId, ComboElement, ItemId, ItemsBitSet, RuneId, RunesBitSet, TypeMetadata,
+use tutorlolv2::{
+    AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata,
+    bitset::{ItemsBitSet, RunesBitSet},
 };
 use yew::{Callback, Reducible, UseReducerHandle, UseStateHandle, hook, use_callback};
 

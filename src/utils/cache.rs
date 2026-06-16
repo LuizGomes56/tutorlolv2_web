@@ -1,6 +1,6 @@
 use brotli::BrotliDecompress;
 use std::io::Write;
-use tutorlolv2_gen::{BLOCK, RAW_BLOCK_LEN};
+use tutorlolv2::docs::{BLOCK, RAW_BLOCK_LEN};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 pub static mut CACHE: [u8; RAW_BLOCK_LEN] = [0; _];

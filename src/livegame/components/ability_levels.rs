@@ -2,7 +2,7 @@ use crate::{
     components::image::{Image, ImageType},
     model::AbilityLevels,
 };
-use tutorlolv2_gen::ChampionId;
+use tutorlolv2::ChampionId;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

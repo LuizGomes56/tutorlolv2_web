@@ -2,7 +2,7 @@ use crate::{
     model::{AbilityKind, StatType},
     utils::BASE_URL,
 };
-use tutorlolv2_gen::{AbilityName, ChampionId, ItemId, Position, RuneId, StatName};
+use tutorlolv2::{AbilityName, ChampionId, ItemId, Position, RuneId, StatName};
 use yew::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]

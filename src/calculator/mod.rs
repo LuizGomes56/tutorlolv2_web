@@ -8,7 +8,7 @@ use crate::{
 };
 use bincode::{Decode, Encode};
 use std::{collections::HashMap, hash::Hash, rc::Rc};
-use tutorlolv2_gen::{AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
+use tutorlolv2::{AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
 
 mod components;
 mod page;

@@ -7,7 +7,7 @@ use crate::{
     utils::encode_offset,
 };
 use std::rc::Rc;
-use tutorlolv2_gen::{CastId, ignite};
+use tutorlolv2::{CastId, ignite};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

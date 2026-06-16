@@ -5,7 +5,7 @@ use crate::{
     utils::ReduceApply,
 };
 use std::ops::{Index, IndexMut};
-use tutorlolv2_gen::{ChampionId, Key};
+use tutorlolv2::{ChampionId, Key};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 

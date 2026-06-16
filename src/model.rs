@@ -1,7 +1,7 @@
 use crate::impl_reducible;
 use bincode::{Decode, Encode};
 use std::fmt::Display;
-use tutorlolv2_gen::{AbilityId, Ctx, ItemId, Key, MergeData, RuneId};
+use tutorlolv2::{AbilityId, Ctx, ItemId, Key, MergeData, RuneId};
 
 impl_reducible!(PlayerStats i32 {
     ability_power,

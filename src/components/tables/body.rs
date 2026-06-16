@@ -6,9 +6,10 @@ use crate::{
 };
 use core::{fmt::Write, ops::Range};
 use tutorlolv2::AttackType;
-use tutorlolv2_gen::{
-    BASIC_ATTACK_FN_OFFSET, CRITICAL_STRIKE_FN_OFFSET, ChampionId, Ctx, CtxVar, DamageIndex,
-    DamageType, EntityId, ItemId, ONHIT_EFFECT_FN_OFFSET, RuneId, TypeMetadata, ValueId,
+use tutorlolv2::{
+    ChampionId, Ctx, CtxVar, DamageIndex, DamageType, EntityId, ItemId, RuneId, TypeMetadata,
+    ValueId,
+    docs::{BASIC_ATTACK_FN_OFFSET, CRITICAL_STRIKE_FN_OFFSET, ONHIT_EFFECT_FN_OFFSET},
 };
 use yew::prelude::*;
 
@@ -309,7 +310,7 @@ impl Damages {
                     &id.functions()[attack_type as usize][DamageIndex::Min as usize],
                     None,
                 ),
-                idents: &id.identifiers()[attack_type as usize][DamageIndex::Min as usize],
+                idents: id.identifiers(),
                 diff: other.map(|o| {
                     let diff_min = o.items[min_i];
                     let diff_max = o.items[min_i + 1];

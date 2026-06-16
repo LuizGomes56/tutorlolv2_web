@@ -1,6 +1,6 @@
 use crate::{components::image::ImageType, utils::random_u64};
 use std::fmt::Debug;
-use tutorlolv2_gen::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
+use tutorlolv2::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
 
 pub trait EnumCast
 where

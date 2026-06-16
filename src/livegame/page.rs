@@ -12,7 +12,7 @@ use crate::{
     },
     utils::{Fetch, Loading, Print, encode_offset, glue::get_data, use_setter},
 };
-use tutorlolv2_gen::{CastId, ChampionId, ItemId, ItemsBitSet, SIMULATED_ITEMS_ENUM};
+use tutorlolv2::{CastId, ChampionId, ItemId, SIMULATED_ITEMS_ENUM, bitset::ItemsBitSet};
 use yew::{
     platform::{spawn_local, time::sleep},
     prelude::*,

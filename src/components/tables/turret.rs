@@ -2,7 +2,7 @@ use crate::{
     components::image::{Image, ImageType},
     utils::encode_offset,
 };
-use tutorlolv2_gen::{L_TWRD, TOWER_DAMAGE_OFFSET};
+use tutorlolv2::{L_TWRD, docs::TOWER_DAMAGE_OFFSET};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

@@ -1,5 +1,5 @@
 use crate::formulas::components::{ValueFormulas, champions::ChampionFormulas};
-use tutorlolv2_gen::{ItemId, RuneId};
+use tutorlolv2::{ItemId, RuneId};
 use yew::prelude::*;
 
 #[component]

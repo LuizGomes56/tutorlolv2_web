@@ -10,9 +10,9 @@ use crate::{
 };
 use bincode::Decode;
 use std::rc::Rc;
-use tutorlolv2_gen::{
-    AdaptiveType, CastId, ChampionId, GameMap, ItemId, ItemsBitSet, L_SIML, Position, RuneId,
-    SIMULATED_ITEMS_ENUM, SIMULATED_ITEMS_METADATA, TypeMetadata,
+use tutorlolv2::{
+    AdaptiveType, CastId, ChampionId, GameMap, ItemId, L_SIML, Position, RuneId,
+    SIMULATED_ITEMS_ENUM, SIMULATED_ITEMS_METADATA, TypeMetadata, bitset::ItemsBitSet,
 };
 use yew::prelude::*;
 

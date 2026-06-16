@@ -16,7 +16,7 @@ use crate::{
     utils::{ClassCast, Fetch, FetchUrl, Loading, Print, encode_offset, tray::TrayAction},
 };
 use std::{cell::RefCell, rc::Rc};
-use tutorlolv2_gen::{CastId, L_MSTR, L_TWRD, TOWER_DAMAGE_FN_OFFSET};
+use tutorlolv2::{CastId, L_MSTR, L_TWRD, docs::TOWER_DAMAGE_FN_OFFSET};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 

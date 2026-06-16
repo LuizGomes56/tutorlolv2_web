@@ -18,7 +18,7 @@ use crate::{
     model::{Dragons, DragonsAction, PlayerStats},
     utils::Print,
 };
-use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
+use tutorlolv2::{ChampionId, ItemId, RuneId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 

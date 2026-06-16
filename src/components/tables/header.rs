@@ -4,9 +4,9 @@ use crate::{
     utils::encode_offset,
 };
 use std::{ops::Range, rc::Rc};
-use tutorlolv2_gen::{
-    BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, CastId, ChampionId, ItemId, ONHIT_EFFECT_OFFSET,
-    RuneId, TypeMetadata,
+use tutorlolv2::{
+    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
+    docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, ONHIT_EFFECT_OFFSET},
 };
 use yew::prelude::*;
 

@@ -11,7 +11,7 @@ use crate::{
     overlay::panel::PanelManager,
     utils::{Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
 };
-use tutorlolv2_gen::CastId;
+use tutorlolv2::CastId;
 use wasm_bindgen::{
     JsCast, JsValue,
     prelude::{Closure, wasm_bindgen},

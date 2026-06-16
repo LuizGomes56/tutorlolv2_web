@@ -4,7 +4,10 @@ use crate::{
     utils::encode_offset,
 };
 use std::hash::Hash;
-use tutorlolv2_gen::{BitSetArray, CastId, ChampionId, ItemsBitSet};
+use tutorlolv2::{
+    CastId, ChampionId,
+    bitset::{BitSetArray, ItemsBitSet},
+};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 

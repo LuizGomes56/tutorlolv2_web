@@ -7,9 +7,9 @@ use crate::{
 };
 use serde_json::Value;
 use std::{collections::HashMap, rc::Rc};
-use tutorlolv2_gen::{
-    BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, CastId, ChampionId, IGNITE_OFFSET, ItemId,
-    ONHIT_EFFECT_OFFSET, RuneId, TypeMetadata,
+use tutorlolv2::{
+    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
+    docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, IGNITE_OFFSET, ONHIT_EFFECT_OFFSET},
 };
 use yew::prelude::*;
 

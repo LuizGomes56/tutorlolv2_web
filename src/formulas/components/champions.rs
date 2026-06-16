@@ -7,7 +7,7 @@ use crate::{
     formulas::components::code::Code,
     utils::{EnumCast, encode_offset, use_setter},
 };
-use tutorlolv2_gen::{CastId, ChampionId, Position};
+use tutorlolv2::{CastId, ChampionId, Position};
 use yew::prelude::*;
 
 #[component]

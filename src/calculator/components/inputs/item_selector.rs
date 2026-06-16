@@ -11,8 +11,9 @@ use crate::{
         tray::{Tray, TrayAction, TrayEntry},
     },
 };
-use tutorlolv2_gen::{
-    BitSetArray, CastId, ChampionId, ItemId, Position, RuneId, StatName, bitset::sizeof_bitset,
+use tutorlolv2::{
+    CastId, ChampionId, ItemId, Position, RuneId, StatName, bitset::BitSetArray,
+    bitset::sizeof_bitset,
 };
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -453,8 +454,8 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         .iter()
         .copied()
         .filter(|item| {
-            !item.cache().custom
-                && item.cache().purchasable
+            !item.data().custom
+                && item.data().purchasable
                 && item.has_map(tutorlolv2::GameMap::SummonersRift)
         })
         .filter(|item| {

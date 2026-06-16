@@ -1,6 +1,5 @@
 use std::rc::Rc;
-
-use tutorlolv2_gen::{CastId, ChampionId};
+use tutorlolv2::{CastId, ChampionId};
 use yew::prelude::*;
 
 use crate::{

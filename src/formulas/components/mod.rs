@@ -7,7 +7,7 @@ use crate::{
     utils::{EnumCast, use_setter},
 };
 use std::collections::HashSet;
-use tutorlolv2_gen::{EntityId, ValueId};
+use tutorlolv2::{EntityId, ValueId};
 use yew::prelude::*;
 
 #[component]

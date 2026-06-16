@@ -16,7 +16,7 @@ use crate::{
     },
     model::{Dragons, DragonsAction, EnemyStats},
 };
-use tutorlolv2_gen::{ChampionId, ItemId};
+use tutorlolv2::{ChampionId, ItemId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 

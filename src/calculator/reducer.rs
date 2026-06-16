@@ -7,7 +7,7 @@ use crate::{
     },
 };
 use std::rc::Rc;
-use tutorlolv2_gen::{ChampionId, ItemId, RuneId};
+use tutorlolv2::{ChampionId, ItemId, RuneId};
 use yew::Reducible;
 
 pub type EnemyDataAction = DataAction<EnemyStats>;
