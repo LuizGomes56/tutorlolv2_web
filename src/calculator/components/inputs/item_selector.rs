@@ -1,22 +1,23 @@
-use crate::{
-    calculator::{
-        Player, PlayerData,
-        page::{EnemyProps, PlayerProps, TargetEntity},
-        reducer::{DataAction, EnemyAction, LastAction, PlayerAction},
+use {
+    crate::{
+        calculator::{
+            Player, PlayerData,
+            page::{EnemyProps, PlayerProps, TargetEntity},
+            reducer::{DataAction, EnemyAction, LastAction, PlayerAction},
+        },
+        components::image::{Image, ImageType, Svg},
+        utils::{
+            encode_offset,
+            hooks::{on_keydown, use_clickout},
+            tray::{Tray, TrayAction, TrayEntry},
+        },
     },
-    components::image::{Image, ImageType, Svg},
-    utils::{
-        encode_offset,
-        hooks::{on_keydown, use_clickout},
-        tray::{Tray, TrayAction, TrayEntry},
+    tutorlolv2::{
+        ChampionId, ItemId, Position, RuneId, StatName, bitset::BitSetArray, bitset::sizeof_bitset,
     },
+    web_sys::HtmlInputElement,
+    yew::prelude::*,
 };
-use tutorlolv2::{
-    CastId, ChampionId, ItemId, Position, RuneId, StatName, bitset::BitSetArray,
-    bitset::sizeof_bitset,
-};
-use web_sys::HtmlInputElement;
-use yew::prelude::*;
 
 #[hook]
 pub fn use_rune_tray_callback<T: 'static>(
@@ -264,7 +265,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     Callback::from(move |_| remove.emit(id))
                 };
 
-                let data_offset = encode_offset(&[value.formula()]);
+                let data_offset = encode_offset(&[value.docs()]);
 
                 html! {
                     <button
@@ -291,7 +292,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
             })
         };
 
-        let data_offset = encode_offset(&[champion_id.formula()]);
+        let data_offset = encode_offset(&[champion_id.docs()]);
 
         html! {
             <div class={classes!(
@@ -476,7 +477,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
             let insert = insert.clone();
             let onclick = Callback::from(move |_| insert.emit(item));
 
-            let data_offset = encode_offset(&[item.formula()]);
+            let data_offset = encode_offset(&[item.docs()]);
 
             html! {
                 <button

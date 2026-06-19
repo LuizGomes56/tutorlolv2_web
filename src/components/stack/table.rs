@@ -7,7 +7,7 @@ use crate::{
     utils::encode_offset,
 };
 use std::rc::Rc;
-use tutorlolv2::{CastId, ignite};
+use tutorlolv2::ignite;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -75,7 +75,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                             <tr>
                                 <td
                                     class={classes!("w-12")}
-                                    data_offset={encode_offset(&[enemy_id.formula()])}
+                                    data_offset={encode_offset(&[enemy_id.docs()])}
                                 >
                                     <button
                                         class={classes!(

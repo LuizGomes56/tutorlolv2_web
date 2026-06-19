@@ -1,25 +1,27 @@
-use crate::{
-    components::{
-        dynamic::Dynamic,
-        errorlog::errorlog,
-        image::{Image, ImageType},
-        stack::{Stack, StackInsert, StackRemover, StackTable},
-        tables::header::TableHeader,
+use {
+    crate::{
+        components::{
+            dynamic::Dynamic,
+            errorlog::errorlog,
+            image::{Image, ImageType},
+            stack::{Stack, StackInsert, StackRemover, StackTable},
+            tables::{body::to_html, header::TableHeader},
+        },
+        impl_reducible,
+        livegame::{Enemy, Game},
+        overlay::panel::PanelManager,
+        utils::{Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
     },
-    impl_reducible,
-    livegame::{Enemy, Game},
-    overlay::panel::PanelManager,
-    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
-};
-use tutorlolv2::CastId;
-use wasm_bindgen::{
-    JsCast, JsValue,
-    prelude::{Closure, wasm_bindgen},
-};
-use web_sys::js_sys::Function;
-use yew::{
-    platform::{spawn_local, time::sleep},
-    prelude::*,
+    std::time::Duration,
+    wasm_bindgen::{
+        JsCast, JsValue,
+        prelude::{Closure, wasm_bindgen},
+    },
+    web_sys::js_sys::Function,
+    yew::{
+        platform::{spawn_local, time::sleep},
+        prelude::*,
+    },
 };
 
 #[wasm_bindgen(module = "/public/events.js")]
@@ -164,7 +166,7 @@ pub fn Overlay() -> Html {
                     }
 
                     game_data.set(data);
-                    sleep(Fetch::REFRESH_RATE).await;
+                    sleep(Duration::from_secs(1)).await;
                 }
             });
         });
@@ -195,16 +197,15 @@ pub fn Overlay() -> Html {
 
             let damages = enemy
                 .map(|enemy| {
-                    let damages = enemy
-                        .damages
-                        .to_html(champion_id, items_meta, runes_meta, None);
+                    let damages =
+                        to_html(&enemy.damages, champion_id, items_meta, runes_meta, None);
                     let enemy_id = enemy.champion_id;
 
                     html! {
                         <tr>
                             <td
                                 class={classes!("w-12")}
-                                data_offset={encode_offset(&[enemy_id.formula()])}
+                                data_offset={encode_offset(&[enemy_id.docs()])}
                             >
                                 <Image src={ImageType::from(enemy_id)} />
                             </td>

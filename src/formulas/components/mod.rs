@@ -20,7 +20,7 @@ where
 
     let mut functions = HashSet::with_capacity(4);
 
-    for range in value.functions().iter().flatten() {
+    for range in value.functions_docs().iter().flatten() {
         if range.len() > 0 {
             functions.insert(range);
         }
@@ -44,7 +44,7 @@ where
                 {callback}
             />
             <H2 text={"Source code definition"} />
-            <Code range={value.formula()} />
+            <Code range={value.docs()} />
             {(!functions.is_empty()).then_some(html!(
                 <>
                     <H2 text={"Function definition"} />
@@ -53,10 +53,10 @@ where
                     }
                 </>
             ))}
-            {(value.generator().len() > 0).then_some(html!(
+            {(value.generator_docs().len() > 0).then_some(html!(
                 <>
                     <H2 text={"Implementation"} />
-                    <Code range={value.generator()} />
+                    <Code range={value.generator_docs()} />
                 </>
             ))}
         </div>

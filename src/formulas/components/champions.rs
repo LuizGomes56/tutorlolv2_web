@@ -32,7 +32,7 @@ pub fn ChampionFormulas() -> Html {
                                     "md:justify-items-start",
                                     "overflow-hidden"
                                 )}
-                                data_offset={encode_offset(&[item.formula()])}
+                                data_offset={encode_offset(&[item.docs()])}
                             >
                                 <div class={classes!("flex", "items-center", "gap-3")}>
                                     <Image
@@ -107,17 +107,17 @@ pub fn ChampionFormulas() -> Html {
                 </table>
             </div>
             <H2 text={"Source code definition"} />
-            <Code range={champion.formula()} />
+            <Code range={champion.docs()} />
             <H2 text={"Abilities virtual definiton"} />
             for i in 0..champion.number_of_abilities() {
-                <Code range={champion.get_ability_formula(i)} />
+                <Code range={&champion.abilities_docs()[i]} />
             }
             <H2 text={"Internal ability functions"} />
             for i in 0..champion.number_of_abilities() {
-                <Code range={&champion.closures()[i]} />
+                <Code range={&champion.functions_docs()[i]} />
             }
             <H2 text={"Champion generator implementation"} />
-            <Code range={champion.generator()} />
+            <Code range={champion.generator_docs()} />
         </div>
     }
 }

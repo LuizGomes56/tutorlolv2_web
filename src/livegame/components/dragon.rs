@@ -1,7 +1,5 @@
-use crate::{
-    components::image::{DragonImage, Image, ImageType, OtherImage},
-    model::Dragons,
-};
+use crate::components::image::{DragonImage, Image, ImageType, OtherImage};
+use tutorlolv2::model::Dragons;
 use yew::{html::IntoPropValue, prelude::*};
 
 #[derive(PartialEq, Properties)]
@@ -42,8 +40,8 @@ pub fn DragonDisplay(props: &DragonDisplayProps) -> Html {
                     </tr>
                 </thead>
                 <tbody>
-                    {row(dragons.ally_earth, dragons.enemy_earth, DragonImage::Earth)}
-                    {row(dragons.ally_fire, UNKNOWN, DragonImage::Fire)}
+                    {row(dragons.ally_earth_dragons, dragons.enemy_earth_dragons, DragonImage::Earth)}
+                    {row(dragons.ally_fire_dragons, UNKNOWN, DragonImage::Fire)}
                     {row(UNKNOWN, UNKNOWN, DragonImage::Ocean)}
                     {row(UNKNOWN, UNKNOWN, DragonImage::Chemtech)}
                 </tbody>

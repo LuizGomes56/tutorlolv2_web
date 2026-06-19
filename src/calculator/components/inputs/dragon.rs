@@ -1,9 +1,9 @@
 use crate::{
     calculator::reducer::LastAction,
     components::image::{DragonImage, Image, ImageType, OtherImage},
-    model::{Dragons, DragonsAction},
 };
 use std::{cell::RefCell, rc::Rc};
+use tutorlolv2::{model::Dragons, yew::dragons::DragonsAction};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 

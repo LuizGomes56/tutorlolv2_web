@@ -1,13 +1,16 @@
 use crate::{
-    calculator::{ExceptionMap, Player, PlayerData},
-    model::{AbilityLevelsAction, EnemyStats, PlayerStats, ValueException},
+    calculator::{Player, PlayerData},
     utils::{
-        Print, ReduceApply,
+        Print,
         tray::{Tray, TrayAction, TrayEntry},
     },
 };
 use std::rc::Rc;
-use tutorlolv2::{ChampionId, ItemId, RuneId};
+use tutorlolv2::{
+    ChampionId, ItemId, RuneId,
+    model::{EnemyStats, PlayerStats, ValueException},
+    yew::{ReduceApply, ability_levels::AbilityLevelsAction},
+};
 use yew::Reducible;
 
 pub type EnemyDataAction = DataAction<EnemyStats>;
@@ -68,33 +71,21 @@ impl core::ops::DerefMut for Enemies {
     }
 }
 
-pub fn push_item(
-    item_exceptions: &mut ExceptionMap<ItemId>,
-    v: ItemId,
-    ally: bool,
-    mut f: impl FnMut(ItemId),
-) {
-    if ItemId::exceptions(ally).contains_const(v.index() as _) {
-        let value = ValueException::pack_item_id(v, 0);
-        item_exceptions.inner.insert(v, value);
-    }
-    f(v);
-}
-
 impl<T: ReduceApply> PlayerData<T> {
     pub fn reduce_mut(&mut self, ally: bool, action: DataAction<T>) {
         match action {
             DataAction::Level(v) => self.level = v,
             DataAction::ReplaceStats(v) => self.stats = unsafe { *v },
-            DataAction::Stats(v) => self.stats.apply(v),
+            DataAction::Stats(v) => {
+                let _ = self.stats.apply(v);
+            }
             DataAction::Stacks(v) => self.stacks = v,
             DataAction::InferStats(v) => self.infer_stats = v,
             DataAction::IsMegaGnar(v) => self.is_mega_gnar = v,
             DataAction::ChampionId(v) => self.champion_id = v,
             DataAction::Tray(v) => v.custom_apply(&mut self.items, |c, v| {
-                push_item(&mut self.item_exceptions, v, ally, |v| {
-                    c.push(TrayEntry::new(v))
-                })
+                self.item_exceptions
+                    .push_item(v, ally, |v| c.push(TrayEntry::new(v)))
             }),
             DataAction::ModifyItemExc((item_id, stacks)) => {
                 let value = ValueException::pack_item_id(item_id, stacks);

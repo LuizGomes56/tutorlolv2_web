@@ -1,5 +1,6 @@
 use bincode::{Decode, Encode, config::Configuration};
 use std::{error::Error, time::Duration};
+use tutorlolv2::model::OwnedInputGame;
 use web_sys::AbortSignal;
 
 const CONFIG: Configuration = bincode::config::standard();
@@ -47,37 +48,37 @@ impl Fetch {
     pub async fn post<T: Decode<()>>(self) -> Result<T, Box<dyn Error>> {
         let Self { url, data, .. } = self;
 
-        #[cfg(not(feature = "server"))]
-        let result = {
-            use crate::utils::BASE_URL;
-            use gloo_net::http::{Headers, Request};
+        // #[cfg(not(feature = "server"))]
+        // let result = {
+        //     use crate::utils::BASE_URL;
+        //     use gloo_net::http::{Headers, Request};
 
-            let target = [
-                BASE_URL,
-                match url {
-                    FetchUrl::Realtime => "/api/games/realtime",
-                    FetchUrl::Calculator => "/api/games/calculator",
-                },
-            ]
-            .concat();
-            let builder = Request::post(&target);
+        //     let target = [
+        //         BASE_URL,
+        //         match url {
+        //             FetchUrl::Realtime => "/api/games/realtime",
+        //             FetchUrl::Calculator => "/api/games/calculator",
+        //         },
+        //     ]
+        //     .concat();
+        //     let builder = Request::post(&target);
 
-            let headers = Headers::new();
-            headers.set("Content-Type", "application/octet-stream");
+        //     let headers = Headers::new();
+        //     headers.set("Content-Type", "application/octet-stream");
 
-            match self.signal {
-                Some(ref signal) => builder.abort_signal(Some(signal)),
-                None => builder,
-            }
-            .headers(headers)
-            .body(data)?
-            .send()
-            .await?
-            .binary()
-            .await?
-        };
+        //     match self.signal {
+        //         Some(ref signal) => builder.abort_signal(Some(signal)),
+        //         None => builder,
+        //     }
+        //     .headers(headers)
+        //     .body(data)?
+        //     .send()
+        //     .await?
+        //     .binary()
+        //     .await?
+        // };
 
-        #[cfg(feature = "server")]
+        // #[cfg(feature = "server")]
         let result = match url {
             FetchUrl::Realtime => {
                 use tutorlolv2::realtime::RealtimeError;
@@ -91,8 +92,9 @@ impl Fetch {
                 bincode::encode_to_vec(data, CONFIG)?
             }
             FetchUrl::Calculator => {
-                let (game, _) = bincode::decode_from_slice(data.as_slice(), CONFIG)?;
-                let data = tutorlolv2::calculator(game);
+                let (game, _) =
+                    bincode::decode_from_slice::<OwnedInputGame, _>(data.as_slice(), CONFIG)?;
+                let data = tutorlolv2::calculator((&game).into());
                 bincode::encode_to_vec(data, CONFIG)?
             }
         };

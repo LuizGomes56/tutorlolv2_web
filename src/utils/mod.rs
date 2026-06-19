@@ -10,11 +10,11 @@ mod macros;
 mod traits;
 pub mod tray;
 
-pub use self::{
+pub use {
     cache::init_cache,
     fetch::{Fetch, FetchUrl},
     hooks::use_setter,
-    traits::{ClassCast, EnumCast, Print, ReduceApply},
+    traits::{ClassCast, EnumCast, Print},
 };
 
 pub const BASE_URL: &str = "http://localhost:8082";

@@ -1,11 +1,10 @@
-use std::rc::Rc;
-use tutorlolv2::{CastId, ChampionId};
-use yew::prelude::*;
-
 use crate::{
     components::image::{Image, ImageType},
     utils::encode_offset,
 };
+use std::rc::Rc;
+use tutorlolv2::ChampionId;
+use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct BannerProps {
@@ -26,7 +25,7 @@ pub fn Banner(props: &BannerProps) -> Html {
     let seconds = game_time % 60;
     let time = format!("{minutes:02}m {seconds:02}s");
 
-    let data_offset = encode_offset(core::array::from_ref(&champion_id.formula()));
+    let data_offset = encode_offset(core::array::from_ref(&champion_id.docs()));
 
     html! {
         <div {data_offset} class={classes!("box")}>

@@ -6,7 +6,7 @@ use crate::{
 use std::hash::Hash;
 use tutorlolv2::{
     CastId, ChampionId,
-    bitset::{BitSetArray, ItemsBitSet},
+    bitset::{BitSet, BitSetArray, BitSetExc},
 };
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -32,7 +32,7 @@ where
         stacks,
     } = *props;
 
-    let data_offset = value.map(|v| encode_offset(&[v.formula()]));
+    let data_offset = value.map(|v| encode_offset(&[v.docs()]));
     let title = value.map(|v| {
         let name = v.name();
         format!("Define the amount of stacks for {name}")
@@ -67,15 +67,15 @@ where
 }
 
 #[derive(PartialEq, Properties)]
-pub struct ExceptionSelectorProps<const N: usize, T: Default + Eq + Hash + 'static> {
+pub struct ExceptionSelectorProps<T: Default + Eq + Hash + 'static> {
     pub values: Box<[T]>,
     pub exceptions: ExceptionMap<T>,
     pub callback: Callback<(T, u32)>,
-    pub filter: BitSetArray<N>,
+    pub filter: BitSetExc,
 }
 
 #[component]
-pub fn ExceptionSelector<const N: usize, T>(props: &ExceptionSelectorProps<N, T>) -> Html
+pub fn ExceptionSelector<T>(props: &ExceptionSelectorProps<T>) -> Html
 where
     T: CastId + Default + Eq + Hash,
     ImageType: From<T>,
@@ -87,7 +87,7 @@ where
         filter,
     } = *props;
 
-    let mut seen = ItemsBitSet::EMPTY;
+    let mut seen = BitSet::EMPTY;
 
     values
         .iter()

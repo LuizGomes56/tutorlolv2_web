@@ -1,9 +1,9 @@
 use brotli::BrotliDecompress;
 use std::io::Write;
-use tutorlolv2::docs::{BLOCK, RAW_BLOCK_LEN};
+use tutorlolv2::docs::{DOCS_BR, DOCS_LEN};
 use wasm_bindgen::prelude::wasm_bindgen;
 
-pub static mut CACHE: [u8; RAW_BLOCK_LEN] = [0; _];
+pub static mut CACHE: [u8; DOCS_LEN] = [0; _];
 
 pub struct FixedBuffer<const N: usize> {
     buffer: &'static mut [u8; N],
@@ -33,15 +33,16 @@ pub fn cache_ptr() -> *const u8 {
 
 #[wasm_bindgen]
 pub fn cache_len() -> usize {
-    RAW_BLOCK_LEN
+    DOCS_LEN
 }
 
 #[cold]
+#[allow(const_item_mutation)]
 pub fn init_cache() {
     web_sys::console::time();
     unsafe {
         BrotliDecompress(
-            &mut BLOCK,
+            &mut DOCS_BR,
             &mut FixedBuffer {
                 buffer: &mut CACHE,
                 position: 0,

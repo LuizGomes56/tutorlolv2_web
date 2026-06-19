@@ -1,11 +1,10 @@
-use bincode::Encode;
-use yew::Reducible;
-
 use crate::utils::random_u64;
+use bincode::Encode;
 use std::{
     ops::{Deref, DerefMut},
     rc::Rc,
 };
+use yew::Reducible;
 
 #[derive(Clone, Debug, PartialEq)]
 #[repr(transparent)]

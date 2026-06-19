@@ -1,24 +1,29 @@
-use crate::{
-    calculator::{
-        FinalEnemy, Game, InputGame, Player, PlayerData,
-        components::inputs::{
-            enemies::EnemiesInput, item_selector::ItemSelector, player::PlayerInput,
+use {
+    crate::{
+        calculator::{
+            Game, InputGame, Player, PlayerData,
+            components::inputs::{
+                enemies::EnemiesInput, item_selector::ItemSelector, player::PlayerInput,
+            },
+            reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
         },
-        reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
+        components::{
+            errorlog::errorlog,
+            image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
+            stack::{Stack, StackInsert, StackRemover, StackTable},
+            tables::{body::to_html, empty::EmptyTable, header::TableHeader, turret::TurretTable},
+        },
+        utils::{ClassCast, Fetch, FetchUrl, Loading, Print, encode_offset, tray::TrayAction},
     },
-    components::{
-        errorlog::errorlog,
-        image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
-        stack::{Stack, StackInsert, StackRemover, StackTable},
-        tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
+    std::{cell::RefCell, rc::Rc},
+    tutorlolv2::{
+        L_MSTR, L_TWRD,
+        docs::TOWER_DAMAGE_FN_OFFSET,
+        model::{Dragons, EnemyStats, OutputEnemy},
     },
-    model::{Dragons, EnemyStats},
-    utils::{ClassCast, Fetch, FetchUrl, Loading, Print, encode_offset, tray::TrayAction},
+    web_sys::AbortController,
+    yew::{platform::spawn_local, prelude::*},
 };
-use std::{cell::RefCell, rc::Rc};
-use tutorlolv2::{CastId, L_MSTR, L_TWRD, docs::TOWER_DAMAGE_FN_OFFSET};
-use web_sys::AbortController;
-use yew::{platform::spawn_local, prelude::*};
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct PlayerProps {
@@ -221,10 +226,11 @@ pub fn Calculator() -> Html {
                             <tbody>
                                 {
                                     enemies.iter().enumerate().map(|(i, enemy)| {
-                                        let damages = enemy.damages.to_html(
+                                        let damages = to_html(
+                                            &enemy.damages,
                                             current_player.champion_id,
-                                            items_meta,
-                                            runes_meta,
+                                            &items_meta,
+                                            &runes_meta,
                                             None
                                         );
                                         let enemy_id = enemy.champion_id;
@@ -232,7 +238,7 @@ pub fn Calculator() -> Html {
                                             <tr>
                                                 <td
                                                     class={classes!("w-12")}
-                                                    data_offset={encode_offset(&[enemy_id.formula()])}
+                                                    data_offset={encode_offset(&[enemy_id.docs()])}
                                                 >
                                                     <button
                                                         class={classes!(
@@ -271,10 +277,11 @@ pub fn Calculator() -> Html {
                             <tbody>
                                 {
                                     monster_damages.iter().enumerate().map(|(i, damage)| {
-                                        let damages = damage.to_html(
+                                        let damages = to_html(
+                                            damage,
                                             current_player.champion_id,
-                                            items_meta,
-                                            runes_meta,
+                                            &items_meta,
+                                            &runes_meta,
                                             None
                                         );
 
@@ -336,15 +343,13 @@ pub fn Calculator() -> Html {
                                 runes_meta={runes_meta.clone()}
                             />
                             <div class={classes!("overflow-auto")}>
-                                <StackTable<FinalEnemy>
+                                <StackTable<OutputEnemy>
                                     callback={{
                                         let enemy_index = enemy_index.clone();
-                                        Callback::from(move |i| {
-                                            enemy_index.set(i);
-                                        })
+                                        Callback::from(move |i| enemy_index.set(i))
                                     }}
                                     enemies={enemies.clone()}
-                                    stack={stack.reconcile(current_player.champion_id, items_meta, runes_meta)}
+                                    stack={stack.reconcile(current_player.champion_id, &items_meta, &runes_meta)}
                                     level={current_player.level}
                                 />
                             </div>

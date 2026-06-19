@@ -1,14 +1,15 @@
-use crate::{
-    calculator::reducer::push_item,
-    model::{
-        AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
-        ValueException,
+use {
+    crate::utils::{EnumCast, tray::Tray},
+    bincode::{Decode, Encode},
+    std::{collections::HashMap, hash::Hash, rc::Rc},
+    tutorlolv2::{
+        ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata, ValueId,
+        model::{
+            AbilityLevels, Damages, Dragons, EnemyStats, OutputCurrentPlayer, OutputEnemy,
+            PlayerStats, ValueException,
+        },
     },
-    utils::{EnumCast, tray::Tray},
 };
-use bincode::{Decode, Encode};
-use std::{collections::HashMap, hash::Hash, rc::Rc};
-use tutorlolv2::{AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
 
 mod components;
 mod page;
@@ -20,6 +21,16 @@ pub use page::Calculator;
 #[repr(transparent)]
 pub struct ExceptionMap<T: Default + Eq + Hash> {
     pub inner: HashMap<T, ValueException>,
+}
+
+impl<T: Default + Eq + Hash + ValueId> ExceptionMap<T> {
+    pub fn push_item(&mut self, v: T, ally: bool, mut f: impl FnMut(T)) {
+        if T::exceptions(ally).contains_const(v.index() as _) {
+            let value = v.pack_exc(0);
+            self.inner.insert(v, value);
+        }
+        f(v);
+    }
 }
 
 impl<T> Encode for ExceptionMap<T>
@@ -90,9 +101,9 @@ pub struct PlayerData<T> {
     pub item_exceptions: ExceptionMap<ItemId>,
     pub stacks: u32,
     pub level: u8,
-    pub infer_stats: bool,
-    pub is_mega_gnar: bool,
     pub champion_id: ChampionId,
+    pub is_mega_gnar: bool,
+    pub infer_stats: bool,
 }
 
 impl<T: Default> Default for PlayerData<T> {
@@ -104,7 +115,7 @@ impl<T: Default> Default for PlayerData<T> {
             inner: HashMap::with_capacity(recommended_items.len()),
         };
         for &item in recommended_items {
-            push_item(&mut item_exceptions, item, true, |item| items.push(item));
+            item_exceptions.push_item(item, true, |item| items.push(item));
         }
         Self {
             stats: T::default(),
@@ -112,40 +123,18 @@ impl<T: Default> Default for PlayerData<T> {
             item_exceptions,
             stacks: 0,
             level: 18,
-            infer_stats: true,
             is_mega_gnar: false,
             champion_id,
+            infer_stats: true,
         }
     }
 }
 
 #[derive(Clone, Debug, Decode, PartialEq)]
-pub struct FinalEnemy {
-    pub damages: Damages,
-    pub base_stats: SimpleStats,
-    pub bonus_stats: SimpleStats,
-    pub current_stats: EnemyStats,
-    pub real_armor: i32,
-    pub real_magic_resist: i32,
-    pub level: u8,
-    pub champion_id: ChampionId,
-}
-
-#[derive(Clone, Copy, Debug, Decode, PartialEq)]
-pub struct FinalPlayer {
-    pub current_stats: PlayerStats,
-    pub base_stats: BasicStats,
-    pub bonus_stats: BasicStats,
-    pub level: u8,
-    pub adaptive_type: AdaptiveType,
-    pub champion_id: ChampionId,
-}
-
-#[derive(Clone, Debug, Decode, PartialEq)]
 pub struct Game {
     pub monster_damages: [Damages; L_MSTR],
-    pub current_player: FinalPlayer,
-    pub enemies: Rc<[FinalEnemy]>,
+    pub current_player: OutputCurrentPlayer,
+    pub enemies: Rc<[OutputEnemy]>,
     pub tower_damages: [i32; L_TWRD],
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,

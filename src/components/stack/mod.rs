@@ -9,8 +9,7 @@ use std::{
     rc::Rc,
 };
 use tutorlolv2::{
-    AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata,
-    bitset::{ItemsBitSet, RunesBitSet},
+    AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata, bitset::BitSet,
 };
 use yew::{Callback, Reducible, UseReducerHandle, UseStateHandle, hook, use_callback};
 
@@ -96,11 +95,12 @@ impl Stack {
         let items_allowed = items_meta
             .iter()
             .map(|m| m.kind.index())
-            .collect::<ItemsBitSet>();
+            .collect::<BitSet>();
+
         let runes_allowed = runes_meta
             .iter()
             .map(|m| m.kind.index())
-            .collect::<RunesBitSet>();
+            .collect::<BitSet>();
 
         let mut values = Tray::new(Vec::with_capacity(self.len()));
 

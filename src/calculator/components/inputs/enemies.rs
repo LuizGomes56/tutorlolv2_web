@@ -1,24 +1,29 @@
-use crate::{
-    calculator::{
-        components::inputs::{
-            banner::Banner,
-            checkbox::Checkbox,
-            dragon::{DragonInput, use_dragons},
-            exceptions::{ChampionExceptionSelector, ExceptionSelector},
-            stats::{StatCell, Stats},
+use {
+    crate::{
+        calculator::{
+            components::inputs::{
+                banner::Banner,
+                checkbox::Checkbox,
+                dragon::DragonInput,
+                exceptions::{ChampionExceptionSelector, ExceptionSelector},
+                stats::{StatCell, Stats},
+            },
+            page::{EnemyProps, TargetEntity},
+            reducer::{DataAction, EnemyAction, EnemyDataAction, LastAction},
         },
-        page::{EnemyProps, TargetEntity},
-        reducer::{DataAction, EnemyAction, EnemyDataAction, LastAction},
+        components::{
+            image::{DragonImage, ImageType},
+            selector::SelectorButton,
+        },
     },
-    components::{
-        image::{DragonImage, ImageType},
-        selector::SelectorButton,
+    tutorlolv2::{
+        ChampionId, ItemId,
+        model::{Dragons, EnemyStats},
+        yew::dragons::DragonsAction,
     },
-    model::{Dragons, DragonsAction, EnemyStats},
+    web_sys::HtmlInputElement,
+    yew::prelude::*,
 };
-use tutorlolv2::{ChampionId, ItemId};
-use web_sys::HtmlInputElement;
-use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct EnemiesInputProps {
@@ -84,6 +89,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
     let infer_stats_callback = use_enemy_data_callback(enemy_props, DataAction::InferStats);
     let item_exception_callback = use_enemy_data_callback(enemy_props, DataAction::ModifyItemExc);
     let is_mega_gnar_callback = use_enemy_data_callback(enemy_props, DataAction::IsMegaGnar);
+
     let enemy_earth = {
         let dragons = dragons.clone();
         let last_action = enemy_props.last_action.clone();
@@ -102,10 +108,15 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
         )
     };
 
+    let mut index = (*enemy_props.enemy_index + 1) as u32;
+
     let enemy = enemy_props
         .enemies
         .get(*enemy_props.enemy_index)
-        .unwrap_or_else(|| &enemy_props.enemies[0]);
+        .unwrap_or_else(|| {
+            index = 1;
+            &enemy_props.enemies[0]
+        });
 
     html! {
         <div class={classes!(
@@ -140,7 +151,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                         title={"Earth dragons"}
                         oninput={enemy_earth}
                         src={DragonImage::Earth}
-                        value={dragons.enemy_earth}
+                        value={dragons.enemy_earth_dragons}
                     />
                 }
                 <ChampionExceptionSelector
@@ -149,7 +160,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     callback={stack_callback}
                     ally={false}
                 />
-                <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
+                <ExceptionSelector<ItemId>
                     values={enemy.items.values::<Box<_>>()}
                     exceptions={enemy.item_exceptions.clone()}
                     callback={item_exception_callback}
@@ -176,7 +187,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     image_type={ImageType::Level}
                     name={"Level"}
                     disabled={false}
-                    value={enemy.level as i32}
+                    value={enemy.level as f32}
                     placeholder={1}
                     oninput={{
                         let callback = level_callback.clone();

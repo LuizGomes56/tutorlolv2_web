@@ -8,7 +8,7 @@ use crate::{
 use serde_json::Value;
 use std::{collections::HashMap, rc::Rc};
 use tutorlolv2::{
-    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
+    ChampionId, ItemId, RuneId, TypeMetadata,
     docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, IGNITE_OFFSET, ONHIT_EFFECT_OFFSET},
 };
 use yew::prelude::*;
@@ -159,17 +159,15 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
             let (image_type, offset, max) = match entry.value {
                 StackValue::Ability { slot, ability_id } => (
                     ImageType::Ability(champion_id, ability_id.into()),
-                    champion_id.get_ability_formula(slot),
+                    &champion_id.abilities_docs()[slot],
                     false,
                 ),
                 StackValue::Item(i, item_id) => (
                     ImageType::from(item_id),
-                    item_id.formula(),
+                    item_id.docs(),
                     i % 2 == 1 && item_id.deals_max_damage(),
                 ),
-                StackValue::Rune(_, rune_id) => {
-                    (ImageType::from(rune_id), rune_id.formula(), false)
-                }
+                StackValue::Rune(_, rune_id) => (ImageType::from(rune_id), rune_id.docs(), false),
                 StackValue::BasicAttack => (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET, false),
                 StackValue::CritStrike => (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET, false),
                 StackValue::OnhitMin => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, false),

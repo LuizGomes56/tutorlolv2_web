@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use tutorlolv2::{
-    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
+    ChampionId, ItemId, RuneId, TypeMetadata,
     docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, IGNITE_OFFSET, ONHIT_EFFECT_OFFSET},
 };
 use yew::prelude::*;
@@ -136,7 +136,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
             .enumerate()
             .map(|(slot, metadata)| {
                 let ability_id = metadata.kind;
-                let data_offset = encode_offset(&[champion_id.get_ability_formula(slot)]);
+                let data_offset = encode_offset(&[&champion_id.abilities_docs()[slot]]);
 
                 let onclick = {
                     let callback = callback.clone();
@@ -172,7 +172,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                         let base = cursor.get();
                         cursor.set(base + if has_max { 2 } else { 1 });
 
-                        let data_offset = encode_offset(&[item_id.formula()]);
+                        let data_offset = encode_offset(&[item_id.docs()]);
 
                         let onclick = |j: usize| {
                             let callback = callback.clone();
@@ -200,7 +200,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 "Runes",
                 runes_meta.iter().enumerate().map(|(i, metadata)| {
                     let id = metadata.kind;
-                    let data_offset = encode_offset(&[id.formula()]);
+                    let data_offset = encode_offset(&[id.docs()]);
 
                     let onclick = {
                         let callback = callback.clone();

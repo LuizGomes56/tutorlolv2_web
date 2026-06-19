@@ -1,20 +1,21 @@
 mod components;
 mod page;
 
-use crate::{
-    components::image::{Image, ImageType},
-    model::{
-        AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats, Team,
+use {
+    crate::{
+        components::image::{Image, ImageType},
+        utils::encode_offset,
     },
-    utils::encode_offset,
+    bincode::Decode,
+    std::rc::Rc,
+    tutorlolv2::{
+        AdaptiveType, ChampionId, GameMap, ItemId, Position, RuneId, TypeMetadata,
+        model::{
+            AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats, Team,
+        },
+    },
+    yew::prelude::*,
 };
-use bincode::Decode;
-use std::rc::Rc;
-use tutorlolv2::{
-    AdaptiveType, CastId, ChampionId, GameMap, ItemId, L_SIML, Position, RuneId,
-    SIMULATED_ITEMS_ENUM, SIMULATED_ITEMS_METADATA, TypeMetadata, bitset::ItemsBitSet,
-};
-use yew::prelude::*;
 
 pub use components::*;
 pub use page::Livegame;
@@ -70,7 +71,7 @@ impl Scoreboard {
             ..
         } = self;
 
-        let data_offset = encode_offset(core::array::from_ref(&champion_id.formula()));
+        let data_offset = encode_offset(core::array::from_ref(&champion_id.docs()));
 
         html! {
             <div class={classes!(
@@ -144,7 +145,7 @@ impl Scoreboard {
 pub struct Enemy {
     pub riot_id: Box<str>,
     pub damages: Damages,
-    pub siml_items: [Damages; L_SIML],
+    pub siml_items: [Damages; ItemId::L_SIML],
     pub base_stats: SimpleStats,
     pub bonus_stats: SimpleStats,
     pub current_stats: EnemyStats,
@@ -165,7 +166,7 @@ impl Enemy {
         let mut list = self
             .siml_items
             .iter()
-            .zip(SIMULATED_ITEMS_ENUM)
+            .zip(ItemId::SIML)
             .map(|(s, item)| (s.sum(), item))
             .collect::<Vec<_>>();
 

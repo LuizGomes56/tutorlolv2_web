@@ -15,10 +15,12 @@ use crate::{
         image::{DragonImage, ImageType},
         selector::SelectorButton,
     },
-    model::{Dragons, DragonsAction, PlayerStats},
-    utils::Print,
 };
-use tutorlolv2::{ChampionId, ItemId, RuneId};
+use tutorlolv2::{
+    ChampionId, ItemId, RuneId,
+    model::{Dragons, PlayerStats},
+    yew::dragons::DragonsAction,
+};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -138,13 +140,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                         title={"Fire dragons"}
                         oninput={ally_fire}
                         src={DragonImage::Fire}
-                        value={dragons.ally_fire}
+                        value={dragons.ally_fire_dragons}
                     />
                     <DragonInput
                         title={"Earth dragons"}
                         oninput={ally_earth}
                         src={DragonImage::Earth}
-                        value={dragons.ally_earth}
+                        value={dragons.ally_earth_dragons}
                     />
                 }
                 <ChampionExceptionSelector
@@ -153,13 +155,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     callback={stack_callback}
                     ally={true}
                 />
-                <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
+                <ExceptionSelector<ItemId>
                     values={player.data.items.values::<Box<_>>()}
                     exceptions={player.data.item_exceptions.clone()}
                     callback={item_exception_callback}
                     filter={ItemId::exceptions(true)}
                 />
-                <ExceptionSelector<{ RuneId::SIZE_OF_EXCEPTIONS }, RuneId>
+                <ExceptionSelector<RuneId>
                     values={player.runes.values::<Box<_>>()}
                     exceptions={player.rune_exceptions.clone()}
                     callback={rune_exception_callback}
@@ -186,7 +188,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     image_type={ImageType::Level}
                     name={"Level"}
                     disabled={false}
-                    value={data.level as i32}
+                    value={data.level as f32}
                     placeholder={1}
                     oninput={{
                         let callback = level_cb.clone();

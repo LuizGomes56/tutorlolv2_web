@@ -1,11 +1,5 @@
-use crate::{
-    components::image::{Image, ImageType},
-    impl_index,
-    model::AbilityLevels,
-    utils::ReduceApply,
-};
-use std::ops::{Index, IndexMut};
-use tutorlolv2::{ChampionId, Key};
+use crate::components::image::{Image, ImageType};
+use tutorlolv2::{ChampionId, model::AbilityLevels, yew::ReduceApply};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -14,15 +8,6 @@ pub struct AbilitiesProps {
     pub ability_levels: AbilityLevels,
     pub callback: Callback<<AbilityLevels as ReduceApply>::Action>,
     pub champion_id: ChampionId,
-}
-
-impl_index! {
-    AbilityLevels[Key] u8 {
-        Key::Q => q,
-        Key::W => w,
-        Key::E => e,
-        Key::R => r,
-    }
 }
 
 #[component]

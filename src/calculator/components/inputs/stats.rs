@@ -1,19 +1,20 @@
-use crate::{
-    components::image::{Image, ImageType},
-    impl_index,
-    model::{EnemyStats, PlayerStats, StatType},
-    utils::ReduceApply,
+use {
+    crate::components::image::{Image, ImageType},
+    std::ops::Index,
+    tutorlolv2::{
+        model::{EnemyStats, PlayerStats},
+        yew::{ReduceApply, stats::PlayerStatsField},
+    },
+    web_sys::HtmlInputElement,
+    yew::prelude::*,
 };
-use std::ops::{Index, IndexMut};
-use web_sys::HtmlInputElement;
-use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct StatCellProps {
     pub image_type: ImageType,
     pub name: AttrValue,
     pub disabled: bool,
-    pub value: i32,
+    pub value: f32,
     pub oninput: Callback<InputEvent>,
     pub placeholder: u8,
 }
@@ -48,57 +49,28 @@ pub fn StatCell(props: &StatCellProps) -> Html {
                 )}
                 {disabled}
                 placeholder={placeholder.to_string()}
-                value={value.to_string()}
+                value={(value as i32).to_string()}
                 {oninput}
             />
         </>
     }
 }
 
-impl_index! {
-    @PlayerStats[StatType] i32 {
-        AbilityPower,
-        Armor,
-        ArmorPenetrationFlat,
-        ArmorPenetrationPercent,
-        AttackDamage,
-        AttackSpeed,
-        CritChance,
-        CritDamage,
-        CurrentHealth,
-        MagicPenetrationFlat,
-        MagicPenetrationPercent,
-        MagicResist,
-        MaxHealth,
-        MaxMana,
-        CurrentMana,
-    }
-}
-
-impl_index! {
-    @EnemyStats[StatType] i32 {
-        Armor,
-        CurrentHealth,
-        MagicResist,
-        MaxHealth,
-    }
-}
-
 pub trait StatDisplay
 where
-    Self: Index<StatType, Output = i32> + ReduceApply,
+    Self: Index<PlayerStatsField, Output = f32> + ReduceApply,
 {
-    const VALUES: &[StatType];
-    fn prototype(value: StatType) -> fn(i32) -> Self::Action;
+    const VALUES: &[PlayerStatsField];
+    fn prototype(value: PlayerStatsField) -> fn(i32) -> Self::Action;
 }
 
 macro_rules! impl_stat_display {
     ($type:ty { $($stat:ident),+$(,)? }) => {
         impl StatDisplay for $type {
-            const VALUES: &[StatType] = &[$(StatType::$stat),+];
-            fn prototype(value: StatType) -> fn(i32) -> Self::Action {
+            const VALUES: &[PlayerStatsField] = &[$(PlayerStatsField::$stat),+];
+            fn prototype(value: PlayerStatsField) -> fn(i32) -> Self::Action {
                 match value {
-                    $(StatType::$stat => Self::Action::$stat,)+
+                    $(PlayerStatsField::$stat => Self::Action::$stat,)+
                     _ => unreachable!(),
                 }
             }

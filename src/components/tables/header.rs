@@ -57,7 +57,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
 
             result.push((
                 ImageType::Ability(champion_id, ability_kind),
-                champion_id.get_ability_formula(i),
+                &champion_id.abilities_docs()[i],
             ));
             i += 1;
         }
@@ -74,7 +74,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     ) {
         for metadata in slice.iter() {
             let kind = metadata.kind;
-            headers.push((kind.into(), kind.formula()))
+            headers.push((kind.into(), kind.docs()))
         }
     }
 
