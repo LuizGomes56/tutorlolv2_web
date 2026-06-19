@@ -1,6 +1,5 @@
 use {
     crate::utils::{EnumCast, tray::Tray},
-    bincode::{Decode, Encode},
     std::{collections::HashMap, hash::Hash, rc::Rc},
     tutorlolv2::{
         ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata, ValueId,
@@ -40,23 +39,7 @@ impl<T: Default + Eq + Hash> core::ops::Deref for ExceptionMap<T> {
     }
 }
 
-impl<T> Encode for ExceptionMap<T>
-where
-    T: Default + Encode + Eq + Hash,
-{
-    fn encode<E: bincode::enc::Encoder>(
-        &self,
-        encoder: &mut E,
-    ) -> Result<(), bincode::error::EncodeError> {
-        self.inner.len().encode(encoder)?;
-        for value in self.inner.values() {
-            value.encode(encoder)?;
-        }
-        Ok(())
-    }
-}
-
-#[derive(Clone, Debug, Encode, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Player {
     pub runes: Tray<RuneId>,
     pub rune_exceptions: ExceptionMap<RuneId>,
@@ -94,7 +77,7 @@ impl Default for Player {
 /// have effect if field `champion_id` is also of type [`ChampionId::Gnar`].
 /// Field `stacks` is useless if the associated champion does not have any special
 /// characteristics that are related to stack-scaling
-#[derive(Clone, Debug, Encode, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PlayerData<T> {
     pub stats: T,
     pub items: Tray<ItemId>,
@@ -130,7 +113,7 @@ impl<T: Default> Default for PlayerData<T> {
     }
 }
 
-#[derive(Clone, Debug, Decode, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Game {
     pub monster_damages: [Damages; L_MSTR],
     pub current_player: OutputCurrentPlayer,

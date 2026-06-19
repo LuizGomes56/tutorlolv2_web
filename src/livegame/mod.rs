@@ -6,7 +6,6 @@ use {
         components::image::{Image, ImageType},
         utils::encode_offset,
     },
-    bincode::Decode,
     std::rc::Rc,
     tutorlolv2::{
         AdaptiveType, ChampionId, GameMap, ItemId, Position, RuneId, TypeMetadata,
@@ -20,7 +19,7 @@ use {
 pub use components::*;
 pub use page::Livegame;
 
-#[derive(Debug, Decode)]
+#[derive(Debug)]
 pub struct Game {
     pub current_player: CurrentPlayer,
     pub enemies: Rc<[Enemy]>,
@@ -32,7 +31,7 @@ pub struct Game {
     pub dragons: Dragons,
 }
 
-#[derive(Debug, Decode)]
+#[derive(Debug)]
 pub struct CurrentPlayer {
     pub riot_id: Rc<str>,
     pub base_stats: BasicStats,
@@ -46,7 +45,7 @@ pub struct CurrentPlayer {
     pub game_map: GameMap,
 }
 
-#[derive(Debug, Decode, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Scoreboard {
     pub riot_id: Box<str>,
     pub assists: u8,
@@ -141,7 +140,7 @@ impl Scoreboard {
     }
 }
 
-#[derive(Debug, Decode, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Enemy {
     pub riot_id: Box<str>,
     pub damages: Damages,
