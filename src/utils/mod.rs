@@ -3,7 +3,6 @@ use std::ops::Range;
 use web_sys::js_sys::Math;
 
 mod cache;
-mod fetch;
 pub mod glue;
 pub mod hooks;
 mod macros;
@@ -12,7 +11,6 @@ pub mod tray;
 
 pub use {
     cache::init_cache,
-    fetch::{Fetch, FetchUrl},
     hooks::use_setter,
     traits::{ClassCast, EnumCast, Print},
 };

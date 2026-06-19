@@ -5,8 +5,7 @@ use {
     tutorlolv2::{
         ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata, ValueId,
         model::{
-            AbilityLevels, Damages, Dragons, EnemyStats, OutputCurrentPlayer, OutputEnemy,
-            PlayerStats, ValueException,
+            AbilityLevels, Damages, OutputCurrentPlayer, OutputEnemy, PlayerStats, ValueException,
         },
     },
 };
@@ -33,6 +32,14 @@ impl<T: Default + Eq + Hash + ValueId> ExceptionMap<T> {
     }
 }
 
+impl<T: Default + Eq + Hash> core::ops::Deref for ExceptionMap<T> {
+    type Target = HashMap<T, ValueException>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
 impl<T> Encode for ExceptionMap<T>
 where
     T: Default + Encode + Eq + Hash,
@@ -47,13 +54,6 @@ where
         }
         Ok(())
     }
-}
-
-#[derive(Clone, Debug, Encode, PartialEq)]
-pub struct InputGame<'a> {
-    pub active_player: &'a Player,
-    pub enemy_players: &'a [Rc<PlayerData<EnemyStats>>],
-    pub dragons: &'a Dragons,
 }
 
 #[derive(Clone, Debug, Encode, PartialEq)]

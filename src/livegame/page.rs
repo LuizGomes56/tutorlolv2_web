@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::{
     components::{
         errorlog::errorlog,
@@ -10,7 +12,7 @@ use crate::{
         Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
         scoreboard::ScoreboardDisplay,
     },
-    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, use_setter},
+    utils::{Loading, Print, encode_offset, glue::get_data, use_setter},
 };
 use tutorlolv2::{ChampionId, ItemId, bitset::BitSet};
 use yew::{
@@ -36,7 +38,7 @@ pub fn Livegame() -> Html {
                     data.log();
 
                     game_data.set(data);
-                    sleep(Fetch::REFRESH_RATE).await;
+                    sleep(Duration::from_secs(1)).await;
                 }
             });
         });

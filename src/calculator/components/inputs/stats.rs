@@ -49,7 +49,13 @@ pub fn StatCell(props: &StatCellProps) -> Html {
                 )}
                 {disabled}
                 placeholder={placeholder.to_string()}
-                value={(value as i32).to_string()}
+                value={{
+                    if name != "Attack Speed" {
+                        (value as i32).to_string()
+                    } else {
+                        format!("{value:.2}")
+                    }
+                }}
                 {oninput}
             />
         </>
