@@ -3,7 +3,6 @@ use {
         livegame::{CurrentPlayer, Enemy, Game, Scoreboard},
         utils::traits::Print,
     },
-    std::rc::Rc,
     tutorlolv2::realtime::RealtimeError,
     wasm_bindgen::{JsValue, prelude::wasm_bindgen},
     web_sys::js_sys::Uint8Array,

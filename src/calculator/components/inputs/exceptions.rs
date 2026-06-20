@@ -6,7 +6,7 @@ use crate::{
 use std::hash::Hash;
 use tutorlolv2::{
     CastId, ChampionId,
-    bitset::{BitSet, BitSetArray, BitSetExc},
+    bitset::{BitSet, BitSetExc},
 };
 use web_sys::HtmlInputElement;
 use yew::prelude::*;

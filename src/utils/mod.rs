@@ -15,8 +15,6 @@ pub use {
     traits::{ClassCast, EnumCast, Print},
 };
 
-pub const BASE_URL: &str = "http://localhost:8082";
-
 pub fn random_u64(range: Range<u64>) -> u64 {
     let start = range.start;
     let end = range.end;

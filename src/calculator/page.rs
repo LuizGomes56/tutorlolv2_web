@@ -4,6 +4,7 @@ use {
             Game, Player, PlayerData,
             components::inputs::{
                 enemies::EnemiesInput, item_selector::ItemSelector, player::PlayerInput,
+                rune_selector::RuneSelector,
             },
             reducer::{DataAction, Enemies, EnemyAction, LastAction, PlayerAction},
         },
@@ -12,7 +13,7 @@ use {
             stack::{Stack, StackInsert, StackRemover, StackTable},
             tables::{body::to_html, empty::EmptyTable, header::TableHeader, turret::TurretTable},
         },
-        utils::{ClassCast, encode_offset, tray::TrayAction},
+        utils::{ClassCast, encode_offset},
     },
     std::{cell::RefCell, rc::Rc},
     tutorlolv2::{
@@ -160,6 +161,7 @@ pub fn Calculator() -> Html {
     let last_action = use_mut_ref(|| LastAction::Init);
     let entity = use_state(|| TargetEntity::Player);
     let is_item_modal_open = use_state(|| false);
+    let is_rune_modal_open = use_state(|| false);
 
     let open_item_menu = {
         let entity = entity.clone();
@@ -167,6 +169,15 @@ pub fn Calculator() -> Html {
         use_callback((), move |v, _| {
             entity.set(v);
             is_item_modal_open.set(true);
+        })
+    };
+
+    let open_rune_menu = {
+        let entity = entity.clone();
+        let is_rune_modal_open = is_rune_modal_open.clone();
+        use_callback((), move |v, _| {
+            entity.set(v);
+            is_rune_modal_open.set(true);
         })
     };
 
@@ -410,6 +421,10 @@ pub fn Calculator() -> Html {
                 {entity}
                 is_open={is_item_modal_open}
             />
+            <RuneSelector
+                player_props={player_props.clone()}
+                is_open={is_rune_modal_open}
+            />
             <div class={classes!(
                 "flex", "flex-wrap", "mb-96",
                 "w-full", "px-2", "mt-2"
@@ -418,6 +433,7 @@ pub fn Calculator() -> Html {
                     {player_props}
                     dragons={dragons.clone()}
                     open_item_menu={open_item_menu.clone()}
+                    {open_rune_menu}
                 />
                 <div class={classes!(
                     "flex", "flex-col", "gap-4",

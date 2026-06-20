@@ -140,11 +140,11 @@ impl ImageType {
                 // }
             }
             ImageType::Item(item_id) => &{
-                let riot_id = item_id.to_riot_id();
+                let riot_id = item_id.riot_id();
                 format!("items/{riot_id}.avif")
             },
             ImageType::Rune(rune_id) => &{
-                let riot_id = rune_id.to_riot_id();
+                let riot_id = rune_id.riot_id();
                 format!("runes/{riot_id}.avif")
             },
             ImageType::Tower => &"other/tower.avif",
@@ -286,16 +286,16 @@ pub fn Svg(props: &SvgProps) -> Html {
             class={classes}
             style={format!(
                 concat!(
-                    "-webkit-mask-image:url('{}');",
+                    "-webkit-mask-image:url('{0}');",
                     "-webkit-mask-repeat:no-repeat;",
                     "-webkit-mask-position:center;",
                     "-webkit-mask-size:contain;",
-                    "mask-image:url('{}');",
+                    "mask-image:url('{0}');",
                     "mask-repeat:no-repeat;",
                     "mask-position:center;",
                     "mask-size:contain;"
                 ),
-                src, src
+                src
             )}
         />
     }

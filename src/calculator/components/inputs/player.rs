@@ -62,6 +62,7 @@ pub fn use_data_callback<T: 'static>(
 pub struct PlayerInputProps {
     pub player_props: PlayerProps,
     pub open_item_menu: Callback<TargetEntity>,
+    pub open_rune_menu: Callback<TargetEntity>,
     pub dragons: UseReducerHandle<Dragons>,
 }
 
@@ -70,6 +71,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
     let PlayerInputProps {
         player_props,
         open_item_menu,
+        open_rune_menu,
         dragons,
     } = props;
 
@@ -121,11 +123,10 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                 <SelectorButton
                     title={"Runes"}
                     onclick={{
-                        Callback::from(move |_| {})
-                        // let open_item_menu = open_item_menu.clone();
-                        // Callback::from(move |_| {
-                        //     open_item_menu.emit(TargetEntity::Player);
-                        // })
+                        let open_rune_menu = open_rune_menu.clone();
+                        Callback::from(move |_| {
+                            open_rune_menu.emit(TargetEntity::Player);
+                        })
                     }}
                     length={player.runes.len()}
                 />

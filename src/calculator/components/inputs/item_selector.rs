@@ -13,7 +13,8 @@ use {
         },
     },
     tutorlolv2::{
-        ChampionId, ItemId, Position, RuneId, StatName, bitset::BitSetArray, bitset::sizeof_bitset,
+        ChampionId, ItemId, Position, RuneId, StatName, ValueId,
+        bitset::{BitSetArray, sizeof_bitset},
     },
     web_sys::HtmlInputElement,
     yew::prelude::*,
@@ -73,15 +74,98 @@ pub fn use_enemy_tray_callback<T: 'static>(
     })
 }
 
+pub fn make_row<T: Copy>(
+    entity: &UseStateHandle<TargetEntity>,
+    target_entity: TargetEntity,
+    champion_id: ChampionId,
+    values: &Tray<T>,
+    remove: Callback<u64>,
+    recommendations: Callback<Tray<T>>,
+) -> Html
+where
+    T: PartialEq + ValueId,
+    ImageType: From<T>,
+    Tray<T>: FromIterator<T>,
+{
+    let remover = values
+        .iter()
+        .map(|&entry| {
+            let TrayEntry { id, value } = entry;
+
+            let onclick = {
+                let remove = remove.clone();
+                Callback::from(move |_| remove.emit(id))
+            };
+
+            let data_offset = encode_offset(&[value.docs()]);
+
+            html! {
+                <button
+                    {onclick}
+                    {data_offset}
+                    key={id}
+                >
+                    <Image
+                        class={classes!(
+                            "w-9", "h-9", "border-2",
+                            "border-std-700"
+                        )}
+                        src={ImageType::from(value)}
+                    />
+                </button>
+            }
+        })
+        .collect::<Html>();
+
+    let onclick = {
+        let entity = entity.clone();
+        Callback::from(move |_| {
+            entity.set(target_entity);
+        })
+    };
+
+    let data_offset = encode_offset(&[champion_id.docs()]);
+
+    html! {
+        <div class={classes!(
+            "flex", "flex-col", "gap-4", "p-2",
+            if **entity == target_entity { "bg-std-800" } else { "bg-transparent" }
+        )}>
+            <div class={classes!("grid", "grid-cols-6", "gap-2")}>
+                <button
+                    {onclick}
+                    {data_offset}
+                >
+                    <Image
+                        class={classes!("w-7", "h-7")}
+                        src={ImageType::Champion(champion_id)}
+                    />
+                </button>
+                <Recommendations<T>
+                    {champion_id}
+                    callback={recommendations}
+                />
+            </div>
+            <div class={classes!("grid", "grid-cols-6", "gap-2")}>
+                {remover}
+            </div>
+        </div>
+    }
+}
+
 #[derive(PartialEq, Properties)]
-pub struct RecommendedItemsProps {
+pub struct RecommendationsProps<T: ValueId + PartialEq> {
     pub champion_id: ChampionId,
-    pub callback: Callback<Tray<ItemId>>,
+    pub callback: Callback<Tray<T>>,
 }
 
 #[component]
-pub fn RecommendedItems(props: &RecommendedItemsProps) -> Html {
-    let RecommendedItemsProps {
+pub fn Recommendations<T>(props: &RecommendationsProps<T>) -> Html
+where
+    T: ValueId + PartialEq,
+    Tray<T>: FromIterator<T>,
+{
+    let RecommendationsProps {
         champion_id,
         callback,
     } = props;
@@ -91,7 +175,7 @@ pub fn RecommendedItems(props: &RecommendedItemsProps) -> Html {
         .map(|position| {
             let onclick = {
                 let callback = callback.clone();
-                let array = champion_id.recommended_items(position);
+                let array = T::recommendations(*champion_id, position);
                 Callback::from(move |_| callback.emit(array.iter().collect()))
             };
 
@@ -120,11 +204,7 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
 
     let toggle = use_callback(filters.clone(), move |v: StatName, filters| {
         let mut new = **filters;
-        let index = v as _;
-        match new.contains_const(index) {
-            true => new.remove_const(index),
-            false => new.insert_const(index),
-        };
+        new.toggle_const(v as _);
         filters.set(new);
     });
 
@@ -203,7 +283,7 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
 
     html! {
         <div class={classes!("flex", "flex-col")}>
-            // {clear_button}
+            {clear_button}
             {buttons}
         </div>
     }
@@ -245,80 +325,6 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
     {
         let is_open = is_open.clone();
         use_effect_with((), move |_| on_keydown(27, move || is_open.set(false)));
-    }
-
-    fn make_row(
-        entity: &UseStateHandle<TargetEntity>,
-        target_entity: TargetEntity,
-        champion_id: ChampionId,
-        items: &Tray<ItemId>,
-        remove: Callback<u64>,
-        recommendations: Callback<Tray<ItemId>>,
-    ) -> Html {
-        let remover = items
-            .iter()
-            .map(|&entry| {
-                let TrayEntry { id, value } = entry;
-
-                let onclick = {
-                    let remove = remove.clone();
-                    Callback::from(move |_| remove.emit(id))
-                };
-
-                let data_offset = encode_offset(&[value.docs()]);
-
-                html! {
-                    <button
-                        {onclick}
-                        {data_offset}
-                        key={id}
-                    >
-                        <Image
-                            class={classes!(
-                                "w-9", "h-9", "border-2",
-                                "border-std-700"
-                            )}
-                            src={ImageType::from(value)}
-                        />
-                    </button>
-                }
-            })
-            .collect::<Html>();
-
-        let onclick = {
-            let entity = entity.clone();
-            Callback::from(move |_| {
-                entity.set(target_entity);
-            })
-        };
-
-        let data_offset = encode_offset(&[champion_id.docs()]);
-
-        html! {
-            <div class={classes!(
-                "flex", "flex-col", "gap-4", "p-2",
-                if **entity == target_entity { "bg-std-800" } else { "bg-transparent" }
-            )}>
-                <div class={classes!("grid", "grid-cols-6", "gap-2")}>
-                    <button
-                        {onclick}
-                        {data_offset}
-                    >
-                        <Image
-                            class={classes!("w-7", "h-7")}
-                            src={ImageType::Champion(champion_id)}
-                        />
-                    </button>
-                    <RecommendedItems
-                        {champion_id}
-                        callback={recommendations}
-                    />
-                </div>
-                <div class={classes!("grid", "grid-cols-6", "gap-2")}>
-                    {remover}
-                </div>
-            </div>
-        }
     }
 
     let tray = {
@@ -472,8 +478,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     ItemId::filter(StatName::from_u8_unchecked(v as _)).contains(item)
                 })
         })
-        .enumerate()
-        .map(|(i, item)| {
+        .map(|item| {
             let insert = insert.clone();
             let onclick = Callback::from(move |_| insert.emit(item));
 
@@ -517,7 +522,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     "w-full", "p-4",
                     "h-full", "min-h-0"
                 )}>
-                    <ItemSearch {oninput} />
+                    <Search {oninput} />
                     <div class={classes!(
                         "grid", "grid-cols-[auto_1fr]",
                         "gap-4", "flex-1", "min-h-0"
@@ -540,13 +545,13 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
 }
 
 #[derive(PartialEq, Properties)]
-pub struct ItemSearchProps {
+pub struct SearchProps {
     pub oninput: Callback<InputEvent>,
 }
 
 #[component]
-pub fn ItemSearch(props: &ItemSearchProps) -> Html {
-    let ItemSearchProps { oninput } = props;
+pub fn Search(props: &SearchProps) -> Html {
+    let SearchProps { oninput } = props;
     html! {
         <div
             class={classes!(
