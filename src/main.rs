@@ -1,4 +1,3 @@
-#![allow(static_mut_refs)]
 use {
     crate::{
         about::About,
@@ -7,7 +6,6 @@ use {
         formulas::Formulas,
         livegame::Livegame,
         overlay::Overlay,
-        utils::init_cache,
     },
     yew::prelude::*,
     yew_router::{BrowserRouter, Routable, Switch},
@@ -83,5 +81,4 @@ fn App() -> Html {
 
 fn main() {
     yew::Renderer::<App>::new().render();
-    init_cache();
 }

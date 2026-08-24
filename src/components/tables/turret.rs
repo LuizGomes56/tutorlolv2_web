@@ -1,8 +1,5 @@
-use crate::{
-    components::image::{Image, ImageType},
-    utils::encode_offset,
-};
-use tutorlolv2::{L_TWRD, docs::TOWER_DAMAGE_OFFSET};
+use crate::components::image::{Image, ImageType};
+use tutorlolv2::L_TWRD;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -13,11 +10,9 @@ pub struct TurretTableProps {
 #[component]
 pub fn TurretTable(props: &TurretTableProps) -> Html {
     let header = use_memo((), |_| {
-        let offset = encode_offset(&[&TOWER_DAMAGE_OFFSET]);
         let head = |i| {
-            let data_offset = offset.clone();
             html! {
-                <th {data_offset}>
+                <th>
                     <div class={classes!(
                         "relative", "w-fit", "flex",
                         "items-center", "justify-center",

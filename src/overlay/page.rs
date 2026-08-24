@@ -10,7 +10,7 @@ use {
         impl_reducible,
         livegame::{Enemy, Game},
         overlay::panel::PanelManager,
-        utils::{Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
+        utils::{Loading, Print, glue::get_data, hooks::on_keydown},
     },
     std::time::Duration,
     wasm_bindgen::{
@@ -203,10 +203,7 @@ pub fn Overlay() -> Html {
 
                     html! {
                         <tr>
-                            <td
-                                class={classes!("w-12")}
-                                data_offset={encode_offset(&[enemy_id.docs()])}
-                            >
+                            <td class={classes!("w-12")}>
                                 <Image src={ImageType::from(enemy_id)} />
                             </td>
                             {damages}

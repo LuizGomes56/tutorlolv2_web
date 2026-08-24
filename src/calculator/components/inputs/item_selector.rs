@@ -7,7 +7,6 @@ use {
         },
         components::image::{Image, ImageType, Svg},
         utils::{
-            encode_offset,
             hooks::{on_keydown, use_clickout},
             tray::{Tray, TrayAction, TrayEntry},
         },
@@ -97,14 +96,8 @@ where
                 Callback::from(move |_| remove.emit(id))
             };
 
-            let data_offset = encode_offset(&[value.docs()]);
-
             html! {
-                <button
-                    {onclick}
-                    {data_offset}
-                    key={id}
-                >
+                <button {onclick} key={id}>
                     <Image
                         class={classes!(
                             "w-9", "h-9", "border-2",
@@ -124,18 +117,13 @@ where
         })
     };
 
-    let data_offset = encode_offset(&[champion_id.docs()]);
-
     html! {
         <div class={classes!(
             "flex", "flex-col", "gap-4", "p-2",
             if **entity == target_entity { "bg-std-800" } else { "bg-transparent" }
         )}>
             <div class={classes!("grid", "grid-cols-6", "gap-2")}>
-                <button
-                    {onclick}
-                    {data_offset}
-                >
+                <button {onclick}>
                     <Image
                         class={classes!("w-7", "h-7")}
                         src={ImageType::Champion(champion_id)}
@@ -482,13 +470,8 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
             let insert = insert.clone();
             let onclick = Callback::from(move |_| insert.emit(item));
 
-            let data_offset = encode_offset(&[item.docs()]);
-
             html! {
-                <button
-                    {onclick}
-                    {data_offset}
-                    class={classes!("flex", "flex-col", "gap-1", "w-fit")}
+                <button {onclick} class={classes!("flex", "flex-col", "gap-1", "w-fit")}
                 >
                     <Image
                         src={ImageType::from(item)}

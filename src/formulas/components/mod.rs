@@ -6,7 +6,6 @@ use crate::{
     formulas::components::code::Code,
     utils::{EnumCast, use_setter},
 };
-use std::collections::HashSet;
 use tutorlolv2::{EntityId, ValueId};
 use yew::prelude::*;
 
@@ -18,13 +17,7 @@ where
     let value = use_state(T::random);
     let callback = use_setter(&value);
 
-    let mut functions = HashSet::with_capacity(4);
-
-    for range in value.functions_docs().iter().flatten() {
-        if range.len() > 0 {
-            functions.insert(range);
-        }
-    }
+    let functions = value.render_fn().unwrap();
 
     html! {
         <div class={classes!("flex", "flex-col", "gap-6", "p-6", "box")}>
@@ -44,21 +37,12 @@ where
                 {callback}
             />
             <H2 text={"Source code definition"} />
-            <Code range={value.docs()} />
-            {(!functions.is_empty()).then_some(html!(
-                <>
-                    <H2 text={"Function definition"} />
-                    for range in functions {
-                        <Code range={range} />
-                    }
-                </>
-            ))}
-            {(value.generator_docs().len() > 0).then_some(html!(
-                <>
-                    <H2 text={"Implementation"} />
-                    <Code range={value.generator_docs()} />
-                </>
-            ))}
+            <Code fragment={value.render_global().unwrap()} />
+            <Code fragment={functions} />
+            if let Some(fragment) = value.render_generator() {
+                <H2 text={"Implementation"} />
+                <Code {fragment} />
+            }
         </div>
     }
 }

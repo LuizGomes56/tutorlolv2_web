@@ -1,16 +1,11 @@
-use crate::{
-    livegame::Enemy,
-    utils::{ClassCast, encode_offset},
-};
-use core::{fmt::Write, ops::Range};
+use crate::{livegame::Enemy, utils::ClassCast};
+use core::fmt::Write;
 use tutorlolv2::{
     AttackType,
     model::{Attacks, Damages, OutputEnemy},
 };
 use tutorlolv2::{
-    ChampionId, Ctx, CtxVar, DamageIndex, DamageType, EntityId, ItemId, RuneId, TypeMetadata,
-    ValueId,
-    docs::{BASIC_ATTACK_FN_OFFSET, CRITICAL_STRIKE_FN_OFFSET, ONHIT_EFFECT_FN_OFFSET},
+    ChampionId, Ctx, CtxVar, DamageType, EntityId, ItemId, RuneId, TypeMetadata, ValueId,
 };
 use yew::prelude::*;
 
@@ -52,7 +47,6 @@ pub struct Cell {
     damage_type: DamageType,
     min_dmg: i32,
     max_dmg: Option<i32>,
-    offsets: (&'static Range<usize>, Option<&'static Range<usize>>),
     idents: &'static [CtxVar],
     diff: Option<(i32, Option<i32>)>,
 }
@@ -94,7 +88,6 @@ impl Cell {
             damage_type,
             min_dmg,
             max_dmg,
-            offsets,
             idents,
             diff,
         } = self;
@@ -109,14 +102,6 @@ impl Cell {
             let _ = write!(&mut data_idents, "{identifier}:{value}");
         }
 
-        let data_offset = {
-            let (a, b) = offsets;
-            match b {
-                Some(b) => encode_offset(&[a, b]),
-                None => encode_offset(core::slice::from_ref(&a)),
-            }
-        };
-
         let main_line = Self::render_range(min_dmg, max_dmg).unwrap_or(Html::from(min_dmg));
 
         let diff_line = diff.map(|(diff_min, diff_max)| {
@@ -130,7 +115,6 @@ impl Cell {
         html! {
             <td
                 {data_idents}
-                {data_offset}
                 class={classes!("whitespace-nowrap", damage_type.class())}
             >
                 <div class={classes!("flex", "flex-col", "items-center", "leading-tight")}>
@@ -180,7 +164,6 @@ fn attack_cells(damages: &Damages, cells: &mut Vec<Cell>, other: Option<&Damages
             damage_type: DamageType::Physical,
             min_dmg: basic_attack,
             max_dmg: None,
-            offsets: (&BASIC_ATTACK_FN_OFFSET, None),
             idents: &[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier],
             diff: other.map(|o| (basic_attack - o.attacks.basic_attack, None)),
         },
@@ -188,7 +171,6 @@ fn attack_cells(damages: &Damages, cells: &mut Vec<Cell>, other: Option<&Damages
             damage_type: DamageType::Physical,
             min_dmg: critical_strike,
             max_dmg: None,
-            offsets: (&CRITICAL_STRIKE_FN_OFFSET, None),
             idents: &[CtxVar::AttackDamage, CtxVar::CritDamage],
             diff: other.map(|o| (critical_strike - o.attacks.critical_strike, None)),
         },
@@ -196,7 +178,6 @@ fn attack_cells(damages: &Damages, cells: &mut Vec<Cell>, other: Option<&Damages
             damage_type: DamageType::Mixed,
             min_dmg: onhit_damage.minimum_damage,
             max_dmg: Some(onhit_damage.maximum_damage),
-            offsets: (&ONHIT_EFFECT_FN_OFFSET, None),
             idents: &[],
             diff: other.map(|o| {
                 let other_onhit = &o.attacks.onhit_damage;
@@ -223,13 +204,11 @@ fn abilities_damage(
     let merge_data = champion_id.merge_data();
     let ability_cell_index = ability_cell_index(champion_id);
     let ability_idents = champion_id.identifiers();
-    let ability_closures = champion_id.functions_docs();
 
     let meta_len = abilities_meta.len();
 
     debug_assert_eq!(damages.len(), meta_len);
     debug_assert_eq!(ability_idents.len(), meta_len);
-    debug_assert_eq!(ability_closures.len(), meta_len);
 
     let mut md_end = 0;
 
@@ -246,7 +225,6 @@ fn abilities_damage(
             let mut_ref = &mut cells[target];
 
             mut_ref.max_dmg = Some(max_dmg);
-            mut_ref.offsets.1 = Some(&ability_closures[i]);
 
             if let Some(o) = other
                 && let Some((_, max_diff)) = &mut mut_ref.diff
@@ -254,7 +232,6 @@ fn abilities_damage(
                 *max_diff = Some(max_dmg - o.abilities[i]);
             }
 
-            mut_ref.offsets.1 = Some(&ability_closures[i]);
             md_end += 1;
 
             continue;
@@ -271,7 +248,6 @@ fn abilities_damage(
             damage_type: meta.damage_type,
             min_dmg: damages[i],
             max_dmg: None,
-            offsets: (&ability_closures[i], None),
             idents,
             diff: None,
         });
@@ -306,10 +282,6 @@ fn value_damage<T: ValueId>(
             damage_type: meta.damage_type,
             min_dmg,
             max_dmg: Some(max_dmg),
-            offsets: (
-                &id.functions_docs()[attack_type as usize][DamageIndex::Min as usize],
-                None,
-            ),
             idents: id.identifiers(),
             diff: other.map(|o| {
                 let diff_min = o.items[min_i];

@@ -1,10 +1,7 @@
-use crate::{
-    components::{
-        image::{Image, ImageType},
-        stack::{Stack, StackValue},
-        tables::body::Victim,
-    },
-    utils::encode_offset,
+use crate::components::{
+    image::{Image, ImageType},
+    stack::{Stack, StackValue},
+    tables::body::Victim,
 };
 use std::rc::Rc;
 use tutorlolv2::ignite;
@@ -73,10 +70,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
 
                         Some(html! {
                             <tr>
-                                <td
-                                    class={classes!("w-12")}
-                                    data_offset={encode_offset(&[enemy_id.docs()])}
-                                >
+                                <td class={classes!("w-12")}>
                                     <button
                                         class={classes!(
                                             "outline-none",

@@ -1,7 +1,6 @@
 use crate::{
     calculator::ExceptionMap,
     components::image::{Image, ImageType},
-    utils::encode_offset,
 };
 use std::hash::Hash;
 use tutorlolv2::{
@@ -32,7 +31,6 @@ where
         stacks,
     } = *props;
 
-    let data_offset = value.map(|v| encode_offset(&[v.docs()]));
     let title = value.map(|v| {
         let name = v.name();
         format!("Define the amount of stacks for {name}")
@@ -40,10 +38,7 @@ where
 
     html! {
         <>
-            <div
-                {data_offset}
-                class={classes!("flex", "items-center", "justify-center", "relative")}
-            >
+            <div class={classes!("flex", "items-center", "justify-center", "relative")}>
                 <Image
                     class={classes!("h-6", "w-6")}
                     src={image_type}

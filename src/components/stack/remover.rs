@@ -3,14 +3,11 @@ use crate::{
         image::{Image, ImageType},
         stack::{Stack, StackValue, Tray, TrayAction, TrayEntry},
     },
-    utils::{Print, encode_offset},
+    utils::Print,
 };
 use serde_json::Value;
 use std::{collections::HashMap, rc::Rc};
-use tutorlolv2::{
-    ChampionId, ItemId, RuneId, TypeMetadata,
-    docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, IGNITE_OFFSET, ONHIT_EFFECT_OFFSET},
-};
+use tutorlolv2::{ChampionId, ItemId, RuneId, TypeMetadata};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -156,26 +153,22 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
     let remover = safe_stack
         .iter()
         .map(|entry| {
-            let (image_type, offset, max) = match entry.value {
-                StackValue::Ability { slot, ability_id } => (
-                    ImageType::Ability(champion_id, ability_id.into()),
-                    &champion_id.abilities_docs()[slot],
-                    false,
-                ),
+            let (image_type, max) = match entry.value {
+                StackValue::Ability { slot, ability_id } => {
+                    (ImageType::Ability(champion_id, ability_id.into()), false)
+                }
                 StackValue::Item(i, item_id) => (
                     ImageType::from(item_id),
-                    item_id.docs(),
                     i % 2 == 1 && item_id.deals_max_damage(),
                 ),
-                StackValue::Rune(_, rune_id) => (ImageType::from(rune_id), rune_id.docs(), false),
-                StackValue::BasicAttack => (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET, false),
-                StackValue::CritStrike => (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET, false),
-                StackValue::OnhitMin => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, false),
-                StackValue::OnhitMax => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, true),
-                StackValue::Ignite => (ImageType::Ignite, &IGNITE_OFFSET, false),
+                StackValue::Rune(_, rune_id) => (ImageType::from(rune_id), false),
+                StackValue::BasicAttack => (ImageType::BasicAttack, false),
+                StackValue::CritStrike => (ImageType::CritStrike, false),
+                StackValue::OnhitMin => (ImageType::OnhitAttack, false),
+                StackValue::OnhitMax => (ImageType::OnhitAttack, true),
+                StackValue::Ignite => (ImageType::Ignite, false),
             };
 
-            let data_offset = encode_offset(&[offset]);
             let id = entry.id;
 
             let onclick = {
@@ -224,7 +217,6 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                     type={"button"}
                     {class}
                     {onclick}
-                    {data_offset}
                 >
                     {inner}
                 </button>

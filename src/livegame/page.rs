@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use crate::{
     components::{
         errorlog::errorlog,
@@ -12,8 +10,9 @@ use crate::{
         Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
         scoreboard::ScoreboardDisplay,
     },
-    utils::{Loading, Print, encode_offset, glue::get_data, use_setter},
+    utils::{Loading, Print, glue::get_data, use_setter},
 };
+use std::time::Duration;
 use tutorlolv2::{ChampionId, ItemId, bitset::BitSet};
 use yew::{
     platform::{spawn_local, time::sleep},
@@ -62,10 +61,7 @@ pub fn Livegame() -> Html {
             let get_damages = |enemy_id: ChampionId, damages| {
                 html! {
                     <tr>
-                        <td
-                            class={classes!("w-12")}
-                            data_offset={encode_offset(&[enemy_id.docs()])}
-                        >
+                        <td class={classes!("w-12")}>
                             <Image src={ImageType::from(enemy_id)} />
                         </td>
                         {damages}
@@ -119,10 +115,8 @@ pub fn Livegame() -> Html {
                 .iter()
                 .copied()
                 .map(|item_id| {
-                    let data_offset = encode_offset(core::array::from_ref(&item_id.docs()));
-
                     html! {
-                        <th {data_offset}>
+                        <th>
                             <Image src={ImageType::from(item_id)} />
                         </th>
                     }
@@ -132,11 +126,9 @@ pub fn Livegame() -> Html {
             let recm_body = enemy_rows
                 .iter()
                 .map(|(enemy_id, base, list)| {
-                    let data_offset = encode_offset(core::array::from_ref(&enemy_id.docs()));
-
                     html! {
                         <tr>
-                            <td {data_offset} class={classes!("w-10")}>
+                            <td class={classes!("w-10")}>
                                 <Image src={ImageType::from(*enemy_id)} />
                             </td>
                             {

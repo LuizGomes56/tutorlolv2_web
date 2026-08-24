@@ -13,12 +13,11 @@ use {
             stack::{Stack, StackInsert, StackRemover, StackTable},
             tables::{body::to_html, empty::EmptyTable, header::TableHeader, turret::TurretTable},
         },
-        utils::{ClassCast, encode_offset},
+        utils::ClassCast,
     },
     std::{cell::RefCell, rc::Rc},
     tutorlolv2::{
         L_MSTR, L_TWRD,
-        docs::TOWER_DAMAGE_FN_OFFSET,
         model::{
             Dragons, EnemyStats, InputActivePlayer, InputGame, InputMinData, OutputEnemy,
             OwnedInputMinData,
@@ -92,7 +91,7 @@ fn __fetch(
     enemies: &UseReducerHandle<Enemies>,
     dragons: &UseReducerHandle<Dragons>,
 ) -> Game {
-    let output = tutorlolv2::calculator(InputGame {
+    let output = tutorlolv2::calculator::calculator(InputGame {
         active_player: InputActivePlayer {
             runes: &player.runes.values::<Box<_>>(),
             rune_exceptions: &player.rune_exceptions.values().copied().collect::<Box<_>>(),
@@ -269,10 +268,7 @@ pub fn Calculator() -> Html {
                                         let enemy_id = enemy.champion_id;
                                         html! {
                                             <tr>
-                                                <td
-                                                    class={classes!("w-12")}
-                                                    data_offset={encode_offset(&[enemy_id.docs()])}
-                                                >
+                                                <td class={classes!("w-12")}>
                                                     <button
                                                         class={classes!(
                                                             "cursor-pointer",
@@ -342,13 +338,9 @@ pub fn Calculator() -> Html {
                     <div class={classes!("box", "overflow-auto")}>
                         <TurretTable
                             damages={{
-                                let offset = encode_offset(&[&TOWER_DAMAGE_FN_OFFSET]);
                                 (0..L_TWRD).into_iter().map(|i| {
                                     html! {
-                                        <td
-                                            data_offset={offset.clone()}
-                                            class={classes!(current_player.adaptive_type.class())}
-                                        >
+                                        <td class={classes!(current_player.adaptive_type.class())}>
                                             {tower_damages[i]}
                                         </td>
                                     }

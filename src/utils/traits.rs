@@ -51,10 +51,6 @@ pub trait Print: Debug {
     fn log(&self) {
         web_sys::console::log_1(&format!("{self:#?}").into());
     }
-
-    fn err(&self) {
-        web_sys::console::error_1(&format!("{self:#?}").into());
-    }
 }
 
 impl<T: Debug> Print for T {}

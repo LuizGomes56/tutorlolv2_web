@@ -5,7 +5,7 @@ use crate::{
         selector::Selector,
     },
     formulas::components::code::Code,
-    utils::{EnumCast, encode_offset, use_setter},
+    utils::{EnumCast, use_setter},
 };
 use tutorlolv2::{CastId, ChampionId, Position};
 use yew::prelude::*;
@@ -32,7 +32,6 @@ pub fn ChampionFormulas() -> Html {
                                     "md:justify-items-start",
                                     "overflow-hidden"
                                 )}
-                                data_offset={encode_offset(&[item.docs()])}
                             >
                                 <div class={classes!("flex", "items-center", "gap-3")}>
                                     <Image
@@ -107,17 +106,17 @@ pub fn ChampionFormulas() -> Html {
                 </table>
             </div>
             <H2 text={"Source code definition"} />
-            <Code range={champion.docs()} />
+            <Code fragment={champion.render_global().unwrap()} />
             <H2 text={"Abilities virtual definiton"} />
-            for i in 0..champion.number_of_abilities() {
-                <Code range={&champion.abilities_docs()[i]} />
-            }
+            // for meta in champion.metadata() {
+            //     <Code fragment={champion.render_ability(meta.kind).unwrap()} />
+            // }
             <H2 text={"Internal ability functions"} />
-            for i in 0..champion.number_of_abilities() {
-                <Code range={&champion.functions_docs()[i]} />
+            for meta in champion.metadata() {
+                <Code fragment={champion.render_fn(meta.kind).unwrap()} />
             }
             <H2 text={"Champion generator implementation"} />
-            <Code range={champion.generator_docs()} />
+            <Code fragment={champion.render_generator().unwrap()} />
         </div>
     }
 }

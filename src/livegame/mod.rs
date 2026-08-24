@@ -2,10 +2,7 @@ mod components;
 mod page;
 
 use {
-    crate::{
-        components::image::{Image, ImageType},
-        utils::encode_offset,
-    },
+    crate::components::image::{Image, ImageType},
     std::rc::Rc,
     tutorlolv2::{
         AdaptiveType, ChampionId, GameMap, ItemId, Position, RuneId, TypeMetadata,
@@ -70,14 +67,12 @@ impl Scoreboard {
             ..
         } = self;
 
-        let data_offset = encode_offset(core::array::from_ref(&champion_id.docs()));
-
         html! {
             <div class={classes!(
                 "grid", "grid-cols-[auto_1fr_auto]",
                 "gap-2", "items-center"
             )}>
-                <div {data_offset} class={classes!("relative", "shrink-0")}>
+                <div class={classes!("relative", "shrink-0")}>
                     <Image
                         class={classes!("w-8", "h-8", "overflow-hidden")}
                         src={ImageType::from(champion_id)}

@@ -8,7 +8,6 @@ use {
         },
         components::image::{Image, ImageType},
         utils::{
-            encode_offset,
             hooks::{on_keydown, use_clickout},
             tray::{Tray, TrayAction},
         },
@@ -71,14 +70,8 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
             let insert = insert.clone();
             let onclick = Callback::from(move |_| insert.emit(rune));
 
-            let data_offset = encode_offset(&[rune.docs()]);
-
             html! {
-                <button
-                    {onclick}
-                    {data_offset}
-                    class={classes!("flex", "flex-col", "gap-1", "w-fit")}
-                >
+                <button {onclick} class={classes!("flex", "flex-col", "gap-1", "w-fit")}>
                     <Image
                         src={ImageType::from(rune)}
                         class={classes!("w-9", "h-9", "border-2", "border-std-700")}

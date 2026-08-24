@@ -1,13 +1,9 @@
 use crate::{
     components::image::{Image, ImageType},
     model::AbilityKind,
-    utils::encode_offset,
 };
-use std::{ops::Range, rc::Rc};
-use tutorlolv2::{
-    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
-    docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, ONHIT_EFFECT_OFFSET},
-};
+use std::rc::Rc;
+use tutorlolv2::{CastId, ChampionId, ItemId, RuneId, TypeMetadata};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -55,10 +51,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 }
             }
 
-            result.push((
-                ImageType::Ability(champion_id, ability_kind),
-                &champion_id.abilities_docs()[i],
-            ));
+            result.push(ImageType::Ability(champion_id, ability_kind));
             i += 1;
         }
 
@@ -69,19 +62,19 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         Vec::with_capacity(skip + 3 + abilities.len() + items_meta.len() + runes_meta.len());
 
     fn header<T: Copy + Into<ImageType> + CastId>(
-        headers: &mut Vec<(ImageType, &'static Range<usize>)>,
+        headers: &mut Vec<ImageType>,
         slice: &Rc<[TypeMetadata<T>]>,
     ) {
         for metadata in slice.iter() {
             let kind = metadata.kind;
-            headers.push((kind.into(), kind.docs()))
+            headers.push(kind.into());
         }
     }
 
     headers.extend([
-        (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET),
-        (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET),
-        (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET),
+        ImageType::BasicAttack,
+        ImageType::CritStrike,
+        ImageType::OnhitAttack,
     ]);
     headers.extend(abilities);
     header(&mut headers, items_meta);
@@ -91,10 +84,9 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         <thead>
             <tr>
                 {for (0..skip).map(|_| html!(<th></th>))}
-                {for headers.into_iter().map(|(src, offsets)| {
-                    let data_offset = encode_offset(&[offsets]);
+                {for headers.into_iter().map(|src| {
                     html! {
-                        <th {data_offset}>
+                        <th>
                             <Image
                                 {src}
                                 class={classes!(

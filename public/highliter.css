@@ -1,54 +1,69 @@
-._r {
-    color: #C586C0;
+/* Control */
+.C4 {
+    color: #c586c0;
 }
 
-._l,
-._k,
-._m,
-._b {
-    color: #569CD6;
+/* Lifetime */
+.C2,
+/* Keyword */
+.C3,
+/* Boolean */
+.C9,
+/* Macro */
+.C10 {
+    color: #569cd6;
 }
 
-._p,
-._t {
-    color: #4EC8B0;
+/* Primitive */
+.C7,
+/* Type */
+.C6 {
+    color: #4ec8b0;
 }
 
-._f {
-    color: #DCDCAA;
+/* Function */
+.C11 {
+    color: #dcdcaa;
 }
 
-._n {
-    color: #B3CDA8;
+/* Number */
+.C8 {
+    color: #b3cda8;
 }
 
-._c,
-._i {
-    color: #4FC1FF;
+/* Constant */
+.C5 {
+    color: #4fc1ff;
 }
 
-._b1 {
-    color: #FFD700;
+/* Bracket 1 */
+.C13 {
+    color: #ffd700;
 }
 
-._b2 {
-    color: #DA70D6;
+/* Bracket 2 */
+.C14 {
+    color: #da70d6;
 }
 
-._b3 {
-    color: #189FFF;
+/* Bracket 3 */
+.C15 {
+    color: #189fff;
 }
 
-._s {
+/* String */
+.C1 {
     white-space: break-spaces;
-    color: #CE9178;
+    color: #ce9178;
 }
 
-._v {
-    color: #9CDCFE;
+/* Variable */
+.C12 {
+    color: #9cdcfe;
 }
 
-._x {
+/* Comment */
+.C0 {
     color: #969696;
     background-color: #262626;
     padding: 1px 0;
@@ -56,8 +71,15 @@
 
 code,
 pre {
-    color: #D4D4D4;
+    color: #d4d4d4;
     line-height: 1.5;
     background: transparent;
-    font-family: "SF Mono", Consolas, Monaco, 'AndaleMono', 'UbuntuMono', monospace;
+    font-family:
+        "SF Mono", Consolas, Monaco, "AndaleMono", "UbuntuMono", monospace;
+    white-space: pre-wrap;
+    tab-size: 4;
+}
+
+body {
+    background-color: #1e1e1e;
 }

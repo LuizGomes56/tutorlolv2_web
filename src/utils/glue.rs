@@ -19,7 +19,7 @@ async fn realtime(bytes: Vec<u8>) -> Result<Game, Box<dyn core::error::Error>> {
         true => Err("Desktop application required to use the overlay feature".into()),
         false => {
             let game = serde_json::from_slice(bytes.as_slice())?;
-            let data = tutorlolv2::realtime(&game).map_err(|e| match e {
+            let data = tutorlolv2::realtime::realtime(&game).map_err(|e| match e {
                 RealtimeError::UnrecognizedCurrentPlayer(p) => {
                     format!("Unable to recognize current player with name {p:?}")
                 }
