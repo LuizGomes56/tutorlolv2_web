@@ -12,6 +12,7 @@ use {
             tray::{Tray, TrayAction},
         },
     },
+    strum::VariantArray,
     tutorlolv2::RuneId,
     web_sys::HtmlInputElement,
     yew::prelude::*,
@@ -56,7 +57,7 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
         use_effect_with((), move |_| on_keydown(27, move || is_open.set(false)));
     }
 
-    let options = RuneId::VALUES
+    let options = RuneId::VARIANTS
         .iter()
         .copied()
         .filter(|item| {

@@ -7,6 +7,7 @@ use crate::{
     formulas::components::code::Code,
     utils::{EnumCast, use_setter},
 };
+use strum::VariantArray;
 use tutorlolv2::{CastId, ChampionId, Position};
 use yew::prelude::*;
 
@@ -22,7 +23,7 @@ pub fn ChampionFormulas() -> Html {
         ImageType: From<T>,
     {
         html! {
-            for position in Position::ARRAY {
+            for &position in Position::VARIANTS {
                 <td class={"content-baseline"}>
                     <div class={classes!("flex", "flex-col", "gap-2", "py-2")}>
                         for item in f(position) {
@@ -72,7 +73,7 @@ pub fn ChampionFormulas() -> Html {
                 <table class={classes!("table-fixed")}>
                     <thead>
                         <tr>
-                            for position in Position::ARRAY {
+                            for &position in Position::VARIANTS {
                                 <th class={classes!("overflow-hidden")}>
                                     <div class={classes!(
                                         "flex", "items-center", "gap-3",

@@ -2,12 +2,13 @@ use crate::{
     components::image::{Image, ImageType, Svg},
     utils::{EnumCast, hooks::use_clickout},
 };
+use strum::VariantArray;
 use tutorlolv2::{CastId, GameMap, ItemId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
-pub struct SelectorProps<T: CastId + PartialEq + 'static> {
+pub struct SelectorProps<T: CastId + VariantArray + PartialEq + 'static> {
     pub callback: Callback<T>,
     pub value: T,
     #[prop_or(classes!("gap-4"))]
@@ -21,14 +22,14 @@ pub struct SelectorProps<T: CastId + PartialEq + 'static> {
     pub input_class: Classes,
     #[prop_or(classes!("mt-2", "px-1.5", "py-1", "w-96"))]
     pub dropdown_class: Classes,
-    #[prop_or(T::VALUES)]
+    #[prop_or(T::VARIANTS)]
     pub array: &'static [T],
 }
 
 #[component]
 pub fn Selector<T>(props: &SelectorProps<T>) -> Html
 where
-    T: EnumCast,
+    T: EnumCast + VariantArray,
     ImageType: From<T>,
 {
     let SelectorProps {

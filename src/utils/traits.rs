@@ -1,15 +1,16 @@
 use crate::{components::image::ImageType, utils::random_u64};
 use std::fmt::Debug;
+use strum::EnumCount;
 use tutorlolv2::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
 
 pub trait EnumCast
 where
-    Self: CastId + TryFrom<u16> + PartialEq + Copy,
+    Self: CastId + PartialEq + Copy + EnumCount,
     ImageType: From<Self>,
 {
     fn random() -> Self {
-        let index = random_u64(0..Self::VARIANTS as _);
-        unsafe { Self::try_from(index as _).unwrap_unchecked() }
+        let index = random_u64(0..Self::COUNT as _);
+        unsafe { Self::try_from_u16(index as _).unwrap_unchecked() }
     }
 
     fn image_type(&self) -> ImageType {

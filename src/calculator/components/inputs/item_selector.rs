@@ -11,6 +11,7 @@ use {
             tray::{Tray, TrayAction, TrayEntry},
         },
     },
+    strum::VariantArray,
     tutorlolv2::{
         ChampionId, ItemId, Position, RuneId, StatName, ValueId,
         bitset::{BitSetArray, sizeof_bitset},
@@ -158,9 +159,9 @@ where
         callback,
     } = props;
 
-    Position::ARRAY
+    Position::VARIANTS
         .into_iter()
-        .map(|position| {
+        .map(|&position| {
             let onclick = {
                 let callback = callback.clone();
                 let array = T::recommendations(*champion_id, position);
@@ -445,7 +446,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         }
     };
 
-    let options = ItemId::VALUES
+    let options = ItemId::VARIANTS
         .iter()
         .copied()
         .filter(|item| {

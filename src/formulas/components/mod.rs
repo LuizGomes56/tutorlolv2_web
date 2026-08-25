@@ -6,11 +6,12 @@ use crate::{
     formulas::components::code::Code,
     utils::{EnumCast, use_setter},
 };
+use strum::VariantArray;
 use tutorlolv2::{EntityId, ValueId};
 use yew::prelude::*;
 
 #[component]
-pub fn ValueFormulas<T: ValueId + EnumCast>() -> Html
+pub fn ValueFormulas<T: ValueId + EnumCast + VariantArray>() -> Html
 where
     ImageType: From<T>,
 {
