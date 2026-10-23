@@ -217,6 +217,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                     type={"button"}
                     {class}
                     {onclick}
+                    data_docs={image_type.docs()}
                 >
                     {inner}
                 </button>

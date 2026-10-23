@@ -3,6 +3,7 @@ use crate::components::{
     stack::{Stack, StackValue},
     tables::body::Victim,
 };
+use crate::hover::Docs;
 use std::rc::Rc;
 use tutorlolv2::ignite;
 use yew::prelude::*;
@@ -70,7 +71,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
 
                         Some(html! {
                             <tr>
-                                <td class={classes!("w-12")}>
+                                <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
                                     <button
                                         class={classes!(
                                             "outline-hidden",

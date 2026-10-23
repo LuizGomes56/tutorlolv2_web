@@ -141,7 +141,7 @@ function init_hover() {
             if (!host) return;
 
             const from = e.relatedTarget;
-            if (from && from instanceof Node && host.contains(from)) return;
+            if (currentHost === host && from instanceof Node && host.contains(from)) return;
 
             showOn(host);
         },

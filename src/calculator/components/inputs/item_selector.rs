@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use {
     crate::{
         calculator::{
@@ -98,7 +99,7 @@ where
             };
 
             html! {
-                <button {onclick} key={id}>
+                <button {onclick} key={id} data_docs={Docs::global(value).encode()}>
                     <Image
                         class={classes!(
                             "w-9", "h-9", "border-2",
@@ -124,7 +125,7 @@ where
             if **entity == target_entity { "bg-std-800" } else { "bg-transparent" }
         )}>
             <div class={classes!("grid", "grid-cols-6", "gap-2")}>
-                <button {onclick}>
+                <button {onclick} data_docs={Docs::global(champion_id).encode()}>
                     <Image
                         class={classes!("w-7", "h-7")}
                         src={ImageType::Champion(champion_id)}
@@ -472,7 +473,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
             let onclick = Callback::from(move |_| insert.emit(item));
 
             html! {
-                <button {onclick} class={classes!("flex", "flex-col", "gap-1", "w-fit")}
+                <button {onclick} data_docs={Docs::global(item).encode()} class={classes!("flex", "flex-col", "gap-1", "w-fit")}
                 >
                     <Image
                         src={ImageType::from(item)}

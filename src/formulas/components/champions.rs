@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use crate::{
     components::{
         h2::H2,
@@ -28,6 +29,7 @@ pub fn ChampionFormulas() -> Html {
                     <div class={classes!("flex", "flex-col", "gap-2", "py-2")}>
                         for item in f(position) {
                             <div
+                                data_docs={Docs::global(*item).encode()}
                                 class={classes!(
                                     "justify-items-center",
                                     "md:justify-items-start",

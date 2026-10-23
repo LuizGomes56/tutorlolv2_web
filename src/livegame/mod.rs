@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 mod components;
 mod page;
 
@@ -72,7 +73,7 @@ impl Scoreboard {
                 "grid", "grid-cols-[auto_1fr_auto]",
                 "gap-2", "items-center"
             )}>
-                <div class={classes!("relative", "shrink-0")}>
+                <div data_docs={Docs::global(*champion_id).encode()} class={classes!("relative", "shrink-0")}>
                     <Image
                         class={classes!("w-8", "h-8", "overflow-hidden")}
                         src={ImageType::from(champion_id)}

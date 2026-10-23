@@ -1,3 +1,4 @@
+use crate::hover::{Builtin, DocView, Docs};
 use {
     crate::{
         calculator::{
@@ -268,7 +269,7 @@ pub fn Calculator() -> Html {
                                         let enemy_id = enemy.champion_id;
                                         html! {
                                             <tr>
-                                                <td class={classes!("w-12")}>
+                                                <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
                                                     <button
                                                         class={classes!(
                                                             "cursor-pointer",
@@ -340,7 +341,7 @@ pub fn Calculator() -> Html {
                             damages={{
                                 (0..L_TWRD).into_iter().map(|i| {
                                     html! {
-                                        <td class={classes!(current_player.adaptive_type.class())}>
+                                        <td data_docs={Docs::Builtin(Builtin::Tower, DocView::Function).encode()} class={classes!(current_player.adaptive_type.class())}>
                                             {tower_damages[i]}
                                         </td>
                                     }

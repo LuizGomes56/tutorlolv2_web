@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use {
     crate::{
         components::{
@@ -203,7 +204,7 @@ pub fn Overlay() -> Html {
 
                     html! {
                         <tr>
-                            <td class={classes!("w-12")}>
+                            <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
                                 <Image src={ImageType::from(enemy_id)} />
                             </td>
                             {damages}

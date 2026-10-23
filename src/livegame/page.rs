@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use crate::{
     components::{
         errorlog::errorlog,
@@ -61,7 +62,7 @@ pub fn Livegame() -> Html {
             let get_damages = |enemy_id: ChampionId, damages| {
                 html! {
                     <tr>
-                        <td class={classes!("w-12")}>
+                        <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
                             <Image src={ImageType::from(enemy_id)} />
                         </td>
                         {damages}
@@ -116,7 +117,7 @@ pub fn Livegame() -> Html {
                 .copied()
                 .map(|item_id| {
                     html! {
-                        <th>
+                        <th data_docs={Docs::global(item_id).encode()}>
                             <Image src={ImageType::from(item_id)} />
                         </th>
                     }
@@ -128,7 +129,7 @@ pub fn Livegame() -> Html {
                 .map(|(enemy_id, base, list)| {
                     html! {
                         <tr>
-                            <td class={classes!("w-10")}>
+                            <td data_docs={Docs::global(*enemy_id).encode()} class={classes!("w-10")}>
                                 <Image src={ImageType::from(*enemy_id)} />
                             </td>
                             {

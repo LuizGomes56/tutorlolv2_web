@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use {
     crate::{
         calculator::{
@@ -72,7 +73,7 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
             let onclick = Callback::from(move |_| insert.emit(rune));
 
             html! {
-                <button {onclick} class={classes!("flex", "flex-col", "gap-1", "w-fit")}>
+                <button {onclick} data_docs={Docs::global(rune).encode()} class={classes!("flex", "flex-col", "gap-1", "w-fit")}>
                     <Image
                         src={ImageType::from(rune)}
                         class={classes!("w-9", "h-9", "border-2", "border-std-700")}

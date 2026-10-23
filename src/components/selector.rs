@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use crate::{
     components::image::{Image, ImageType, Svg},
     utils::{EnumCast, hooks::use_clickout},
@@ -69,7 +70,7 @@ where
                     };
 
                     (v, html! {
-                        <button key={v.index()} {onclick}>
+                        <button key={v.index()} {onclick} data_docs={Docs::global(v).encode()}>
                             <div class={classes!("flex", "items-center", "gap-2", "py-0.5")}>
                                 <Image src={v.image_type()} class={classes!("w-6", "h-6")} />
                                 <span class={classes!("truncate")}>{v.name()}</span>

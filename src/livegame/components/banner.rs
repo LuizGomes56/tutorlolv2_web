@@ -1,4 +1,5 @@
 use crate::components::image::{Image, ImageType};
+use crate::hover::Docs;
 use std::rc::Rc;
 use tutorlolv2::ChampionId;
 use yew::prelude::*;
@@ -23,7 +24,7 @@ pub fn Banner(props: &BannerProps) -> Html {
     let time = format!("{minutes:02}m {seconds:02}s");
 
     html! {
-        <div class={classes!("box")}>
+        <div data_docs={Docs::global(champion_id).encode()} class={classes!("box")}>
             <Image
                 class={classes!(
                     "img-clipped", "h-24", "sm:h-40",

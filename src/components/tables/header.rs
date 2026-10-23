@@ -86,7 +86,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 {for (0..skip).map(|_| html!(<th></th>))}
                 {for headers.into_iter().map(|src| {
                     html! {
-                        <th>
+                        <th data_docs={src.docs()}>
                             <Image
                                 {src}
                                 class={classes!(

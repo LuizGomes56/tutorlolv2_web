@@ -59,6 +59,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 type={"button"}
                 class={classes!("btn-stack", "group")}
                 {onclick}
+                data_docs={src.docs()}
             >
                 <Image
                     class={classes!(

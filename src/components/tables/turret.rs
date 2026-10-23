@@ -1,4 +1,5 @@
 use crate::components::image::{Image, ImageType};
+use crate::hover::{Builtin, DocView, Docs};
 use tutorlolv2::L_TWRD;
 use yew::prelude::*;
 
@@ -12,7 +13,7 @@ pub fn TurretTable(props: &TurretTableProps) -> Html {
     let header = use_memo((), |_| {
         let head = |i| {
             html! {
-                <th>
+                <th data_docs={Docs::Builtin(Builtin::Tower, DocView::Global).encode()}>
                     <div class={classes!(
                         "relative", "w-fit", "flex",
                         "items-center", "justify-center",

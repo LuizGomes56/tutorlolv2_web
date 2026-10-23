@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use crate::{
     calculator::ExceptionMap,
     components::image::{Image, ImageType},
@@ -38,7 +39,7 @@ where
 
     html! {
         <>
-            <div class={classes!("flex", "items-center", "justify-center", "relative")}>
+            <div data_docs={value.map(|v| Docs::global(v).encode())} class={classes!("flex", "items-center", "justify-center", "relative")}>
                 <Image
                     class={classes!("h-6", "w-6")}
                     src={image_type}

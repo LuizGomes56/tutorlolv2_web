@@ -2,6 +2,7 @@ use crate::components::{
     image::{Image, ImageType},
     selector::Selector,
 };
+use crate::hover::Docs;
 use tutorlolv2::ChampionId;
 use yew::prelude::*;
 
@@ -20,6 +21,7 @@ pub fn Banner(props: &BannerProps) -> Html {
 
     html! {
         <div
+            data_docs={Docs::global(champion_id).encode()}
             title={"Click on champion name to open champion selector"}
             class={classes!("bg-std-900", "box", "relative")}
         >
