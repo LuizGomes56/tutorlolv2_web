@@ -1,3 +1,12 @@
+/* .ZedMono resolves to Lilex in Zed: https://github.com/zed-industries/zed-fonts */
+@font-face {
+    font-family: ".ZedMono";
+    src: url("fonts/Lilex-Variable.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: swap;
+}
+
 /* Control */
 .C4 {
     color: #c586c0;
@@ -75,7 +84,7 @@ pre {
     line-height: 1.5;
     background: transparent;
     font-family:
-        "SF Mono", Consolas, Monaco, "AndaleMono", "UbuntuMono", monospace;
+        ".ZedMono", Consolas, Monaco, "AndaleMono", "UbuntuMono", monospace;
     white-space: pre-wrap;
     tab-size: 4;
 }

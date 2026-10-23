@@ -1,4 +1,5 @@
 use crate::hover::Docs;
+use strum::EnumCount;
 use {
     crate::{
         calculator::{
@@ -181,7 +182,7 @@ where
         .collect::<Html>()
 }
 
-type FilterBitSet = BitSetArray<{ sizeof_bitset(StatName::VARIANTS) }>;
+type FilterBitSet = BitSetArray<{ sizeof_bitset(StatName::COUNT) }>;
 
 #[derive(PartialEq, Properties)]
 pub struct ItemFilterProps {
@@ -464,8 +465,8 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         })
         .filter(|item| {
             filters.is_empty_const()
-                || filters.iter_const().all(|v| unsafe {
-                    ItemId::filter(StatName::from_u8_unchecked(v as _)).contains(item)
+                || filters.iter_const().all(|v| {
+                    ItemId::filter(StatName::from_repr(v as _).unwrap()).contains(item)
                 })
         })
         .map(|item| {
