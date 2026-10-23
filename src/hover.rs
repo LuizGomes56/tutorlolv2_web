@@ -275,9 +275,11 @@ mod tests {
 
     #[test]
     fn idents_round_trip_names_and_float_values() {
-        let mut ctx = Ctx::default();
-        ctx.attack_damage = 123.25;
-        ctx.physical_multiplier = -0.5;
+        let ctx = Ctx {
+            attack_damage: 123.25,
+            physical_multiplier: -0.5,
+            ..Default::default()
+        };
         let encoded =
             encode_idents(&[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier], &ctx).unwrap();
         assert_eq!(STANDARD_NO_PAD.decode(&encoded).unwrap().len(), 10);
