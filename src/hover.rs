@@ -53,7 +53,7 @@ impl Docs {
         STANDARD_NO_PAD.encode(bytes)
     }
 
-    fn render(self, html: &mut String) -> MayFail<()> {
+    fn render(self, html: &mut String) -> MayFail {
         let body = match self {
             Self::ChampionMerged(champion, min, max) => {
                 Self::Champion(champion, min).render(html)?;

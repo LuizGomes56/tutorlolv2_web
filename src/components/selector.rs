@@ -197,7 +197,7 @@ pub fn SelectorButton(props: &SelectorButtonProps) -> Html {
             </div>
             <div class={classes!("flex", "items-center", "gap-2", "shrink-0")}>
                 <span class={classes!(
-                    "min-w-[2rem]",
+                    "min-w-8",
                     "px-1.5", "py-0.5",
                     "bg-sky-500/15",
                     "border", "border-sky-500/20",

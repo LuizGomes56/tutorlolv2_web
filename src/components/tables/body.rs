@@ -290,8 +290,17 @@ fn value_damage<T: ValueId>(
                 EntityId::Champion(_) => unreachable!("value_damage only accepts items and runes"),
             },
             diff: other.map(|o| {
-                let diff_min = o.items[min_i];
-                let diff_max = o.items[min_i + 1];
+                let odmg = match tag.entity() {
+                    EntityId::Champion(_) => {
+                        panic!("Can't use method value_damage with champions")
+                    }
+                    EntityId::Item(_) => &o.items,
+                    EntityId::Rune(_) => &o.runes,
+                };
+
+                let diff_min = odmg[min_i];
+                let diff_max = odmg[min_i + 1];
+
                 (min_dmg - diff_min, Some(max_dmg - diff_max))
             }),
         });
