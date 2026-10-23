@@ -153,13 +153,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     callback={stack_callback}
                     ally={true}
                 />
-                <ExceptionSelector<{ ItemId::SIZE_OF_EXCEPTIONS }, ItemId>
+                <ExceptionSelector<ItemId>
                     values={player.data.items.values::<Box<_>>()}
                     exceptions={player.data.item_exceptions.clone()}
                     callback={item_exception_callback}
                     filter={ItemId::exceptions(true)}
                 />
-                <ExceptionSelector<{ RuneId::SIZE_OF_EXCEPTIONS }, RuneId>
+                <ExceptionSelector<RuneId>
                     values={player.runes.values::<Box<_>>()}
                     exceptions={player.rune_exceptions.clone()}
                     callback={rune_exception_callback}

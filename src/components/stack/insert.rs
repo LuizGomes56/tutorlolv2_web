@@ -1,8 +1,5 @@
 use std::rc::Rc;
-use tutorlolv2::{
-    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
-    docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, IGNITE_OFFSET, ONHIT_EFFECT_OFFSET},
-};
+use tutorlolv2::{ChampionId, ItemId, RuneId, TypeMetadata, yew::render::FormulaRenderer};
 use yew::prelude::*;
 
 use crate::{
@@ -11,7 +8,6 @@ use crate::{
         stack::StackValue,
     },
     model::AbilityKind,
-    utils::encode_offset,
 };
 
 fn section(title: &str, iterator: impl ExactSizeIterator<Item = Html>) -> Option<Html> {
@@ -59,7 +55,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
 
     fn button(
         onclick: Callback<MouseEvent>,
-        data_offset: String,
+        docs: Option<String>,
         src: ImageType,
         max: bool,
     ) -> Html {
@@ -68,7 +64,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 type={"button"}
                 class={classes!("btn-stack", "group")}
                 {onclick}
-                {data_offset}
+                // docs
             >
                 <Image
                     class={classes!(
@@ -90,40 +86,43 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         let buttons = [
             (
                 ImageType::BasicAttack,
-                &BASIC_ATTACK_OFFSET,
+                FormulaRenderer::tower_global(),
                 StackValue::BasicAttack,
                 false,
             ),
             (
                 ImageType::CritStrike,
-                &CRITICAL_STRIKE_OFFSET,
+                FormulaRenderer::tower_global(),
                 StackValue::CritStrike,
                 false,
             ),
             (
                 ImageType::OnhitAttack,
-                &ONHIT_EFFECT_OFFSET,
+                FormulaRenderer::tower_global(),
                 StackValue::OnhitMin,
                 false,
             ),
             (
                 ImageType::OnhitAttack,
-                &ONHIT_EFFECT_OFFSET,
+                FormulaRenderer::tower_global(),
                 StackValue::OnhitMax,
                 true,
             ),
-            (ImageType::Ignite, &IGNITE_OFFSET, StackValue::Ignite, false),
+            (
+                ImageType::Ignite,
+                FormulaRenderer::tower_global(),
+                StackValue::Ignite,
+                false,
+            ),
         ]
         .into_iter()
         .map(|(src, offset, v, max)| {
-            let data_offset = encode_offset(&[offset]);
-
             let onclick = {
                 let callback = callback.clone();
                 Callback::from(move |_| callback.emit(v))
             };
 
-            button(onclick, data_offset, src, max)
+            button(onclick, Some(offset), src, max)
         });
 
         section("Other", buttons)
@@ -136,7 +135,6 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
             .enumerate()
             .map(|(slot, metadata)| {
                 let ability_id = metadata.kind;
-                let data_offset = encode_offset(&[champion_id.get_ability_formula(slot)]);
 
                 let onclick = {
                     let callback = callback.clone();
@@ -147,7 +145,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
 
                 button(
                     onclick,
-                    data_offset,
+                    champion_id.render_fn(ability_id).ok(),
                     ImageType::Ability(champion_id, AbilityKind::Normal(ability_id)),
                     false,
                 )
@@ -172,8 +170,6 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                         let base = cursor.get();
                         cursor.set(base + if has_max { 2 } else { 1 });
 
-                        let data_offset = encode_offset(&[item_id.formula()]);
-
                         let onclick = |j: usize| {
                             let callback = callback.clone();
                             Callback::from(move |_| callback.emit(StackValue::Item(j, item_id)))
@@ -181,9 +177,10 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
 
                         html! {
                             <>
-                                {button(onclick(base), data_offset.clone(), ImageType::from(item_id), false)}
+                                {button(onclick(base), item_id.render_global().ok(), ImageType::from(item_id), false)}
+
                                 if has_max {
-                                    {button(onclick(base + 1), data_offset, ImageType::from(item_id), true)}
+                                    {button(onclick(base + 1), item_id.render_global().ok(), ImageType::from(item_id), true)}
                                 }
                             </>
                         }
@@ -200,14 +197,13 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 "Runes",
                 runes_meta.iter().enumerate().map(|(i, metadata)| {
                     let id = metadata.kind;
-                    let data_offset = encode_offset(&[id.formula()]);
 
                     let onclick = {
                         let callback = callback.clone();
                         Callback::from(move |_| callback.emit(StackValue::Rune(i, id)))
                     };
 
-                    button(onclick, data_offset, ImageType::from(id), false)
+                    button(onclick, id.render_global().ok(), ImageType::from(id), false)
                 }),
             )
         },

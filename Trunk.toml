@@ -7,3 +7,7 @@ release = false
 minify = "never"
 open = false
 public_url = "./"
+
+[tools]
+# Keep the compiler aligned with tailwind.config.js and the v3 stylesheet.
+tailwindcss = "3.4.17"

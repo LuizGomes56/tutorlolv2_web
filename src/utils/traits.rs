@@ -1,15 +1,16 @@
 use crate::{components::image::ImageType, utils::random_u64};
 use std::fmt::Debug;
+use strum::{EnumCount, VariantArray};
 use tutorlolv2::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
 
 pub trait EnumCast
 where
-    Self: CastId + TryFrom<u16> + PartialEq + Copy,
+    Self: CastId + EnumCount + VariantArray + PartialEq + Copy,
     ImageType: From<Self>,
 {
     fn random() -> Self {
-        let index = random_u64(0..Self::VARIANTS as _);
-        unsafe { Self::try_from(index as _).unwrap_unchecked() }
+        let index = random_u64(0..Self::COUNT as _);
+        unsafe { Self::try_from_u16(index as _).unwrap_unchecked() }
     }
 
     fn image_type(&self) -> ImageType {
@@ -50,9 +51,6 @@ impl ClassCast for AdaptiveType {
 pub trait Print: Debug {
     fn log(&self) {
         web_sys::console::log_1(&format!("{self:#?}").into());
-    }
-    fn err(&self) {
-        web_sys::console::error_1(&format!("{self:#?}").into());
     }
 }
 

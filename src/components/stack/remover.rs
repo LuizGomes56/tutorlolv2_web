@@ -3,14 +3,11 @@ use crate::{
         image::{Image, ImageType},
         stack::{Stack, StackValue, Tray, TrayAction, TrayEntry},
     },
-    utils::{Print, encode_offset},
+    utils::Print,
 };
 use serde_json::Value;
 use std::{collections::HashMap, rc::Rc};
-use tutorlolv2::{
-    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
-    docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, IGNITE_OFFSET, ONHIT_EFFECT_OFFSET},
-};
+use tutorlolv2::{ChampionId, ItemId, RuneId, TypeMetadata, yew::render::FormulaRenderer};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -156,28 +153,47 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
     let remover = safe_stack
         .iter()
         .map(|entry| {
-            let (image_type, offset, max) = match entry.value {
-                StackValue::Ability { slot, ability_id } => (
+            let (image_type, docs, max) = match entry.value {
+                StackValue::Ability { ability_id, .. } => (
                     ImageType::Ability(champion_id, ability_id.into()),
-                    champion_id.get_ability_formula(slot),
+                    champion_id.render_fn(ability_id).ok(),
                     false,
                 ),
                 StackValue::Item(i, item_id) => (
                     ImageType::from(item_id),
-                    item_id.formula(),
+                    item_id.render_fn().ok(),
                     i % 2 == 1 && item_id.deals_max_damage(),
                 ),
                 StackValue::Rune(_, rune_id) => {
-                    (ImageType::from(rune_id), rune_id.formula(), false)
+                    (ImageType::from(rune_id), rune_id.render_fn().ok(), false)
                 }
-                StackValue::BasicAttack => (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET, false),
-                StackValue::CritStrike => (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET, false),
-                StackValue::OnhitMin => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, false),
-                StackValue::OnhitMax => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, true),
-                StackValue::Ignite => (ImageType::Ignite, &IGNITE_OFFSET, false),
+                StackValue::BasicAttack => (
+                    ImageType::BasicAttack,
+                    Some(FormulaRenderer::tower_global()),
+                    false,
+                ),
+                StackValue::CritStrike => (
+                    ImageType::CritStrike,
+                    Some(FormulaRenderer::tower_global()),
+                    false,
+                ),
+                StackValue::OnhitMin => (
+                    ImageType::OnhitAttack,
+                    Some(FormulaRenderer::tower_global()),
+                    false,
+                ),
+                StackValue::OnhitMax => (
+                    ImageType::OnhitAttack,
+                    Some(FormulaRenderer::tower_global()),
+                    true,
+                ),
+                StackValue::Ignite => (
+                    ImageType::Ignite,
+                    Some(FormulaRenderer::tower_global()),
+                    false,
+                ),
             };
 
-            let data_offset = encode_offset(&[offset]);
             let id = entry.id;
 
             let onclick = {
@@ -226,7 +242,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                     type={"button"}
                     {class}
                     {onclick}
-                    {data_offset}
+                    // docs
                 >
                     {inner}
                 </button>

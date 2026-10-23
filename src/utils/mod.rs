@@ -1,8 +1,7 @@
-use crate::utils::cache::CACHE;
+use derive_more::Display;
 use std::ops::Range;
 use web_sys::js_sys::Math;
 
-mod cache;
 mod fetch;
 pub mod glue;
 pub mod hooks;
@@ -11,7 +10,6 @@ mod traits;
 pub mod tray;
 
 pub use self::{
-    cache::init_cache,
     fetch::{Fetch, FetchUrl},
     hooks::use_setter,
     traits::{ClassCast, EnumCast, Print, ReduceApply},
@@ -35,25 +33,8 @@ pub fn random_u64(range: Range<u64>) -> u64 {
     }
 }
 
-pub fn encode_offset(range: &[&Range<usize>]) -> String {
-    range
-        .iter()
-        .map(|r| format!("{r:?}"))
-        .collect::<Vec<_>>()
-        .join("|")
-}
-
-pub fn hoverdocs(offsets: Range<usize>) -> &'static str {
-    unsafe { core::str::from_utf8_unchecked(CACHE.get_unchecked(offsets)) }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Display)]
+#[display("Loading")]
 pub struct Loading;
-
-impl std::fmt::Display for Loading {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Loading")
-    }
-}
 
 impl std::error::Error for Loading {}

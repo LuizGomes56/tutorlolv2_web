@@ -5,8 +5,9 @@ use crate::{
         selector::Selector,
     },
     formulas::components::code::Code,
-    utils::{EnumCast, encode_offset, use_setter},
+    utils::{EnumCast, use_setter},
 };
+use strum::VariantArray;
 use tutorlolv2::{CastId, ChampionId, Position};
 use yew::prelude::*;
 
@@ -22,7 +23,7 @@ pub fn ChampionFormulas() -> Html {
         ImageType: From<T>,
     {
         html! {
-            for position in Position::ARRAY {
+            for &position in Position::VARIANTS {
                 <td class={"content-baseline"}>
                     <div class={classes!("flex", "flex-col", "gap-2", "py-2")}>
                         for item in f(position) {
@@ -32,7 +33,7 @@ pub fn ChampionFormulas() -> Html {
                                     "md:justify-items-start",
                                     "overflow-hidden"
                                 )}
-                                data_offset={encode_offset(&[item.formula()])}
+                                // item.render_global()
                             >
                                 <div class={classes!("flex", "items-center", "gap-3")}>
                                     <Image
@@ -73,7 +74,7 @@ pub fn ChampionFormulas() -> Html {
                 <table class={classes!("table-fixed")}>
                     <thead>
                         <tr>
-                            for position in Position::ARRAY {
+                            for &position in Position::VARIANTS {
                                 <th class={classes!("overflow-hidden")}>
                                     <div class={classes!(
                                         "flex", "items-center", "gap-3",
@@ -107,17 +108,13 @@ pub fn ChampionFormulas() -> Html {
                 </table>
             </div>
             <H2 text={"Source code definition"} />
-            <Code range={champion.formula()} />
+            <Code value={champion.render_global().ok()} />
             <H2 text={"Abilities virtual definiton"} />
-            for i in 0..champion.number_of_abilities() {
-                <Code range={champion.get_ability_formula(i)} />
-            }
-            <H2 text={"Internal ability functions"} />
-            for i in 0..champion.number_of_abilities() {
-                <Code range={&champion.closures()[i]} />
+            for meta in champion.abilities() {
+                <Code value={champion.render_fn(meta.kind).ok()} />
             }
             <H2 text={"Champion generator implementation"} />
-            <Code range={champion.generator()} />
+            <Code value={champion.render_generator()} />
         </div>
     }
 }

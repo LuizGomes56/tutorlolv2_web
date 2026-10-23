@@ -13,10 +13,10 @@ use crate::{
         tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
     },
     model::{Dragons, EnemyStats},
-    utils::{ClassCast, Fetch, FetchUrl, Loading, Print, encode_offset, tray::TrayAction},
+    utils::{ClassCast, Fetch, FetchUrl, Loading, Print, tray::TrayAction},
 };
 use std::{cell::RefCell, rc::Rc};
-use tutorlolv2::{CastId, L_MSTR, L_TWRD, docs::TOWER_DAMAGE_FN_OFFSET};
+use tutorlolv2::{L_MSTR, L_TWRD};
 use web_sys::AbortController;
 use yew::{platform::spawn_local, prelude::*};
 
@@ -232,7 +232,7 @@ pub fn Calculator() -> Html {
                                             <tr>
                                                 <td
                                                     class={classes!("w-12")}
-                                                    data_offset={encode_offset(&[enemy_id.formula()])}
+                                                    // enemy_id.render_global()
                                                 >
                                                     <button
                                                         class={classes!(
@@ -302,11 +302,10 @@ pub fn Calculator() -> Html {
                     <div class={classes!("box", "overflow-auto")}>
                         <TurretTable
                             damages={{
-                                let offset = encode_offset(&[&TOWER_DAMAGE_FN_OFFSET]);
                                 (0..L_TWRD).into_iter().map(|i| {
                                     html! {
                                         <td
-                                            data_offset={offset.clone()}
+                                            // Tower
                                             class={classes!(current_player.adaptive_type.class())}
                                         >
                                             {tower_damages[i]}

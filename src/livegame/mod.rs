@@ -6,14 +6,10 @@ use crate::{
     model::{
         AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats, Team,
     },
-    utils::encode_offset,
 };
 use bincode::Decode;
 use std::rc::Rc;
-use tutorlolv2::{
-    AdaptiveType, CastId, ChampionId, GameMap, ItemId, L_SIML, Position, RuneId,
-    SIMULATED_ITEMS_ENUM, SIMULATED_ITEMS_METADATA, TypeMetadata, bitset::ItemsBitSet,
-};
+use tutorlolv2::{AdaptiveType, ChampionId, GameMap, ItemId, Position, RuneId, TypeMetadata};
 use yew::prelude::*;
 
 pub use components::*;
@@ -70,14 +66,12 @@ impl Scoreboard {
             ..
         } = self;
 
-        let data_offset = encode_offset(core::array::from_ref(&champion_id.formula()));
-
         html! {
             <div class={classes!(
                 "grid", "grid-cols-[auto_1fr_auto]",
                 "gap-2", "items-center"
             )}>
-                <div {data_offset} class={classes!("relative", "shrink-0")}>
+                <div class={classes!("relative", "shrink-0")}>
                     <Image
                         class={classes!("w-8", "h-8", "overflow-hidden")}
                         src={ImageType::from(champion_id)}
@@ -144,7 +138,7 @@ impl Scoreboard {
 pub struct Enemy {
     pub riot_id: Box<str>,
     pub damages: Damages,
-    pub siml_items: [Damages; L_SIML],
+    pub siml_items: [Damages; ItemId::L_SIML],
     pub base_stats: SimpleStats,
     pub bonus_stats: SimpleStats,
     pub current_stats: EnemyStats,
@@ -165,7 +159,7 @@ impl Enemy {
         let mut list = self
             .siml_items
             .iter()
-            .zip(SIMULATED_ITEMS_ENUM)
+            .zip(ItemId::SIML)
             .map(|(s, item)| (s.sum(), item))
             .collect::<Vec<_>>();
 

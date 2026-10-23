@@ -1,14 +1,13 @@
 use crate::{
     calculator::reducer::push_item,
-    model::{
-        AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats,
-        ValueException,
-    },
+    model::{AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats},
     utils::{EnumCast, tray::Tray},
 };
 use bincode::{Decode, Encode};
 use std::{collections::HashMap, hash::Hash, rc::Rc};
-use tutorlolv2::{AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata};
+use tutorlolv2::{
+    AdaptiveType, ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata, model::ValueException,
+};
 
 mod components;
 mod page;

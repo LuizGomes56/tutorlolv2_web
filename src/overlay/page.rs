@@ -9,9 +9,8 @@ use crate::{
     impl_reducible,
     livegame::{Enemy, Game},
     overlay::panel::PanelManager,
-    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
+    utils::{Fetch, Loading, Print, glue::get_data, hooks::on_keydown},
 };
-use tutorlolv2::CastId;
 use wasm_bindgen::{
     JsCast, JsValue,
     prelude::{Closure, wasm_bindgen},
@@ -204,7 +203,7 @@ pub fn Overlay() -> Html {
                         <tr>
                             <td
                                 class={classes!("w-12")}
-                                data_offset={encode_offset(&[enemy_id.formula()])}
+                                // enemy_id.render_global()
                             >
                                 <Image src={ImageType::from(enemy_id)} />
                             </td>

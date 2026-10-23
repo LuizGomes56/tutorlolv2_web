@@ -6,7 +6,6 @@ use crate::{
     formulas::Formulas,
     livegame::Livegame,
     overlay::Overlay,
-    utils::init_cache,
 };
 use yew::prelude::*;
 use yew_router::{BrowserRouter, Routable, Switch};
@@ -81,5 +80,4 @@ fn App() -> Html {
 
 fn main() {
     yew::Renderer::<App>::new().render();
-    init_cache();
 }

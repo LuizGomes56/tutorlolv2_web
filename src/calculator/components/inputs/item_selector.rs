@@ -6,11 +6,11 @@ use crate::{
     },
     components::image::{Image, ImageType, Svg},
     utils::{
-        encode_offset,
         hooks::{on_keydown, use_clickout},
         tray::{Tray, TrayAction, TrayEntry},
     },
 };
+use strum::VariantArray;
 use tutorlolv2::{
     CastId, ChampionId, ItemId, Position, RuneId, StatName, bitset::BitSetArray,
     bitset::sizeof_bitset,
@@ -85,9 +85,9 @@ pub fn RecommendedItems(props: &RecommendedItemsProps) -> Html {
         callback,
     } = props;
 
-    Position::ARRAY
+    Position::VARIANTS
         .into_iter()
-        .map(|position| {
+        .map(|&position| {
             let onclick = {
                 let callback = callback.clone();
                 let array = champion_id.recommended_items(position);
@@ -264,12 +264,10 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     Callback::from(move |_| remove.emit(id))
                 };
 
-                let data_offset = encode_offset(&[value.formula()]);
-
                 html! {
                     <button
                         {onclick}
-                        {data_offset}
+                        // value.render_global()
                         key={id}
                     >
                         <Image
@@ -291,8 +289,6 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
             })
         };
 
-        let data_offset = encode_offset(&[champion_id.formula()]);
-
         html! {
             <div class={classes!(
                 "flex", "flex-col", "gap-4", "p-2",
@@ -301,7 +297,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                 <div class={classes!("grid", "grid-cols-6", "gap-2")}>
                     <button
                         {onclick}
-                        {data_offset}
+                        // champion_id.render_global()
                     >
                         <Image
                             class={classes!("w-7", "h-7")}
@@ -450,7 +446,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         }
     };
 
-    let options = ItemId::VALUES
+    let options = ItemId::VARIANTS
         .iter()
         .copied()
         .filter(|item| {
@@ -471,17 +467,14 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     ItemId::filter(StatName::from_u8_unchecked(v as _)).contains(item)
                 })
         })
-        .enumerate()
-        .map(|(i, item)| {
+        .map(|item| {
             let insert = insert.clone();
             let onclick = Callback::from(move |_| insert.emit(item));
-
-            let data_offset = encode_offset(&[item.formula()]);
 
             html! {
                 <button
                     {onclick}
-                    {data_offset}
+                    // item.render_global()
                     class={classes!("flex", "flex-col", "gap-1", "w-fit")}
                 >
                     <Image

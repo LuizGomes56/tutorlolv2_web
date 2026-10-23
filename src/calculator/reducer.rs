@@ -1,13 +1,13 @@
 use crate::{
     calculator::{ExceptionMap, Player, PlayerData},
-    model::{AbilityLevelsAction, EnemyStats, PlayerStats, ValueException},
+    model::{AbilityLevelsAction, EnemyStats, PlayerStats},
     utils::{
         Print, ReduceApply,
         tray::{Tray, TrayAction, TrayEntry},
     },
 };
 use std::rc::Rc;
-use tutorlolv2::{ChampionId, ItemId, RuneId};
+use tutorlolv2::{ChampionId, ItemId, RuneId, model::ValueException};
 use yew::Reducible;
 
 pub type EnemyDataAction = DataAction<EnemyStats>;

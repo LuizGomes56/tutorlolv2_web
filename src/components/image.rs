@@ -141,11 +141,11 @@ impl ImageType {
                 }
             }
             ImageType::Item(item_id) => &{
-                let riot_id = item_id.to_riot_id();
+                let riot_id = item_id.riot_id();
                 format!("items/{riot_id}.avif")
             },
             ImageType::Rune(rune_id) => &{
-                let riot_id = rune_id.to_riot_id();
+                let riot_id = rune_id.riot_id();
                 format!("runes/{riot_id}.avif")
             },
             ImageType::Tower => &"other/tower.avif",
