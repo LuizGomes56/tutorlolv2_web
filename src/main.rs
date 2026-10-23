@@ -15,6 +15,7 @@ mod about;
 mod calculator;
 mod components;
 mod formulas;
+mod hover;
 mod livegame;
 mod model;
 mod overlay;

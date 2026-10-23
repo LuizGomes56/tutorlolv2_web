@@ -1,9 +1,6 @@
+use crate::hover::{self, Docs};
 use crate::{livegame::Enemy, utils::ClassCast};
-use core::fmt::Write;
-use tutorlolv2::{
-    AttackType,
-    model::{Attacks, Damages, OutputEnemy},
-};
+use tutorlolv2::model::{Attacks, Damages, OutputEnemy};
 use tutorlolv2::{
     ChampionId, Ctx, CtxVar, DamageType, EntityId, ItemId, RuneId, TypeMetadata, ValueId,
 };
@@ -48,6 +45,7 @@ pub struct Cell {
     min_dmg: i32,
     max_dmg: Option<i32>,
     idents: &'static [CtxVar],
+    docs: Vec<Docs>,
     diff: Option<(i32, Option<i32>)>,
 }
 
@@ -89,18 +87,12 @@ impl Cell {
             min_dmg,
             max_dmg,
             idents,
+            docs,
             diff,
         } = self;
 
-        let mut data_idents = String::new();
-        for (i, &ident) in idents.iter().enumerate() {
-            if i > 0 {
-                data_idents.push('|');
-            }
-            let value = ctx[ident];
-            let identifier = &ident.as_var()[4..];
-            let _ = write!(&mut data_idents, "{identifier}:{value}");
-        }
+        let data_idents = hover::encode_idents(idents, ctx);
+        let data_docs = hover::encode_docs(&docs);
 
         let main_line = Self::render_range(min_dmg, max_dmg).unwrap_or(Html::from(min_dmg));
 
@@ -115,6 +107,7 @@ impl Cell {
         html! {
             <td
                 {data_idents}
+                {data_docs}
                 class={classes!("whitespace-nowrap", damage_type.class())}
             >
                 <div class={classes!("flex", "flex-col", "items-center", "leading-tight")}>
@@ -165,6 +158,7 @@ fn attack_cells(damages: &Damages, cells: &mut Vec<Cell>, other: Option<&Damages
             min_dmg: basic_attack,
             max_dmg: None,
             idents: &[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier],
+            docs: Vec::new(),
             diff: other.map(|o| (basic_attack - o.attacks.basic_attack, None)),
         },
         Cell {
@@ -172,6 +166,7 @@ fn attack_cells(damages: &Damages, cells: &mut Vec<Cell>, other: Option<&Damages
             min_dmg: critical_strike,
             max_dmg: None,
             idents: &[CtxVar::AttackDamage, CtxVar::CritDamage],
+            docs: Vec::new(),
             diff: other.map(|o| (critical_strike - o.attacks.critical_strike, None)),
         },
         Cell {
@@ -179,6 +174,7 @@ fn attack_cells(damages: &Damages, cells: &mut Vec<Cell>, other: Option<&Damages
             min_dmg: onhit_damage.minimum_damage,
             max_dmg: Some(onhit_damage.maximum_damage),
             idents: &[],
+            docs: Vec::new(),
             diff: other.map(|o| {
                 let other_onhit = &o.attacks.onhit_damage;
                 (
@@ -225,6 +221,9 @@ fn abilities_damage(
             let mut_ref = &mut cells[target];
 
             mut_ref.max_dmg = Some(max_dmg);
+            mut_ref
+                .docs
+                .push(Docs::Champion(champion_id, abilities_meta[i].kind));
 
             if let Some(o) = other
                 && let Some((_, max_diff)) = &mut mut_ref.diff
@@ -249,6 +248,7 @@ fn abilities_damage(
             min_dmg: damages[i],
             max_dmg: None,
             idents,
+            docs: vec![Docs::Champion(champion_id, meta.kind)],
             diff: None,
         });
     }
@@ -258,7 +258,6 @@ fn value_damage<T: ValueId>(
     damages: &Damages,
     cells: &mut Vec<Cell>,
     metadata: &[TypeMetadata<T>],
-    attack_type: AttackType,
     other: Option<&Damages>,
 ) {
     let tag = T::default();
@@ -283,6 +282,11 @@ fn value_damage<T: ValueId>(
             min_dmg,
             max_dmg: Some(max_dmg),
             idents: id.identifiers(),
+            docs: vec![match id.entity() {
+                EntityId::Item(item) => Docs::Item(item),
+                EntityId::Rune(rune) => Docs::Rune(rune),
+                EntityId::Champion(_) => unreachable!("value_damage only accepts items and runes"),
+            }],
             diff: other.map(|o| {
                 let diff_min = o.items[min_i];
                 let diff_max = o.items[min_i + 1];
@@ -331,19 +335,7 @@ pub fn to_html(
 
     attack_cells(damages, &mut cells, other);
     abilities_damage(damages, &mut cells, champion_id, other);
-    value_damage(
-        damages,
-        &mut cells,
-        items_meta,
-        champion_id.attack_type(),
-        other,
-    );
-    value_damage(
-        damages,
-        &mut cells,
-        runes_meta,
-        champion_id.attack_type(),
-        other,
-    );
+    value_damage(damages, &mut cells, items_meta, other);
+    value_damage(damages, &mut cells, runes_meta, other);
     render_cells(damages, cells)
 }

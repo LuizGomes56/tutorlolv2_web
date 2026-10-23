@@ -1,6 +1,7 @@
 function init_hover() {
     let shiftDown = false;
     let currentHost = null;
+    const hostSelector = ":is([data_docs], [data_idents])";
 
     const tip = document.getElementById("hoverdocs");
     const code = document.getElementById("hoverdocs_code");
@@ -12,26 +13,6 @@ function init_hover() {
 
     const baseTipClasses = new Set(tip.className.split(/\s+/).filter(Boolean));
     const extraClasses = new Set();
-
-    function parseOffsets(host) {
-        return (host.getAttribute("data_offset") || "")
-            .split("|")
-            .filter(Boolean)
-            .map((r) => r.split("..").map(Number))
-            .filter(([s, e]) => Number.isFinite(s) && Number.isFinite(e));
-    }
-
-    function ensureHostPositioned(host) {
-        if (!(host instanceof Element)) return;
-        const cs = getComputedStyle(host);
-        if (cs.position === "static") host.style.position = "relative";
-    }
-
-    function ensureAllDataOffsetHostsPositioned() {
-        document
-            .querySelectorAll("[data_offset]")
-            .forEach(ensureHostPositioned);
-    }
 
     function clearExtraClasses() {
         for (const cls of extraClasses) tip.classList.remove(cls);
@@ -52,27 +33,15 @@ function init_hover() {
     }
 
     function setTooltipContent(host) {
-        const offsets = parseOffsets(host);
-
-        const data_idents = host.getAttribute("data_idents") || "";
-        const identsHtml = data_idents
-            .split("|")
-            .filter(Boolean)
-            .map((entry) => {
-                const [ctx_var, ctx_value] = entry.split(":");
-                return `<div class="whitespace-nowrap"><span class="_v">${ctx_var}</span> = <span class="_n">${ctx_value ?? "?"}</span></div>`;
-            })
-            .join("");
-
-        let html = identsHtml
-            ? `<div class="flex flex-col">${identsHtml}</div>`
-            : "";
-
-        for (const [s, e] of offsets) {
-            html += window.decodeCacheSlice(s, e);
+        try {
+            code.innerHTML = window.wasm.render_hover_docs(
+                host.getAttribute("data_idents") || "",
+                host.getAttribute("data_docs") || "",
+            );
+        } catch (error) {
+            console.warn("[hoverdocs] Unable to render documentation", error);
+            code.textContent = "Unable to load documentation.";
         }
-
-        return html;
     }
 
     function positionTooltip(host) {
@@ -100,10 +69,13 @@ function init_hover() {
 
     function showOn(host) {
         if (!(host instanceof Element)) return;
-        ensureHostPositioned(host);
 
         applyExtraClasses(host);
-        code.innerHTML = setTooltipContent(host);
+        setTooltipContent(host);
+        if (!code.hasChildNodes()) {
+            hideTooltip();
+            return;
+        }
 
         currentHost = host;
 
@@ -133,13 +105,15 @@ function init_hover() {
     window.addEventListener(
         "keydown",
         (e) => {
+            if (e.key === "Escape") {
+                hideTooltip();
+                return;
+            }
             if (e.key !== "Shift") return;
             if (shiftDown) return;
             shiftDown = true;
 
-            ensureAllDataOffsetHostsPositioned();
-
-            const hovered = document.querySelectorAll("[data_offset]:hover");
+            const hovered = document.querySelectorAll(`${hostSelector}:hover`);
             if (!hovered.length) return;
 
             showOn(hovered[hovered.length - 1]);
@@ -163,7 +137,7 @@ function init_hover() {
             const el = e.target;
             if (!(el instanceof Element)) return;
 
-            const host = el.closest?.("[data_offset]");
+            const host = el.closest(hostSelector);
             if (!host) return;
 
             const from = e.relatedTarget;
@@ -186,7 +160,10 @@ function init_hover() {
         true,
     );
 
-    window.addEventListener("blur", hideTooltip, true);
+    window.addEventListener("blur", () => {
+        shiftDown = false;
+        hideTooltip();
+    }, true);
 
     const reposition = () => {
         if (!currentHost || tip.classList.contains("hidden")) return;
@@ -196,29 +173,21 @@ function init_hover() {
     window.addEventListener("scroll", reposition, true);
     window.addEventListener("resize", reposition, true);
 
-    ensureAllDataOffsetHostsPositioned();
     const mo = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-            if (m.type !== "childList") continue;
-
-            for (const n of m.addedNodes) {
-                if (!(n instanceof Element)) continue;
-                if (n.matches?.("[data_offset]")) ensureHostPositioned(n);
-                n.querySelectorAll?.("[data_offset]").forEach(
-                    ensureHostPositioned,
-                );
-            }
-
-            for (const n of m.removedNodes) {
-                if (!(n instanceof Element)) continue;
-                if (
-                    currentHost &&
-                    (n === currentHost || n.contains(currentHost))
-                )
-                    hideTooltip();
-            }
+        if (!currentHost) return;
+        if (!currentHost.isConnected || !currentHost.matches(hostSelector)) {
+            hideTooltip();
+            return;
+        }
+        if (mutations.some((m) => m.type === "attributes" && m.target === currentHost)) {
+            showOn(currentHost);
         }
     });
 
-    mo.observe(document.documentElement, { childList: true, subtree: true });
+    mo.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["data_docs", "data_idents", "data_classes"],
+    });
 }
