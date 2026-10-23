@@ -74,7 +74,7 @@ pub fn use_enemy_tray_callback<T: 'static>(
     })
 }
 
-pub fn make_row<T: Copy>(
+pub fn make_row<T>(
     entity: &UseStateHandle<TargetEntity>,
     target_entity: TargetEntity,
     champion_id: ChampionId,
@@ -160,7 +160,7 @@ where
     } = props;
 
     Position::VARIANTS
-        .into_iter()
+        .iter()
         .map(|&position| {
             let onclick = {
                 let callback = callback.clone();
@@ -558,7 +558,7 @@ pub fn Search(props: &SearchProps) -> Html {
                 class={classes!(
                     "placeholder:text-std-500",
                     "bg-transparent",
-                    "text-sm", "p-3", "outline-none"
+                    "text-sm", "p-3", "outline-hidden"
                 )}
                 placeholder={"Click Here to Search"}
                 {oninput}

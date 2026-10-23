@@ -76,9 +76,7 @@ impl<T: ReduceApply> PlayerData<T> {
         match action {
             DataAction::Level(v) => self.level = v,
             DataAction::ReplaceStats(v) => self.stats = unsafe { *v },
-            DataAction::Stats(v) => {
-                let _ = self.stats.apply(v);
-            }
+            DataAction::Stats(v) => self.stats.apply(v),
             DataAction::Stacks(v) => self.stacks = v,
             DataAction::InferStats(v) => self.infer_stats = v,
             DataAction::IsMegaGnar(v) => self.is_mega_gnar = v,

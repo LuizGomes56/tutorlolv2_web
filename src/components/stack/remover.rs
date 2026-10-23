@@ -154,7 +154,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
         .iter()
         .map(|entry| {
             let (image_type, max) = match entry.value {
-                StackValue::Ability { slot, ability_id } => {
+                StackValue::Ability { ability_id, .. } => {
                     (ImageType::Ability(champion_id, ability_id.into()), false)
                 }
                 StackValue::Item(i, item_id) => (

@@ -73,7 +73,7 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                                 <td class={classes!("w-12")}>
                                     <button
                                         class={classes!(
-                                            "outline-none",
+                                            "outline-hidden",
                                             "focus:ring-1",
                                             "focus:ring-blue-500/75"
                                         )}

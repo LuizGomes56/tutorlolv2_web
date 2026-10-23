@@ -63,7 +63,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                 <Image
                     class={classes!(
                         "w-8", "h-8", "pointer-events-none",
-                        "overflow-hidden", "rounded"
+                        "overflow-hidden", "rounded-sm"
                     )}
                     {src}
                 />

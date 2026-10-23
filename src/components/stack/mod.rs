@@ -3,11 +3,9 @@ mod remover;
 mod table;
 
 use crate::utils::tray::{Tray, TrayAction, TrayEntry};
+use derive_more::{Deref, DerefMut};
 use serde::{Deserialize, Serialize};
-use std::{
-    ops::{Deref, DerefMut},
-    rc::Rc,
-};
+use std::rc::Rc;
 use tutorlolv2::{
     AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata, bitset::BitSet,
 };
@@ -17,23 +15,12 @@ pub use insert::StackInsert;
 pub use remover::StackRemover;
 pub use table::StackTable;
 
-impl Deref for Stack {
-    type Target = Tray<StackValue>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.values
-    }
-}
-
-impl DerefMut for Stack {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.values
-    }
-}
-
-#[derive(Clone, Default, PartialEq)]
+#[derive(Clone, Default, Deref, DerefMut, PartialEq)]
 pub struct Stack {
     champion_id: ChampionId,
+
+    #[deref]
+    #[deref_mut]
     values: Tray<StackValue>,
 }
 

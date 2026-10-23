@@ -21,7 +21,7 @@
 //         <label
 //             title={tag}
 //             class={classes!(
-//                 "rounded", "p-4",
+//                 "rounded-sm", "p-4",
 //                 match checked {
 //                     true => classes!("bg-std-800"),
 //                     false => classes!("bg-std-900"),

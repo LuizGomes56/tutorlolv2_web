@@ -124,7 +124,7 @@ where
                         class={{
                             let mut class = classes!(
                                 "bg-transparent", "focus:ring-0",
-                                "focus:outline-none", "truncate"
+                                "focus:outline-hidden", "truncate"
                             );
                             class.push(input_class);
                             class

@@ -15,7 +15,7 @@ use {
         },
         utils::ClassCast,
     },
-    std::{cell::RefCell, rc::Rc},
+    std::{cell::RefCell, num::NonZeroU8, rc::Rc},
     tutorlolv2::{
         L_MSTR, L_TWRD,
         model::{
@@ -106,7 +106,7 @@ fn __fetch(
                     .copied()
                     .collect::<Box<_>>(),
                 stacks: player.data.stacks,
-                level: player.data.level,
+                level: player.data.level.try_into().unwrap_or(NonZeroU8::MIN),
                 champion_id: player.data.champion_id,
                 is_mega_gnar: player.data.is_mega_gnar,
             },
@@ -118,7 +118,7 @@ fn __fetch(
                 items: enemy.items.values::<Box<_>>(),
                 item_exceptions: enemy.item_exceptions.values().copied().collect::<Box<_>>(),
                 stacks: enemy.stacks,
-                level: enemy.level,
+                level: enemy.level.try_into().unwrap_or(NonZeroU8::MIN),
                 champion_id: enemy.champion_id,
                 is_mega_gnar: enemy.is_mega_gnar,
             })
@@ -261,8 +261,8 @@ pub fn Calculator() -> Html {
                                         let damages = to_html(
                                             &enemy.damages,
                                             current_player.champion_id,
-                                            &items_meta,
-                                            &runes_meta,
+                                            items_meta,
+                                            runes_meta,
                                             None
                                         );
                                         let enemy_id = enemy.champion_id;
@@ -272,7 +272,7 @@ pub fn Calculator() -> Html {
                                                     <button
                                                         class={classes!(
                                                             "cursor-pointer",
-                                                            "outline-none",
+                                                            "outline-hidden",
                                                             "focus:ring-1",
                                                             "focus:ring-blue-500/75",
                                                         )}
@@ -309,8 +309,8 @@ pub fn Calculator() -> Html {
                                         let damages = to_html(
                                             damage,
                                             current_player.champion_id,
-                                            &items_meta,
-                                            &runes_meta,
+                                            items_meta,
+                                            runes_meta,
                                             None
                                         );
 
@@ -374,7 +374,7 @@ pub fn Calculator() -> Html {
                                         Callback::from(move |i| enemy_index.set(i))
                                     }}
                                     enemies={enemies.clone()}
-                                    stack={stack.reconcile(current_player.champion_id, &items_meta, &runes_meta)}
+                                    stack={stack.reconcile(current_player.champion_id, items_meta, runes_meta)}
                                     level={current_player.level}
                                 />
                             </div>

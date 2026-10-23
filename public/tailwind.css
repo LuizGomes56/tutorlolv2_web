@@ -1,9 +1,32 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss" source(none);
+
+@source "../index.html";
+@source "../src/**/*.rs";
+
+/* The std palette replaces the former JavaScript matchUtilities plugin. */
+@theme inline {
+    --color-std-50: var(--color-zinc-50);
+    --color-std-100: var(--color-zinc-100);
+    --color-std-200: var(--color-zinc-200);
+    --color-std-300: var(--color-zinc-300);
+    --color-std-400: var(--color-zinc-400);
+    --color-std-500: var(--color-zinc-500);
+    --color-std-600: var(--color-zinc-600);
+    --color-std-700: var(--color-zinc-700);
+    --color-std-800: var(--color-zinc-800);
+    --color-std-900: var(--color-zinc-900);
+    --color-std-950: var(--color-zinc-950);
+}
+
+/* Preserve the v3 default for borders without an explicit color. */
+@layer base {
+    *, ::before, ::after, ::backdrop, ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
 
 .btn-stack {
-    @apply relative flex items-center justify-center w-10 h-10 border border-std-800 bg-std-900/60 hover:bg-std-800/60 hover:border-blue-500 transition-all duration-150 outline-none;
+    @apply relative flex items-center justify-center w-10 h-10 border border-std-800 bg-std-900/60 hover:bg-std-800/60 hover:border-blue-500 transition-all duration-150 outline-hidden;
 }
 
 .min-w-80 {

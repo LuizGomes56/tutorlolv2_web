@@ -75,6 +75,7 @@ macro_rules! impl_stat_display {
         impl StatDisplay for $type {
             const VALUES: &[PlayerStatsField] = &[$(PlayerStatsField::$stat),+];
             fn prototype(value: PlayerStatsField) -> fn(i32) -> Self::Action {
+                #[allow(unreachable_patterns)]
                 match value {
                     $(PlayerStatsField::$stat => Self::Action::$stat,)+
                     _ => unreachable!(),
