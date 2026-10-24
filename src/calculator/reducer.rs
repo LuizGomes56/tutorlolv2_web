@@ -6,9 +6,9 @@ use crate::{
     },
 };
 use derive_more::{Deref, DerefMut};
-use std::rc::Rc;
+use std::{num::NonZeroU8, rc::Rc};
 use tutorlolv2::{
-    ChampionId, ItemId, RuneId, ValueId,
+    ChampionId, ItemId, RuneId,
     model::{EnemyStats, PlayerStats},
     yew::{ReduceApply, ability_levels::AbilityLevelsAction},
 };
@@ -25,7 +25,7 @@ pub enum PlayerAction {
 }
 
 pub enum DataAction<T: ReduceApply> {
-    Level(u8),
+    Level(NonZeroU8),
     ReplaceStats(*const T),
     Stats(T::Action),
     Stacks(u32),
@@ -75,9 +75,7 @@ impl<T: ReduceApply> PlayerData<T> {
                     .push_item(v, ally, |v| c.push(TrayEntry::new(v)))
             }),
             DataAction::ModifyItemExc((item_id, stacks)) => {
-                self.item_exceptions
-                    .inner
-                    .insert(item_id, item_id.pack_exc(stacks));
+                self.item_exceptions.insert(item_id, stacks);
             }
         }
     }
@@ -93,9 +91,7 @@ impl Reducible for Player {
             Self::Action::Tray(v) => v.apply(&mut new.runes),
             Self::Action::AbilityLevels(v) => new.abilities.apply(v),
             Self::Action::ModifyRuneExc((rune_id, stacks)) => {
-                new.rune_exceptions
-                    .inner
-                    .insert(rune_id, rune_id.pack_exc(stacks));
+                new.rune_exceptions.insert(rune_id, stacks);
             }
             Self::Action::Data(v) => {
                 let mut data = new.data;

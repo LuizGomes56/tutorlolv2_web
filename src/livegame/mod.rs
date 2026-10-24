@@ -1,3 +1,5 @@
+use std::num::NonZeroU8;
+
 use crate::hover::Docs;
 mod components;
 mod page;
@@ -35,7 +37,7 @@ pub struct CurrentPlayer {
     pub base_stats: BasicStats,
     pub bonus_stats: BasicStats,
     pub current_stats: PlayerStats,
-    pub level: u8,
+    pub level: NonZeroU8,
     pub team: Team,
     pub adaptive_type: AdaptiveType,
     pub position: Position,
@@ -146,7 +148,7 @@ pub struct Enemy {
     pub current_stats: EnemyStats,
     pub real_armor: i32,
     pub real_magic_resist: i32,
-    pub level: u8,
+    pub level: NonZeroU8,
     pub champion_id: ChampionId,
     pub team: Team,
     pub position: Position,

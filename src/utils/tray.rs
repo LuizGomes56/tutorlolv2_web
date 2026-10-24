@@ -7,39 +7,59 @@ use {
     yew::Reducible,
 };
 
+/// Stable entry identities alongside contiguous values. All mutations keep the
+/// two vectors aligned so calculator inputs can borrow the values directly.
 #[derive(Clone, Debug, PartialEq)]
-#[repr(transparent)]
 pub struct Tray<T: Copy> {
-    pub inner: Vec<TrayEntry<T>>,
+    ids: Vec<u64>,
+    values: Vec<T>,
 }
 
 impl<T: Copy> Default for Tray<T> {
     fn default() -> Self {
-        Self { inner: Vec::new() }
+        Self {
+            ids: Vec::new(),
+            values: Vec::new(),
+        }
     }
 }
 
 impl<T: Copy> Tray<T> {
-    pub fn new(inner: Vec<TrayEntry<T>>) -> Self {
-        Self { inner }
+    pub fn new(entries: impl IntoIterator<Item = TrayEntry<T>>) -> Self {
+        entries.into_iter().collect()
     }
 
-    pub fn values<U: FromIterator<T>>(&self) -> U {
-        self.inner.iter().map(|e| e.value).collect()
+    pub fn values(&self) -> &[T] {
+        &self.values
     }
-}
 
-impl<T: Copy> Deref for Tray<T> {
-    type Target = Vec<TrayEntry<T>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = TrayEntry<T>> + ExactSizeIterator + '_ {
+        self.ids
+            .iter()
+            .copied()
+            .zip(self.values.iter().copied())
+            .map(|(id, value)| TrayEntry { id, value })
     }
-}
 
-impl<T: Copy> DerefMut for Tray<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
+    pub fn len(&self) -> usize {
+        self.values.len()
+    }
+
+    pub fn push(&mut self, entry: TrayEntry<T>) {
+        self.ids.push(entry.id);
+        self.values.push(entry.value);
+    }
+
+    pub fn remove_by_id(&mut self, id: u64) {
+        if let Some(index) = self.ids.iter().position(|&entry_id| entry_id == id) {
+            self.ids.remove(index);
+            self.values.remove(index);
+        }
+    }
+
+    pub fn clear(&mut self) {
+        self.ids.clear();
+        self.values.clear();
     }
 }
 
@@ -67,19 +87,24 @@ pub enum TrayAction<T, U: Copy> {
 
 impl<U: Copy> FromIterator<U> for Tray<U> {
     fn from_iter<T: IntoIterator<Item = U>>(iter: T) -> Self {
-        Tray::new(iter.into_iter().map(TrayEntry::new).collect())
+        iter.into_iter().map(TrayEntry::new).collect()
     }
 }
 
 impl<'a, U: Copy> FromIterator<&'a U> for Tray<U> {
     fn from_iter<T: IntoIterator<Item = &'a U>>(iter: T) -> Self {
-        Tray::new(iter.into_iter().copied().map(TrayEntry::new).collect())
+        iter.into_iter().copied().collect()
     }
 }
 
 impl<U: Copy> FromIterator<TrayEntry<U>> for Tray<U> {
     fn from_iter<T: IntoIterator<Item = TrayEntry<U>>>(iter: T) -> Self {
-        Tray::new(iter.into_iter().collect())
+        let (ids, values) = iter
+            .into_iter()
+            .map(|entry| (entry.id, entry.value))
+            .unzip();
+
+        Self { ids, values }
     }
 }
 
@@ -90,7 +115,7 @@ where
     pub fn apply(self, container: &mut T) {
         match self {
             TrayAction::Insert(entry) => container.push(TrayEntry::new(entry)),
-            TrayAction::RemoveById(id) => container.retain(|e| e.id != id),
+            TrayAction::RemoveById(id) => container.remove_by_id(id),
             TrayAction::Replace(stack) => *container = stack,
             TrayAction::Clear => container.clear(),
         }
@@ -105,7 +130,7 @@ impl<T: Copy> TrayAction<Tray<T>, T> {
     pub fn custom_apply(self, container: &mut Tray<T>, mut f: impl FnMut(&mut Tray<T>, T)) {
         match self {
             TrayAction::Insert(v) => f(container, v),
-            TrayAction::RemoveById(id) => container.retain(|e| e.id != id),
+            TrayAction::RemoveById(id) => container.remove_by_id(id),
             TrayAction::Replace(stack) => *container = stack,
             TrayAction::Clear => container.clear(),
         }
@@ -119,5 +144,55 @@ impl<T: Copy> Reducible for Tray<T> {
         let mut new = (*self).clone();
         action.apply(&mut new);
         Rc::new(new)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Tray, TrayAction, TrayEntry};
+
+    #[test]
+    fn removing_one_duplicate_preserves_other_identities_and_value_order() {
+        let mut tray = Tray::new(vec![
+            TrayEntry { id: 10, value: 7 },
+            TrayEntry { id: 20, value: 7 },
+            TrayEntry { id: 30, value: 9 },
+        ]);
+
+        TrayAction::RemoveById(10).custom_apply(&mut tray, |_, _| unreachable!());
+
+        let values: &[i32] = tray.values();
+        assert_eq!(values, &[7, 9]);
+        assert_eq!(
+            tray.iter().map(|entry| entry.id).collect::<Vec<_>>(),
+            [20, 30]
+        );
+
+        tray.push(TrayEntry { id: 40, value: 11 });
+        TrayAction::RemoveById(999).custom_apply(&mut tray, |_, _| unreachable!());
+        assert_eq!(tray.values(), &[7, 9, 11]);
+        assert_eq!(
+            tray.iter().map(|entry| entry.id).collect::<Vec<_>>(),
+            [20, 30, 40]
+        );
+    }
+
+    #[test]
+    fn replacement_clear_and_insertion_keep_ids_paired_with_values() {
+        let mut tray = Tray::new(vec![TrayEntry { id: 1, value: 5 }]);
+        let replacement = Tray::new(vec![TrayEntry { id: 2, value: 8 }]);
+        TrayAction::Replace(replacement).custom_apply(&mut tray, |_, _| unreachable!());
+        assert_eq!(tray.values(), &[8]);
+        assert_eq!(tray.iter().next().unwrap().id, 2);
+
+        TrayAction::Clear.custom_apply(&mut tray, |_, _| unreachable!());
+        assert!(tray.values().is_empty());
+        assert_eq!(tray.iter().count(), 0);
+
+        TrayAction::Insert(13).custom_apply(&mut tray, |tray, value| {
+            tray.push(TrayEntry { id: 3, value });
+        });
+        assert_eq!(tray.values(), &[13]);
+        assert_eq!(tray.iter().next().unwrap().id, 3);
     }
 }

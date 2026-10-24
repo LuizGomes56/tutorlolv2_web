@@ -16,6 +16,7 @@ use {
             selector::SelectorButton,
         },
     },
+    std::num::NonZeroU8,
     tutorlolv2::{
         ChampionId, ItemId,
         model::{Dragons, EnemyStats},
@@ -164,7 +165,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     ally={false}
                 />
                 <ExceptionSelector<ItemId>
-                    values={enemy.items.values::<Box<_>>()}
+                    values={Box::from(enemy.items.values())}
                     exceptions={enemy.item_exceptions.clone()}
                     callback={item_exception_callback}
                     filter={ItemId::exceptions(false)}
@@ -190,14 +191,14 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     image_type={ImageType::Level}
                     name={"Level"}
                     disabled={false}
-                    value={enemy.level as f32}
+                    value={enemy.level.get() as f32}
                     placeholder={1}
                     oninput={{
                         let callback = level_callback.clone();
 
                         Callback::from(move |e: InputEvent| {
                             let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                            let number = value.parse().unwrap_or(1).max(1);
+                            let number = value.parse::<NonZeroU8>().unwrap_or(NonZeroU8::MIN);
 
                             callback.emit(number);
                         })

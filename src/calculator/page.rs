@@ -1,6 +1,5 @@
-use implicit_clone::ImplicitClone;
-
 use crate::hover::{Builtin, DocView, Docs};
+use implicit_clone::ImplicitClone;
 use {
     crate::{
         calculator::{
@@ -18,13 +17,10 @@ use {
         },
         utils::ClassCast,
     },
-    std::{cell::RefCell, num::NonZeroU8, rc::Rc},
+    std::{cell::RefCell, rc::Rc},
     tutorlolv2::{
         L_MSTR, L_TWRD,
-        model::{
-            Dragons, EnemyStats, InputActivePlayer, InputGame, InputMinData, OutputEnemy,
-            OwnedInputMinData,
-        },
+        model::{Dragons, EnemyStats, InputActivePlayer, InputGame, InputMinData, OutputEnemy},
     },
     yew::{platform::spawn_local, prelude::*},
 };
@@ -98,45 +94,29 @@ fn game_fetch(
 ) -> Game {
     let output = tutorlolv2::calculator::calculator(InputGame {
         active_player: InputActivePlayer {
-            runes: &player.runes.values::<Box<_>>(),
-            rune_exceptions: &player.rune_exceptions.values().copied().collect::<Box<_>>(),
+            runes: player.runes.values(),
+            rune_exceptions: player.rune_exceptions.values(),
             abilities: player.abilities,
             data: InputMinData {
                 stats: (!player.data.infer_stats).then_some(player.data.stats),
-                items: &player.data.items.values::<Box<_>>(),
-                item_exceptions: &player
-                    .data
-                    .item_exceptions
-                    .values()
-                    .copied()
-                    .collect::<Box<_>>(),
+                items: player.data.items.values(),
+                item_exceptions: player.data.item_exceptions.values(),
                 stacks: player.data.stacks,
-                level: player.data.level.try_into().unwrap_or(NonZeroU8::MIN),
+                level: player.data.level,
                 champion_id: player.data.champion_id,
                 is_mega_gnar: player.data.is_mega_gnar,
             },
         },
-        enemy_players: &(&enemies
+        enemy_players: &enemies
             .iter()
-            .map(|enemy| OwnedInputMinData {
+            .map(|enemy| InputMinData {
                 stats: (!enemy.infer_stats).then_some(enemy.stats),
-                items: enemy.items.values::<Box<_>>(),
-                item_exceptions: enemy.item_exceptions.values().copied().collect::<Box<_>>(),
+                items: enemy.items.values(),
+                item_exceptions: enemy.item_exceptions.values(),
                 stacks: enemy.stacks,
-                level: enemy.level.try_into().unwrap_or(NonZeroU8::MIN),
+                level: enemy.level,
                 champion_id: enemy.champion_id,
                 is_mega_gnar: enemy.is_mega_gnar,
-            })
-            .collect::<Box<_>>())
-            .into_iter()
-            .map(|v| InputMinData {
-                stats: v.stats,
-                items: &v.items,
-                item_exceptions: &v.item_exceptions,
-                stacks: v.stacks,
-                level: v.level,
-                champion_id: v.champion_id,
-                is_mega_gnar: v.is_mega_gnar,
             })
             .collect::<Box<_>>(),
         dragons: **dragons,

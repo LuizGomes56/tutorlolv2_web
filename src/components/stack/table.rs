@@ -4,7 +4,7 @@ use crate::components::{
     tables::body::Victim,
 };
 use crate::hover::Docs;
-use std::rc::Rc;
+use std::{num::NonZeroU8, rc::Rc};
 use tutorlolv2::ignite;
 use yew::prelude::*;
 
@@ -12,7 +12,7 @@ use yew::prelude::*;
 pub struct StackTableProps<T: Victim + PartialEq + 'static> {
     pub enemies: Rc<[T]>,
     pub stack: Stack,
-    pub level: u8,
+    pub level: NonZeroU8,
 
     #[prop_or_default]
     pub callback: Option<Callback<usize>>,

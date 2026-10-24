@@ -68,8 +68,7 @@ impl Stack {
                         ComboElement::Attack => Some(TrayEntry::new(StackValue::BasicAttack)),
                     })
                     .chain(chain_meta(items_meta, StackValue::Item))
-                    .chain(chain_meta(runes_meta, StackValue::Rune))
-                    .collect(),
+                    .chain(chain_meta(runes_meta, StackValue::Rune)),
             ),
         }
     }
@@ -90,18 +89,15 @@ impl Stack {
             .map(|m| m.kind.index())
             .collect::<BitSet>();
 
-        let mut values = Tray::new(Vec::with_capacity(self.len()));
-
-        for entry in self.iter() {
-            if match entry.value {
+        let values = self
+            .iter()
+            .filter(|entry| match entry.value {
                 StackValue::Item(_, item_id) => items_allowed.contains_const(item_id.index() as _),
                 StackValue::Rune(_, rune_id) => runes_allowed.contains_const(rune_id.index() as _),
                 StackValue::Ability { .. } => champion_id == self.champion_id,
                 _ => true,
-            } {
-                values.push(*entry);
-            }
-        }
+            })
+            .collect();
 
         Self {
             champion_id,

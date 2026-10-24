@@ -94,7 +94,7 @@ where
 {
     let remover = values
         .iter()
-        .map(|&entry| {
+        .map(|entry| {
             let TrayEntry { id, value } = entry;
 
             let onclick = {

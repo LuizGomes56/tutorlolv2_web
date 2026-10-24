@@ -1,3 +1,5 @@
+use std::num::NonZeroU8;
+
 use crate::{
     calculator::{
         components::inputs::{
@@ -161,13 +163,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     ally={true}
                 />
                 <ExceptionSelector<ItemId>
-                    values={player.data.items.values::<Box<_>>()}
+                    values={Box::from(player.data.items.values())}
                     exceptions={player.data.item_exceptions.clone()}
                     callback={item_exception_callback}
                     filter={ItemId::exceptions(true)}
                 />
                 <ExceptionSelector<RuneId>
-                    values={player.runes.values::<Box<_>>()}
+                    values={Box::from(player.runes.values())}
                     exceptions={player.rune_exceptions.clone()}
                     callback={rune_exception_callback}
                     filter={RuneId::exceptions()}
@@ -193,14 +195,14 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     image_type={ImageType::Level}
                     name={"Level"}
                     disabled={false}
-                    value={data.level as f32}
+                    value={data.level.get() as f32}
                     placeholder={1}
                     oninput={{
                         let callback = level_cb.clone();
 
                         Callback::from(move |e: InputEvent| {
                             let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                            let number = value.parse().unwrap_or(1).max(1);
+                            let number = value.parse::<NonZeroU8>().unwrap_or(NonZeroU8::MIN);
 
                             callback.emit(number);
                         })

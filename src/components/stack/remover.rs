@@ -1,7 +1,7 @@
 use crate::{
     components::{
         image::{Image, ImageType},
-        stack::{Stack, StackValue, Tray, TrayAction, TrayEntry},
+        stack::{Stack, StackValue, Tray, TrayAction},
     },
     utils::Print,
 };
@@ -50,12 +50,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                 && let Ok(de) = serde_json::from_str::<StackStore>(&value)
                 && let Some(stored) = de.get(&champion_id)
             {
-                let values = Tray::new(
-                    stored
-                        .iter()
-                        .map(|&v| TrayEntry::new(v))
-                        .collect::<Vec<_>>(),
-                );
+                let values = stored.iter().collect::<Tray<_>>();
 
                 return stack.dispatch(TrayAction::Replace(Stack {
                     champion_id,
@@ -80,7 +75,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                     && let Ok(local) = window.local_storage()
                     && let Some(storage) = local
                 {
-                    let entries = stack.iter().map(|entry| entry.value).collect::<Vec<_>>();
+                    let entries = stack.values();
 
                     let mut root: HashMap<ChampionId, Value> = storage
                         .get_item("stack")

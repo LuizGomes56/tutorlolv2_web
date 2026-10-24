@@ -2,3 +2,4 @@
 *.lock
 *.ttf
 /dist
+/docs

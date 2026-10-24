@@ -3,9 +3,8 @@ use crate::{
     calculator::ExceptionMap,
     components::image::{Image, ImageType},
 };
-use std::hash::Hash;
 use tutorlolv2::{
-    CastId, ChampionId,
+    CastId, ChampionId, ValueId,
     bitset::{BitSet, BitSetExc},
 };
 use web_sys::HtmlInputElement;
@@ -66,7 +65,7 @@ where
 }
 
 #[derive(PartialEq, Properties)]
-pub struct ExceptionSelectorProps<T: Default + Eq + Hash + 'static> {
+pub struct ExceptionSelectorProps<T: ValueId + PartialEq> {
     pub values: Box<[T]>,
     pub exceptions: ExceptionMap<T>,
     pub callback: Callback<(T, u32)>,
@@ -76,7 +75,7 @@ pub struct ExceptionSelectorProps<T: Default + Eq + Hash + 'static> {
 #[component]
 pub fn ExceptionSelector<T>(props: &ExceptionSelectorProps<T>) -> Html
 where
-    T: CastId + Default + Eq + Hash,
+    T: ValueId + PartialEq,
     ImageType: From<T>,
 {
     let ExceptionSelectorProps {
@@ -94,7 +93,6 @@ where
             let index = value.index() as _;
 
             exceptions
-                .inner
                 .get(&value)
                 .filter(|_| !(filter.contains_const(index) && seen.contains_const(index)))
                 .map(|v| {

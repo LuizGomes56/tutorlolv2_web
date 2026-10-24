@@ -1,37 +1,19 @@
 use {
     crate::utils::{EnumCast, tray::Tray},
-    derive_more::Deref,
-    std::{collections::HashMap, hash::Hash, rc::Rc},
+    std::{num::NonZeroU8, rc::Rc},
     tutorlolv2::{
-        ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata, ValueId,
-        model::{
-            AbilityLevels, Damages, OutputCurrentPlayer, OutputEnemy, PlayerStats, ValueException,
-        },
+        ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata,
+        model::{AbilityLevels, Damages, OutputCurrentPlayer, OutputEnemy, PlayerStats},
     },
 };
 
 mod components;
+mod exceptions;
 mod page;
 mod reducer;
 
+pub use exceptions::ExceptionMap;
 pub use page::Calculator;
-
-#[derive(Clone, Debug, Deref, Default, PartialEq)]
-#[repr(transparent)]
-pub struct ExceptionMap<T: Default + Eq + Hash> {
-    pub inner: HashMap<T, ValueException>,
-}
-
-impl<T: Default + Eq + Hash + ValueId> ExceptionMap<T> {
-    pub fn push_item(&mut self, v: T, ally: bool, mut f: impl FnMut(T)) {
-        if T::exceptions(ally).contains_const(v.index() as _) {
-            let value = v.pack_exc(0);
-            self.inner.insert(v, value);
-        }
-
-        f(v);
-    }
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Player {
@@ -77,7 +59,7 @@ pub struct PlayerData<T> {
     pub items: Tray<ItemId>,
     pub item_exceptions: ExceptionMap<ItemId>,
     pub stacks: u32,
-    pub level: u8,
+    pub level: NonZeroU8,
     pub champion_id: ChampionId,
     pub is_mega_gnar: bool,
     pub infer_stats: bool,
@@ -89,9 +71,7 @@ impl<T: Default> Default for PlayerData<T> {
         let recommended_items = champion_id.recommended_items(champion_id.main_position());
         let mut items = Vec::with_capacity(recommended_items.len());
 
-        let mut item_exceptions = ExceptionMap {
-            inner: HashMap::with_capacity(recommended_items.len()),
-        };
+        let mut item_exceptions = ExceptionMap::default();
 
         for &item in recommended_items {
             item_exceptions.push_item(item, true, |item| items.push(item));
@@ -102,7 +82,7 @@ impl<T: Default> Default for PlayerData<T> {
             items: items.into_iter().collect(),
             item_exceptions,
             stacks: 0,
-            level: 18,
+            level: const { NonZeroU8::new(18).unwrap() },
             is_mega_gnar: false,
             champion_id,
             infer_stats: true,
