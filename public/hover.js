@@ -11,6 +11,8 @@ function init_hover() {
         return;
     }
 
+    const tooltipRoot = tip.parentNode;
+
     const baseTipClasses = new Set(tip.className.split(/\s+/).filter(Boolean));
     const extraClasses = new Set();
 
@@ -70,6 +72,11 @@ function init_hover() {
     function showOn(host) {
         if (!(host instanceof Element)) return;
 
+        // Native dialogs sit in the top layer. Keep docs in the same modal so
+        // they remain visible and interactive instead of behind its backdrop.
+        const tooltipParent = host.closest("dialog[open]") || tooltipRoot;
+        if (tip.parentNode !== tooltipParent) tooltipParent.appendChild(tip);
+
         applyExtraClasses(host);
         setTooltipContent(host);
         if (!code.hasChildNodes()) {
@@ -93,6 +100,7 @@ function init_hover() {
         code.innerHTML = "";
         clearExtraClasses();
         currentHost = null;
+        if (tip.parentNode !== tooltipRoot) tooltipRoot.appendChild(tip);
     }
 
     function isInsideSafe(node) {
@@ -172,6 +180,7 @@ function init_hover() {
 
     window.addEventListener("scroll", reposition, true);
     window.addEventListener("resize", reposition, true);
+    document.addEventListener("close", hideTooltip, true);
 
     const mo = new MutationObserver((mutations) => {
         if (!currentHost) return;

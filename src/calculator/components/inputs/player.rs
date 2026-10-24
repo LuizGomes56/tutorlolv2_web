@@ -1,3 +1,4 @@
+use crate::utils::tray::TrayAction;
 use crate::{
     calculator::{
         components::inputs::{
@@ -6,15 +7,14 @@ use crate::{
             checkbox::Checkbox,
             dragon::{DragonInput, use_dragons},
             exceptions::{ChampionExceptionSelector, ExceptionSelector},
+            item_selector::{use_item_tray_callback, use_rune_tray_callback},
+            loadout::Loadout,
             stats::{StatCell, Stats},
         },
         page::{PlayerProps, TargetEntity},
         reducer::{DataAction, LastAction, PlayerAction},
     },
-    components::{
-        image::{DragonImage, ImageType},
-        selector::SelectorButton,
-    },
+    components::image::{DragonImage, ImageType},
 };
 use tutorlolv2::{
     ChampionId, ItemId, RuneId,
@@ -79,6 +79,8 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
 
     let player = &player_props.player;
     let data = &player.data;
+    let remove_item = use_item_tray_callback(player_props, TrayAction::RemoveById);
+    let remove_rune = use_rune_tray_callback(player_props, TrayAction::RemoveById);
 
     let stats_cb = use_data_callback(player_props, DataAction::Stats);
     let level_cb = use_data_callback(player_props, DataAction::Level);
@@ -96,7 +98,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
 
     html! {
         <div class={classes!(
-            "flex", "flex-col",
+            "flex", "flex-col", "calculator-input-panel",
             "w-full", "max-w-80", "sm:w-64",
             "box", "m-2", "order-1"
         )}>
@@ -111,28 +113,31 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     champion_id={data.champion_id}
                 />
             </div>
-            <div class={classes!("flex", "flex-col", "gap-2", "my-2", "w-full")}>
-                <SelectorButton
+            <div class="panel-loadouts">
+                <Loadout<ItemId>
                     title={"Items"}
-                    onclick={{
+                    onopen={{
                         let open_item_menu = open_item_menu.clone();
 
                         Callback::from(move |_| {
                             open_item_menu.emit(TargetEntity::Player);
                         })
                     }}
-                    length={player.data.items.len()}
+                    values={player.data.items.clone()}
+                    onremove={remove_item}
                 />
-                <SelectorButton
+                <Loadout<RuneId>
                     title={"Runes"}
-                    onclick={{
+                    onopen={{
                         let open_rune_menu = open_rune_menu.clone();
 
                         Callback::from(move |_| {
                             open_rune_menu.emit(TargetEntity::Player);
                         })
                     }}
-                    length={player.runes.len()}
+                    values={player.runes.clone()}
+                    onremove={remove_rune}
+                    runes={true}
                 />
             </div>
             <div class={classes!(

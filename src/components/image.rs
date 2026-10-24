@@ -53,6 +53,16 @@ pub fn Image(props: &ImageProps) -> Html {
     let ImageProps { class, src } = props;
 
     let header = src.header();
+    // Some historical/custom runes have no artwork in the bundled game assets.
+    let onerror = matches!(src, ImageType::Rune(_)).then(|| {
+        Callback::from(|event: Event| {
+            let image = event.target_unchecked_into::<web_sys::HtmlImageElement>();
+            let fallback = "/svgs/rune-placeholder.svg";
+            if image.get_attribute("src").as_deref() != Some(fallback) {
+                image.set_src(fallback);
+            }
+        })
+    });
     let src = src.url();
 
     match header {
@@ -63,13 +73,13 @@ pub fn Image(props: &ImageProps) -> Html {
 
             html! {
                 <div class={classes}>
-                    <img loading={"lazy"} {src} alt={""} />
+                    <img loading={"lazy"} {src} {onerror} alt={""} />
                     {h}
                 </div>
             }
         }
         None => html! {
-            <img {class} loading={"lazy"} {src} alt={""} />
+            <img {class} loading={"lazy"} {src} {onerror} alt={""} />
         },
     }
 }

@@ -1,3 +1,4 @@
+use crate::utils::tray::TrayAction;
 use {
     crate::{
         calculator::{
@@ -6,15 +7,14 @@ use {
                 checkbox::Checkbox,
                 dragon::DragonInput,
                 exceptions::{ChampionExceptionSelector, ExceptionSelector},
+                item_selector::use_enemy_tray_callback,
+                loadout::Loadout,
                 stats::{StatCell, Stats},
             },
             page::{EnemyProps, TargetEntity},
             reducer::{DataAction, EnemyAction, EnemyDataAction, LastAction},
         },
-        components::{
-            image::{DragonImage, ImageType},
-            selector::SelectorButton,
-        },
+        components::image::{DragonImage, ImageType},
     },
     tutorlolv2::{
         ChampionId, ItemId,
@@ -81,8 +81,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
         dragons,
     } = props;
 
-    let add_enemy = use_enemy_callback(enemy_props, EnemyAction::Insert);
-    let remove_enemy = use_enemy_callback(enemy_props, EnemyAction::Remove);
+    let remove_item = use_enemy_tray_callback(enemy_props, TrayAction::RemoveById);
 
     let level_callback = use_enemy_data_callback(enemy_props, DataAction::Level);
     let stats_callback = use_enemy_data_callback(enemy_props, DataAction::Stats);
@@ -122,7 +121,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
 
     html! {
         <div class={classes!(
-            "flex", "flex-col", "box",
+            "flex", "flex-col", "box", "calculator-input-panel",
             "w-full", "max-w-80", "sm:w-64",
             "m-2", "order-2", "xl:order-3"
         )}>
@@ -130,10 +129,10 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                 callback={champion_callback}
                 champion_id={enemy.champion_id}
             />
-            <div class={classes!("w-full", "my-2")}>
-                <SelectorButton
+            <div class="panel-loadouts">
+                <Loadout<ItemId>
                     title={"Items"}
-                    onclick={{
+                    onopen={{
                         let open_item_menu = open_item_menu.clone();
                         let index = *enemy_props.enemy_index;
 
@@ -141,7 +140,8 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                             open_item_menu.emit(TargetEntity::Enemy(index));
                         })
                     }}
-                    length={enemy.items.len()}
+                    values={enemy.items.clone()}
+                    onremove={remove_item}
                 />
             </div>
             <div class={classes!(

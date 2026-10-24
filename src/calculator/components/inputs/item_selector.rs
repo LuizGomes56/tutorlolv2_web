@@ -1,24 +1,21 @@
+use super::item_clicks::ItemClicks;
+use super::selector_dialog::{Search, SelectorDialog};
 use crate::hover::Docs;
 use strum::EnumCount;
 use {
     crate::{
         calculator::{
-            Player, PlayerData,
             page::{EnemyProps, PlayerProps, TargetEntity},
             reducer::{DataAction, EnemyAction, LastAction, PlayerAction},
         },
-        components::image::{Image, ImageType, Svg},
-        utils::{
-            hooks::{on_keydown, use_clickout},
-            tray::{Tray, TrayAction, TrayEntry},
-        },
+        components::image::{Image, ImageType},
+        utils::tray::{Tray, TrayAction, TrayEntry},
     },
     strum::VariantArray,
     tutorlolv2::{
         ChampionId, ItemId, Position, RuneId, StatName, ValueId,
         bitset::{BitSetArray, sizeof_bitset},
     },
-    web_sys::HtmlInputElement,
     yew::prelude::*,
 };
 
@@ -79,9 +76,8 @@ pub fn use_enemy_tray_callback<T: 'static>(
     })
 }
 
-pub fn make_row<T>(
-    entity: &UseStateHandle<TargetEntity>,
-    target_entity: TargetEntity,
+/// One active inventory; target selection belongs to the portrait tabs above it.
+pub fn make_inventory<T>(
     champion_id: ChampionId,
     values: &Tray<T>,
     remove: Callback<u64>,
@@ -92,60 +88,35 @@ where
     ImageType: From<T>,
     Tray<T>: FromIterator<T>,
 {
-    let remover = values
+    let has_recommendations = Position::VARIANTS
         .iter()
-        .map(|&entry| {
-            let TrayEntry { id, value } = entry;
-
-            let onclick = {
-                let remove = remove.clone();
-
-                Callback::from(move |_| remove.emit(id))
-            };
-
-            html! {
-                <button {onclick} key={id} data_docs={Docs::global(value).encode()}>
-                    <Image
-                        class={classes!(
-                            "w-9", "h-9", "border-2",
-                            "border-std-700"
-                        )}
-                        src={ImageType::from(value)}
-                    />
-                </button>
-            }
-        })
-        .collect::<Html>();
-
-    let onclick = {
-        let entity = entity.clone();
-
-        Callback::from(move |_| {
-            entity.set(target_entity);
-        })
-    };
-
+        .any(|&position| !T::recommendations(champion_id, position).is_empty());
     html! {
-        <div class={classes!(
-            "flex", "flex-col", "gap-4", "p-2",
-            if **entity == target_entity { "bg-std-800" } else { "bg-transparent" }
-        )}>
-            <div class={classes!("grid", "grid-cols-6", "gap-2")}>
-                <button {onclick} data_docs={Docs::global(champion_id).encode()}>
-                    <Image
-                        class={classes!("w-7", "h-7")}
-                        src={ImageType::Champion(champion_id)}
-                    />
-                </button>
-                <Recommendations<T>
-                    {champion_id}
-                    callback={recommendations}
-                />
+        <section class="shop-inventory">
+            <div class="inventory-heading"><h3>{"Inventory"}</h3><span role="status">{values.len()}{" selected"}</span></div>
+            <div class="build-slots">
+                {for values.iter().map(|&TrayEntry { id, value }| {
+                    let remove = remove.clone();
+                    html! {
+                        <button key={id} type="button" class="loadout-slot is-equipped"
+                            onclick={Callback::from(move |_| remove.emit(id))}
+                            aria-label={format!("Remove {}", value.name())}
+                            title={format!("{} · Click to remove", value.name())}
+                            data_docs={Docs::global(value).encode()}>
+                            <Image src={ImageType::from(value)} />
+                            <span class="slot-remove" aria-hidden="true">{"×"}</span>
+                        </button>
+                    }
+                })}
+                {for (0..6usize.saturating_sub(values.len())).map(|i| html! {
+                    <span key={i} class="loadout-slot is-empty" aria-hidden="true" />
+                })}
             </div>
-            <div class={classes!("grid", "grid-cols-6", "gap-2")}>
-                {remover}
-            </div>
-        </div>
+            <p class="inventory-help">{"Click an equipped icon to remove it."}</p>
+            if has_recommendations {
+                <div class="build-recommendations"><span>{"Recommended for your role"}</span><Recommendations<T> {champion_id} callback={recommendations} /></div>
+            }
+        </section>
     }
 }
 
@@ -161,34 +132,50 @@ where
     T: ValueId + PartialEq,
     Tray<T>: FromIterator<T>,
 {
-    let RecommendationsProps {
-        champion_id,
-        callback,
-    } = props;
-
-    Position::VARIANTS
-        .iter()
-        .map(|&position| {
-            let onclick = {
-                let callback = callback.clone();
-                let array = T::recommendations(*champion_id, position);
-
-                Callback::from(move |_| callback.emit(array.iter().collect()))
-            };
-
-            html! {
-                <button {onclick}>
-                    <Image
-                        class={classes!("w-7", "h-7")}
-                        src={ImageType::Position(position)}
-                    />
-                </button>
-            }
-        })
-        .collect::<Html>()
+    html! {
+        <div class="recommendation-roles">
+            {for Position::VARIANTS.iter().map(|&position| {
+                let callback = props.callback.clone();
+                let array = T::recommendations(props.champion_id, position);
+                let available = !array.is_empty();
+                let label = format!("Apply recommended {} build for {}", format!("{position:?}").to_lowercase(), props.champion_id.name());
+                html! {
+                    <button type="button" onclick={Callback::from(move |_| callback.emit(array.iter().collect()))}
+                        title={if available {label.clone()} else {format!("No {position:?} recommendations available")}}
+                        aria-label={label} disabled={!available}>
+                        <Image src={ImageType::Position(position)} />
+                    </button>
+                }
+            })}
+        </div>
+    }
 }
 
 type FilterBitSet = BitSetArray<{ sizeof_bitset(StatName::COUNT) }>;
+const FILTER_STATS: [StatName; 22] = [
+    StatName::AttackDamage,
+    StatName::AbilityPower,
+    StatName::AttackSpeed,
+    StatName::AbilityHaste,
+    StatName::CritChance,
+    StatName::CritDamage,
+    StatName::ArmorPenetration,
+    StatName::Lethality,
+    StatName::MagicPenetration,
+    StatName::Health,
+    StatName::Armor,
+    StatName::MagicResist,
+    StatName::Mana,
+    StatName::BaseManaRegen,
+    StatName::BaseHealthRegen,
+    StatName::LifeSteal,
+    StatName::Omnivamp,
+    StatName::MoveSpeed,
+    StatName::HealAndShieldPower,
+    StatName::Tenacity,
+    StatName::GoldPer10Seconds,
+    StatName::AdaptiveForce,
+];
 
 #[derive(PartialEq, Properties)]
 pub struct ItemFilterProps {
@@ -197,95 +184,68 @@ pub struct ItemFilterProps {
 
 #[component]
 pub fn ItemFilter(props: &ItemFilterProps) -> Html {
-    let ItemFilterProps { filters } = props;
-
-    let toggle = use_callback(filters.clone(), move |v: StatName, filters| {
-        let mut new = **filters;
-
-        new.toggle_const(v as _);
-        filters.set(new);
+    let filters = &props.filters;
+    let toggle = use_callback(filters.clone(), move |stat: StatName, filters| {
+        let mut next = **filters;
+        next.toggle_const(stat as _);
+        filters.set(next);
     });
-
     let clear = use_callback(filters.clone(), move |_: MouseEvent, filters| {
         filters.set(FilterBitSet::EMPTY)
     });
-
-    let buttons = [
-        StatName::AdaptiveForce,
-        StatName::AttackDamage,
-        StatName::CritChance,
-        StatName::CritDamage,
-        StatName::AttackSpeed,
-        StatName::ArmorPenetration,
-        StatName::Lethality,
-        StatName::AbilityPower,
-        StatName::Mana,
-        StatName::BaseManaRegen,
-        StatName::MagicPenetration,
-        StatName::Health,
-        StatName::BaseHealthRegen,
-        StatName::HealAndShieldPower,
-        StatName::Armor,
-        StatName::MagicResist,
-        StatName::AbilityHaste,
-        StatName::MoveSpeed,
-        StatName::Tenacity,
-        StatName::Omnivamp,
-        StatName::LifeSteal,
-        StatName::GoldPer10Seconds,
-    ]
-    .into_iter()
-    .map(|stat| {
-        let onclick = {
-            let toggle = toggle.clone();
-
-            Callback::from(move |_| toggle.emit(stat))
-        };
-
-        let contains = filters.contains_const(stat as _);
-
-        html! {
-            <button
-                {onclick}
-                title={stat.name()}
-                class={classes!(
-                    "border-r-3", "py-1.5", "px-4",
-                    match contains {
-                        true => classes!("border-r-cyan-400", "bright"),
-                        false => classes!("border-r-transparent")
-                    },
-                )}
-            >
-                <Image
-                    class={classes!("w-4", "h-4", match contains {
-                        true => "contrast-100",
-                        false => "contrast-0"
-                    })}
-                    src={ImageType::StatsFilter(stat)}
-                />
-            </button>
-        }
-    })
-    .collect::<Html>();
-
-    let clear_button = html! {
-        <button
-            onclick={clear}
-            title={"Clear"}
-            class={classes!("p-1")}
-        >
-            <span class={classes!("w-4", "h-4")}>
-                {"x"}
-            </span>
-        </button>
-    };
-
     html! {
-        <div class={classes!("flex", "flex-col")}>
-            {clear_button}
-            {buttons}
-        </div>
+        <nav class="selector-filters item-stat-rail" aria-label="Filter items by stats">
+            <span class="filter-heading">{"Stats"}</span>
+            <button type="button" class={classes!("stat-filter", "all-stat-filter", filters.is_empty_const().then_some("is-active"))}
+                onclick={clear} aria-label="All items" title="All items" aria-pressed={filters.is_empty_const().to_string()}>
+                <span class="all-filter-icon" aria-hidden="true">{"⊞"}</span><span>{"All"}</span>
+            </button>
+            {for FILTER_STATS.into_iter().map(|stat| {
+                let toggle = toggle.clone(); let active = filters.contains_const(stat as _);
+                html! {
+                    <button type="button" class={classes!("stat-filter", active.then_some("is-active"))}
+                        onclick={Callback::from(move |_| toggle.emit(stat))} aria-label={stat.name()} title={stat.name()} aria-pressed={active.to_string()}>
+                        <Image src={ImageType::StatsFilter(stat)} />
+                    </button>
+                }
+            })}
+        </nav>
     }
+}
+
+fn percent_stat(stat: StatName) -> bool {
+    matches!(
+        stat,
+        StatName::AttackSpeed
+            | StatName::CritChance
+            | StatName::CritDamage
+            | StatName::ArmorPenetration
+            | StatName::MagicPenetrationPercent
+            | StatName::MoveSpeedPercent
+            | StatName::LifeSteal
+            | StatName::Omnivamp
+            | StatName::BaseManaRegen
+            | StatName::BaseHealthRegen
+            | StatName::HealAndShieldPower
+            | StatName::Tenacity
+    )
+}
+
+/// Give long compound names a balanced break without changing their text.
+fn item_name(name: &str) -> Html {
+    name.split(' ')
+        .enumerate()
+        .map(|(i, word)| {
+            let split = (word.chars().count() > 12)
+                .then(|| word.char_indices().nth(word.chars().count() / 2).unwrap().0);
+            html! {<>
+                {if i > 0 { " " } else { "" }}
+                if let Some(at) = split {
+                    {&word[..at]}<wbr />{&word[at..]}
+                } else { {word} }
+            </>}
+        })
+        .collect()
 }
 
 #[derive(PartialEq, Properties)]
@@ -304,160 +264,80 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         entity,
         is_open,
     } = props;
-
     let query = use_state(String::new);
     let filters = use_state_eq(|| FilterBitSet::EMPTY);
-
-    let dropdown_ref = {
-        let is_open = is_open.clone();
-
-        use_clickout(Callback::from(move |_| is_open.set(false)), [])
-    };
-
-    let oninput = {
-        let query = query.clone();
-
-        use_callback((), move |e: InputEvent, _| {
-            let value = e.target_unchecked_into::<HtmlInputElement>().value();
-            query.set(value);
-        })
-    };
-
+    let selected = use_state(|| ItemId::AbyssalMask);
+    let item_clicks = use_mut_ref(ItemClicks::default);
+    let player_remove = use_item_tray_callback(player_props, TrayAction::RemoveById);
+    let player_replace = use_item_tray_callback(player_props, TrayAction::Replace);
+    let target = **entity;
     {
-        let is_open = is_open.clone();
-        use_effect_with((), move |_| on_keydown(27, move || is_open.set(false)));
+        let item_clicks = item_clicks.clone();
+        use_effect_with(
+            (**is_open, target, query.clone(), filters.clone()),
+            move |_| {
+                item_clicks.borrow_mut().reset();
+            },
+        );
     }
-
-    let tray = {
-        let player_tray = {
-            let Player {
-                data:
-                    PlayerData {
-                        ref items,
-                        champion_id,
-                        ..
-                    },
-                ..
-            } = *player_props.player;
-
-            let player_remove = {
-                let player_props = player_props.clone();
-
-                Callback::from(move |id| {
-                    player_props.last_action.replace(LastAction::CurrentPlayer);
-                    player_props
-                        .player
-                        .dispatch(PlayerAction::Data(DataAction::Tray(
-                            TrayAction::RemoveById(id),
-                        )));
-                })
-            };
-
-            let player_replace = {
-                let player_props = player_props.clone();
-
-                Callback::from(move |v: Tray<ItemId>| {
-                    player_props.last_action.replace(LastAction::CurrentPlayer);
-                    player_props
-                        .player
-                        .dispatch(PlayerAction::Data(DataAction::Tray(TrayAction::Replace(v))));
-                })
-            };
-
-            make_row(
-                entity,
-                TargetEntity::Player,
-                champion_id,
-                items,
-                player_remove,
-                player_replace,
-            )
-        };
-
-        let enemy_tray = enemy_props
-            .enemies
-            .iter()
-            .enumerate()
-            .map(|(i, enemy)| {
-                let PlayerData {
-                    ref items,
-                    champion_id,
-                    ..
-                } = *enemy.as_ref();
-
-                let enemy_remove = {
-                    let enemy_props = enemy_props.clone();
-
-                    Callback::from(move |id: u64| {
-                        enemy_props.last_action.replace(LastAction::EnemyPlayer(i));
-                        enemy_props.enemies.dispatch(EnemyAction::Change(
-                            i,
-                            DataAction::Tray(TrayAction::RemoveById(id)),
-                        ));
-                    })
-                };
-
-                let enemy_replace = {
-                    let enemy_props = enemy_props.clone();
-
-                    Callback::from(move |v: Tray<ItemId>| {
-                        enemy_props.last_action.replace(LastAction::EnemyPlayer(i));
-                        enemy_props.enemies.dispatch(EnemyAction::Change(
-                            i,
-                            DataAction::Tray(TrayAction::Replace(v)),
-                        ));
-                    })
-                };
-
-                html! {
-                    <div key={format!("enemy_row_{i}")}>
-                        {make_row(
-                            entity,
-                            TargetEntity::Enemy(i),
-                            champion_id,
-                            items,
-                            enemy_remove,
-                            enemy_replace,
-                        )}
-                    </div>
-                }
+    let (items, champion_id) = match target {
+        TargetEntity::Player => (
+            &player_props.player.data.items,
+            player_props.player.data.champion_id,
+        ),
+        TargetEntity::Enemy(i) => (
+            &enemy_props.enemies[i].items,
+            enemy_props.enemies[i].champion_id,
+        ),
+    };
+    let remove = match target {
+        TargetEntity::Player => player_remove,
+        TargetEntity::Enemy(i) => {
+            let props = enemy_props.clone();
+            Callback::from(move |id| {
+                props.last_action.replace(LastAction::EnemyPlayer(i));
+                props.enemies.dispatch(EnemyAction::Change(
+                    i,
+                    DataAction::Tray(TrayAction::RemoveById(id)),
+                ));
             })
-            .collect::<Html>();
-
-        html! {
-            <div class={classes!("flex", "flex-col", "gap-4", "overflow-auto")}>
-                {player_tray}
-                {enemy_tray}
-            </div>
         }
     };
-
-    let insert = match **entity {
-        TargetEntity::Player => {
-            let player_props = player_props.clone();
-
-            Callback::from(move |item| {
+    let replace = match target {
+        TargetEntity::Player => player_replace,
+        TargetEntity::Enemy(i) => {
+            let props = enemy_props.clone();
+            Callback::from(move |tray| {
+                props.last_action.replace(LastAction::EnemyPlayer(i));
+                props.enemies.dispatch(EnemyAction::Change(
+                    i,
+                    DataAction::Tray(TrayAction::Replace(tray)),
+                ));
+            })
+        }
+    };
+    let insert = {
+        let player_props = player_props.clone();
+        let enemy_props = enemy_props.clone();
+        Callback::from(move |item| match target {
+            TargetEntity::Player => {
                 player_props.last_action.replace(LastAction::CurrentPlayer);
                 player_props
                     .player
                     .dispatch(PlayerAction::Data(DataAction::Tray(TrayAction::Insert(
                         item,
                     ))));
-            })
-        }
-        TargetEntity::Enemy(i) => {
-            let enemy_props = enemy_props.clone();
-
-            Callback::from(move |item| {
+            }
+            TargetEntity::Enemy(i) => {
                 enemy_props.last_action.replace(LastAction::EnemyPlayer(i));
                 enemy_props.enemies.dispatch(EnemyAction::Change(
                     i,
                     DataAction::Tray(TrayAction::Insert(item)),
                 ));
-            })
-        }
+            }
+        })
     };
-
+    let normalized_query = query.trim().to_ascii_lowercase();
     let options = ItemId::VARIANTS
         .iter()
         .copied()
@@ -465,119 +345,141 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
             !item.data().custom
                 && item.data().purchasable
                 && item.has_map(tutorlolv2::GameMap::SummonersRift)
+                && item.name().to_ascii_lowercase().contains(&normalized_query)
+                && (filters.is_empty_const()
+                    || filters.iter_const().all(|v| {
+                        ItemId::filter(StatName::from_repr(v as _).unwrap()).contains(item)
+                    }))
         })
-        .filter(|item| {
-            query.is_empty()
-                || item
-                    .name()
-                    .to_ascii_lowercase()
-                    .contains(query.to_ascii_lowercase().as_str())
+        .collect::<Vec<_>>();
+    let reset = {
+        let query = query.clone();
+        let filters = filters.clone();
+        Callback::from(move |_| {
+            query.set(String::new());
+            filters.set(FilterBitSet::EMPTY);
         })
-        .filter(|item| {
-            filters.is_empty_const()
-                || filters
-                    .iter_const()
-                    .all(|v| ItemId::filter(StatName::from_repr(v as _).unwrap()).contains(item))
+    };
+    let add_selected = {
+        let insert = insert.clone();
+        let item_clicks = item_clicks.clone();
+        let item = *selected;
+        Callback::from(move |_| {
+            item_clicks.borrow_mut().reset();
+            insert.emit(item);
         })
-        .map(|item| {
-            let insert = insert.clone();
-            let onclick = Callback::from(move |_| insert.emit(item));
-
-            html! {
-                <button
-                    {onclick}
-                    data_docs={Docs::global(item).encode()}
-                    class={classes!("flex", "flex-col", "gap-1", "w-fit")}
-                >
-                    <Image
-                        src={ImageType::from(item)}
-                        class={classes!("w-9", "h-9", "border-2", "border-std-700")}
-                    />
-                    <span class={classes!("text-std-500", "font-medium", "text-center")}>
-                        {item.price()}
-                    </span>
-                </button>
+    };
+    let total_cost: u32 = items.iter().map(|e| u32::from(e.value.price())).sum();
+    let player_champion = player_props.player.data.champion_id;
+    let oninteraction = {
+        let item_clicks = item_clicks.clone();
+        Callback::from(move |event: MouseEvent| {
+            let catalog_click = event
+                .target_dyn_into::<web_sys::Element>()
+                .and_then(|element| element.closest(".item-card").ok().flatten())
+                .is_some();
+            if !catalog_click {
+                item_clicks.borrow_mut().reset();
             }
         })
-        .collect::<Html>();
-
+    };
     html! {
-        <div class={classes!(
-            if **is_open { "flex" } else { "hidden" },
-            "fixed", "inset-0", "z-50",
-            "items-center", "justify-center",
-            "bg-black/70",
-        )}>
-            <div
-                ref={dropdown_ref}
-                class={classes!(
-                    "grid", "grid-cols-[1fr_auto]",
-                    "bg-std-950", "w-full", "max-w-7xl",
-                    "h-[80vh]", "overflow-hidden"
-                )}
-            >
-                <div class={classes!(
-                    "flex", "flex-col", "gap-4",
-                    "w-full", "p-4",
-                    "h-full", "min-h-0"
-                )}>
-                    <Search {oninput} />
-                    <div class={classes!(
-                        "grid", "grid-cols-[auto_1fr]",
-                        "gap-4", "flex-1", "min-h-0"
-                    )}>
-                        <ItemFilter {filters} />
-                        <div class={classes!(
-                            "flex", "flex-wrap", "gap-4",
-                            "content-start",
-                            "min-h-0", "h-full",
-                            "overflow-y-auto"
-                        )}>
-                            {options}
+        <SelectorDialog title="Item shop" kind="items" is_open={is_open.clone()} {oninteraction}>
+            <div class="selector-workspace">
+                <ItemFilter filters={filters.clone()} />
+                <main class="selector-catalog">
+                    <div class="catalog-toolbar"><h3>{"All items"}<span class="catalog-count" role="status">{options.len()}</span></h3><Search query={query.clone()} placeholder="Search items…" /></div>
+                    <div class="catalog-heading">
+                        <div class="active-filter-list">
+                            if filters.is_empty_const() { <span class="catalog-hint">{"Select an item to view its stats"}</span> }
+                            {for FILTER_STATS.into_iter().filter(|&s| filters.contains_const(s as _)).map(|stat| html! {<span class="active-stat-name">{stat.name()}</span>})}
                         </div>
+                        if !filters.is_empty_const() || !query.is_empty() { <button type="button" class="text-action" onclick={reset.clone()}>{"Reset filters"}</button> }
                     </div>
-                </div>
-                {tray}
+                    <div class="catalog-scroll">
+                        if options.is_empty() {
+                            <div class="catalog-empty"><h3>{"No items found"}</h3><p>{"Try another name or fewer stat filters."}</p><button type="button" class="empty-reset" onclick={reset}>{"Clear search & filters"}</button></div>
+                        } else {
+                            <div class="item-catalog-grid">
+                                {for options.into_iter().map(|item| {
+                                    let selected = selected.clone();
+                                    let active = *selected == item;
+                                    let count = items.iter().filter(|e| e.value == item).count();
+                                    let onclick = {
+                                        let insert = insert.clone(); let item_clicks = item_clicks.clone();
+                                        Callback::from(move |event: MouseEvent| {
+                                            selected.set(item);
+                                            if event.detail() == 0 {
+                                                item_clicks.borrow_mut().reset();
+                                            } else if item_clicks.borrow_mut().click(item, target, event.time_stamp()) {
+                                                insert.emit(item);
+                                            }
+                                        })
+                                    };
+                                    let ondblclick = {
+                                        let insert = insert.clone(); let item_clicks = item_clicks.clone();
+                                        Callback::from(move |event: MouseEvent| {
+                                            if item_clicks.borrow_mut().native_double_click(item, target, event.time_stamp()) {
+                                                insert.emit(item);
+                                            }
+                                        })
+                                    };
+                                    html! {
+                                        <button type="button" key={item as u16} class={classes!("item-card", active.then_some("is-selected"), (count > 0).then_some("is-equipped"))}
+                                            {onclick} {ondblclick}
+                                            aria-label={item.name()} aria-pressed={active.to_string()} title={format!("{} · Double-click to add", item.name())}
+                                            data_docs={Docs::global(item).encode()}>
+                                            <span class="catalog-art"><Image src={ImageType::from(item)} />
+                                                if count > 0 { <span class="equipped-badge" aria-label={format!("{count} equipped")}>{count}</span> }
+                                            </span>
+                                            <span class="item-card-name">{item_name(item.name())}</span>
+                                            <span class="item-price"><Image class={classes!("gold-coin")} src={ImageType::StatsFilter(StatName::GoldPer10Seconds)} />{item.price()}</span>
+                                        </button>
+                                    }
+                                })}
+                            </div>
+                        }
+                    </div>
+                    <p class="catalog-shortcut">{"Double-click an item to add it to your inventory."}</p>
+                </main>
+                <aside class="selector-builds" aria-label="Champion inventory and item details">
+                    <nav class="champion-tabs" aria-label="Choose champion inventory">
+                        <button type="button" class={classes!("champion-tab", "champion-player", (target == TargetEntity::Player).then_some("is-active"))}
+                            onclick={{let entity = entity.clone(); Callback::from(move |_| entity.set(TargetEntity::Player))}}
+                            aria-pressed={(target == TargetEntity::Player).to_string()} aria-label={format!("Edit You: {}", player_champion.name())}>
+                            <Image src={ImageType::Champion(player_champion)} /><span><small>{"Your champion"}</small><strong>{player_champion.name()}</strong></span>
+                            if target == TargetEntity::Player { <span class="target-active-mark" aria-hidden="true">{"✓"}</span> }
+                        </button>
+                        <div class="enemy-target-group"><span class="target-group-label">{"Enemies"}</span><div class="enemy-tabs">
+                            {for enemy_props.enemies.iter().enumerate().map(|(i, enemy)| {
+                                let entity = entity.clone(); let champion = enemy.champion_id; let enemy_target = TargetEntity::Enemy(i);
+                                html! {
+                                    <button type="button" class={classes!("champion-tab", "champion-enemy", (target == enemy_target).then_some("is-active"))}
+                                        onclick={Callback::from(move |_| entity.set(enemy_target))} aria-pressed={(target == enemy_target).to_string()}
+                                        aria-label={format!("Edit Enemy {}: {}", i + 1, champion.name())} title={champion.name()}>
+                                        <Image src={ImageType::Champion(champion)} /><span>{i + 1}</span>
+                                    </button>
+                                }
+                            })}
+                        </div></div>
+                    </nav>
+                    <div class="shop-detail-scroll">
+                        <section class="selected-item" aria-label="Selected item">
+                            <div class="selected-item-heading" data_docs={Docs::global(*selected).encode()}>
+                                <Image src={ImageType::from(*selected)} /><div><h3>{selected.name()}</h3><span class="item-price"><Image class={classes!("gold-coin")} src={ImageType::StatsFilter(StatName::GoldPer10Seconds)} />{selected.price()}</span></div>
+                            </div>
+                            <dl class="selected-item-stats">
+                                {for selected.stats().iter().map(|&(stat, value)| html! {
+                                    <div><dt><Image src={ImageType::StatsFilter(stat)} />{stat.name()}</dt><dd>{format!("+{value}{}", if percent_stat(stat) { "%" } else { "" })}</dd></div>
+                                })}
+                            </dl>
+                            <button type="button" class="shop-add-item" onclick={add_selected}>{"Add item"}<span aria-hidden="true">{"+"}</span></button>
+                        </section>
+                        <div class="shop-active-champion"><Image src={ImageType::Champion(champion_id)} /><span><small>{if target == TargetEntity::Player { "Your build" } else { "Enemy build" }}</small><strong>{champion_id.name()}</strong></span><span class="build-cost"><Image class={classes!("gold-coin")} src={ImageType::StatsFilter(StatName::GoldPer10Seconds)} />{total_cost}</span></div>
+                        {make_inventory(champion_id, items, remove, replace)}
+                    </div>
+                </aside>
             </div>
-        </div>
-    }
-}
-
-#[derive(PartialEq, Properties)]
-pub struct SearchProps {
-    pub oninput: Callback<InputEvent>,
-}
-
-#[component]
-pub fn Search(props: &SearchProps) -> Html {
-    let SearchProps { oninput } = props;
-    html! {
-        <div
-            class={classes!(
-                "group",
-                "flex", "items-center", "gap-2",
-                "border", "border-transparent",
-                "focus-within:border-std-800",
-                "px-4"
-            )}
-        >
-            <Svg
-                class={classes!(
-                    "w-4", "h-4", "shrink-0",
-                    "text-std-300",
-                    "group-focus-within:text-white"
-                )}
-                src={"/svgs/search.svg"}
-            />
-            <input
-                class={classes!(
-                    "placeholder:text-std-500",
-                    "bg-transparent",
-                    "text-sm", "p-3", "outline-hidden"
-                )}
-                placeholder={"Click Here to Search"}
-                {oninput}
-            />
-        </div>
+        </SelectorDialog>
     }
 }

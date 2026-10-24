@@ -149,3 +149,44 @@ img {
             rgba(90, 255, 255, 0.15) 90%,
             rgba(90, 255, 255, 1));
 }
+
+/* Shared calculator inventories and editors. Keep page/table geometry independent. */
+:root {
+    --loadout-bg: #121212;
+    --loadout-surface: #18181b;
+    --loadout-raised: #202027;
+    --loadout-border: #35353f;
+    --loadout-accent: #67d9ed;
+    --loadout-gold: #d7b775;
+    --loadout-text: #f4f4f5;
+    --loadout-muted: #a1a1aa;
+    --loadout-font: ui-sans-serif, system-ui, sans-serif;
+    --loadout-mono: ui-monospace, monospace;
+}
+
+.loadout, .selector-dialog { color: var(--loadout-text); font-family: var(--loadout-font); }
+.loadout button, .selector-dialog button { cursor: pointer; }
+.loadout button:disabled, .selector-dialog button:disabled { cursor: default; opacity: .3; }
+.loadout button:focus-visible, .selector-dialog button:focus-visible { outline: 2px solid var(--loadout-accent); outline-offset: 3px; z-index: 1; }
+.panel-loadouts { padding: 4px 12px 8px; }
+.calculator-input-panel > :first-child { flex-shrink: 0; height: 144px; min-height: 144px; }
+.calculator-input-panel > :first-child > .clip { height: 144px; }
+.loadout { padding: 10px 0 12px; border-bottom: 1px solid var(--loadout-border); }
+.loadout-heading { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; font-size: 12px; font-weight: 600; }
+.loadout-heading > span:first-child { display: flex; align-items: center; gap: 8px; }
+.loadout-count { color: var(--loadout-muted); font: 11px var(--loadout-mono); }
+.loadout-edit { display: flex; align-items: center; gap: 4px; color: var(--loadout-muted); font-size: 11px; font-weight: 400; }
+.loadout-edit > span { width: 12px; height: 12px; }
+.loadout-heading:hover .loadout-edit { color: var(--loadout-accent); }
+.loadout-slots, .build-slots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.loadout-slot { display: grid; position: relative; place-items: center; aspect-ratio: 1; min-width: 0; border: 1px solid var(--loadout-border); border-radius: 4px; background: var(--loadout-bg); transition: border-color .15s, background-color .15s; }
+.loadout-slot > img { width: 100%; height: 100%; object-fit: cover; border-radius: 3px; }
+.loadout-slot.is-empty { color: #74747f; border-style: dashed; font: 18px var(--loadout-font); }
+button.loadout-slot:hover { border-color: var(--loadout-accent); background: #67d9ed0d; }
+.slot-remove { position: absolute; inset: 0; display: grid; place-content: center; background: #121212b8; color: white; opacity: 0; font: 22px var(--loadout-font); transition: opacity .15s; border-radius: 3px; }
+.loadout-slot:hover .slot-remove, .loadout-slot:focus-visible .slot-remove { opacity: 1; }
+.loadout-add { grid-column: 1 / -1; justify-self: end; padding: 2px 0; color: var(--loadout-muted); font-size: 10px; }
+.loadout-add:hover { color: var(--loadout-accent); }
+.loadout-runes .loadout-slot { border-radius: 50%; }
+.loadout-runes .loadout-slot > img { object-fit: contain; padding: 3px; }
+.loadout-runes .slot-remove { border-radius: 50%; }
