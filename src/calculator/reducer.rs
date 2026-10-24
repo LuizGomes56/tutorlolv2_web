@@ -5,10 +5,11 @@ use crate::{
         tray::{Tray, TrayAction, TrayEntry},
     },
 };
+use derive_more::{Deref, DerefMut};
 use std::rc::Rc;
 use tutorlolv2::{
-    ChampionId, ItemId, RuneId,
-    model::{EnemyStats, PlayerStats, ValueException},
+    ChampionId, ItemId, RuneId, ValueId,
+    model::{EnemyStats, PlayerStats},
     yew::{ReduceApply, ability_levels::AbilityLevelsAction},
 };
 use yew::Reducible;
@@ -41,7 +42,7 @@ pub enum EnemyAction {
     Change(usize, EnemyDataAction),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Deref, DerefMut)]
 #[repr(transparent)]
 pub struct Enemies(Vec<Rc<PlayerData<EnemyStats>>>);
 
@@ -52,22 +53,10 @@ impl Enemies {
 impl Default for Enemies {
     fn default() -> Self {
         let mut vector = Vec::with_capacity(Self::MAX_ENEMIES);
+
         (0..3).for_each(|_| vector.push(Default::default()));
+
         Self(vector)
-    }
-}
-
-impl core::ops::Deref for Enemies {
-    type Target = Vec<Rc<PlayerData<EnemyStats>>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl core::ops::DerefMut for Enemies {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 
@@ -86,8 +75,9 @@ impl<T: ReduceApply> PlayerData<T> {
                     .push_item(v, ally, |v| c.push(TrayEntry::new(v)))
             }),
             DataAction::ModifyItemExc((item_id, stacks)) => {
-                let value = ValueException::pack_item_id(item_id, stacks);
-                self.item_exceptions.inner.insert(item_id, value);
+                self.item_exceptions
+                    .inner
+                    .insert(item_id, item_id.pack_exc(stacks));
             }
         }
     }
@@ -98,12 +88,14 @@ impl Reducible for Player {
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
+
         match action {
             Self::Action::Tray(v) => v.apply(&mut new.runes),
             Self::Action::AbilityLevels(v) => new.abilities.apply(v),
             Self::Action::ModifyRuneExc((rune_id, stacks)) => {
-                let value = ValueException::pack_rune_id(rune_id, stacks);
-                new.rune_exceptions.inner.insert(rune_id, value);
+                new.rune_exceptions
+                    .inner
+                    .insert(rune_id, rune_id.pack_exc(stacks));
             }
             Self::Action::Data(v) => {
                 let mut data = new.data;
@@ -111,6 +103,7 @@ impl Reducible for Player {
                 new.data = data;
             }
         }
+
         Rc::new(new)
     }
 }
@@ -130,6 +123,7 @@ impl Reducible for Enemies {
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
+
         match action {
             EnemyAction::Insert(champion_id) => match new.len() < Self::MAX_ENEMIES {
                 true => {

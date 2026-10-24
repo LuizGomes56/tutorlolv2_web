@@ -18,8 +18,6 @@ where
     let value = use_state(T::random);
     let callback = use_setter(&value);
 
-    let functions = value.render_fn().unwrap();
-
     html! {
         <div class={classes!("flex", "flex-col", "gap-6", "p-6", "box")}>
             <H2 text={match value.entity() {
@@ -39,7 +37,7 @@ where
             />
             <H2 text={"Source code definition"} />
             <Code fragment={value.render_global().unwrap()} />
-            <Code fragment={functions} />
+            <Code fragment={value.render_fn().unwrap()} />
             if let Some(fragment) = value.render_generator() {
                 <H2 text={"Implementation"} />
                 <Code {fragment} />

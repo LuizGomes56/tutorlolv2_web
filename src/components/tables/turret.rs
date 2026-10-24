@@ -11,28 +11,25 @@ pub struct TurretTableProps {
 #[component]
 pub fn TurretTable(props: &TurretTableProps) -> Html {
     let header = use_memo((), |_| {
-        let head = |i| {
-            html! {
-                <th data_docs={Docs::Builtin(Builtin::Tower, DocView::Global).encode()}>
-                    <div class={classes!(
-                        "relative", "w-fit", "flex",
-                        "items-center", "justify-center",
-                        "place-self-center"
-                    )}>
-                        <Image src={ImageType::Tower} />
-                        <span class={classes!(
-                            "text-sm", "img-letter"
-                        )}>
-                            {i}
-                        </span>
-                    </div>
-                </th>
-            }
-        };
         html! {
             <thead>
                 <tr>
-                    {(0..L_TWRD).into_iter().map(head).collect::<Html>()}
+                    for i in 0..L_TWRD {
+                        <th data_docs={Docs::Builtin(Builtin::Tower, DocView::Global).encode()}>
+                            <div class={classes!(
+                                "relative", "w-fit", "flex",
+                                "items-center", "justify-center",
+                                "place-self-center"
+                            )}>
+                                <Image src={ImageType::Tower} />
+                                <span class={classes!(
+                                    "text-sm", "img-letter"
+                                )}>
+                                    {i}
+                                </span>
+                            </div>
+                        </th>
+                    }
                 </tr>
             </thead>
         }

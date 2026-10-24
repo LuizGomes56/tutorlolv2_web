@@ -1,7 +1,3 @@
-use std::rc::Rc;
-use tutorlolv2::{ChampionId, ItemId, RuneId, TypeMetadata};
-use yew::prelude::*;
-
 use crate::{
     components::{
         image::{Image, ImageType},
@@ -9,30 +5,37 @@ use crate::{
     },
     model::AbilityKind,
 };
+use std::rc::Rc;
+use tutorlolv2::{ChampionId, ItemId, RuneId, TypeMetadata};
+use yew::prelude::*;
 
 fn section(title: &str, iterator: impl ExactSizeIterator<Item = Html>) -> Option<Html> {
-    (iterator.len() > 0).then_some(html! {
-        <div class={classes!(
-            "flex", "flex-col", "gap-2",
-            "pt-4", "border-t", "border-std-800/70",
-            "first:pt-0", "first:border-t-0"
-        )}>
-            <div class={classes!("flex", "items-baseline", "justify-between")}>
-                <h2 class={classes!(
-                    "text-xs", "uppercase", "tracking-wider",
-                    "text-std-400", "font-semibold"
-                )}>
-                    {title}
-                </h2>
-            </div>
+    if iterator.len() > 0 {
+        Some(html! {
             <div class={classes!(
-                "flex", "flex-wrap", "w-fit",
-                "gap-2", "items-start",
+                "flex", "flex-col", "gap-2",
+                "pt-4", "border-t", "border-std-800/70",
+                "first:pt-0", "first:border-t-0"
             )}>
-                {iterator.collect::<Html>()}
+                <div class={classes!("flex", "items-baseline", "justify-between")}>
+                    <h2 class={classes!(
+                        "text-xs", "uppercase", "tracking-wider",
+                        "text-std-400", "font-semibold"
+                    )}>
+                        {title}
+                    </h2>
+                </div>
+                <div class={classes!(
+                    "flex", "flex-wrap", "w-fit",
+                    "gap-2", "items-start",
+                )}>
+                    {for iterator}
+                </div>
             </div>
-        </div>
-    })
+        })
+    } else {
+        None
+    }
 }
 
 #[derive(PartialEq, Properties)]
@@ -89,6 +92,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         .map(|(src, v, max)| {
             let onclick = {
                 let callback = callback.clone();
+
                 Callback::from(move |_| callback.emit(v))
             };
 
@@ -108,6 +112,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
 
                 let onclick = {
                     let callback = callback.clone();
+
                     Callback::from(move |_| {
                         callback.emit(StackValue::Ability { slot, ability_id });
                     })
@@ -127,7 +132,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         (callback.clone(), items_meta.clone()),
         |(callback, items_meta)| {
             section("Items", {
-                let cursor = std::cell::Cell::new(0usize);
+                let cursor = core::cell::Cell::new(0usize);
 
                 items_meta.iter().map({
                     let callback = callback.clone();
@@ -141,6 +146,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
 
                         let onclick = |j: usize| {
                             let callback = callback.clone();
+
                             Callback::from(move |_| callback.emit(StackValue::Item(j, item_id)))
                         };
 
@@ -168,6 +174,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
 
                     let onclick = {
                         let callback = callback.clone();
+
                         Callback::from(move |_| callback.emit(StackValue::Rune(i, id)))
                     };
 

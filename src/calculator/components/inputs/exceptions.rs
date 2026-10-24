@@ -39,7 +39,10 @@ where
 
     html! {
         <>
-            <div data_docs={value.map(|v| Docs::global(v).encode())} class={classes!("flex", "items-center", "justify-center", "relative")}>
+            <div
+                data_docs={value.map(|v| Docs::global(v).encode())}
+                class={classes!("flex", "items-center", "justify-center", "relative")}
+            >
                 <Image
                     class={classes!("h-6", "w-6")}
                     src={image_type}
@@ -96,11 +99,14 @@ where
                 .filter(|_| !(filter.contains_const(index) && seen.contains_const(index)))
                 .map(|v| {
                     seen.insert_const(index);
+
                     let oninput = {
                         let callback = callback.clone();
+
                         Callback::from(move |e: InputEvent| {
                             let target = e.target_unchecked_into::<HtmlInputElement>();
                             let stacks = target.value().parse::<u32>().unwrap_or(0);
+
                             callback.emit((value, stacks));
                         })
                     };
@@ -123,6 +129,7 @@ pub struct ChampionExceptionSelectorProps {
     pub callback: Callback<u32>,
     pub stacks: u32,
     pub champion_id: ChampionId,
+
     #[prop_or(false)]
     pub ally: bool,
 }
@@ -139,6 +146,7 @@ pub fn ChampionExceptionSelector(props: &ChampionExceptionSelectorProps) -> Html
     let oninput = use_callback(callback.clone(), move |e: InputEvent, callback| {
         let target = e.target_unchecked_into::<HtmlInputElement>();
         let value = target.value().parse::<u32>().unwrap_or(0);
+
         callback.emit(value);
     });
 

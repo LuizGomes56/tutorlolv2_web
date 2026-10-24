@@ -1,3 +1,5 @@
+use implicit_clone::ImplicitClone;
+
 use crate::hover::{Builtin, DocView, Docs};
 use {
     crate::{
@@ -27,13 +29,13 @@ use {
     yew::{platform::spawn_local, prelude::*},
 };
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, PartialEq, Properties, ImplicitClone)]
 pub struct PlayerProps {
     pub player: UseReducerHandle<Player>,
     pub last_action: Rc<RefCell<LastAction>>,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, ImplicitClone)]
 pub struct EnemyProps {
     pub enemies: UseReducerHandle<Enemies>,
     pub enemy_index: UseStateHandle<usize>,
@@ -71,6 +73,7 @@ const MONSTER_HEADERS: [&[OtherImage]; L_MSTR] = [
 const MONSTER_COUNT: usize = {
     let mut i = 0;
     let mut max = 0;
+
     while i < L_MSTR {
         let len = MONSTER_HEADERS[i].len();
         if len > max {
@@ -78,6 +81,7 @@ const MONSTER_COUNT: usize = {
         }
         i += 1;
     }
+
     max
 };
 
@@ -87,7 +91,7 @@ pub enum TargetEntity {
     Enemy(usize),
 }
 
-fn __fetch(
+fn game_fetch(
     player: &UseReducerHandle<Player>,
     enemies: &UseReducerHandle<Enemies>,
     dragons: &UseReducerHandle<Dragons>,
@@ -166,6 +170,7 @@ pub fn Calculator() -> Html {
     let open_item_menu = {
         let entity = entity.clone();
         let is_item_modal_open = is_item_modal_open.clone();
+
         use_callback((), move |v, _| {
             entity.set(v);
             is_item_modal_open.set(true);
@@ -175,6 +180,7 @@ pub fn Calculator() -> Html {
     let open_rune_menu = {
         let entity = entity.clone();
         let is_rune_modal_open = is_rune_modal_open.clone();
+
         use_callback((), move |v, _| {
             entity.set(v);
             is_rune_modal_open.set(true);
@@ -198,7 +204,7 @@ pub fn Calculator() -> Html {
                 let dragons = dragons.clone();
 
                 spawn_local(async move {
-                    let data = __fetch(&player, &enemies, &dragons);
+                    let data = game_fetch(&player, &enemies, &dragons);
                     let infer_enemy_player_stats = |index| {
                         if let Some(enemy) = &data.enemies.get(index)
                             && let Some(input_enemy) =
@@ -212,7 +218,9 @@ pub fn Calculator() -> Html {
                             ));
                         }
                     };
+
                     let action = *last_action.borrow();
+
                     match action {
                         LastAction::Init | LastAction::CurrentPlayer => {
                             if player.data.infer_stats {
@@ -222,6 +230,7 @@ pub fn Calculator() -> Html {
                                     &data.current_player.current_stats as _,
                                 )));
                             }
+
                             if action == LastAction::Init {
                                 (0..data.enemies.len()).for_each(infer_enemy_player_stats);
                             }
@@ -253,8 +262,8 @@ pub fn Calculator() -> Html {
                         <table class={classes!("data-table")}>
                             <TableHeader
                                 champion_id={current_player.champion_id}
-                                items_meta={items_meta.clone()}
-                                runes_meta={runes_meta.clone()}
+                                {items_meta}
+                                {runes_meta}
                             />
                             <tbody>
                                 {
@@ -266,7 +275,9 @@ pub fn Calculator() -> Html {
                                             runes_meta,
                                             None
                                         );
+
                                         let enemy_id = enemy.champion_id;
+
                                         html! {
                                             <tr>
                                                 <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
@@ -279,6 +290,7 @@ pub fn Calculator() -> Html {
                                                         )}
                                                         onclick={{
                                                             let enemy_index = enemy_index.clone();
+
                                                             Callback::from(move |_| {
                                                                 enemy_index.set(i);
                                                             })
@@ -301,8 +313,8 @@ pub fn Calculator() -> Html {
                             <TableHeader
                                 skip={MONSTER_COUNT}
                                 champion_id={current_player.champion_id}
-                                items_meta={items_meta.clone()}
-                                runes_meta={runes_meta.clone()}
+                                {items_meta}
+                                {runes_meta}
                             />
                             <tbody>
                                 {
@@ -316,10 +328,12 @@ pub fn Calculator() -> Html {
                                         );
 
                                         let mut images = Vec::with_capacity(MONSTER_COUNT);
+
                                         for j in (0..MONSTER_COUNT).rev() {
                                             let cell = MONSTER_HEADERS[i].get(j).map(|&value| {
                                                 html!(<Image src={ImageType::Other(value)} />)
                                             });
+
                                             images.push(html!(
                                                 <td class={classes!(
                                                     "px-1", "w-8", "first:pl-2", "last:pr-2"
@@ -341,7 +355,10 @@ pub fn Calculator() -> Html {
                             damages={{
                                 (0..L_TWRD).into_iter().map(|i| {
                                     html! {
-                                        <td data_docs={Docs::Builtin(Builtin::Tower, DocView::Function).encode()} class={classes!(current_player.adaptive_type.class())}>
+                                        <td
+                                            data_docs={Docs::Builtin(Builtin::Tower, DocView::Function).encode()}
+                                            class={classes!(current_player.adaptive_type.class())}
+                                        >
                                             {tower_damages[i]}
                                         </td>
                                     }
@@ -357,24 +374,25 @@ pub fn Calculator() -> Html {
                             "2xl:grid-cols-3",
                         )}>
                             <StackInsert
-                                callback={stack_push.clone()}
-                                items_meta={items_meta.clone()}
-                                runes_meta={runes_meta.clone()}
+                                callback={stack_push}
+                                {items_meta}
+                                {runes_meta}
                                 champion_id={current_player.champion_id}
                             />
                             <StackRemover
-                                stack={stack.clone()}
+                                stack={&stack}
                                 champion_id={current_player.champion_id}
-                                items_meta={items_meta.clone()}
-                                runes_meta={runes_meta.clone()}
+                                {items_meta}
+                                {runes_meta}
                             />
                             <div class={classes!("overflow-auto")}>
                                 <StackTable<OutputEnemy>
                                     callback={{
                                         let enemy_index = enemy_index.clone();
+
                                         Callback::from(move |i| enemy_index.set(i))
                                     }}
-                                    enemies={enemies.clone()}
+                                    enemies={enemies}
                                     stack={stack.reconcile(current_player.champion_id, items_meta, runes_meta)}
                                     level={current_player.level}
                                 />
@@ -409,13 +427,13 @@ pub fn Calculator() -> Html {
     html! {
         <>
             <ItemSelector
-                player_props={player_props.clone()}
-                enemy_props={enemy_props.clone()}
+                player_props={&player_props}
+                enemy_props={&enemy_props}
                 {entity}
                 is_open={is_item_modal_open}
             />
             <RuneSelector
-                player_props={player_props.clone()}
+                player_props={&player_props}
                 is_open={is_rune_modal_open}
             />
             <div class={classes!(
@@ -424,8 +442,8 @@ pub fn Calculator() -> Html {
             )}>
                 <PlayerInput
                     {player_props}
-                    dragons={dragons.clone()}
-                    open_item_menu={open_item_menu.clone()}
+                    dragons={&dragons}
+                    open_item_menu={&open_item_menu}
                     {open_rune_menu}
                 />
                 <div class={classes!(

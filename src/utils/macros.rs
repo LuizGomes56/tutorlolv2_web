@@ -1,80 +1,4 @@
 #[macro_export]
-macro_rules! impl_index {
-    (@$ty:ty[$from:ty] $out:ty {
-        $($res:ident),+$(,)?
-    }) => {
-        pastey::paste! {
-            impl Index<$from> for $ty {
-                type Output = $out;
-
-                fn index(&self, index: $from) -> &Self::Output {
-                    match index {
-                        $($from::$res => &self.[<$res:snake>],)+
-                        #[allow(unreachable_patterns)]
-                        _ => panic!(concat!(
-                            stringify!($ty),
-                            "[",
-                            stringify!($from),
-                            "] was called with an invalid index"
-                        ))
-                    }
-                }
-            }
-
-            impl IndexMut<$from> for $ty {
-                fn index_mut(&mut self, index: $from) -> &mut Self::Output {
-                    match index {
-                        $($from::$res => &mut self.[<$res:snake>],)+
-                        #[allow(unreachable_patterns)]
-                        _ => panic!(concat!(
-                            stringify!($ty),
-                            "[",
-                            stringify!($from),
-                            "] was called with an invalid index"
-                        ))
-                    }
-                }
-            }
-        }
-    };
-    ($ty:ty[$from:ty] $out:ty {
-        $($arm:pat => $res:ident),+$(,)?
-    }) => {
-        impl Index<$from> for $ty {
-            type Output = $out;
-
-            fn index(&self, index: $from) -> &Self::Output {
-                match index {
-                    $($arm => &self.$res,)+
-                    #[allow(unreachable_patterns)]
-                    _ => panic!(concat!(
-                        stringify!($ty),
-                        "[",
-                        stringify!($from),
-                        "] was called with an invalid index"
-                    ))
-                }
-            }
-        }
-
-        impl IndexMut<$from> for $ty {
-            fn index_mut(&mut self, index: $from) -> &mut Self::Output {
-                match index {
-                    $($arm => &mut self.$res,)+
-                    #[allow(unreachable_patterns)]
-                    _ => panic!(concat!(
-                        stringify!($ty),
-                        "[",
-                        stringify!($from),
-                        "] was called with an invalid index"
-                    ))
-                }
-            }
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! impl_reducible {
     (#[$meta:meta] $type:ident $fty:ty { $($field:ident),* $(,)? }) => {
         pastey::paste! {
@@ -107,12 +31,6 @@ macro_rules! impl_reducible {
                     std::rc::Rc::new(new)
                 }
             }
-        }
-    };
-    ($type:ident $fty:ty { $($field:ident),* $(,)? }) => {
-        $crate::impl_reducible! {
-            #[derive(Clone, Copy, Debug, bincode::Decode, Default, bincode::Encode, PartialEq)]
-            $type $fty { $($field),* }
         }
     };
 }

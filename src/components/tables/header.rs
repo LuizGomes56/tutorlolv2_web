@@ -33,18 +33,22 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         let mut result = Vec::with_capacity(meta_len - merge_len);
 
         let mut i = 0;
+
         'outer: while i < meta_len {
             let metadata = abilities_meta[i];
             let kind = metadata.kind;
             let mut ability_kind = AbilityKind::Normal(kind);
             let mut j = 0;
+
             'inner: while j < merge_len {
                 let merge = abilities_to_merge[j];
                 j += 1;
+
                 if merge.max == i as u8 {
                     i += 1;
                     continue 'outer;
                 }
+
                 if merge.min == i as u8 {
                     ability_kind = AbilityKind::Alias(merge);
                     break 'inner;
@@ -76,29 +80,31 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         ImageType::CritStrike,
         ImageType::OnhitAttack,
     ]);
+
     headers.extend(abilities);
+
     header(&mut headers, items_meta);
     header(&mut headers, runes_meta);
 
     html! {
         <thead>
             <tr>
-                {for (0..skip).map(|_| html!(<th></th>))}
-                {for headers.into_iter().map(|src| {
-                    html! {
-                        <th data_docs={src.docs()}>
-                            <Image
-                                {src}
-                                class={classes!(
-                                    "flex", "items-center",
-                                    "justify-center",
-                                    "place-self-center",
-                                    "w-8", "h-8"
-                                )}
-                            />
-                        </th>
-                    }
-                })}
+                for _ in 0..skip {
+                    <th></th>
+                }
+                for src in headers {
+                    <th data_docs={src.docs()}>
+                        <Image
+                            {src}
+                            class={classes!(
+                                "flex", "items-center",
+                                "justify-center",
+                                "place-self-center",
+                                "w-8", "h-8"
+                            )}
+                        />
+                    </th>
+                }
             </tr>
         </thead>
     }

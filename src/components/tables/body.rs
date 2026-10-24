@@ -131,6 +131,7 @@ fn ability_cell_index(champion_id: ChampionId) -> Vec<usize> {
     let mut max_iterator = merge_data.iter().map(|m| m.max as usize).peekable();
 
     let mut pos = BASE_CELLS;
+
     (0..len).for_each(|i| match max_iterator.peek() {
         Some(&max) if max == i => {
             max_iterator.next();
@@ -214,6 +215,7 @@ fn abilities_damage(
             let min_i = md.min as usize;
 
             let target = ability_cell_index[min_i];
+
             debug_assert!(target != usize::MAX);
             debug_assert!(target < cells.len(), "Found a max match without min");
 
@@ -239,6 +241,7 @@ fn abilities_damage(
         }
 
         let cell_i = ability_cell_index[i];
+
         debug_assert!(cell_i != usize::MAX);
         debug_assert_eq!(cell_i, cells.len());
 

@@ -51,13 +51,16 @@ pub struct ImageProps {
 #[component]
 pub fn Image(props: &ImageProps) -> Html {
     let ImageProps { class, src } = props;
+
     let header = src.header();
     let src = src.url();
 
     match header {
         Some(h) => {
             let mut classes = classes!("relative");
+
             classes.push(class);
+
             html! {
                 <div class={classes}>
                     <img loading={"lazy"} {src} alt={""} />
@@ -97,6 +100,7 @@ impl ImageType {
                 let ability_id = kind.ability_id();
                 let char = ability_id.as_char();
                 let name = ability_id.ability_name().display();
+
                 Some(html! {
                     <div class={classes!("img-letter", "text-sm")}>
                         <span>{char}</span>
@@ -114,9 +118,11 @@ impl ImageType {
                 let ability_id = kind.ability_id();
                 let char = ability_id.as_char();
                 let mut result = format!("abilities/{champion_id:?}{char}");
+
                 if ability_id.ability_name() == AbilityName::Mega {
                     result.push_str("Mega");
                 }
+
                 result.push_str(".avif");
                 result
             },

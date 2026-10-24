@@ -46,6 +46,7 @@ pub fn use_enemy_callback<T: 'static>(
 
     use_callback(enemy_index.clone(), move |v, enemy_index| {
         let value = callback(v);
+
         last_action.replace(LastAction::EnemyPlayer(**enemy_index));
         enemies.dispatch(value);
     })
@@ -66,6 +67,7 @@ pub fn use_enemy_data_callback<T: 'static>(
     use_callback(enemy_index.clone(), move |v, enemy_index| {
         let index = **enemy_index;
         let value = callback(v);
+
         last_action.replace(value.action(LastAction::EnemyPlayer(index)));
         enemies.dispatch(EnemyAction::Change(index, value));
     })
@@ -134,6 +136,7 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     onclick={{
                         let open_item_menu = open_item_menu.clone();
                         let index = *enemy_props.enemy_index;
+
                         Callback::from(move |_| {
                             open_item_menu.emit(TargetEntity::Enemy(index));
                         })
@@ -191,9 +194,11 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
                     placeholder={1}
                     oninput={{
                         let callback = level_callback.clone();
+
                         Callback::from(move |e: InputEvent| {
                             let value = e.target_unchecked_into::<HtmlInputElement>().value();
                             let number = value.parse().unwrap_or(1).max(1);
+
                             callback.emit(number);
                         })
                     }}

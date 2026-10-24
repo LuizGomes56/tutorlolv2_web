@@ -10,13 +10,15 @@ use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct StackTableProps<T: Victim + PartialEq + 'static> {
-    #[prop_or_default]
-    pub callback: Option<Callback<usize>>,
     pub enemies: Rc<[T]>,
     pub stack: Stack,
+    pub level: u8,
+
+    #[prop_or_default]
+    pub callback: Option<Callback<usize>>,
+
     #[prop_or_default]
     pub index: Option<usize>,
-    pub level: u8,
 }
 
 #[component]

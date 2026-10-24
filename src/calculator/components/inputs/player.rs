@@ -36,6 +36,7 @@ pub fn use_player_callback<T: 'static>(
 
     use_callback((), move |v, _| {
         let value = callback(v);
+
         last_action.replace(LastAction::CurrentPlayer);
         player.dispatch(value);
     })
@@ -53,6 +54,7 @@ pub fn use_data_callback<T: 'static>(
 
     use_callback((), move |v, _| {
         let value = callback(v);
+
         last_action.replace(value.action(LastAction::CurrentPlayer));
         player.dispatch(PlayerAction::Data(value));
     })
@@ -114,6 +116,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     title={"Items"}
                     onclick={{
                         let open_item_menu = open_item_menu.clone();
+
                         Callback::from(move |_| {
                             open_item_menu.emit(TargetEntity::Player);
                         })
@@ -124,6 +127,7 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     title={"Runes"}
                     onclick={{
                         let open_rune_menu = open_rune_menu.clone();
+
                         Callback::from(move |_| {
                             open_rune_menu.emit(TargetEntity::Player);
                         })
@@ -193,9 +197,11 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     placeholder={1}
                     oninput={{
                         let callback = level_cb.clone();
+
                         Callback::from(move |e: InputEvent| {
                             let value = e.target_unchecked_into::<HtmlInputElement>().value();
                             let number = value.parse().unwrap_or(1).max(1);
+
                             callback.emit(number);
                         })
                     }}

@@ -34,6 +34,7 @@ pub fn use_rune_tray_callback<T: 'static>(
 
     use_callback((), move |v, _| {
         let value = callback(v);
+
         last_action.replace(LastAction::CurrentPlayer);
         player.dispatch(PlayerAction::Tray(value));
     })
@@ -51,6 +52,7 @@ pub fn use_item_tray_callback<T: 'static>(
 
     use_callback((), move |v, _| {
         let value = callback(v);
+
         last_action.replace(LastAction::CurrentPlayer);
         player.dispatch(PlayerAction::Data(DataAction::Tray(value)));
     })
@@ -71,6 +73,7 @@ pub fn use_enemy_tray_callback<T: 'static>(
     use_callback(enemy_index.clone(), move |v, enemy_index| {
         let index = **enemy_index;
         let value = callback(v);
+
         last_action.replace(LastAction::EnemyPlayer(index));
         enemies.dispatch(EnemyAction::Change(index, DataAction::Tray(value)));
     })
@@ -96,6 +99,7 @@ where
 
             let onclick = {
                 let remove = remove.clone();
+
                 Callback::from(move |_| remove.emit(id))
             };
 
@@ -115,6 +119,7 @@ where
 
     let onclick = {
         let entity = entity.clone();
+
         Callback::from(move |_| {
             entity.set(target_entity);
         })
@@ -167,6 +172,7 @@ where
             let onclick = {
                 let callback = callback.clone();
                 let array = T::recommendations(*champion_id, position);
+
                 Callback::from(move |_| callback.emit(array.iter().collect()))
             };
 
@@ -195,6 +201,7 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
 
     let toggle = use_callback(filters.clone(), move |v: StatName, filters| {
         let mut new = **filters;
+
         new.toggle_const(v as _);
         filters.set(new);
     });
@@ -231,6 +238,7 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
     .map(|stat| {
         let onclick = {
             let toggle = toggle.clone();
+
             Callback::from(move |_| toggle.emit(stat))
         };
 
@@ -239,7 +247,7 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
         html! {
             <button
                 {onclick}
-                title={stat.to_string()}
+                title={stat.name()}
                 class={classes!(
                     "border-r-3", "py-1.5", "px-4",
                     match contains {
@@ -302,11 +310,13 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
 
     let dropdown_ref = {
         let is_open = is_open.clone();
+
         use_clickout(Callback::from(move |_| is_open.set(false)), [])
     };
 
     let oninput = {
         let query = query.clone();
+
         use_callback((), move |e: InputEvent, _| {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
             query.set(value);
@@ -465,16 +475,19 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         })
         .filter(|item| {
             filters.is_empty_const()
-                || filters.iter_const().all(|v| {
-                    ItemId::filter(StatName::from_repr(v as _).unwrap()).contains(item)
-                })
+                || filters
+                    .iter_const()
+                    .all(|v| ItemId::filter(StatName::from_repr(v as _).unwrap()).contains(item))
         })
         .map(|item| {
             let insert = insert.clone();
             let onclick = Callback::from(move |_| insert.emit(item));
 
             html! {
-                <button {onclick} data_docs={Docs::global(item).encode()} class={classes!("flex", "flex-col", "gap-1", "w-fit")}
+                <button
+                    {onclick}
+                    data_docs={Docs::global(item).encode()}
+                    class={classes!("flex", "flex-col", "gap-1", "w-fit")}
                 >
                     <Image
                         src={ImageType::from(item)}

@@ -38,9 +38,11 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                         placeholder={value.to_string()}
                         oninput={{
                             let callback = callback.clone();
+
                             Callback::from(move |e: InputEvent| {
                                 let target = e.target_unchecked_into::<HtmlInputElement>();
                                 let value = target.value().parse::<u8>().unwrap_or(0);
+
                                 callback.emit(prototype(value));
                             })
                         }}

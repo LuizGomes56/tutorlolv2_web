@@ -73,19 +73,25 @@ impl Docs {
             Self::RuneGlobal(id) => id.render_global(),
             Self::Builtin(Builtin::Tower, DocView::Function) => Ok(FormulaRenderer::tower_fn()),
             Self::Builtin(Builtin::Tower, DocView::Global) => Ok(FormulaRenderer::tower_global()),
-            Self::Builtin(
-                Builtin::BasicAttack | Builtin::CriticalStrike | Builtin::Onhit | Builtin::Ignite,
-                view,
-            ) => {
-                match view {
-                    // Placeholder: basic attack, critical strike, on-hit, and ignite
-                    // functions are not implemented in the Formula builder yet.
-                    DocView::Function => Ok(FormulaRenderer::tower_fn()),
-                    // Placeholder: these globals are not implemented in the Formula
-                    // builder yet; retain their distinct Builtin IDs for replacement.
-                    DocView::Global => Ok(FormulaRenderer::tower_global()),
-                }
+            Self::Builtin(Builtin::Onhit, DocView::Function) => {
+                Ok(FormulaRenderer::onhit_effect_fn())
             }
+            Self::Builtin(Builtin::Onhit, DocView::Global) => {
+                Ok(FormulaRenderer::onhit_effect_global())
+            }
+            Self::Builtin(Builtin::CriticalStrike, DocView::Function) => {
+                Ok(FormulaRenderer::critical_strike_fn())
+            }
+            Self::Builtin(Builtin::CriticalStrike, DocView::Global) => {
+                Ok(FormulaRenderer::critical_strike_global())
+            }
+            Self::Builtin(Builtin::BasicAttack, DocView::Function) => {
+                Ok(FormulaRenderer::basic_attack_fn())
+            }
+            Self::Builtin(Builtin::BasicAttack, DocView::Global) => {
+                Ok(FormulaRenderer::basic_attack_global())
+            }
+            Self::Builtin(Builtin::Ignite, _) => Ok(FormulaRenderer::ignite_fn()),
         }?;
 
         html.push_str("<pre>");
@@ -153,7 +159,7 @@ fn render(idents: &str, docs: &str) -> MayFail<String> {
 
         html.push_str("<div class=\"flex flex-col\">");
 
-        for record in bytes.chunks_exact(5) {
+        for record in bytes.as_chunks::<5>().0 {
             let ident = CtxVar::from_repr(record[0]).ok_or("Unknown context variable")?;
             let value = f32::from_le_bytes(record[1..].try_into()?);
 
@@ -199,17 +205,21 @@ mod tests {
             .copied()
             .find(|id| !id.merge_data().is_empty())
             .unwrap();
+
         let merge = champion.merge_data()[0];
         let payload = ImageType::Ability(champion, AbilityKind::Alias(merge))
             .docs()
             .unwrap();
+
         let abilities = champion.abilities();
         let min = champion
             .render_fn(abilities[merge.min as usize].kind)
             .unwrap();
+
         let max = champion
             .render_fn(abilities[merge.max as usize].kind)
             .unwrap();
+
         assert_eq!(
             render("", &payload).unwrap(),
             format!("<pre>{min}</pre><pre>{max}</pre>")
@@ -220,10 +230,12 @@ mod tests {
     fn icon_docs_use_global_entity_definitions() {
         let item = ItemId::default();
         let payload = ImageType::Item(item).docs().unwrap();
+
         assert_eq!(
             render("", &payload).unwrap(),
             format!("<pre>{}</pre>", item.render_global().unwrap())
         );
+
         assert!(ImageType::Level.docs().is_none());
     }
 
@@ -244,6 +256,7 @@ mod tests {
             ),
         ] {
             let payload = entity.encode();
+
             assert_eq!(
                 render("", &payload).unwrap(),
                 format!("<pre>{expected}</pre>")
@@ -265,6 +278,7 @@ mod tests {
                 (DocView::Global, FormulaRenderer::tower_global()),
             ] {
                 let payload = Docs::Builtin(builtin, view).encode();
+
                 assert_eq!(
                     render("", &payload).unwrap(),
                     format!("<pre>{expected}</pre>")
@@ -280,10 +294,14 @@ mod tests {
             physical_multiplier: -0.5,
             ..Default::default()
         };
+
         let encoded =
             encode_idents(&[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier], &ctx).unwrap();
+
         assert_eq!(STANDARD_NO_PAD.decode(&encoded).unwrap().len(), 10);
+
         let html = render(&encoded, "").unwrap();
+
         assert!(html.contains("attack_damage</span> = <span class=\"C8\">123.25"));
         assert!(html.contains("physical_multiplier</span> = <span class=\"C8\">-0.5"));
     }
@@ -294,6 +312,7 @@ mod tests {
         let ability = champion.abilities()[0].kind;
         let item = ItemId::default();
         let rune = RuneId::default();
+
         for (doc, expected) in [
             (
                 Docs::Champion(champion, ability),
@@ -304,6 +323,7 @@ mod tests {
         ] {
             let encoded = doc.encode();
             let html = render("", &encoded).unwrap();
+
             assert_eq!(html, format!("<pre>{expected}</pre>"));
             assert!(encoded.len() < html.len());
         }
@@ -322,10 +342,13 @@ mod tests {
         assert!(render(&STANDARD_NO_PAD.encode([255, 0, 0, 0, 0]), "").is_err());
         assert!(render("", "!").is_err());
         assert!(render("", &STANDARD_NO_PAD.encode([1, 255])).is_err());
+
         let mut valid = STANDARD_NO_PAD
             .decode(Docs::Item(ItemId::default()).encode())
             .unwrap();
+
         valid.push(0);
+
         assert!(render("", &STANDARD_NO_PAD.encode(valid)).is_err());
     }
 }

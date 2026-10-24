@@ -37,16 +37,20 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
 
     let entity = use_state(|| TargetEntity::Player);
     let query = use_state(String::new);
+
     let insert = use_callback(player.clone(), |rune_id, player| {
         player.dispatch(PlayerAction::Tray(TrayAction::Insert(rune_id)))
     });
+
     let dropdown_ref = {
         let is_open = is_open.clone();
+
         use_clickout(Callback::from(move |_| is_open.set(false)), [])
     };
 
     let oninput = {
         let query = query.clone();
+
         use_callback((), move |e: InputEvent, _| {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
             query.set(value);
@@ -73,7 +77,11 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
             let onclick = Callback::from(move |_| insert.emit(rune));
 
             html! {
-                <button {onclick} data_docs={Docs::global(rune).encode()} class={classes!("flex", "flex-col", "gap-1", "w-fit")}>
+                <button
+                    {onclick}
+                    data_docs={Docs::global(rune).encode()}
+                    class={classes!("flex", "flex-col", "gap-1", "w-fit")}
+                >
                     <Image
                         src={ImageType::from(rune)}
                         class={classes!("w-9", "h-9", "border-2", "border-std-700")}

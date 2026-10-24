@@ -117,7 +117,7 @@ pub fn Overlay() -> Html {
                         enemy_index.set(new);
                     }) as Box<dyn FnMut(bool)>);
 
-                    let js_fn: Function = callback.as_ref().unchecked_ref::<Function>().clone();
+                    let js_fn = callback.as_ref().unchecked_ref::<Function>().clone();
 
                     match listen("change".to_string(), &js_fn).await {
                         Ok(value) if !value.is_null() && !value.is_undefined() => {
@@ -144,6 +144,7 @@ pub fn Overlay() -> Html {
 
     {
         let focused = focused.clone();
+
         use_effect_with((), move |_| {
             spawn_local(async move {
                 let callback =
@@ -157,6 +158,7 @@ pub fn Overlay() -> Html {
     {
         let game_data = game_data.clone();
         let enemy_count = enemy_count.clone();
+
         use_effect_with((), |_| {
             spawn_local(async move {
                 loop {
@@ -175,6 +177,7 @@ pub fn Overlay() -> Html {
 
     {
         let focused = focused.clone();
+
         use_effect_with((), move |_| {
             on_keydown(27, move || {
                 focused.set(false);
@@ -200,6 +203,7 @@ pub fn Overlay() -> Html {
                 .map(|enemy| {
                     let damages =
                         to_html(&enemy.damages, champion_id, items_meta, runes_meta, None);
+
                     let enemy_id = enemy.champion_id;
 
                     html! {
@@ -215,9 +219,10 @@ pub fn Overlay() -> Html {
 
             let recommendation = enemy.map(|enemy| {
                 let base = enemy.total_damage();
-                let list = enemy.item_scores();
 
-                list.into_iter()
+                enemy
+                    .item_scores()
+                    .into_iter()
                     .map(|(damage, item)| {
                         html! {
                             <div class={classes!("flex", "items-center", "gap-2")}>
@@ -239,7 +244,7 @@ pub fn Overlay() -> Html {
                     if *focused {
                         <Dynamic panel_id={"panel-manager"} resize={false} focused={*focused}>
                             <div data-panel-content={true}>
-                                <PanelManager handler={panel_manager.clone()} />
+                                <PanelManager handler={&panel_manager} />
                             </div>
                         </Dynamic>
                     }
@@ -252,8 +257,8 @@ pub fn Overlay() -> Html {
                                 <table class={classes!("data-table", "overlay")}>
                                     <TableHeader
                                         {champion_id}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
+                                        {items_meta}
+                                        {runes_meta}
                                     />
                                     <tbody>{damages}</tbody>
                                 </table>
@@ -275,9 +280,9 @@ pub fn Overlay() -> Html {
                             <Dynamic panel_id={"stack-insert"} resize={false} focused={*focused}>
                                 <div data-panel-content={true}>
                                     <StackInsert
-                                        callback={stack_push.clone()}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
+                                        callback={stack_push}
+                                        {items_meta}
+                                        {runes_meta}
                                         {champion_id}
                                     />
                                 </div>
@@ -290,10 +295,10 @@ pub fn Overlay() -> Html {
                                     class={classes!("min-h-fit", "min-w-min")}
                                 >
                                     <StackRemover
-                                        stack={stack.clone()}
+                                        stack={&stack}
                                         {champion_id}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
+                                        {items_meta}
+                                        {runes_meta}
                                         hmax={false}
                                     />
                                 </div>
@@ -308,7 +313,7 @@ pub fn Overlay() -> Html {
                             >
                                 <StackTable<Enemy>
                                     index={*enemy_index}
-                                    enemies={enemies.clone()}
+                                    {enemies}
                                     stack={stack.reconcile(champion_id, items_meta, runes_meta)}
                                     level={current_player.level}
                                 />

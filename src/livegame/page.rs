@@ -30,6 +30,7 @@ pub fn Livegame() -> Html {
 
     {
         let game_data = game_data.clone();
+
         use_effect_with((), |_| {
             spawn_local(async move {
                 loop {
@@ -180,13 +181,13 @@ pub fn Livegame() -> Html {
                         "flex-col", "gap-4", "min-w-80"
                     )}>
                         <Banner
-                            riot_id={current_player.riot_id.clone()}
+                            riot_id={&current_player.riot_id}
                             {game_time}
                             {champion_id}
                         />
                         <ScoreboardDisplay
                             ally_team={current_player.team}
-                            scoreboard={scoreboard.clone()}
+                            {scoreboard}
                         />
                         <div class={classes!("grid", "grid-cols-[auto_auto]", "gap-4")}>
                             <DragonDisplay {dragons} />
@@ -204,8 +205,8 @@ pub fn Livegame() -> Html {
                             <table class={classes!("data-table")}>
                                 <TableHeader
                                     {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    {items_meta}
+                                    {runes_meta}
                                 />
                                 <tbody>{damages}</tbody>
                             </table>
@@ -217,20 +218,20 @@ pub fn Livegame() -> Html {
                                 "2xl:grid-cols-3",
                             )}>
                                 <StackInsert
-                                    callback={stack_push.clone()}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    callback={stack_push}
+                                    {items_meta}
+                                    {runes_meta}
                                     {champion_id}
                                 />
                                 <StackRemover
-                                    stack={stack.clone()}
+                                    stack={&stack}
                                     {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    {items_meta}
+                                    {runes_meta}
                                 />
                                 <div class={classes!("overflow-auto")}>
                                     <StackTable<Enemy>
-                                        enemies={enemies.clone()}
+                                        {enemies}
                                         stack={stack.reconcile(champion_id, items_meta, runes_meta)}
                                         level={current_player.level}
                                     />
@@ -259,8 +260,8 @@ pub fn Livegame() -> Html {
                             <table class={classes!("data-table")}>
                                 <TableHeader
                                     {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    {items_meta}
+                                    {runes_meta}
                                 />
                                 <tbody>
                                     {siml_damages(ItemId::SIML

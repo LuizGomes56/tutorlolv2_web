@@ -1,5 +1,6 @@
 use {
     crate::utils::{EnumCast, tray::Tray},
+    derive_more::Deref,
     std::{collections::HashMap, hash::Hash, rc::Rc},
     tutorlolv2::{
         ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata, ValueId,
@@ -15,7 +16,7 @@ mod reducer;
 
 pub use page::Calculator;
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Deref, Default, PartialEq)]
 #[repr(transparent)]
 pub struct ExceptionMap<T: Default + Eq + Hash> {
     pub inner: HashMap<T, ValueException>,
@@ -27,15 +28,8 @@ impl<T: Default + Eq + Hash + ValueId> ExceptionMap<T> {
             let value = v.pack_exc(0);
             self.inner.insert(v, value);
         }
+
         f(v);
-    }
-}
-
-impl<T: Default + Eq + Hash> core::ops::Deref for ExceptionMap<T> {
-    type Target = HashMap<T, ValueException>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
     }
 }
 
@@ -94,12 +88,15 @@ impl<T: Default> Default for PlayerData<T> {
         let champion_id = ChampionId::random();
         let recommended_items = champion_id.recommended_items(champion_id.main_position());
         let mut items = Vec::with_capacity(recommended_items.len());
+
         let mut item_exceptions = ExceptionMap {
             inner: HashMap::with_capacity(recommended_items.len()),
         };
+
         for &item in recommended_items {
             item_exceptions.push_item(item, true, |item| items.push(item));
         }
+
         Self {
             stats: T::default(),
             items: items.into_iter().collect(),

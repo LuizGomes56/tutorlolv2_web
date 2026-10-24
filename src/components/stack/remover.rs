@@ -16,6 +16,7 @@ pub struct StackRemoverProps {
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
     pub champion_id: ChampionId,
+
     #[prop_or(true)]
     pub hmax: bool,
 }
@@ -114,6 +115,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                     items_meta,
                     runes_meta,
                 )));
+
                 combo_index.set(**combo_index + 1);
             },
         )
@@ -121,11 +123,13 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
 
     let stack_remove = {
         let stack = stack.clone();
+
         use_callback((), move |id, _| stack.dispatch(TrayAction::RemoveById(id)))
     };
 
     let clear_stack = {
         let stack = stack.clone();
+
         use_callback((), move |_: MouseEvent, _| {
             stack.dispatch(TrayAction::Clear)
         })
@@ -140,6 +144,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
             (items_meta.clone(), runes_meta.clone(), champion_id),
             move |(items_meta, runes_meta, ..)| {
                 let next = stack.reconcile(champion_id, items_meta, runes_meta);
+
                 if *stack != next {
                     stack.dispatch(TrayAction::Replace(next));
                 }
@@ -173,6 +178,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
 
             let onclick = {
                 let stack_remove = stack_remove.clone();
+
                 Callback::from(move |_| stack_remove.emit(id))
             };
 

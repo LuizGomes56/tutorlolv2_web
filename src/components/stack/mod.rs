@@ -28,6 +28,7 @@ impl Stack {
     #[hook]
     pub fn use_push(stack: &UseReducerHandle<Stack>) -> Callback<StackValue> {
         let stack = stack.clone();
+
         use_callback((), move |value, _| {
             stack.dispatch(TrayAction::Insert(value))
         })
@@ -114,7 +115,9 @@ impl Reducible for Stack {
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
+
         action.apply(&mut new);
+
         Rc::new(new)
     }
 }

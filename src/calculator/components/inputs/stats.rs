@@ -74,6 +74,7 @@ macro_rules! impl_stat_display {
     ($type:ty { $($stat:ident),+$(,)? }) => {
         impl StatDisplay for $type {
             const VALUES: &[PlayerStatsField] = &[$(PlayerStatsField::$stat),+];
+
             fn prototype(value: PlayerStatsField) -> fn(i32) -> Self::Action {
                 #[allow(unreachable_patterns)]
                 match value {
@@ -129,16 +130,18 @@ pub fn Stats<T: StatDisplay>(props: &StatsProps<T>) -> Html {
             html! {
                 <StatCell
                     image_type={ImageType::Stats(stat)}
-                    name={stat.to_string()}
+                    name={stat.name()}
                     disabled={infer}
                     placeholder={0}
                     value={stats[stat]}
                     oninput={{
                         let callback = callback.clone();
+
                         Callback::from(move |e: InputEvent| {
                             let value = e.target_unchecked_into::<HtmlInputElement>().value();
                             let number = value.parse().unwrap_or(0);
                             let prototype = T::prototype(stat);
+
                             callback.emit(prototype(number));
                         })
                     }}
