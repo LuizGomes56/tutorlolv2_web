@@ -76,7 +76,7 @@ impl Cell {
                 </>
             )),
             Some(max) if max == min && min != 0 => Some(Html::from(min)),
-            None if min != 0 => Some(Html::from(min)),
+            Some(0) | None if min != 0 => Some(Html::from(min)),
             _ => None,
         }
     }
@@ -254,7 +254,7 @@ fn abilities_damage(
             max_dmg: None,
             idents,
             docs: Docs::Champion(champion_id, meta.kind),
-            diff: None,
+            diff: other.map(|o| (damages[i] - o.abilities[i], None)),
         });
     }
 }
@@ -274,7 +274,13 @@ fn value_damage<T: ValueId>(
         EntityId::Rune(_) => &damages.runes,
     };
 
-    debug_assert_eq!(metadata.len(), damages.len() >> 1);
+    let visible_len = metadata.len() << 1;
+    debug_assert!(
+        damages.len() == visible_len
+            || (matches!(tag.entity(), EntityId::Item(_))
+                && damages.len() == visible_len + 2
+                && damages[visible_len..] == [0, 0])
+    );
 
     for (k, meta) in metadata.iter().enumerate() {
         let min_i = k << 1;
@@ -301,8 +307,15 @@ fn value_damage<T: ValueId>(
                     EntityId::Rune(_) => &o.runes,
                 };
 
-                let diff_min = odmg[min_i];
-                let diff_max = odmg[min_i + 1];
+                // A new purchase appends one item pair absent from the owned build.
+                debug_assert!(
+                    odmg.len() == damages.len()
+                        || (matches!(tag.entity(), EntityId::Item(_))
+                            && odmg.len() + 2 == damages.len())
+                );
+
+                let diff_min = odmg.get(min_i).copied().unwrap_or(0);
+                let diff_max = odmg.get(min_i + 1).copied().unwrap_or(0);
 
                 (min_dmg - diff_min, Some(max_dmg - diff_max))
             }),
@@ -333,6 +346,8 @@ pub fn make_cells(
     Vec::<Cell>::with_capacity(len)
 }
 
+/// Item metadata may omit the final candidate column when every enemy's pair is
+/// zero. `other` may be the owned build without that final pair.
 pub fn to_html(
     damages: &Damages,
     champion_id: ChampionId,
@@ -342,8 +357,12 @@ pub fn to_html(
 ) -> Html {
     let mut cells = make_cells(champion_id, items_meta, runes_meta);
 
+    #[cfg(debug_assertions)]
     if let Some(other) = other {
-        debug_assert_eq!(other.items.len(), damages.items.len());
+        debug_assert!(
+            other.items.len() == damages.items.len()
+                || other.items.len() + 2 == damages.items.len()
+        );
         debug_assert_eq!(other.runes.len(), damages.runes.len());
     }
 
@@ -352,4 +371,163 @@ pub fn to_html(
     value_damage(damages, &mut cells, items_meta, other);
     value_damage(damages, &mut cells, runes_meta, other);
     render_cells(damages, cells)
+}
+
+#[cfg(test)]
+mod purchase_tests {
+    use super::*;
+
+    #[test]
+    fn new_purchase_row_uses_zero_baseline_and_keeps_owned_diffs() {
+        let damage = Damages {
+            items: vec![30, 40, 50, 60].into_boxed_slice(),
+            ..Default::default()
+        };
+        let baseline = Damages {
+            items: vec![10, 20].into_boxed_slice(),
+            ..Default::default()
+        };
+        let metadata = [
+            ItemId::NashorsTooth.data().metadata,
+            ItemId::BladeOfTheRuinedKing.data().metadata,
+        ];
+        let mut cells = Vec::new();
+        value_damage(&damage, &mut cells, &metadata, Some(&baseline));
+        assert_eq!(cells.len(), 2);
+        assert_eq!(cells[0].diff, Some((20, Some(20))));
+        assert_eq!(cells[1].diff, Some((50, Some(60))));
+        assert!(matches!(
+            cells[1].docs,
+            Docs::Item(ItemId::BladeOfTheRuinedKing)
+        ));
+        assert_eq!(cells[1].min_dmg, 50);
+        assert_eq!(cells[1].max_dmg, Some(60));
+    }
+
+    #[test]
+    fn zero_candidate_pair_renders_for_owned_and_non_damaging_purchases() {
+        for candidate in [ItemId::NashorsTooth, ItemId::VoidStaff] {
+            let damage = Damages {
+                items: vec![30, 40, 0, 0].into_boxed_slice(),
+                ..Default::default()
+            };
+            let baseline = Damages {
+                items: vec![10, 20].into_boxed_slice(),
+                ..Default::default()
+            };
+            let metadata = [
+                ItemId::NashorsTooth.data().metadata,
+                candidate.data().metadata,
+            ];
+            let mut cells = Vec::new();
+            value_damage(&damage, &mut cells, &metadata, Some(&baseline));
+            assert_eq!(cells.len(), 2);
+            assert_eq!(cells[0].diff, Some((20, Some(20))));
+            assert_eq!(cells[1].min_dmg, 0);
+            assert_eq!(cells[1].max_dmg, Some(0));
+            assert_eq!(cells[1].diff, Some((0, Some(0))));
+            assert!(matches!(cells[1].docs, Docs::Item(item) if item == candidate));
+        }
+    }
+
+    #[test]
+    fn hidden_zero_candidate_preserves_owned_cells_and_rune_alignment() {
+        let damage = Damages {
+            items: vec![30, 40, 0, 0].into_boxed_slice(),
+            runes: vec![8, 12].into_boxed_slice(),
+            ..Default::default()
+        };
+        let baseline = Damages {
+            items: vec![10, 20].into_boxed_slice(),
+            runes: vec![3, 4].into_boxed_slice(),
+            ..Default::default()
+        };
+        let mut cells = Vec::new();
+        value_damage(
+            &damage,
+            &mut cells,
+            &[ItemId::NashorsTooth.data().metadata],
+            Some(&baseline),
+        );
+        value_damage(
+            &damage,
+            &mut cells,
+            &[RuneId::Electrocute.data().metadata],
+            Some(&baseline),
+        );
+        assert_eq!(cells.len(), 2);
+        assert!(matches!(cells[0].docs, Docs::Item(ItemId::NashorsTooth)));
+        assert_eq!(cells[0].diff, Some((20, Some(20))));
+        assert!(matches!(cells[1].docs, Docs::Rune(RuneId::Electrocute)));
+        assert_eq!(cells[1].min_dmg, 8);
+        assert_eq!(cells[1].diff, Some((5, Some(8))));
+    }
+
+    #[test]
+    fn purchase_with_no_owned_damage_still_renders_its_pair() {
+        let damage = Damages {
+            items: vec![0, 70].into_boxed_slice(),
+            ..Default::default()
+        };
+        let baseline = Damages::default();
+        let metadata = [ItemId::NashorsTooth.data().metadata];
+        let mut cells = Vec::new();
+        value_damage(&damage, &mut cells, &metadata, Some(&baseline));
+        assert_eq!(cells.len(), 1);
+        assert_eq!(cells[0].diff, Some((0, Some(70))));
+        assert!(matches!(cells[0].docs, Docs::Item(ItemId::NashorsTooth)));
+    }
+}
+
+#[cfg(test)]
+mod ability_diff_tests {
+    use super::*;
+
+    #[test]
+    fn ability_diffs_include_single_values_and_both_merged_endpoints() {
+        let champion = ChampionId::Gnar;
+        let len = champion.abilities().len();
+        let merge = &champion.merge_data()[0];
+        let single = (0..len)
+            .find(|&i| {
+                !champion
+                    .merge_data()
+                    .iter()
+                    .any(|m| m.min as usize == i || m.max as usize == i)
+            })
+            .unwrap();
+        let baseline = Damages {
+            abilities: vec![100; len].into_boxed_slice(),
+            ..Default::default()
+        };
+        let mut damage = baseline.clone();
+        damage.abilities[merge.min as usize] = 125;
+        damage.abilities[merge.max as usize] = 90;
+        damage.abilities[single] = 130;
+        let mut cells = Vec::new();
+        attack_cells(&damage, &mut cells, Some(&baseline));
+        abilities_damage(&damage, &mut cells, champion, Some(&baseline));
+        let indexes = ability_cell_index(champion);
+        assert_eq!(
+            cells[indexes[merge.min as usize]].diff,
+            Some((25, Some(-10)))
+        );
+        assert_eq!(cells[indexes[single]].diff, Some((30, None)));
+
+        let mut plain = Vec::new();
+        attack_cells(&damage, &mut plain, None);
+        abilities_damage(&damage, &mut plain, champion, None);
+        assert!(plain.iter().all(|cell| cell.diff.is_none()));
+    }
+
+    #[test]
+    fn nonzero_differences_remain_visible_with_zero_or_absent_upper_bound() {
+        for min in [-15, 25] {
+            assert!(Cell::render_range(min, None).is_some());
+            assert!(Cell::render_range(min, Some(0)).is_some());
+            assert!(Cell::render_range(0, Some(min)).is_some());
+        }
+        assert!(Cell::render_range(0, None).is_none());
+        assert!(Cell::render_range(0, Some(0)).is_none());
+    }
 }

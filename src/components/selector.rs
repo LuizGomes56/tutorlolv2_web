@@ -113,6 +113,8 @@ where
         is_open.set(true)
     });
 
+    let image_type = ImageType::from(value);
+
     html! {
         <div class={classes!("relative")}>
             <label ref={label_ref} class={classes!(
@@ -123,10 +125,12 @@ where
                     class.push(label_class);
                     class
                 }}>
-                    <Image
-                        class={img_class}
-                        src={ImageType::from(value)}
-                    />
+                    <div data_docs={image_type.docs()}>
+                        <Image
+                            class={img_class}
+                            src={image_type}
+                        />
+                    </div>
                     <input
                         class={classes!(
                             "bg-transparent", "focus:ring-0",

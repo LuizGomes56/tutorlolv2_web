@@ -13,12 +13,36 @@ use crate::{
     },
     utils::{Loading, Print, glue::get_data, use_setter},
 };
-use std::time::Duration;
-use tutorlolv2::{ChampionId, ItemId, bitset::BitSet};
+use std::{rc::Rc, time::Duration};
+use tutorlolv2::{ChampionId, ItemId, TypeMetadata, bitset::BitSet, model::Damages};
 use yew::{
     platform::{spawn_local, time::sleep},
     prelude::*,
 };
+
+// Keep the fixed candidate pair in the data, but show its column only when at
+// least one enemy has damage there. Header and every row share this decision.
+fn simulated_items_meta<'a>(
+    owned: &Rc<[TypeMetadata<ItemId>]>,
+    candidate: ItemId,
+    damages: impl IntoIterator<Item = &'a Damages>,
+) -> Rc<[TypeMetadata<ItemId>]> {
+    let offset = owned.len() * 2;
+    let visible = damages.into_iter().any(|damage| {
+        debug_assert_eq!(damage.items.len(), offset + 2);
+        damage.items[offset] != 0 || damage.items[offset + 1] != 0
+    });
+
+    if !visible {
+        return owned.clone();
+    }
+
+    owned
+        .iter()
+        .copied()
+        .chain(core::iter::once(candidate.data().metadata))
+        .collect()
+}
 
 #[component]
 pub fn Livegame() -> Html {
@@ -59,6 +83,16 @@ pub fn Livegame() -> Html {
             } = *data;
 
             let champion_id = current_player.champion_id;
+            let siml_index = ItemId::SIML
+                .iter()
+                .position(|&v| v == *siml_item)
+                .unwrap_or(0);
+
+            let siml_items_meta = simulated_items_meta(
+                items_meta,
+                *siml_item,
+                enemies.iter().map(|enemy| &enemy.siml_items[siml_index]),
+            );
 
             let get_damages = |enemy_id: ChampionId, damages| {
                 html! {
@@ -90,7 +124,7 @@ pub fn Livegame() -> Html {
                             to_html(
                                 &enemy.siml_items[i],
                                 champion_id,
-                                items_meta,
+                                &siml_items_meta,
                                 runes_meta,
                                 Some(&enemy.damages),
                             ),
@@ -260,15 +294,11 @@ pub fn Livegame() -> Html {
                             <table class={classes!("data-table")}>
                                 <TableHeader
                                     {champion_id}
-                                    {items_meta}
+                                    items_meta={&siml_items_meta}
                                     {runes_meta}
                                 />
                                 <tbody>
-                                    {siml_damages(ItemId::SIML
-                                        .iter()
-                                        .position(|&v| v == *siml_item)
-                                        .unwrap_or(0)
-                                    )}
+                                    {siml_damages(siml_index)}
                                 </tbody>
                             </table>
                         </div>
@@ -286,6 +316,72 @@ pub fn Livegame() -> Html {
                     <EmptyTable rows={5} />
                     <div class={classes!("box", "h-96")} />
                 </div>
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod purchase_tests {
+    use super::*;
+
+    #[test]
+    fn selected_purchase_appends_metadata_after_owned_columns() {
+        let owned: Rc<[_]> = vec![ItemId::NashorsTooth.data().metadata].into();
+        let damage = Damages {
+            items: vec![10, 20, 7, 0].into_boxed_slice(),
+            ..Default::default()
+        };
+        let selected = simulated_items_meta(&owned, ItemId::BladeOfTheRuinedKing, [&damage]);
+        assert_eq!(
+            selected.iter().map(|m| m.kind).collect::<Vec<_>>(),
+            vec![ItemId::NashorsTooth, ItemId::BladeOfTheRuinedKing]
+        );
+        assert_eq!(owned.len(), 1);
+        let empty: Rc<[_]> = Rc::from([]);
+        let damage = Damages {
+            items: vec![0, 7].into_boxed_slice(),
+            ..Default::default()
+        };
+        assert_eq!(
+            simulated_items_meta(&empty, ItemId::NashorsTooth, [&damage])[0].kind,
+            ItemId::NashorsTooth
+        );
+    }
+
+    #[test]
+    fn all_zero_candidate_column_is_hidden_despite_owned_damage() {
+        let owned: Rc<[_]> = vec![ItemId::NashorsTooth.data().metadata].into();
+        let damage = Damages {
+            items: vec![50, 60, 0, 0].into_boxed_slice(),
+            ..Default::default()
+        };
+        for candidate in [ItemId::NashorsTooth, ItemId::SapphireCrystal] {
+            let selected = simulated_items_meta(&owned, candidate, [&damage, &damage]);
+            assert!(Rc::ptr_eq(&selected, &owned));
+        }
+        assert!(Rc::ptr_eq(
+            &simulated_items_meta(&owned, ItemId::NashorsTooth, []),
+            &owned
+        ));
+    }
+
+    #[test]
+    fn any_nonzero_enemy_keeps_candidate_column_for_every_row() {
+        let owned: Rc<[_]> = vec![ItemId::NashorsTooth.data().metadata].into();
+        let zero = Damages {
+            items: vec![50, 60, 0, 0].into_boxed_slice(),
+            ..Default::default()
+        };
+        for pair in [[0, 12], [15, 0]] {
+            let nonzero = Damages {
+                items: vec![50, 60, pair[0], pair[1]].into_boxed_slice(),
+                ..Default::default()
+            };
+            for rows in [[&zero, &nonzero], [&nonzero, &zero]] {
+                let selected = simulated_items_meta(&owned, ItemId::BladeOfTheRuinedKing, rows);
+                assert_eq!(selected.len(), 2);
+                assert_eq!(selected[1].kind, ItemId::BladeOfTheRuinedKing);
             }
         }
     }
