@@ -6,4 +6,5 @@ pub mod enemies;
 pub mod exceptions;
 pub mod item_selector;
 pub mod player;
+pub mod rune_selector;
 pub mod stats;

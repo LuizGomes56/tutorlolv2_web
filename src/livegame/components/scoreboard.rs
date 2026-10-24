@@ -1,5 +1,6 @@
-use crate::{livegame::Scoreboard, model::Team};
+use crate::livegame::Scoreboard;
 use std::rc::Rc;
+use tutorlolv2::model::Team;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

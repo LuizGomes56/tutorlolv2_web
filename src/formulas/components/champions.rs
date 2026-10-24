@@ -1,3 +1,4 @@
+use crate::hover::Docs;
 use crate::{
     components::{
         h2::H2,
@@ -5,8 +6,9 @@ use crate::{
         selector::Selector,
     },
     formulas::components::code::Code,
-    utils::{EnumCast, encode_offset, use_setter},
+    utils::{EnumCast, use_setter},
 };
+use strum::VariantArray;
 use tutorlolv2::{CastId, ChampionId, Position};
 use yew::prelude::*;
 
@@ -22,17 +24,17 @@ pub fn ChampionFormulas() -> Html {
         ImageType: From<T>,
     {
         html! {
-            for position in Position::ARRAY {
+            for &position in Position::VARIANTS {
                 <td class={"content-baseline"}>
                     <div class={classes!("flex", "flex-col", "gap-2", "py-2")}>
                         for item in f(position) {
                             <div
+                                data_docs={Docs::global(*item).encode()}
                                 class={classes!(
                                     "justify-items-center",
                                     "md:justify-items-start",
                                     "overflow-hidden"
                                 )}
-                                data_offset={encode_offset(&[item.formula()])}
                             >
                                 <div class={classes!("flex", "items-center", "gap-3")}>
                                     <Image
@@ -73,7 +75,7 @@ pub fn ChampionFormulas() -> Html {
                 <table class={classes!("table-fixed")}>
                     <thead>
                         <tr>
-                            for position in Position::ARRAY {
+                            for &position in Position::VARIANTS {
                                 <th class={classes!("overflow-hidden")}>
                                     <div class={classes!(
                                         "flex", "items-center", "gap-3",
@@ -107,17 +109,17 @@ pub fn ChampionFormulas() -> Html {
                 </table>
             </div>
             <H2 text={"Source code definition"} />
-            <Code range={champion.formula()} />
+            <Code fragment={champion.render_global().unwrap()} />
             <H2 text={"Abilities virtual definiton"} />
-            for i in 0..champion.number_of_abilities() {
-                <Code range={champion.get_ability_formula(i)} />
-            }
+            // for meta in champion.metadata() {
+            //     <Code fragment={champion.render_ability(meta.kind).unwrap()} />
+            // }
             <H2 text={"Internal ability functions"} />
-            for i in 0..champion.number_of_abilities() {
-                <Code range={&champion.closures()[i]} />
+            for meta in champion.metadata() {
+                <Code fragment={champion.render_fn(meta.kind).unwrap()} />
             }
             <H2 text={"Champion generator implementation"} />
-            <Code range={champion.generator()} />
+            <Code fragment={champion.render_generator().unwrap()} />
         </div>
     }
 }

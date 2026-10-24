@@ -1,8 +1,5 @@
-use crate::{
-    components::image::{Image, ImageType},
-    model::AbilityLevels,
-};
-use tutorlolv2::ChampionId;
+use crate::components::image::{Image, ImageType};
+use tutorlolv2::{ChampionId, model::AbilityLevels};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

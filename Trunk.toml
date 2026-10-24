@@ -7,3 +7,4 @@ release = false
 minify = "never"
 open = false
 public_url = "./"
+

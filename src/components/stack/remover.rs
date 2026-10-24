@@ -3,14 +3,11 @@ use crate::{
         image::{Image, ImageType},
         stack::{Stack, StackValue, Tray, TrayAction, TrayEntry},
     },
-    utils::{Print, encode_offset},
+    utils::Print,
 };
 use serde_json::Value;
 use std::{collections::HashMap, rc::Rc};
-use tutorlolv2::{
-    CastId, ChampionId, ItemId, RuneId, TypeMetadata,
-    docs::{BASIC_ATTACK_OFFSET, CRITICAL_STRIKE_OFFSET, IGNITE_OFFSET, ONHIT_EFFECT_OFFSET},
-};
+use tutorlolv2::{ChampionId, ItemId, RuneId, TypeMetadata};
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -19,6 +16,7 @@ pub struct StackRemoverProps {
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
     pub champion_id: ChampionId,
+
     #[prop_or(true)]
     pub hmax: bool,
 }
@@ -117,6 +115,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                     items_meta,
                     runes_meta,
                 )));
+
                 combo_index.set(**combo_index + 1);
             },
         )
@@ -124,11 +123,13 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
 
     let stack_remove = {
         let stack = stack.clone();
+
         use_callback((), move |id, _| stack.dispatch(TrayAction::RemoveById(id)))
     };
 
     let clear_stack = {
         let stack = stack.clone();
+
         use_callback((), move |_: MouseEvent, _| {
             stack.dispatch(TrayAction::Clear)
         })
@@ -143,6 +144,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
             (items_meta.clone(), runes_meta.clone(), champion_id),
             move |(items_meta, runes_meta, ..)| {
                 let next = stack.reconcile(champion_id, items_meta, runes_meta);
+
                 if *stack != next {
                     stack.dispatch(TrayAction::Replace(next));
                 }
@@ -156,32 +158,27 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
     let remover = safe_stack
         .iter()
         .map(|entry| {
-            let (image_type, offset, max) = match entry.value {
-                StackValue::Ability { slot, ability_id } => (
-                    ImageType::Ability(champion_id, ability_id.into()),
-                    champion_id.get_ability_formula(slot),
-                    false,
-                ),
+            let (image_type, max) = match entry.value {
+                StackValue::Ability { ability_id, .. } => {
+                    (ImageType::Ability(champion_id, ability_id.into()), false)
+                }
                 StackValue::Item(i, item_id) => (
                     ImageType::from(item_id),
-                    item_id.formula(),
                     i % 2 == 1 && item_id.deals_max_damage(),
                 ),
-                StackValue::Rune(_, rune_id) => {
-                    (ImageType::from(rune_id), rune_id.formula(), false)
-                }
-                StackValue::BasicAttack => (ImageType::BasicAttack, &BASIC_ATTACK_OFFSET, false),
-                StackValue::CritStrike => (ImageType::CritStrike, &CRITICAL_STRIKE_OFFSET, false),
-                StackValue::OnhitMin => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, false),
-                StackValue::OnhitMax => (ImageType::OnhitAttack, &ONHIT_EFFECT_OFFSET, true),
-                StackValue::Ignite => (ImageType::Ignite, &IGNITE_OFFSET, false),
+                StackValue::Rune(_, rune_id) => (ImageType::from(rune_id), false),
+                StackValue::BasicAttack => (ImageType::BasicAttack, false),
+                StackValue::CritStrike => (ImageType::CritStrike, false),
+                StackValue::OnhitMin => (ImageType::OnhitAttack, false),
+                StackValue::OnhitMax => (ImageType::OnhitAttack, true),
+                StackValue::Ignite => (ImageType::Ignite, false),
             };
 
-            let data_offset = encode_offset(&[offset]);
             let id = entry.id;
 
             let onclick = {
                 let stack_remove = stack_remove.clone();
+
                 Callback::from(move |_| stack_remove.emit(id))
             };
 
@@ -226,7 +223,7 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
                     type={"button"}
                     {class}
                     {onclick}
-                    {data_offset}
+                    data_docs={image_type.docs()}
                 >
                     {inner}
                 </button>

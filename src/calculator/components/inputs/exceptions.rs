@@ -1,12 +1,12 @@
+use crate::hover::Docs;
 use crate::{
     calculator::ExceptionMap,
     components::image::{Image, ImageType},
-    utils::encode_offset,
 };
 use std::hash::Hash;
 use tutorlolv2::{
     CastId, ChampionId,
-    bitset::{BitSetArray, ItemsBitSet},
+    bitset::{BitSet, BitSetExc},
 };
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -32,7 +32,6 @@ where
         stacks,
     } = *props;
 
-    let data_offset = value.map(|v| encode_offset(&[v.formula()]));
     let title = value.map(|v| {
         let name = v.name();
         format!("Define the amount of stacks for {name}")
@@ -41,7 +40,7 @@ where
     html! {
         <>
             <div
-                {data_offset}
+                data_docs={value.map(|v| Docs::global(v).encode())}
                 class={classes!("flex", "items-center", "justify-center", "relative")}
             >
                 <Image
@@ -67,15 +66,15 @@ where
 }
 
 #[derive(PartialEq, Properties)]
-pub struct ExceptionSelectorProps<const N: usize, T: Default + Eq + Hash + 'static> {
+pub struct ExceptionSelectorProps<T: Default + Eq + Hash + 'static> {
     pub values: Box<[T]>,
     pub exceptions: ExceptionMap<T>,
     pub callback: Callback<(T, u32)>,
-    pub filter: BitSetArray<N>,
+    pub filter: BitSetExc,
 }
 
 #[component]
-pub fn ExceptionSelector<const N: usize, T>(props: &ExceptionSelectorProps<N, T>) -> Html
+pub fn ExceptionSelector<T>(props: &ExceptionSelectorProps<T>) -> Html
 where
     T: CastId + Default + Eq + Hash,
     ImageType: From<T>,
@@ -87,7 +86,7 @@ where
         filter,
     } = *props;
 
-    let mut seen = ItemsBitSet::EMPTY;
+    let mut seen = BitSet::EMPTY;
 
     values
         .iter()
@@ -100,11 +99,14 @@ where
                 .filter(|_| !(filter.contains_const(index) && seen.contains_const(index)))
                 .map(|v| {
                     seen.insert_const(index);
+
                     let oninput = {
                         let callback = callback.clone();
+
                         Callback::from(move |e: InputEvent| {
                             let target = e.target_unchecked_into::<HtmlInputElement>();
                             let stacks = target.value().parse::<u32>().unwrap_or(0);
+
                             callback.emit((value, stacks));
                         })
                     };
@@ -127,6 +129,7 @@ pub struct ChampionExceptionSelectorProps {
     pub callback: Callback<u32>,
     pub stacks: u32,
     pub champion_id: ChampionId,
+
     #[prop_or(false)]
     pub ally: bool,
 }
@@ -143,6 +146,7 @@ pub fn ChampionExceptionSelector(props: &ChampionExceptionSelectorProps) -> Html
     let oninput = use_callback(callback.clone(), move |e: InputEvent, callback| {
         let target = e.target_unchecked_into::<HtmlInputElement>();
         let value = target.value().parse::<u32>().unwrap_or(0);
+
         callback.emit(value);
     });
 

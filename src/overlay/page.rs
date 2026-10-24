@@ -1,25 +1,28 @@
-use crate::{
-    components::{
-        dynamic::Dynamic,
-        errorlog::errorlog,
-        image::{Image, ImageType},
-        stack::{Stack, StackInsert, StackRemover, StackTable},
-        tables::header::TableHeader,
+use crate::hover::Docs;
+use {
+    crate::{
+        components::{
+            dynamic::Dynamic,
+            errorlog::errorlog,
+            image::{Image, ImageType},
+            stack::{Stack, StackInsert, StackRemover, StackTable},
+            tables::{body::to_html, header::TableHeader},
+        },
+        impl_reducible,
+        livegame::{Enemy, Game},
+        overlay::panel::PanelManager,
+        utils::{Loading, Print, glue::get_data, hooks::on_keydown},
     },
-    impl_reducible,
-    livegame::{Enemy, Game},
-    overlay::panel::PanelManager,
-    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, hooks::on_keydown},
-};
-use tutorlolv2::CastId;
-use wasm_bindgen::{
-    JsCast, JsValue,
-    prelude::{Closure, wasm_bindgen},
-};
-use web_sys::js_sys::Function;
-use yew::{
-    platform::{spawn_local, time::sleep},
-    prelude::*,
+    std::time::Duration,
+    wasm_bindgen::{
+        JsCast, JsValue,
+        prelude::{Closure, wasm_bindgen},
+    },
+    web_sys::js_sys::Function,
+    yew::{
+        platform::{spawn_local, time::sleep},
+        prelude::*,
+    },
 };
 
 #[wasm_bindgen(module = "/public/events.js")]
@@ -114,7 +117,7 @@ pub fn Overlay() -> Html {
                         enemy_index.set(new);
                     }) as Box<dyn FnMut(bool)>);
 
-                    let js_fn: Function = callback.as_ref().unchecked_ref::<Function>().clone();
+                    let js_fn = callback.as_ref().unchecked_ref::<Function>().clone();
 
                     match listen("change".to_string(), &js_fn).await {
                         Ok(value) if !value.is_null() && !value.is_undefined() => {
@@ -141,6 +144,7 @@ pub fn Overlay() -> Html {
 
     {
         let focused = focused.clone();
+
         use_effect_with((), move |_| {
             spawn_local(async move {
                 let callback =
@@ -154,6 +158,7 @@ pub fn Overlay() -> Html {
     {
         let game_data = game_data.clone();
         let enemy_count = enemy_count.clone();
+
         use_effect_with((), |_| {
             spawn_local(async move {
                 loop {
@@ -164,7 +169,7 @@ pub fn Overlay() -> Html {
                     }
 
                     game_data.set(data);
-                    sleep(Fetch::REFRESH_RATE).await;
+                    sleep(Duration::from_secs(1)).await;
                 }
             });
         });
@@ -172,6 +177,7 @@ pub fn Overlay() -> Html {
 
     {
         let focused = focused.clone();
+
         use_effect_with((), move |_| {
             on_keydown(27, move || {
                 focused.set(false);
@@ -195,17 +201,14 @@ pub fn Overlay() -> Html {
 
             let damages = enemy
                 .map(|enemy| {
-                    let damages = enemy
-                        .damages
-                        .to_html(champion_id, items_meta, runes_meta, None);
+                    let damages =
+                        to_html(&enemy.damages, champion_id, items_meta, runes_meta, None);
+
                     let enemy_id = enemy.champion_id;
 
                     html! {
                         <tr>
-                            <td
-                                class={classes!("w-12")}
-                                data_offset={encode_offset(&[enemy_id.formula()])}
-                            >
+                            <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
                                 <Image src={ImageType::from(enemy_id)} />
                             </td>
                             {damages}
@@ -216,9 +219,10 @@ pub fn Overlay() -> Html {
 
             let recommendation = enemy.map(|enemy| {
                 let base = enemy.total_damage();
-                let list = enemy.item_scores();
 
-                list.into_iter()
+                enemy
+                    .item_scores()
+                    .into_iter()
                     .map(|(damage, item)| {
                         html! {
                             <div class={classes!("flex", "items-center", "gap-2")}>
@@ -240,7 +244,7 @@ pub fn Overlay() -> Html {
                     if *focused {
                         <Dynamic panel_id={"panel-manager"} resize={false} focused={*focused}>
                             <div data-panel-content={true}>
-                                <PanelManager handler={panel_manager.clone()} />
+                                <PanelManager handler={&panel_manager} />
                             </div>
                         </Dynamic>
                     }
@@ -253,8 +257,8 @@ pub fn Overlay() -> Html {
                                 <table class={classes!("data-table", "overlay")}>
                                     <TableHeader
                                         {champion_id}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
+                                        {items_meta}
+                                        {runes_meta}
                                     />
                                     <tbody>{damages}</tbody>
                                 </table>
@@ -276,9 +280,9 @@ pub fn Overlay() -> Html {
                             <Dynamic panel_id={"stack-insert"} resize={false} focused={*focused}>
                                 <div data-panel-content={true}>
                                     <StackInsert
-                                        callback={stack_push.clone()}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
+                                        callback={stack_push}
+                                        {items_meta}
+                                        {runes_meta}
                                         {champion_id}
                                     />
                                 </div>
@@ -291,10 +295,10 @@ pub fn Overlay() -> Html {
                                     class={classes!("min-h-fit", "min-w-min")}
                                 >
                                     <StackRemover
-                                        stack={stack.clone()}
+                                        stack={&stack}
                                         {champion_id}
-                                        items_meta={items_meta.clone()}
-                                        runes_meta={runes_meta.clone()}
+                                        {items_meta}
+                                        {runes_meta}
                                         hmax={false}
                                     />
                                 </div>
@@ -309,7 +313,7 @@ pub fn Overlay() -> Html {
                             >
                                 <StackTable<Enemy>
                                     index={*enemy_index}
-                                    enemies={enemies.clone()}
+                                    {enemies}
                                     stack={stack.reconcile(champion_id, items_meta, runes_meta)}
                                     level={current_player.level}
                                 />

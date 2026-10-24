@@ -1,18 +1,20 @@
+use crate::hover::Docs;
 use crate::{
     components::{
         errorlog::errorlog,
         image::{Image, ImageType},
         selector::Selector,
         stack::{Stack, StackInsert, StackRemover, StackTable},
-        tables::{empty::EmptyTable, header::TableHeader},
+        tables::{body::to_html, empty::EmptyTable, header::TableHeader},
     },
     livegame::{
         Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
         scoreboard::ScoreboardDisplay,
     },
-    utils::{Fetch, Loading, Print, encode_offset, glue::get_data, use_setter},
+    utils::{Loading, Print, glue::get_data, use_setter},
 };
-use tutorlolv2::{CastId, ChampionId, ItemId, SIMULATED_ITEMS_ENUM, bitset::ItemsBitSet};
+use std::time::Duration;
+use tutorlolv2::{ChampionId, ItemId, bitset::BitSet};
 use yew::{
     platform::{spawn_local, time::sleep},
     prelude::*,
@@ -23,11 +25,12 @@ pub fn Livegame() -> Html {
     let game_data = use_state(|| Err::<Game, _>(Loading.into()));
     let stack = use_reducer(Stack::default);
     let stack_push = Stack::use_push(&stack);
-    let siml_item = use_state(|| SIMULATED_ITEMS_ENUM[0]);
+    let siml_item = use_state(|| ItemId::SIML[0]);
     let siml_item_callback = use_setter(&siml_item);
 
     {
         let game_data = game_data.clone();
+
         use_effect_with((), |_| {
             spawn_local(async move {
                 loop {
@@ -36,7 +39,7 @@ pub fn Livegame() -> Html {
                     data.log();
 
                     game_data.set(data);
-                    sleep(Fetch::REFRESH_RATE).await;
+                    sleep(Duration::from_secs(1)).await;
                 }
             });
         });
@@ -60,10 +63,7 @@ pub fn Livegame() -> Html {
             let get_damages = |enemy_id: ChampionId, damages| {
                 html! {
                     <tr>
-                        <td
-                            class={classes!("w-12")}
-                            data_offset={encode_offset(&[enemy_id.formula()])}
-                        >
+                        <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
                             <Image src={ImageType::from(enemy_id)} />
                         </td>
                         {damages}
@@ -76,9 +76,7 @@ pub fn Livegame() -> Html {
                 .map(|enemy| {
                     get_damages(
                         enemy.champion_id,
-                        enemy
-                            .damages
-                            .to_html(champion_id, items_meta, runes_meta, None),
+                        to_html(&enemy.damages, champion_id, items_meta, runes_meta, None),
                     )
                 })
                 .collect::<Html>();
@@ -89,7 +87,8 @@ pub fn Livegame() -> Html {
                     .map(|enemy| {
                         get_damages(
                             enemy.champion_id,
-                            enemy.siml_items[i].to_html(
+                            to_html(
+                                &enemy.siml_items[i],
                                 champion_id,
                                 items_meta,
                                 runes_meta,
@@ -105,7 +104,7 @@ pub fn Livegame() -> Html {
                 .map(|enemy| (enemy.champion_id, enemy.total_damage(), enemy.item_scores()))
                 .collect::<Vec<_>>();
 
-            let mut seen = ItemsBitSet::EMPTY;
+            let mut seen = BitSet::EMPTY;
             let columns = enemy_rows
                 .iter()
                 .flat_map(|(.., list)| list.iter())
@@ -118,10 +117,8 @@ pub fn Livegame() -> Html {
                 .iter()
                 .copied()
                 .map(|item_id| {
-                    let data_offset = encode_offset(core::array::from_ref(&item_id.formula()));
-
                     html! {
-                        <th {data_offset}>
+                        <th data_docs={Docs::global(item_id).encode()}>
                             <Image src={ImageType::from(item_id)} />
                         </th>
                     }
@@ -131,11 +128,9 @@ pub fn Livegame() -> Html {
             let recm_body = enemy_rows
                 .iter()
                 .map(|(enemy_id, base, list)| {
-                    let data_offset = encode_offset(core::array::from_ref(&enemy_id.formula()));
-
                     html! {
                         <tr>
-                            <td {data_offset} class={classes!("w-10")}>
+                            <td data_docs={Docs::global(*enemy_id).encode()} class={classes!("w-10")}>
                                 <Image src={ImageType::from(*enemy_id)} />
                             </td>
                             {
@@ -186,13 +181,13 @@ pub fn Livegame() -> Html {
                         "flex-col", "gap-4", "min-w-80"
                     )}>
                         <Banner
-                            riot_id={current_player.riot_id.clone()}
+                            riot_id={&current_player.riot_id}
                             {game_time}
                             {champion_id}
                         />
                         <ScoreboardDisplay
                             ally_team={current_player.team}
-                            scoreboard={scoreboard.clone()}
+                            {scoreboard}
                         />
                         <div class={classes!("grid", "grid-cols-[auto_auto]", "gap-4")}>
                             <DragonDisplay {dragons} />
@@ -210,8 +205,8 @@ pub fn Livegame() -> Html {
                             <table class={classes!("data-table")}>
                                 <TableHeader
                                     {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    {items_meta}
+                                    {runes_meta}
                                 />
                                 <tbody>{damages}</tbody>
                             </table>
@@ -223,20 +218,20 @@ pub fn Livegame() -> Html {
                                 "2xl:grid-cols-3",
                             )}>
                                 <StackInsert
-                                    callback={stack_push.clone()}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    callback={stack_push}
+                                    {items_meta}
+                                    {runes_meta}
                                     {champion_id}
                                 />
                                 <StackRemover
-                                    stack={stack.clone()}
+                                    stack={&stack}
                                     {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    {items_meta}
+                                    {runes_meta}
                                 />
                                 <div class={classes!("overflow-auto")}>
                                     <StackTable<Enemy>
-                                        enemies={enemies.clone()}
+                                        {enemies}
                                         stack={stack.reconcile(champion_id, items_meta, runes_meta)}
                                         level={current_player.level}
                                     />
@@ -256,7 +251,7 @@ pub fn Livegame() -> Html {
                             <div class={classes!("h-fit", "p-4")}>
                                 <Selector<ItemId>
                                     value={*siml_item}
-                                    array={&SIMULATED_ITEMS_ENUM as &'static [_]}
+                                    array={&ItemId::SIML as &'static [_]}
                                     callback={siml_item_callback}
                                     img_class={classes!("w-10", "h-10")}
                                     input_class={classes!("text-xl", "font-medium")}
@@ -265,11 +260,11 @@ pub fn Livegame() -> Html {
                             <table class={classes!("data-table")}>
                                 <TableHeader
                                     {champion_id}
-                                    items_meta={items_meta.clone()}
-                                    runes_meta={runes_meta.clone()}
+                                    {items_meta}
+                                    {runes_meta}
                                 />
                                 <tbody>
-                                    {siml_damages(SIMULATED_ITEMS_ENUM
+                                    {siml_damages(ItemId::SIML
                                         .iter()
                                         .position(|&v| v == *siml_item)
                                         .unwrap_or(0)

@@ -1,20 +1,21 @@
-#![allow(static_mut_refs)]
-use crate::{
-    about::About,
-    calculator::Calculator,
-    components::{hoverdocs::HoverDocs, sidebar::Sidebar},
-    formulas::Formulas,
-    livegame::Livegame,
-    overlay::Overlay,
-    utils::init_cache,
+use {
+    crate::{
+        about::About,
+        calculator::Calculator,
+        components::{hoverdocs::HoverDocs, sidebar::Sidebar},
+        formulas::Formulas,
+        livegame::Livegame,
+        overlay::Overlay,
+    },
+    yew::prelude::*,
+    yew_router::{BrowserRouter, Routable, Switch},
 };
-use yew::prelude::*;
-use yew_router::{BrowserRouter, Routable, Switch};
 
 mod about;
 mod calculator;
 mod components;
 mod formulas;
+mod hover;
 mod livegame;
 mod model;
 mod overlay;
@@ -81,5 +82,4 @@ fn App() -> Html {
 
 fn main() {
     yew::Renderer::<App>::new().render();
-    init_cache();
 }

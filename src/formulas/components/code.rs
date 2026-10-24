@@ -1,18 +1,13 @@
-use crate::utils::hoverdocs;
-use std::ops::Range;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct CodeProps {
-    pub range: &'static Range<usize>,
+    pub fragment: AttrValue,
 }
 
 #[component]
 pub fn Code(props: &CodeProps) -> Html {
-    let CodeProps { range } = *props;
-
-    let cache = hoverdocs(range.clone());
-    let code = Html::from_html_unchecked(cache.into());
+    let code = Html::from_html_unchecked(props.fragment.clone());
 
     html! {
         <code class={classes!(
@@ -22,7 +17,7 @@ pub fn Code(props: &CodeProps) -> Html {
             // "max-h-[calc(100vh-16rem)]",
             "overflow-auto"
         )}>
-            {code}
+            <pre>{code}</pre>
         </code>
     }
 }

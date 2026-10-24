@@ -1,34 +1,41 @@
+use crate::hover::Docs;
 use crate::{
     components::image::{Image, ImageType, Svg},
     utils::{EnumCast, hooks::use_clickout},
 };
+use strum::VariantArray;
 use tutorlolv2::{CastId, GameMap, ItemId};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
-pub struct SelectorProps<T: CastId + PartialEq + 'static> {
+pub struct SelectorProps<T: CastId + VariantArray + PartialEq + 'static> {
     pub callback: Callback<T>,
     pub value: T,
+
     #[prop_or(classes!("gap-4"))]
     pub label_class: Classes,
+
     #[prop_or(classes!("w-12", "h-12"))]
     pub img_class: Classes,
+
     #[prop_or(classes!(
         "text-std-200", "placeholder:text-std-500",
         "text-3xl", "font-medium", "w-full",
     ))]
     pub input_class: Classes,
+
     #[prop_or(classes!("mt-2", "px-1.5", "py-1", "w-96"))]
     pub dropdown_class: Classes,
-    #[prop_or(T::VALUES)]
+
+    #[prop_or(T::VARIANTS)]
     pub array: &'static [T],
 }
 
 #[component]
 pub fn Selector<T>(props: &SelectorProps<T>) -> Html
 where
-    T: EnumCast,
+    T: EnumCast + VariantArray,
     ImageType: From<T>,
 {
     let SelectorProps {
@@ -60,6 +67,7 @@ where
                         let callback = callback.clone();
                         let close_callback = close_callback.clone();
                         let query = query.clone();
+
                         Callback::from(move |_| {
                             callback.emit(v);
                             close_callback.emit(());
@@ -68,7 +76,7 @@ where
                     };
 
                     (v, html! {
-                        <button key={v.index()} {onclick}>
+                        <button key={v.index()} {onclick} data_docs={Docs::global(v).encode()}>
                             <div class={classes!("flex", "items-center", "gap-2", "py-0.5")}>
                                 <Image src={v.image_type()} class={classes!("w-6", "h-6")} />
                                 <span class={classes!("truncate")}>{v.name()}</span>
@@ -120,14 +128,11 @@ where
                         src={ImageType::from(value)}
                     />
                     <input
-                        class={{
-                            let mut class = classes!(
-                                "bg-transparent", "focus:ring-0",
-                                "focus:outline-none", "truncate"
-                            );
-                            class.push(input_class);
-                            class
-                        }}
+                        class={classes!(
+                            "bg-transparent", "focus:ring-0",
+                            "focus:outline-hidden", "truncate",
+                            input_class
+                        )}
                         value={query.to_string()}
                         placeholder={value.name()}
                         {oninput}
@@ -137,21 +142,17 @@ where
             </label>
             <div
                 ref={dropdown_ref}
-                class={{
-                    let mut class = classes!(
-                        match *is_open {
-                            true => "flex",
-                            false => "hidden",
-                        },
-                        "absolute",
-                        "bg-[#16161c]", "flex-col",
-                        "overflow-auto", "max-h-72",
-                        "border", "border-std-800",
-                        "z-50", "empty:hidden"
-                    );
-                    class.push(dropdown_class);
-                    class
-                }}
+                class={classes!(
+                    match *is_open {
+                        true => "flex",
+                        false => "hidden",
+                    },
+                    "absolute", dropdown_class,
+                    "bg-[#16161c]", "flex-col",
+                    "overflow-auto", "max-h-72",
+                    "border", "border-std-800",
+                    "z-50", "empty:hidden"
+                )}
             >
                 {options}
             </div>
@@ -195,7 +196,7 @@ pub fn SelectorButton(props: &SelectorButtonProps) -> Html {
             </div>
             <div class={classes!("flex", "items-center", "gap-2", "shrink-0")}>
                 <span class={classes!(
-                    "min-w-[2rem]",
+                    "min-w-8",
                     "px-1.5", "py-0.5",
                     "bg-sky-500/15",
                     "border", "border-sky-500/20",

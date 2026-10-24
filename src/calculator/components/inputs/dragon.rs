@@ -1,9 +1,9 @@
 use crate::{
     calculator::reducer::LastAction,
     components::image::{DragonImage, Image, ImageType, OtherImage},
-    model::{Dragons, DragonsAction},
 };
 use std::{cell::RefCell, rc::Rc};
+use tutorlolv2::{model::Dragons, yew::dragons::DragonsAction};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -15,9 +15,11 @@ pub fn use_dragons(
 ) -> Callback<InputEvent> {
     let dragons = dragons.clone();
     let last_action = last_action.clone();
+
     use_callback((), move |e: InputEvent, _| {
         let target = e.target_unchecked_into::<HtmlInputElement>();
         let value = target.value().parse::<u16>().unwrap_or(0);
+
         last_action.replace(LastAction::CurrentPlayer);
         dragons.dispatch(f(value));
     })
@@ -56,7 +58,7 @@ pub fn DragonInput(props: &DragonInputProps) -> Html {
                     "bg-transparent", "text-white"
                 )}
                 value={value.to_string()}
-                oninput={oninput.clone()}
+                {oninput}
             />
         </>
     }

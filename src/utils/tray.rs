@@ -1,32 +1,16 @@
-use bincode::Encode;
-use yew::Reducible;
-
-use crate::utils::random_u64;
-use std::{
-    ops::{Deref, DerefMut},
-    rc::Rc,
+use {
+    crate::utils::random_u64,
+    std::{
+        ops::{Deref, DerefMut},
+        rc::Rc,
+    },
+    yew::Reducible,
 };
 
 #[derive(Clone, Debug, PartialEq)]
 #[repr(transparent)]
 pub struct Tray<T: Copy> {
     pub inner: Vec<TrayEntry<T>>,
-}
-
-impl<T> Encode for Tray<T>
-where
-    T: Copy + Encode,
-{
-    fn encode<E: bincode::enc::Encoder>(
-        &self,
-        encoder: &mut E,
-    ) -> Result<(), bincode::error::EncodeError> {
-        self.inner.len().encode(encoder)?;
-        for entry in &self.inner {
-            entry.value.encode(encoder)?;
-        }
-        Ok(())
-    }
 }
 
 impl<T: Copy> Default for Tray<T> {

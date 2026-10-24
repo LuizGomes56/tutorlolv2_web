@@ -1,24 +1,24 @@
-use crate::{
-    components::{
-        image::{Image, ImageType},
-        stack::{Stack, StackValue},
-        tables::body::Victim,
-    },
-    utils::encode_offset,
+use crate::components::{
+    image::{Image, ImageType},
+    stack::{Stack, StackValue},
+    tables::body::Victim,
 };
+use crate::hover::Docs;
 use std::rc::Rc;
-use tutorlolv2::{CastId, ignite};
+use tutorlolv2::ignite;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
 pub struct StackTableProps<T: Victim + PartialEq + 'static> {
-    #[prop_or_default]
-    pub callback: Option<Callback<usize>>,
     pub enemies: Rc<[T]>,
     pub stack: Stack,
+    pub level: u8,
+
+    #[prop_or_default]
+    pub callback: Option<Callback<usize>>,
+
     #[prop_or_default]
     pub index: Option<usize>,
-    pub level: u8,
 }
 
 #[component]
@@ -73,13 +73,10 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
 
                         Some(html! {
                             <tr>
-                                <td
-                                    class={classes!("w-12")}
-                                    data_offset={encode_offset(&[enemy_id.formula()])}
-                                >
+                                <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
                                     <button
                                         class={classes!(
-                                            "outline-none",
+                                            "outline-hidden",
                                             "focus:ring-1",
                                             "focus:ring-blue-500/75"
                                         )}

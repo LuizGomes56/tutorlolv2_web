@@ -3,14 +3,11 @@ mod remover;
 mod table;
 
 use crate::utils::tray::{Tray, TrayAction, TrayEntry};
+use derive_more::{Deref, DerefMut};
 use serde::{Deserialize, Serialize};
-use std::{
-    ops::{Deref, DerefMut},
-    rc::Rc,
-};
+use std::rc::Rc;
 use tutorlolv2::{
-    AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata,
-    bitset::{ItemsBitSet, RunesBitSet},
+    AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata, bitset::BitSet,
 };
 use yew::{Callback, Reducible, UseReducerHandle, UseStateHandle, hook, use_callback};
 
@@ -18,23 +15,12 @@ pub use insert::StackInsert;
 pub use remover::StackRemover;
 pub use table::StackTable;
 
-impl Deref for Stack {
-    type Target = Tray<StackValue>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.values
-    }
-}
-
-impl DerefMut for Stack {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.values
-    }
-}
-
-#[derive(Clone, Default, PartialEq)]
+#[derive(Clone, Default, Deref, DerefMut, PartialEq)]
 pub struct Stack {
     champion_id: ChampionId,
+
+    #[deref]
+    #[deref_mut]
     values: Tray<StackValue>,
 }
 
@@ -42,6 +28,7 @@ impl Stack {
     #[hook]
     pub fn use_push(stack: &UseReducerHandle<Stack>) -> Callback<StackValue> {
         let stack = stack.clone();
+
         use_callback((), move |value, _| {
             stack.dispatch(TrayAction::Insert(value))
         })
@@ -96,11 +83,12 @@ impl Stack {
         let items_allowed = items_meta
             .iter()
             .map(|m| m.kind.index())
-            .collect::<ItemsBitSet>();
+            .collect::<BitSet>();
+
         let runes_allowed = runes_meta
             .iter()
             .map(|m| m.kind.index())
-            .collect::<RunesBitSet>();
+            .collect::<BitSet>();
 
         let mut values = Tray::new(Vec::with_capacity(self.len()));
 
@@ -127,7 +115,9 @@ impl Reducible for Stack {
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut new = (*self).clone();
+
         action.apply(&mut new);
+
         Rc::new(new)
     }
 }

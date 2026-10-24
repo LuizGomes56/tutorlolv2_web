@@ -21,7 +21,7 @@
 //         <label
 //             title={tag}
 //             class={classes!(
-//                 "rounded", "p-4",
+//                 "rounded-sm", "p-4",
 //                 match checked {
 //                     true => classes!("bg-std-800"),
 //                     false => classes!("bg-std-900"),
@@ -50,6 +50,7 @@
 //     #[hook]
 //     fn use_panel(handler: &UseReducerHandle<Panel>, f: fn(bool) -> PanelAction) -> Callback<Event> {
 //         let handler = handler.clone();
+//
 //         use_callback((), move |e: Event, _| {
 //             let target = e.target_unchecked_into::<HtmlInputElement>();
 //             handler.dispatch(f(target.checked()));
@@ -147,7 +148,7 @@ pub fn PanelCheckbox(props: &PanelCheckboxProps) -> Html {
 
     html! {
         <label
-            title={props.tag.clone()}
+            title={&props.tag}
             class={classes!(
                 "group",
                 "relative",
@@ -179,7 +180,7 @@ pub fn PanelCheckbox(props: &PanelCheckboxProps) -> Html {
                 type={"checkbox"}
                 class={classes!("absolute", "inset-0", "z-10", "cursor-pointer", "opacity-0")}
                 checked={props.checked}
-                aria-label={props.tag.clone()}
+                aria-label={&props.tag}
                 {onchange}
             />
 
@@ -218,11 +219,11 @@ pub fn PanelCheckbox(props: &PanelCheckboxProps) -> Html {
                     }
                 )}
             >
-                {props.placeholder.clone()}
+                {&props.placeholder}
             </div>
 
             <div class={classes!("pointer-events-none", "text-xs", "leading-tight", "text-white/90")}>
-                {props.label.clone()}
+                {&props.label}
             </div>
         </label>
     }
@@ -245,11 +246,13 @@ pub fn PanelManager(props: &PanelProps) -> Html {
 
     let enable_all = {
         let handler = handler.clone();
+
         Callback::from(move |_| set_all_panels(&handler, true))
     };
 
     let disable_all = {
         let handler = handler.clone();
+
         Callback::from(move |_| set_all_panels(&handler, false))
     };
 
