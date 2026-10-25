@@ -1,4 +1,5 @@
 //! Shared versioned Bincode records for browser localStorage.
+use super::BINCODE_CONFIG;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use bincode::{Decode, Encode};
 
@@ -22,7 +23,7 @@ pub(crate) fn encode_record(kind: u8, value: &impl Encode) -> Option<String> {
         kind,
         value,
     };
-    let bytes = bincode::encode_to_vec(record, bincode::config::standard()).ok()?;
+    let bytes = bincode::encode_to_vec(record, BINCODE_CONFIG).ok()?;
     (bytes.len() <= MAX_RECORD_BYTES).then(|| BASE64.encode(bytes))
 }
 
@@ -32,11 +33,8 @@ pub(crate) fn decode_record<T: Decode<()>>(kind: u8, raw: &str) -> Option<T> {
     }
 
     let bytes = BASE64.decode(raw).ok()?;
-    let (record, read): (Record<T>, _) = bincode::decode_from_slice(
-        &bytes,
-        bincode::config::standard().with_limit::<MAX_RECORD_BYTES>(),
-    )
-    .ok()?;
+    let (record, read): (Record<T>, _) =
+        bincode::decode_from_slice(&bytes, BINCODE_CONFIG.with_limit::<MAX_RECORD_BYTES>()).ok()?;
 
     (read == bytes.len()
         && record.magic == MAGIC

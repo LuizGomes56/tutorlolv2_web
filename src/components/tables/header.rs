@@ -27,10 +27,19 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     let abilities_meta = champion_id.abilities();
     let abilities_to_merge = champion_id.merge_data();
 
-    let abilities = {
+    let mut headers = Vec::with_capacity(
+        3 + abilities_meta.len() - abilities_to_merge.len() + items_meta.len() + runes_meta.len(),
+    );
+
+    headers.extend([
+        ImageType::BasicAttack,
+        ImageType::CritStrike,
+        ImageType::OnhitAttack,
+    ]);
+
+    {
         let meta_len = abilities_meta.len();
         let merge_len = abilities_to_merge.len();
-        let mut result = Vec::with_capacity(meta_len - merge_len);
 
         let mut i = 0;
 
@@ -55,15 +64,10 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
                 }
             }
 
-            result.push(ImageType::Ability(champion_id, ability_kind));
+            headers.push(ImageType::Ability(champion_id, ability_kind));
             i += 1;
         }
-
-        result
-    };
-
-    let mut headers =
-        Vec::with_capacity(skip + 3 + abilities.len() + items_meta.len() + runes_meta.len());
+    }
 
     fn header<T: Copy + Into<ImageType> + CastId>(
         headers: &mut Vec<ImageType>,
@@ -71,17 +75,10 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
     ) {
         for metadata in slice.iter() {
             let kind = metadata.kind;
+
             headers.push(kind.into());
         }
     }
-
-    headers.extend([
-        ImageType::BasicAttack,
-        ImageType::CritStrike,
-        ImageType::OnhitAttack,
-    ]);
-
-    headers.extend(abilities);
 
     header(&mut headers, items_meta);
     header(&mut headers, runes_meta);
@@ -90,7 +87,7 @@ pub fn TableHeader(props: &TableHeaderProps) -> Html {
         <thead>
             <tr>
                 for _ in 0..skip {
-                    <th></th>
+                    <th />
                 }
                 for src in headers {
                     <th data_docs={src.docs()}>

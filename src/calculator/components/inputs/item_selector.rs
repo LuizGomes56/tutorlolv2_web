@@ -1,4 +1,4 @@
-use crate::hover::Docs;
+use crate::{hover::Docs, utils::search::contains_ascii_case_insensitive};
 use strum::EnumCount;
 use {
     crate::{
@@ -305,7 +305,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
         is_open,
     } = props;
 
-    let query = use_state(String::new);
+    let query = use_state(AttrValue::default);
     let filters = use_state_eq(|| FilterBitSet::EMPTY);
 
     let dropdown_ref = {
@@ -319,13 +319,17 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
 
         use_callback((), move |e: InputEvent, _| {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
-            query.set(value);
+            query.set(value.into());
         })
     };
 
     {
         let is_open = is_open.clone();
         use_effect_with((), move |_| on_keydown(27, move || is_open.set(false)));
+    }
+
+    if !**is_open {
+        return Html::default();
     }
 
     let tray = {
@@ -466,13 +470,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                 && item.data().purchasable
                 && item.has_map(tutorlolv2::GameMap::SummonersRift)
         })
-        .filter(|item| {
-            query.is_empty()
-                || item
-                    .name()
-                    .to_ascii_lowercase()
-                    .contains(query.to_ascii_lowercase().as_str())
-        })
+        .filter(|item| contains_ascii_case_insensitive(item.name(), &query))
         .filter(|item| {
             filters.is_empty_const()
                 || filters
@@ -521,7 +519,7 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
                     "w-full", "p-4",
                     "h-full", "min-h-0"
                 )}>
-                    <Search {oninput} />
+                    <Search {oninput} value={(*query).clone()} />
                     <div class={classes!(
                         "grid", "grid-cols-[auto_1fr]",
                         "gap-4", "flex-1", "min-h-0"
@@ -546,11 +544,12 @@ pub fn ItemSelector(props: &ItemSelectorProps) -> Html {
 #[derive(PartialEq, Properties)]
 pub struct SearchProps {
     pub oninput: Callback<InputEvent>,
+    pub value: AttrValue,
 }
 
 #[component]
 pub fn Search(props: &SearchProps) -> Html {
-    let SearchProps { oninput } = props;
+    let SearchProps { oninput, value } = props;
     html! {
         <div
             class={classes!(
@@ -576,6 +575,7 @@ pub fn Search(props: &SearchProps) -> Html {
                     "text-sm", "p-3", "outline-hidden"
                 )}
                 placeholder={"Click Here to Search"}
+                {value}
                 {oninput}
             />
         </div>

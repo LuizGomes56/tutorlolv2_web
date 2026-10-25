@@ -227,7 +227,8 @@ pub fn Overlay() -> Html {
             let champion_id = current_player.champion_id;
             let enemy = enemies.get(*enemy_index).or_else(|| enemies.first());
 
-            let damages = enemy
+            let damages = || {
+                enemy
                 .map(|enemy| {
                     let damages =
                         DamageRenderer::new(&enemy.damages, champion_id, items_meta, runes_meta, None);
@@ -243,29 +244,32 @@ pub fn Overlay() -> Html {
                         </tr>
                     }
                 })
-                .unwrap_or_default();
+                .unwrap_or_default()
+            };
 
-            let recommendation = enemy.map(|enemy| {
-                let base = enemy.total_damage();
+            let recommendation = || {
+                enemy.map(|enemy| {
+                    let base = enemy.total_damage();
 
-                enemy
-                    .item_scores()
-                    .into_iter()
-                    .map(|(damage, item)| {
-                        html! {
-                            <div class={classes!("flex", "items-center", "gap-2")}>
-                                <span class={classes!("text-sm")}>
-                                    {damage - base}
-                                </span>
-                                <Image
-                                    class={classes!("w-6", "h-6")}
-                                    src={ImageType::from(item)}
-                                />
-                            </div>
-                        }
-                    })
-                    .collect::<Html>()
-            });
+                    enemy
+                        .item_scores()
+                        .into_iter()
+                        .map(|(damage, item)| {
+                            html! {
+                                <div class={classes!("flex", "items-center", "gap-2")}>
+                                    <span class={classes!("text-sm")}>
+                                        {damage - base}
+                                    </span>
+                                    <Image
+                                        class={classes!("w-6", "h-6")}
+                                        src={ImageType::from(item)}
+                                    />
+                                </div>
+                            }
+                        })
+                        .collect::<Html>()
+                })
+            };
 
             html! {
                 <>
@@ -288,7 +292,7 @@ pub fn Overlay() -> Html {
                                         {items_meta}
                                         {runes_meta}
                                     />
-                                    <tbody>{damages}</tbody>
+                                    <tbody>{damages()}</tbody>
                                 </table>
                             </div>
                         </Dynamic>
@@ -299,7 +303,7 @@ pub fn Overlay() -> Html {
                                 data-panel-content={true}
                                 class={classes!("flex", "flex-col", "gap-1", "max-w-fit", "max-h-fit")}
                             >
-                                {recommendation}
+                                {recommendation()}
                             </div>
                         </Dynamic>
                     }

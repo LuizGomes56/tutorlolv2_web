@@ -1,5 +1,5 @@
 //! Compact DOM payloads. Only the hovered element's documentation is rendered.
-use crate::{components::image::ImageType, model::AbilityKind};
+use crate::{components::image::ImageType, model::AbilityKind, utils::BINCODE_CONFIG};
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD};
 use bincode::{Decode, Encode};
 use std::fmt::Write;
@@ -38,6 +38,11 @@ pub enum DocView {
 // The enum is the wire schema; JavaScript treats the encoded attributes as opaque.
 // These ephemeral payloads are produced and consumed by the same Wasm build.
 impl Docs {
+    // ChampionMerged encodes the Docs tag, ChampionId, and two AbilityId/AbilityName
+    // pairs: six tags/IDs. Each fits within a varint u32 (at most five bytes).
+    // Revisit this bound if a variant gains additional or variable-length fields.
+    const MAX_ENCODED_BYTES: usize = 6 * 5;
+
     pub fn global(id: impl CastId) -> Self {
         match id.entity() {
             EntityId::Champion(id) => Self::ChampionGlobal(id),
@@ -47,10 +52,12 @@ impl Docs {
     }
 
     pub fn encode(self) -> String {
-        let bytes = bincode::encode_to_vec(self, bincode::config::standard())
-            .expect("Encoding documentation IDs into memory cannot fail");
+        let mut bytes = [0_u8; Self::MAX_ENCODED_BYTES];
 
-        STANDARD_NO_PAD.encode(bytes)
+        let length = bincode::encode_into_slice(self, &mut bytes, BINCODE_CONFIG)
+            .expect("Docs payload exceeded its documented encoded-size bound");
+
+        STANDARD_NO_PAD.encode(&bytes[..length])
     }
 
     fn render(self, html: &mut String) -> MayFail {
@@ -176,7 +183,7 @@ fn render(idents: &str, docs: &str) -> MayFail<String> {
     if !docs.is_empty() {
         let bytes = STANDARD_NO_PAD.decode(docs)?;
         let (doc, consumed): (Docs, _) =
-            bincode::decode_from_slice(&bytes, bincode::config::standard().with_limit::<65536>())?;
+            bincode::decode_from_slice(&bytes, BINCODE_CONFIG.with_limit::<65536>())?;
 
         if consumed != bytes.len() {
             return Err("Trailing documentation data".into());
@@ -196,7 +203,70 @@ pub fn render_hover_docs(idents: &str, docs: &str) -> Result<String, JsValue> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use strum::VariantArray;
+    use strum::{IntoEnumIterator, VariantArray};
+
+    #[test]
+    fn docs_variants_fit_buffer_and_base64_contains_only_encoded_bytes() {
+        let check = |doc: Docs| {
+            let expected = bincode::encode_to_vec(doc, BINCODE_CONFIG).unwrap();
+            let bytes = STANDARD_NO_PAD.decode(doc.encode()).unwrap();
+            assert_eq!(bytes, expected, "{doc:?}");
+
+            let (decoded, consumed): (Docs, _) =
+                bincode::decode_from_slice(&bytes, BINCODE_CONFIG).unwrap();
+            assert_eq!(decoded, doc);
+            assert_eq!(consumed, bytes.len(), "trailing bytes for {doc:?}");
+        };
+
+        for &champion in ChampionId::VARIANTS {
+            check(Docs::ChampionGlobal(champion));
+            for min in champion.abilities() {
+                check(Docs::Champion(champion, min.kind));
+                for max in champion.abilities() {
+                    check(Docs::ChampionMerged(champion, min.kind, max.kind));
+                }
+            }
+        }
+
+        // Also cover ability names that are not used in current champion metadata.
+        let constructors: [fn(tutorlolv2::AbilityName) -> AbilityId; 5] = [
+            AbilityId::P,
+            AbilityId::Q,
+            AbilityId::W,
+            AbilityId::E,
+            AbilityId::R,
+        ];
+        for name in tutorlolv2::AbilityName::iter() {
+            for constructor in constructors {
+                let ability = constructor(name);
+                check(Docs::ChampionMerged(
+                    ChampionId::default(),
+                    ability,
+                    ability,
+                ));
+            }
+        }
+
+        for &item in ItemId::VARIANTS {
+            check(Docs::Item(item));
+            check(Docs::ItemGlobal(item));
+        }
+        for &rune in RuneId::VARIANTS {
+            check(Docs::Rune(rune));
+            check(Docs::RuneGlobal(rune));
+        }
+        for builtin in [
+            Builtin::Tower,
+            Builtin::BasicAttack,
+            Builtin::CriticalStrike,
+            Builtin::Onhit,
+            Builtin::Ignite,
+        ] {
+            for view in [DocView::Global, DocView::Function] {
+                check(Docs::Builtin(builtin, view));
+            }
+        }
+    }
 
     #[test]
     fn merged_header_docs_render_both_real_abilities() {

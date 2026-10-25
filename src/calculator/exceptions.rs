@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, rc::Rc};
 use tutorlolv2::{ValueId, bitset::BitSet, model::ValueException};
 
 /// Packed exceptions in ascending ID order. T supplies the item/rune domain,
@@ -6,7 +6,7 @@ use tutorlolv2::{ValueId, bitset::BitSet, model::ValueException};
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ExceptionMap<T: ValueId> {
     keys: BitSet,
-    values: Vec<ValueException>,
+    values: Rc<Vec<ValueException>>,
     marker: PhantomData<T>,
 }
 
@@ -31,9 +31,9 @@ impl<T: ValueId> ExceptionMap<T> {
         let value = key.pack_exc(stacks);
 
         if self.keys.contains_const(index) {
-            self.values[position] = value;
+            Rc::make_mut(&mut self.values)[position] = value;
         } else {
-            self.values.insert(position, value);
+            Rc::make_mut(&mut self.values).insert(position, value);
             self.keys.insert_const(index);
         }
     }
@@ -51,6 +51,21 @@ impl<T: ValueId> ExceptionMap<T> {
 mod tests {
     use crate::calculator::ExceptionMap;
     use tutorlolv2::{CastId, ItemId, RuneId, model::ValueException};
+
+    #[test]
+    fn snapshots_share_values_until_mutated_and_preserve_previous_stacks() {
+        let mut original = ExceptionMap::<ItemId>::default();
+        original.insert(ItemId::DarkSeal, 4);
+        let mut changed = original.clone();
+        assert_eq!(original.values().as_ptr(), changed.values().as_ptr());
+
+        changed.insert(ItemId::DarkSeal, 9);
+        changed.insert(ItemId::try_from_u16(0).unwrap(), 2);
+        assert_eq!(original.get(&ItemId::DarkSeal).unwrap().stacks(), 4);
+        assert_eq!(original.values().len(), 1);
+        assert_eq!(changed.get(&ItemId::DarkSeal).unwrap().stacks(), 9);
+        assert_eq!(changed.values().len(), 2);
+    }
 
     #[test]
     fn replacing_stacks_keeps_a_single_exception_per_key() {

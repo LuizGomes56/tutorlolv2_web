@@ -3,6 +3,7 @@ use web_sys::js_sys::Math;
 
 pub mod glue;
 pub mod hooks;
+pub mod search;
 pub(crate) mod storage;
 mod traits;
 pub mod transport;
@@ -12,6 +13,10 @@ pub use {
     hooks::use_setter,
     traits::{ClassCast, EnumCast, Print},
 };
+
+/// Shared wire format for calculation payloads, hover docs, and stored records.
+/// Decoders can derive a bounded configuration with `with_limit` at the call site.
+pub const BINCODE_CONFIG: bincode::config::Configuration = bincode::config::standard();
 
 pub fn random_u64(range: Range<u64>) -> u64 {
     let start = range.start;

@@ -2,6 +2,7 @@ use crate::hover::Docs;
 use crate::{
     calculator::ExceptionMap,
     components::image::{Image, ImageType},
+    utils::tray::Tray,
 };
 use tutorlolv2::{
     CastId, ChampionId, ValueId,
@@ -66,7 +67,7 @@ where
 
 #[derive(PartialEq, Properties)]
 pub struct ExceptionSelectorProps<T: ValueId + PartialEq> {
-    pub values: Box<[T]>,
+    pub values: Tray<T>,
     pub exceptions: ExceptionMap<T>,
     pub callback: Callback<(T, u32)>,
     pub filter: BitSetExc,
@@ -89,7 +90,8 @@ where
 
     values
         .iter()
-        .filter_map(|&value| {
+        .filter_map(|entry| {
+            let value = entry.value;
             let index = value.index() as _;
 
             exceptions

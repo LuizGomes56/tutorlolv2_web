@@ -25,6 +25,7 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
             let value = ability_levels[key];
             let prototype = AbilityLevels::ACTIONS[i];
             let id = AttrValue::from(key.as_char().to_string());
+            let value = AttrValue::from(value.to_string());
 
             html! {
                 <label for={&id} class={classes!("grid", "grid-cols-2")}>
@@ -34,8 +35,8 @@ pub fn Abilities(props: &AbilitiesProps) -> Html {
                     />
                     <input
                         id={id}
-                        value={value.to_string()}
-                        placeholder={value.to_string()}
+                        value={&value}
+                        placeholder={value}
                         oninput={{
                             let callback = callback.clone();
 

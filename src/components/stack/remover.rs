@@ -102,24 +102,29 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
         })
     };
 
+    let snapshot = (**stack).clone();
+    let safe_stack = use_memo(
+        (
+            snapshot.clone(),
+            items_meta.clone(),
+            runes_meta.clone(),
+            champion_id,
+        ),
+        |(stack, items_meta, runes_meta, champion_id)| {
+            stack.reconcile(*champion_id, items_meta, runes_meta)
+        },
+    );
+
     {
         let stack = stack.clone();
-        let items_meta = items_meta.clone();
-        let runes_meta = runes_meta.clone();
 
-        use_effect_with(
-            (items_meta.clone(), runes_meta.clone(), champion_id),
-            move |(items_meta, runes_meta, ..)| {
-                let next = stack.reconcile(champion_id, items_meta, runes_meta);
-
-                if *stack != next {
-                    stack.dispatch(TrayAction::Replace(next));
-                }
-            },
-        );
+        use_effect_with((safe_stack.clone(), snapshot), move |(next, rendered)| {
+            // Initialization may have loaded a different combo in an earlier effect.
+            if *stack == *rendered && *rendered != **next {
+                stack.dispatch(TrayAction::Replace((**next).clone()));
+            }
+        });
     }
-
-    let safe_stack = stack.reconcile(champion_id, items_meta, runes_meta);
     let len = safe_stack.len();
 
     let remover = safe_stack

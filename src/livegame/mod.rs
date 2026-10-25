@@ -167,16 +167,10 @@ impl Enemy {
         self.damages.sum()
     }
 
-    pub fn item_scores(&self) -> Vec<(i32, ItemId)> {
-        let mut list = self
-            .siml_items
-            .iter()
-            .zip(ItemId::SIML)
-            .map(|(s, item)| (s.sum(), item))
-            .collect::<Vec<_>>();
+    pub fn item_scores(&self) -> [(i32, ItemId); ItemId::L_SIML] {
+        let mut list = core::array::from_fn(|i| (self.siml_items[i].sum(), ItemId::SIML[i]));
 
-        list.sort_unstable();
-        list.reverse();
+        list.sort_unstable_by(|left, right| right.cmp(left));
         list
     }
 }

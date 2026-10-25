@@ -1,4 +1,4 @@
-use crate::hover::Docs;
+use crate::{hover::Docs, utils::search::contains_ascii_case_insensitive};
 use {
     crate::{
         calculator::{
@@ -36,7 +36,7 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
     } = props;
 
     let entity = use_state(|| TargetEntity::Player);
-    let query = use_state(String::new);
+    let query = use_state(AttrValue::default);
 
     let insert = use_callback(player.clone(), |rune_id, player| {
         player.dispatch(PlayerAction::Tray(TrayAction::Insert(rune_id)))
@@ -53,7 +53,7 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
 
         use_callback((), move |e: InputEvent, _| {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
-            query.set(value);
+            query.set(value.into());
         })
     };
 
@@ -62,16 +62,14 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
         use_effect_with((), move |_| on_keydown(27, move || is_open.set(false)));
     }
 
+    if !**is_open {
+        return Html::default();
+    }
+
     let options = RuneId::VARIANTS
         .iter()
         .copied()
-        .filter(|item| {
-            query.is_empty()
-                || item
-                    .name()
-                    .to_ascii_lowercase()
-                    .contains(query.to_ascii_lowercase().as_str())
-        })
+        .filter(|item| contains_ascii_case_insensitive(item.name(), &query))
         .map(|rune| {
             let insert = insert.clone();
             let onclick = Callback::from(move |_| insert.emit(rune));
@@ -156,7 +154,7 @@ pub fn RuneSelector(props: &RuneSelectorProps) -> Html {
                     "w-full", "p-4",
                     "h-full", "min-h-0"
                 )}>
-                    <Search {oninput} />
+                    <Search {oninput} value={(*query).clone()} />
                     <div class={classes!(
                         "grid", "grid-cols-[auto_1fr]",
                         "gap-4", "flex-1", "min-h-0"

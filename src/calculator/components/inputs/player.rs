@@ -163,13 +163,13 @@ pub fn PlayerInput(props: &PlayerInputProps) -> Html {
                     ally={true}
                 />
                 <ExceptionSelector<ItemId>
-                    values={Box::from(player.data.items.values())}
+                    values={player.data.items.clone()}
                     exceptions={player.data.item_exceptions.clone()}
                     callback={item_exception_callback}
                     filter={ItemId::exceptions(true)}
                 />
                 <ExceptionSelector<RuneId>
-                    values={Box::from(player.runes.values())}
+                    values={player.runes.clone()}
                     exceptions={player.rune_exceptions.clone()}
                     callback={rune_exception_callback}
                     filter={RuneId::exceptions()}

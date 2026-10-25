@@ -97,7 +97,7 @@ impl Cell {
         let data_idents = hover::encode_idents(idents, ctx);
         let data_docs = docs.encode();
 
-        let main_line = Self::render_range(min_dmg, max_dmg).unwrap_or(Html::from(min_dmg));
+        let main_line = Self::render_range(min_dmg, max_dmg).unwrap_or_else(|| Html::from(min_dmg));
 
         let diff_line = diff.map(|(diff_min, diff_max)| {
             html! {
