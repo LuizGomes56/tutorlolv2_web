@@ -1,4 +1,3 @@
-use crate::hover::Docs;
 use {
     crate::{
         components::{
@@ -8,10 +7,10 @@ use {
             stack::{Stack, StackInsert, StackRemover, StackTable},
             tables::{body::to_html, header::TableHeader},
         },
-        impl_reducible,
+        hover::Docs,
         livegame::{Enemy, Game},
-        overlay::panel::PanelManager,
-        utils::{Loading, Print, glue::get_data, hooks::on_keydown},
+        overlay::{panel::PanelManager, storage::initialize_panel_events},
+        utils::{Loading, Print, glue::get_desktop_data, hooks::on_keydown},
     },
     std::time::Duration,
     wasm_bindgen::{
@@ -25,12 +24,6 @@ use {
     },
 };
 
-#[wasm_bindgen(module = "/public/events.js")]
-unsafe extern "C" {
-    #[wasm_bindgen(js_name = "mouse_events")]
-    pub fn mouse_events();
-}
-
 #[wasm_bindgen(module = "/public/invoke.js")]
 unsafe extern "C" {
     #[wasm_bindgen(js_name = "blur_overlay")]
@@ -40,14 +33,45 @@ unsafe extern "C" {
     pub async fn listen(event: String, callback: &Function) -> Result<JsValue, JsValue>;
 }
 
-impl_reducible! {
-    #[derive(Clone, Copy, Debug, PartialEq)]
-    Panel bool {
-        damage_table,
-        recommendations_table,
-        stack_insert,
-        stack_remover,
-        stack_table
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Panel {
+    pub damage_table: bool,
+    pub recommendations_table: bool,
+    pub stack_insert: bool,
+    pub stack_remover: bool,
+    pub stack_table: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PanelAction {
+    DamageTable(bool),
+    RecommendationsTable(bool),
+    StackInsert(bool),
+    StackRemover(bool),
+    StackTable(bool),
+}
+
+impl tutorlolv2::yew::ReduceApply for Panel {
+    type Action = PanelAction;
+
+    fn apply(&mut self, action: Self::Action) {
+        match action {
+            Self::Action::DamageTable(value) => self.damage_table = value,
+            Self::Action::RecommendationsTable(value) => self.recommendations_table = value,
+            Self::Action::StackInsert(value) => self.stack_insert = value,
+            Self::Action::StackRemover(value) => self.stack_remover = value,
+            Self::Action::StackTable(value) => self.stack_table = value,
+        }
+    }
+}
+
+impl yew::Reducible for Panel {
+    type Action = PanelAction;
+
+    fn reduce(self: std::rc::Rc<Self>, action: Self::Action) -> std::rc::Rc<Self> {
+        let mut new = *self;
+        <Self as tutorlolv2::yew::ReduceApply>::apply(&mut new, action);
+        std::rc::Rc::new(new)
     }
 }
 
@@ -80,7 +104,7 @@ pub fn Overlay() -> Html {
 
     let panel_manager = use_reducer_eq(Panel::default);
 
-    use_effect_with((), |_| mouse_events());
+    use_effect_with((), |_| initialize_panel_events());
 
     {
         let latest_enemy_index = latest_enemy_index.clone();
@@ -162,13 +186,14 @@ pub fn Overlay() -> Html {
         use_effect_with((), |_| {
             spawn_local(async move {
                 loop {
-                    let data = get_data().await;
+                    let data = get_desktop_data().await;
 
                     if let Ok(ref game) = data {
                         enemy_count.set(game.enemies.len());
                     }
 
                     game_data.set(data);
+
                     sleep(Duration::from_secs(1)).await;
                 }
             });

@@ -99,3 +99,16 @@ pub struct Game {
     pub items_meta: Rc<[TypeMetadata<ItemId>]>,
     pub runes_meta: Rc<[TypeMetadata<RuneId>]>,
 }
+
+impl From<tutorlolv2::model::OutputGame> for Game {
+    fn from(output: tutorlolv2::model::OutputGame) -> Self {
+        Self {
+            monster_damages: output.monster_damages,
+            current_player: output.current_player,
+            enemies: output.enemies.into(),
+            tower_damages: output.tower_damages,
+            items_meta: output.items_meta.into(),
+            runes_meta: output.runes_meta.into(),
+        }
+    }
+}

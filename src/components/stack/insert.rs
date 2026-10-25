@@ -132,17 +132,14 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
         (callback.clone(), items_meta.clone()),
         |(callback, items_meta)| {
             section("Items", {
-                let cursor = core::cell::Cell::new(0usize);
-
-                items_meta.iter().map({
+                items_meta.iter().enumerate().map({
                     let callback = callback.clone();
 
-                    move |metadata| {
+                    move |(i, metadata)| {
                         let item_id = metadata.kind;
                         let has_max = item_id.deals_max_damage();
 
-                        let base = cursor.get();
-                        cursor.set(base + if has_max { 2 } else { 1 });
+                        let base = i * 2;
 
                         let onclick = |j: usize| {
                             let callback = callback.clone();
@@ -175,7 +172,7 @@ pub fn StackInsert(props: &StackInsertProps) -> Html {
                     let onclick = {
                         let callback = callback.clone();
 
-                        Callback::from(move |_| callback.emit(StackValue::Rune(i, id)))
+                        Callback::from(move |_| callback.emit(StackValue::Rune(i * 2, id)))
                     };
 
                     button(onclick, ImageType::from(id), false)

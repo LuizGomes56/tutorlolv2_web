@@ -3,8 +3,9 @@ use web_sys::js_sys::Math;
 
 pub mod glue;
 pub mod hooks;
-mod macros;
+pub(crate) mod storage;
 mod traits;
+pub mod transport;
 pub mod tray;
 
 pub use {

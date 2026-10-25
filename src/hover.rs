@@ -265,23 +265,41 @@ mod tests {
     }
 
     #[test]
-    fn builtin_placeholders_preserve_function_vs_global() {
-        for builtin in [
-            Builtin::Tower,
-            Builtin::BasicAttack,
-            Builtin::CriticalStrike,
-            Builtin::Onhit,
-            Builtin::Ignite,
+    fn builtin_docs_preserve_function_vs_global() {
+        for (builtin, function, global) in [
+            (
+                Builtin::Tower,
+                FormulaRenderer::tower_fn(),
+                FormulaRenderer::tower_global(),
+            ),
+            (
+                Builtin::BasicAttack,
+                FormulaRenderer::basic_attack_fn(),
+                FormulaRenderer::basic_attack_global(),
+            ),
+            (
+                Builtin::CriticalStrike,
+                FormulaRenderer::critical_strike_fn(),
+                FormulaRenderer::critical_strike_global(),
+            ),
+            (
+                Builtin::Onhit,
+                FormulaRenderer::onhit_effect_fn(),
+                FormulaRenderer::onhit_effect_global(),
+            ),
+            (
+                Builtin::Ignite,
+                FormulaRenderer::ignite_fn(),
+                FormulaRenderer::ignite_fn(),
+            ),
         ] {
-            for (view, expected) in [
-                (DocView::Function, FormulaRenderer::tower_fn()),
-                (DocView::Global, FormulaRenderer::tower_global()),
-            ] {
+            for (view, expected) in [(DocView::Function, function), (DocView::Global, global)] {
                 let payload = Docs::Builtin(builtin, view).encode();
 
                 assert_eq!(
                     render("", &payload).unwrap(),
-                    format!("<pre>{expected}</pre>")
+                    format!("<pre>{expected}</pre>"),
+                    "{builtin:?} {view:?}"
                 );
             }
         }

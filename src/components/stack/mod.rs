@@ -1,14 +1,13 @@
 mod insert;
 mod remover;
+pub mod storage;
 mod table;
 
 use crate::utils::tray::{Tray, TrayAction, TrayEntry};
+use bincode::{Decode, Encode};
 use derive_more::{Deref, DerefMut};
-use serde::{Deserialize, Serialize};
 use std::rc::Rc;
-use tutorlolv2::{
-    AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata, bitset::BitSet,
-};
+use tutorlolv2::{AbilityId, ChampionId, ComboElement, ItemId, RuneId, TypeMetadata};
 use yew::{Callback, Reducible, UseReducerHandle, UseStateHandle, hook, use_callback};
 
 pub use insert::StackInsert;
@@ -34,21 +33,24 @@ impl Stack {
         })
     }
 
+    fn default_metadata_values<T: Copy>(
+        metadata: &[TypeMetadata<T>],
+        value: fn(usize, T) -> StackValue,
+    ) -> impl Iterator<Item = StackValue> + '_ {
+        // Item and rune damage arrays reserve a min/max pair per metadata
+        // entry, including entries whose maximum column stays zero.
+        metadata
+            .iter()
+            .enumerate()
+            .map(move |(i, m)| value(i * 2, m.kind))
+    }
+
     pub fn new(
         combo_index: &UseStateHandle<usize>,
         champion_id: ChampionId,
         items_meta: &[TypeMetadata<ItemId>],
         runes_meta: &[TypeMetadata<RuneId>],
     ) -> Self {
-        fn chain_meta<T: Copy>(
-            meta: &[TypeMetadata<T>],
-            f: fn(usize, T) -> StackValue,
-        ) -> impl IntoIterator<Item = TrayEntry<StackValue>> {
-            meta.iter()
-                .enumerate()
-                .map(move |(i, v)| TrayEntry::new(f(i, v.kind)))
-        }
-
         let combos = champion_id.combos();
         let i = **combo_index % combos.len().max(1);
 
@@ -67,8 +69,14 @@ impl Stack {
                             .map(|slot| TrayEntry::new(StackValue::Ability { slot, ability_id })),
                         ComboElement::Attack => Some(TrayEntry::new(StackValue::BasicAttack)),
                     })
-                    .chain(chain_meta(items_meta, StackValue::Item))
-                    .chain(chain_meta(runes_meta, StackValue::Rune)),
+                    .chain(
+                        Self::default_metadata_values(items_meta, StackValue::Item)
+                            .map(TrayEntry::new),
+                    )
+                    .chain(
+                        Self::default_metadata_values(runes_meta, StackValue::Rune)
+                            .map(TrayEntry::new),
+                    ),
             ),
         }
     }
@@ -79,22 +87,21 @@ impl Stack {
         items_meta: &[TypeMetadata<ItemId>],
         runes_meta: &[TypeMetadata<RuneId>],
     ) -> Self {
-        let items_allowed = items_meta
-            .iter()
-            .map(|m| m.kind.index())
-            .collect::<BitSet>();
-
-        let runes_allowed = runes_meta
-            .iter()
-            .map(|m| m.kind.index())
-            .collect::<BitSet>();
-
         let values = self
             .iter()
             .filter(|entry| match entry.value {
-                StackValue::Item(_, item_id) => items_allowed.contains_const(item_id.index() as _),
-                StackValue::Rune(_, rune_id) => runes_allowed.contains_const(rune_id.index() as _),
-                StackValue::Ability { .. } => champion_id == self.champion_id,
+                StackValue::Item(slot, item_id) => {
+                    items_meta.get(slot / 2).is_some_and(|m| m.kind == item_id)
+                        && (slot % 2 == 0 || item_id.deals_max_damage())
+                }
+                StackValue::Rune(slot, rune_id) => {
+                    runes_meta.get(slot / 2).is_some_and(|m| m.kind == rune_id)
+                        && (slot % 2 == 0 || rune_id.deals_max_damage())
+                }
+                StackValue::Ability { slot, ability_id } => {
+                    champion_id == self.champion_id
+                        && champion_id.index_of_ability(ability_id) == Some(slot)
+                }
                 _ => true,
             })
             .collect();
@@ -118,7 +125,7 @@ impl Reducible for Stack {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Decode, Encode, PartialEq)]
 pub enum StackValue {
     Ability { slot: usize, ability_id: AbilityId },
     Item(usize, ItemId),
