@@ -1,5 +1,8 @@
 use {
-    crate::utils::{EnumCast, tray::Tray},
+    crate::utils::{
+        EnumCast,
+        tray::{Tray, TrayEntry},
+    },
     std::{num::NonZeroU8, rc::Rc},
     tutorlolv2::{
         ChampionId, ItemId, L_MSTR, L_TWRD, RuneId, TypeMetadata,
@@ -69,17 +72,17 @@ impl<T: Default> Default for PlayerData<T> {
     fn default() -> Self {
         let champion_id = ChampionId::random();
         let recommended_items = champion_id.recommended_items(champion_id.main_position());
-        let mut items = Vec::with_capacity(recommended_items.len());
+        let mut items = Tray::with_capacity(recommended_items.len());
 
         let mut item_exceptions = ExceptionMap::default();
 
         for &item in recommended_items {
-            item_exceptions.push_item(item, true, |item| items.push(item));
+            item_exceptions.push_item(item, true, |item| items.push(TrayEntry::new(item)));
         }
 
         Self {
             stats: T::default(),
-            items: items.into_iter().collect(),
+            items,
             item_exceptions,
             stacks: 0,
             level: const { NonZeroU8::new(18).unwrap() },

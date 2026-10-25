@@ -1,7 +1,7 @@
 use crate::hover::Docs;
 use crate::{
     components::image::{Image, ImageType, Svg},
-    utils::{EnumCast, hooks::use_clickout},
+    utils::{EnumCast, hooks::use_clickout, search::contains_ascii_case_insensitive},
 };
 use strum::VariantArray;
 use tutorlolv2::{CastId, GameMap, ItemId};
@@ -49,7 +49,7 @@ where
     } = *props;
 
     let is_open = use_state(|| false);
-    let query = use_state(String::new);
+    let query = use_state(AttrValue::default);
 
     let close_callback = use_callback(is_open.clone(), move |_, is_open| is_open.set(false));
 
@@ -58,8 +58,13 @@ where
 
     let buttons =
         use_memo(
-            (callback.clone(), close_callback.clone(), query.clone()),
-            |(callback, close_callback, query)| {
+            (
+                callback.clone(),
+                close_callback.clone(),
+                query.setter(),
+                array,
+            ),
+            |(callback, close_callback, query, array)| {
                 array
                 .iter()
                 .map(|&v| {
@@ -71,7 +76,7 @@ where
                         Callback::from(move |_| {
                             callback.emit(v);
                             close_callback.emit(());
-                            query.set(String::new());
+                            query.set(AttrValue::default());
                         })
                     };
 
@@ -90,12 +95,7 @@ where
 
     let options = buttons
         .iter()
-        .filter(|(v, _)| {
-            query.is_empty()
-                || v.name()
-                    .to_ascii_lowercase()
-                    .contains(&query.trim().to_ascii_lowercase())
-        })
+        .filter(|(v, _)| contains_ascii_case_insensitive(v.name(), query.trim()))
         .map(|(_, v)| v.clone())
         .collect::<Html>();
 
@@ -104,8 +104,9 @@ where
         |e: InputEvent, (query, is_open)| {
             let target = e.target_unchecked_into::<HtmlInputElement>();
             let value = target.value();
+
             is_open.set(!value.is_empty());
-            query.set(value);
+            query.set(value.into());
         },
     );
 
@@ -133,7 +134,7 @@ where
                             "focus:outline-hidden", "truncate",
                             input_class
                         )}
-                        value={query.to_string()}
+                        value={(*query).clone()}
                         placeholder={value.name()}
                         {oninput}
                         {onfocus}

@@ -11,55 +11,75 @@ use {
 /// two vectors aligned so calculator inputs can borrow the values directly.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Tray<T: Copy> {
+    data: Rc<TrayData<T>>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct TrayData<T: Copy> {
     ids: Vec<u64>,
     values: Vec<T>,
 }
 
 impl<T: Copy> Default for Tray<T> {
     fn default() -> Self {
-        Self {
-            ids: Vec::new(),
-            values: Vec::new(),
-        }
+        Self::with_capacity(0)
     }
 }
 
 impl<T: Copy> Tray<T> {
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            data: Rc::new(TrayData {
+                ids: Vec::with_capacity(capacity),
+                values: Vec::with_capacity(capacity),
+            }),
+        }
+    }
+
     pub fn new(entries: impl IntoIterator<Item = TrayEntry<T>>) -> Self {
         entries.into_iter().collect()
     }
 
     pub fn values(&self) -> &[T] {
-        &self.values
+        &self.data.values
     }
 
     pub fn iter(&self) -> impl DoubleEndedIterator<Item = TrayEntry<T>> + ExactSizeIterator + '_ {
-        self.ids
+        self.data
+            .ids
             .iter()
             .copied()
-            .zip(self.values.iter().copied())
+            .zip(self.data.values.iter().copied())
             .map(|(id, value)| TrayEntry { id, value })
     }
 
     pub fn len(&self) -> usize {
-        self.values.len()
+        self.data.values.len()
     }
 
     pub fn push(&mut self, entry: TrayEntry<T>) {
-        self.ids.push(entry.id);
-        self.values.push(entry.value);
+        let data = Rc::make_mut(&mut self.data);
+
+        data.ids.push(entry.id);
+        data.values.push(entry.value);
     }
 
     pub fn remove_by_id(&mut self, id: u64) {
-        if let Some(index) = self.ids.iter().position(|&entry_id| entry_id == id) {
-            self.ids.remove(index);
-            self.values.remove(index);
+        if let Some(index) = self.data.ids.iter().position(|&entry_id| entry_id == id) {
+            let data = Rc::make_mut(&mut self.data);
+
+            data.ids.remove(index);
+            data.values.remove(index);
         }
     }
 
     pub fn clear(&mut self) {
-        self.ids.clear();
-        self.values.clear();
+        if let Some(data) = Rc::get_mut(&mut self.data) {
+            data.ids.clear();
+            data.values.clear();
+        } else {
+            *self = Self::default();
+        }
     }
 }
 
@@ -104,7 +124,9 @@ impl<U: Copy> FromIterator<TrayEntry<U>> for Tray<U> {
             .map(|entry| (entry.id, entry.value))
             .unzip();
 
-        Self { ids, values }
+        Self {
+            data: Rc::new(TrayData { ids, values }),
+        }
     }
 }
 
@@ -145,7 +167,6 @@ impl<T: Copy> Reducible for Tray<T> {
         let new_mut = Rc::make_mut(&mut new);
 
         action.apply(new_mut);
-
         new
     }
 }
@@ -153,6 +174,32 @@ impl<T: Copy> Reducible for Tray<T> {
 #[cfg(test)]
 mod tests {
     use super::{Tray, TrayAction, TrayEntry};
+
+    #[test]
+    fn snapshots_share_values_until_mutated_and_keep_entry_identities() {
+        let original = Tray::new([
+            TrayEntry { id: 10, value: 7 },
+            TrayEntry { id: 20, value: 9 },
+        ]);
+        let mut changed = original.clone();
+        assert_eq!(original.values().as_ptr(), changed.values().as_ptr());
+
+        changed.remove_by_id(10);
+        changed.push(TrayEntry { id: 30, value: 11 });
+        assert_eq!(original.values(), &[7, 9]);
+        assert_eq!(changed.values(), &[9, 11]);
+        assert_eq!(
+            original.iter().map(|entry| entry.id).collect::<Vec<_>>(),
+            [10, 20]
+        );
+        assert_eq!(
+            changed.iter().map(|entry| entry.id).collect::<Vec<_>>(),
+            [20, 30]
+        );
+        changed.clear();
+        assert!(changed.values().is_empty());
+        assert_eq!(original.values(), &[7, 9]);
+    }
 
     #[test]
     fn removing_one_duplicate_preserves_other_identities_and_value_order() {

@@ -11,7 +11,7 @@ use crate::{
         Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
         scoreboard::ScoreboardDisplay,
     },
-    utils::{Loading, Print, glue::get_desktop_data, use_setter},
+    utils::{Loading, glue::get_desktop_data, use_setter},
 };
 use std::{rc::Rc, time::Duration};
 use tutorlolv2::{ChampionId, ItemId, TypeMetadata, bitset::BitSet, model::Damages};
@@ -60,7 +60,6 @@ pub fn Livegame() -> Html {
                 loop {
                     let data = get_desktop_data().await;
 
-                    data.log();
                     game_data.set(data);
 
                     sleep(Duration::from_secs(1)).await;

@@ -87,24 +87,27 @@ impl Stack {
         items_meta: &[TypeMetadata<ItemId>],
         runes_meta: &[TypeMetadata<RuneId>],
     ) -> Self {
-        let values = self
-            .iter()
-            .filter(|entry| match entry.value {
-                StackValue::Item(slot, item_id) => {
-                    items_meta.get(slot / 2).is_some_and(|m| m.kind == item_id)
-                        && (slot % 2 == 0 || item_id.deals_max_damage())
-                }
-                StackValue::Rune(slot, rune_id) => {
-                    runes_meta.get(slot / 2).is_some_and(|m| m.kind == rune_id)
-                        && (slot % 2 == 0 || rune_id.deals_max_damage())
-                }
-                StackValue::Ability { slot, ability_id } => {
-                    champion_id == self.champion_id
-                        && champion_id.index_of_ability(ability_id) == Some(slot)
-                }
-                _ => true,
-            })
-            .collect();
+        let valid = |entry: &TrayEntry<StackValue>| match entry.value {
+            StackValue::Item(slot, item_id) => {
+                items_meta.get(slot / 2).is_some_and(|m| m.kind == item_id)
+                    && (slot % 2 == 0 || item_id.deals_max_damage())
+            }
+            StackValue::Rune(slot, rune_id) => {
+                runes_meta.get(slot / 2).is_some_and(|m| m.kind == rune_id)
+                    && (slot % 2 == 0 || rune_id.deals_max_damage())
+            }
+            StackValue::Ability { slot, ability_id } => {
+                champion_id == self.champion_id
+                    && champion_id.index_of_ability(ability_id) == Some(slot)
+            }
+            _ => true,
+        };
+
+        if champion_id == self.champion_id && self.iter().all(|entry| valid(&entry)) {
+            return self.clone();
+        }
+
+        let values = self.iter().filter(valid).collect();
 
         Self {
             champion_id,
@@ -136,4 +139,34 @@ pub enum StackValue {
     OnhitMin,
     OnhitMax,
     Ignite,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unchanged_reconciliation_shares_values_and_changed_metadata_removes_stale_entries() {
+        let champion_id = ChampionId::default();
+        let stack = Stack {
+            champion_id,
+            values: Tray::new([
+                TrayEntry {
+                    id: 10,
+                    value: StackValue::BasicAttack,
+                },
+                TrayEntry {
+                    id: 20,
+                    value: StackValue::Item(0, ItemId::NashorsTooth),
+                },
+            ]),
+        };
+        let metadata = [ItemId::NashorsTooth.data().metadata];
+        let same = stack.reconcile(champion_id, &metadata, &[]);
+        assert_eq!(same.values().as_ptr(), stack.values().as_ptr());
+        let changed = same.reconcile(champion_id, &[], &[]);
+        assert_eq!(changed.values(), &[StackValue::BasicAttack]);
+        assert_eq!(changed.iter().next().unwrap().id, 10);
+        assert_eq!(stack.len(), 2);
+    }
 }

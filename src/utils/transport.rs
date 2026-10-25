@@ -1,4 +1,5 @@
 //! Shared Bincode boundary for local calculations and the HTTP calculation service.
+use super::BINCODE_CONFIG;
 use tutorlolv2::{
     model::{InputGame, OutputGame},
     riot::RiotRealtime,
@@ -18,7 +19,7 @@ fn consume_all(consumed: usize, length: usize) -> Result<(), Error> {
 }
 
 pub fn decode_realtime_input(bytes: &[u8]) -> Result<RiotRealtime<'_>, Error> {
-    let (input, consumed) = bincode::borrow_decode_from_slice(bytes, bincode::config::standard())?;
+    let (input, consumed) = bincode::borrow_decode_from_slice(bytes, BINCODE_CONFIG)?;
 
     consume_all(consumed, bytes.len())?;
 
@@ -34,14 +35,13 @@ pub async fn calculator(input: InputGame<'_>) -> Result<OutputGame, Error> {
     #[cfg(not(feature = "local-calculation"))]
     {
         let body = {
-            let bytes = bincode::encode_to_vec(input, bincode::config::standard())?;
+            let bytes = bincode::encode_to_vec(input, BINCODE_CONFIG)?;
             Uint8Array::from(bytes.as_slice())
         };
 
         let response = post("calculator", body).await?;
 
-        let (output, consumed) =
-            bincode::decode_from_slice(&response, bincode::config::standard())?;
+        let (output, consumed) = bincode::decode_from_slice(&response, BINCODE_CONFIG)?;
 
         consume_all(consumed, response.len())?;
 
@@ -95,10 +95,8 @@ pub async fn realtime(
 
         let response = post("realtime", bytes).await?;
 
-        let (output, consumed) = bincode::borrow_decode_from_slice::<Realtime<'_>, _>(
-            &response,
-            bincode::config::standard(),
-        )?;
+        let (output, consumed) =
+            bincode::borrow_decode_from_slice::<Realtime<'_>, _>(&response, BINCODE_CONFIG)?;
 
         consume_all(consumed, response.len())?;
 
