@@ -95,11 +95,10 @@ impl Reducible for Player {
                 new_mut.rune_exceptions.insert(rune_id, stacks);
             }
             Self::Action::Data(v) => {
-                let mut data = new.data.clone();
+                let mut data = new_mut.data.clone();
 
                 data.reduce_mut(true, v);
-
-                Rc::make_mut(&mut new).data = data;
+                new_mut.data = data;
             }
         }
 
@@ -115,7 +114,6 @@ impl<T: ReduceApply> Reducible for PlayerData<T> {
         let new_mut = Rc::make_mut(&mut new);
 
         new_mut.reduce_mut(false, action);
-
         new
     }
 }

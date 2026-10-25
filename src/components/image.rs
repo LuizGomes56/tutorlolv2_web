@@ -56,18 +56,12 @@ pub fn Image(props: &ImageProps) -> Html {
     let src = src.url();
 
     match header {
-        Some(h) => {
-            let mut classes = classes!("relative");
-
-            classes.push(class);
-
-            html! {
-                <div class={classes}>
-                    <img loading={"lazy"} {src} alt={""} />
-                    {h}
-                </div>
-            }
-        }
+        Some(h) => html! {
+            <div class={classes!("relative", class)}>
+                <img loading={"lazy"} {src} alt={""} />
+                {h}
+            </div>
+        },
         None => html! {
             <img {class} loading={"lazy"} {src} alt={""} />
         },
@@ -284,12 +278,9 @@ pub struct SvgProps {
 pub fn Svg(props: &SvgProps) -> Html {
     let SvgProps { class, src } = props;
 
-    let mut classes = classes!("inline-block", "bg-current", "shrink-0");
-    classes.push(class);
-
     html! {
         <span
-            class={classes}
+            class={classes!("inline-block", "bg-current", "shrink-0", class)}
             style={format!(
                 concat!(
                     "-webkit-mask-image:url('{0}');",

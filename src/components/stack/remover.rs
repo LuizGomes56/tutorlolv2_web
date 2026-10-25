@@ -285,30 +285,27 @@ pub fn StackButton(props: &StackButtonProps) -> Html {
         class,
     } = props;
 
-    let mut classes = classes!(
-        "px-3",
-        "py-1.5",
-        "rounded-lg",
-        "border",
-        "border-std-800",
-        "bg-std-900/70",
-        "text-xs",
-        "font-semibold",
-        "text-std-200",
-        "hover:bg-std-800/60",
-        "transition-all",
-        "duration-150",
-        "focus-visible:outline",
-        "focus-visible:outline-2",
-    );
-
-    classes.push(class);
-
     html! {
         <button
             type={"button"}
             {onclick}
-            class={classes}
+            class={classes!(
+                "px-3",
+                "py-1.5",
+                "rounded-lg",
+                "border",
+                "border-std-800",
+                "bg-std-900/70",
+                "text-xs",
+                "font-semibold",
+                "text-std-200",
+                "hover:bg-std-800/60",
+                "transition-all",
+                "duration-150",
+                "focus-visible:outline",
+                "focus-visible:outline-2",
+                class
+            )}
             {title}
             aria-label={title}
         >

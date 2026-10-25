@@ -19,18 +19,17 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
     } = props;
 
     let circle = |handle, class| {
-        let mut base = classes!(
-            "absolute",
-            "w-2.5",
-            "h-2.5",
-            "rounded-full",
-            "bg-std-700",
-            "z-10",
-        );
-
-        base.push(class);
-
-        html!(<div data-resize-handle={handle} class={base} />)
+        html! {
+            <div data-resize-handle={handle} class={classes!(
+                "absolute",
+                "w-2.5",
+                "h-2.5",
+                "rounded-full",
+                "bg-std-700",
+                "z-10",
+                class
+            )} />
+        }
     };
 
     html! {

@@ -120,11 +120,7 @@ where
             <label ref={label_ref} class={classes!(
                 "h-full", "block", "content-end"
             )}>
-                <div class={{
-                    let mut class = classes!("flex", "items-center");
-                    class.push(label_class);
-                    class
-                }}>
+                <div class={classes!("flex", "items-center", label_class)}>
                     <div data_docs={image_type.docs()}>
                         <Image
                             class={img_class}

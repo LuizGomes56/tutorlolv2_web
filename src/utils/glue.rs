@@ -18,16 +18,13 @@ unsafe extern "C" {
 /// Calculation mode is independent of the input source.
 pub async fn get_desktop_data() -> Result<Game, Box<dyn core::error::Error>> {
     #[cfg(feature = "tauri")]
-    let bytes = get_live_game()
-        .await
-        .map_err(|error| {
-            format!("[tauri] Error: {error:?}").log();
-            "[tauri]: Can't access Riot API or you're not playing League right now"
-        })?
-        .to_vec();
+    let bytes = get_live_game().await.map_err(|error| {
+        format!("[tauri] Error: {error:?}").log();
+        "[tauri]: Can't access Riot API or you're not playing League right now"
+    })?;
 
     #[cfg(not(feature = "tauri"))]
-    let bytes = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.bincode"));
+    let bytes = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.bincode")).as_slice();
 
-    transport::realtime(bytes.as_slice()).await
+    transport::realtime(bytes).await
 }

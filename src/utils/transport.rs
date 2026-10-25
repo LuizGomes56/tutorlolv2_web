@@ -49,10 +49,21 @@ pub async fn calculator(input: InputGame<'_>) -> Result<OutputGame, Error> {
     }
 }
 
-pub async fn realtime(bytes: &[u8]) -> Result<crate::livegame::Game, Error> {
+pub async fn realtime(
+    #[cfg(not(feature = "tauri"))] bytes: &[u8],
+    #[cfg(feature = "tauri")] bytes: web_sys::js_sys::Uint8Array,
+) -> Result<crate::livegame::Game, Error> {
     #[cfg(feature = "local-calculation")]
     {
+        // Borrowed decoding needs the Rust buffer to live through calculation.
+        #[cfg(feature = "tauri")]
+        let buffer = bytes.to_vec();
+
+        #[cfg(feature = "tauri")]
+        let bytes = buffer.as_slice();
+
         let input = decode_realtime_input(bytes)?;
+
         let output = tutorlolv2::realtime::realtime(&input).map_err(|error| match error {
             tutorlolv2::realtime::RealtimeError::UnrecognizedCurrentPlayer(player) => {
                 format!("Unable to recognize current player with name {player:?}")
@@ -64,10 +75,26 @@ pub async fn realtime(bytes: &[u8]) -> Result<crate::livegame::Game, Error> {
 
     #[cfg(not(feature = "local-calculation"))]
     {
-        #[cfg(debug_assertions)]
-        let _ = decode_realtime_input(bytes)?;
+        let bytes = {
+            #[cfg(not(feature = "tauri"))]
+            {
+                #[cfg(debug_assertions)]
+                let _ = decode_realtime_input(bytes)?;
 
-        let response = post("realtime", Uint8Array::from(bytes)).await?;
+                Uint8Array::from(bytes)
+            }
+
+            #[cfg(feature = "tauri")]
+            {
+                #[cfg(debug_assertions)]
+                let _ = decode_realtime_input(&bytes.to_vec())?;
+
+                bytes
+            }
+        };
+
+        let response = post("realtime", bytes).await?;
+
         let (output, consumed) = bincode::borrow_decode_from_slice::<Realtime<'_>, _>(
             &response,
             bincode::config::standard(),
