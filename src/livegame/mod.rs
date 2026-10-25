@@ -1,20 +1,20 @@
-use std::num::NonZeroU8;
-
-use crate::hover::Docs;
-mod components;
-mod page;
-
 use {
-    crate::components::image::{Image, ImageType},
-    std::rc::Rc,
+    crate::{
+        components::image::{Image, ImageType},
+        hover::Docs,
+    },
+    std::{num::NonZeroU8, rc::Rc},
     tutorlolv2::{
         AdaptiveType, ChampionId, GameMap, ItemId, Position, RuneId, TypeMetadata,
         model::{
             AbilityLevels, BasicStats, Damages, Dragons, EnemyStats, PlayerStats, SimpleStats, Team,
         },
     },
-    yew::prelude::*,
+    yew::{html::IntoPropValue, prelude::*},
 };
+
+mod components;
+mod page;
 
 pub use components::*;
 pub use page::Livegame;
@@ -47,7 +47,7 @@ pub struct CurrentPlayer {
 
 #[derive(Debug, PartialEq)]
 pub struct Scoreboard {
-    pub riot_id: Box<str>,
+    pub riot_id: Rc<str>,
     pub assists: u8,
     pub creep_score: u16,
     pub deaths: u8,
@@ -57,8 +57,14 @@ pub struct Scoreboard {
     pub team: Team,
 }
 
-impl Scoreboard {
-    pub fn to_html(&self) -> Html {
+impl IntoPropValue<Html> for &Scoreboard {
+    fn into_prop_value(self) -> Html {
+        self.into()
+    }
+}
+
+impl From<&Scoreboard> for Html {
+    fn from(scoreboard: &Scoreboard) -> Html {
         let Scoreboard {
             riot_id,
             assists,
@@ -68,79 +74,81 @@ impl Scoreboard {
             champion_id,
             position,
             ..
-        } = self;
+        } = scoreboard;
 
         html! {
-            <div class={classes!(
-                "grid", "grid-cols-[auto_1fr_auto]",
-                "gap-2", "items-center"
-            )}>
-                <div data_docs={Docs::global(*champion_id).encode()} class={classes!("relative", "shrink-0")}>
-                    <Image
-                        class={classes!("w-8", "h-8", "overflow-hidden")}
-                        src={ImageType::from(champion_id)}
-                    />
-                </div>
+            <td>
                 <div class={classes!(
-                    "flex", "min-w-0", "flex-col", "gap-0.5",
+                    "grid", "grid-cols-[auto_1fr_auto]",
+                    "gap-2", "items-center"
                 )}>
-                    <span class={classes!(
-                        "text-left",
-                        "text-xs",
-                        "text-std-100",
-                        "truncate"
-                    )}>
-                        {riot_id.split_once('#').map(|(left, _)| left).unwrap_or(riot_id)}
-                    </span>
+                    <div data_docs={Docs::global(*champion_id).encode()} class={classes!("relative", "shrink-0")}>
+                        <Image
+                            class={classes!("w-8", "h-8", "overflow-hidden")}
+                            src={ImageType::from(champion_id)}
+                        />
+                    </div>
                     <div class={classes!(
-                        "flex", "items-center", "gap-1.5", "min-w-0",
-                        "justify-between",
+                        "flex", "min-w-0", "flex-col", "gap-0.5",
                     )}>
+                        <span class={classes!(
+                            "text-left",
+                            "text-xs",
+                            "text-std-100",
+                            "truncate"
+                        )}>
+                            {riot_id.split_once('#').map(|(left, _)| left).unwrap_or(riot_id)}
+                        </span>
                         <div class={classes!(
                             "flex", "items-center", "gap-1.5", "min-w-0",
+                            "justify-between",
                         )}>
-                            <Image
-                                class={classes!("w-3.5", "h-3.5", "shrink-0")}
-                                src={ImageType::Position(*position)}
-                            />
+                            <div class={classes!(
+                                "flex", "items-center", "gap-1.5", "min-w-0",
+                            )}>
+                                <Image
+                                    class={classes!("w-3.5", "h-3.5", "shrink-0")}
+                                    src={ImageType::Position(*position)}
+                                />
+                                <span class={classes!(
+                                    "truncate",
+                                    "text-xs",
+                                    "text-std-400"
+                                )}>
+                                    {champion_id.name()}
+                                </span>
+                            </div>
                             <span class={classes!(
-                                "truncate",
+                                "shrink-0",
                                 "text-xs",
                                 "text-std-400"
                             )}>
-                                {champion_id.name()}
+                                {"(CS: "}{creep_score}{")"}
                             </span>
                         </div>
-                        <span class={classes!(
-                            "shrink-0",
-                            "text-xs",
-                            "text-std-400"
-                        )}>
-                            {"(CS: "}{creep_score}{")"}
-                        </span>
+                    </div>
+                    <div class={classes!(
+                        "shrink-0",
+                        "w-24",
+                        "text-sm",
+                        "text-std-200",
+                        "whitespace-nowrap"
+                    )}>
+                        {kills}
+                        <span class={classes!("text-std-400")}>{" / "}</span>
+                        {deaths}
+                        <span class={classes!("text-std-400")}>{" / "}</span>
+                        {assists}
                     </div>
                 </div>
-                <div class={classes!(
-                    "shrink-0",
-                    "w-24",
-                    "text-sm",
-                    "text-std-200",
-                    "whitespace-nowrap"
-                )}>
-                    {kills}
-                    <span class={classes!("text-std-400")}>{" / "}</span>
-                    {deaths}
-                    <span class={classes!("text-std-400")}>{" / "}</span>
-                    {assists}
-                </div>
-            </div>
+            </td>
         }
     }
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Enemy {
-    pub riot_id: Box<str>,
+    pub riot_id: Rc<str>,
     pub damages: Damages,
     pub siml_items: [Damages; ItemId::L_SIML],
     pub base_stats: SimpleStats,

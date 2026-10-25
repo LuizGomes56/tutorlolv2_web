@@ -4,7 +4,7 @@ use crate::{
         image::{Image, ImageType},
         selector::Selector,
         stack::{Stack, StackInsert, StackRemover, StackTable},
-        tables::{body::to_html, empty::EmptyTable, header::TableHeader},
+        tables::{body::DamageRenderer, empty::EmptyTable, header::TableHeader},
     },
     hover::Docs,
     livegame::{
@@ -110,7 +110,13 @@ pub fn Livegame() -> Html {
                 .map(|enemy| {
                     get_damages(
                         enemy.champion_id,
-                        to_html(&enemy.damages, champion_id, items_meta, runes_meta, None),
+                        DamageRenderer::new(
+                            &enemy.damages,
+                            champion_id,
+                            items_meta,
+                            runes_meta,
+                            None,
+                        ),
                     )
                 })
                 .collect::<Html>();
@@ -121,7 +127,7 @@ pub fn Livegame() -> Html {
                     .map(|enemy| {
                         get_damages(
                             enemy.champion_id,
-                            to_html(
+                            DamageRenderer::new(
                                 &enemy.siml_items[i],
                                 champion_id,
                                 &siml_items_meta,

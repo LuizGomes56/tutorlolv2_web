@@ -20,7 +20,7 @@ pub fn AbilityLevelsDisplay(props: &AbilityLevelsDisplayProps) -> Html {
             <table class={classes!("data-table")}>
                 <thead>
                     <tr>
-                        <th></th>
+                        <th />
                         <th>
                             <span class={classes!("pr-2")}>
                                 {"Level"}

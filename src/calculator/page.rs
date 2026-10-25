@@ -1,4 +1,7 @@
-use crate::hover::{Builtin, DocView, Docs};
+use crate::{
+    components::tables::body::DamageRenderer,
+    hover::{Builtin, DocView, Docs},
+};
 use implicit_clone::ImplicitClone;
 use {
     crate::{
@@ -13,7 +16,7 @@ use {
         components::{
             image::{DragonImage, Image, ImageType, MinionImage, MonsterImage, OtherImage},
             stack::{Stack, StackInsert, StackRemover, StackTable},
-            tables::{body::to_html, empty::EmptyTable, header::TableHeader, turret::TurretTable},
+            tables::{empty::EmptyTable, header::TableHeader, turret::TurretTable},
         },
         utils::{ClassCast, transport},
     },
@@ -270,7 +273,7 @@ pub fn Calculator() -> Html {
                             <tbody>
                                 {
                                     enemies.iter().enumerate().map(|(i, enemy)| {
-                                        let damages = to_html(
+                                        let damages = DamageRenderer::new(
                                             &enemy.damages,
                                             current_player.champion_id,
                                             items_meta,
@@ -321,7 +324,7 @@ pub fn Calculator() -> Html {
                             <tbody>
                                 {
                                     monster_damages.iter().enumerate().map(|(i, damage)| {
-                                        let damages = to_html(
+                                        let damages = DamageRenderer::new(
                                             damage,
                                             current_player.champion_id,
                                             items_meta,
