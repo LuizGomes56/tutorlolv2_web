@@ -172,3 +172,59 @@ impl Enemy {
         list
     }
 }
+
+impl From<tutorlolv2::model::Realtime<'_>> for Game {
+    fn from(data: tutorlolv2::model::Realtime<'_>) -> Self {
+        Self {
+            current_player: CurrentPlayer {
+                riot_id: data.current_player.riot_id.into(),
+                base_stats: data.current_player.base_stats,
+                bonus_stats: data.current_player.bonus_stats,
+                current_stats: data.current_player.current_stats,
+                level: data.current_player.level,
+                team: data.current_player.team,
+                adaptive_type: data.current_player.adaptive_type,
+                position: data.current_player.position,
+                champion_id: data.current_player.champion_id,
+                game_map: data.current_player.game_map,
+            },
+            enemies: data
+                .enemies
+                .into_iter()
+                .map(|enemy| Enemy {
+                    riot_id: enemy.riot_id.into(),
+                    damages: enemy.damages,
+                    siml_items: enemy.siml_items,
+                    base_stats: enemy.base_stats,
+                    bonus_stats: enemy.bonus_stats,
+                    current_stats: enemy.current_stats,
+                    real_armor: enemy.real_armor,
+                    real_magic_resist: enemy.real_magic_resist,
+                    level: enemy.level,
+                    champion_id: enemy.champion_id,
+                    team: enemy.team,
+                    position: enemy.position,
+                })
+                .collect(),
+            scoreboard: data
+                .scoreboard
+                .into_iter()
+                .map(|score| Scoreboard {
+                    riot_id: score.riot_id.into(),
+                    assists: score.assists,
+                    creep_score: score.creep_score,
+                    deaths: score.deaths,
+                    kills: score.kills,
+                    champion_id: score.champion_id,
+                    position: score.position,
+                    team: score.team,
+                })
+                .collect(),
+            items_meta: data.items_meta.into(),
+            runes_meta: data.runes_meta.into(),
+            game_time: data.game_time,
+            ability_levels: data.ability_levels,
+            dragons: data.dragons,
+        }
+    }
+}

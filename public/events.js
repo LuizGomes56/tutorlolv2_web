@@ -1,4 +1,4 @@
-export function mouse_events() {
+export function mouse_events(savePanelRecord, loadPanelRecord) {
     document.body.style.backgroundColor = "transparent";
     document.documentElement.style.backgroundColor = "transparent";
 
@@ -95,41 +95,40 @@ export function mouse_events() {
         const key = getPanelStorageKey(panel);
         if (!key) return;
 
-        const payload = {
-            left: panel.style.left || "",
-            top: panel.style.top || "",
-            scale: getNumber(panel.dataset.scale, 1),
-        };
-
-        localStorage.setItem(key, JSON.stringify(payload));
+        savePanelRecord(
+            key,
+            panel.style.left || "",
+            panel.style.top || "",
+            getNumber(panel.dataset.scale, 1),
+        );
     }
 
     function loadPanelState(panel) {
         const key = getPanelStorageKey(panel);
         if (!key) return;
 
-        const raw = localStorage.getItem(key);
-        if (!raw) {
+        const saved = loadPanelRecord(key);
+        if (!saved) {
             applyScale(panel, getNumber(panel.dataset.scale, 1));
             return;
         }
 
         try {
-            const saved = JSON.parse(raw);
+            const [left, top, storedScale] = saved;
 
-            if (saved.left || saved.top) {
+            if (left || top) {
                 panel.style.position = "absolute";
             }
 
-            if (saved.left) {
-                panel.style.left = saved.left;
+            if (left) {
+                panel.style.left = left;
             }
 
-            if (saved.top) {
-                panel.style.top = saved.top;
+            if (top) {
+                panel.style.top = top;
             }
 
-            const scale = clamp(getNumber(saved.scale, 1), 0.35, 2);
+            const scale = clamp(getNumber(storedScale, 1), 0.35, 2);
             applyScale(panel, scale);
         } catch {
             applyScale(panel, getNumber(panel.dataset.scale, 1));

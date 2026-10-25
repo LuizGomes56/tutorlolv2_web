@@ -1,12 +1,8 @@
-use crate::{
-    components::{
-        image::{Image, ImageType},
-        stack::{Stack, StackValue, Tray, TrayAction},
-    },
-    utils::Print,
+use crate::components::{
+    image::{Image, ImageType},
+    stack::{Stack, StackValue, Tray, TrayAction, storage},
 };
-use serde_json::Value;
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 use tutorlolv2::{ChampionId, ItemId, RuneId, TypeMetadata};
 use yew::prelude::*;
 
@@ -39,23 +35,17 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
         let runes_meta = runes_meta.clone();
         let combo_index = combo_index.clone();
 
-        type StackStore = HashMap<ChampionId, Vec<StackValue>>;
-
         use_effect_with(champion_id, move |_| {
-            if let Some(window) = web_sys::window()
-                && let Ok(local) = window.local_storage()
-                && let Some(storage) = local
-                && let Ok(store) = storage.get("stack")
-                && let Some(value) = store
-                && let Ok(de) = serde_json::from_str::<StackStore>(&value)
-                && let Some(stored) = de.get(&champion_id)
-            {
+            if let Some(stored) = storage::load_stack(champion_id) {
                 let values = stored.iter().collect::<Tray<_>>();
 
-                return stack.dispatch(TrayAction::Replace(Stack {
-                    champion_id,
-                    values,
-                }));
+                return stack.dispatch(TrayAction::Replace(
+                    Stack {
+                        champion_id,
+                        values,
+                    }
+                    .reconcile(champion_id, &items_meta, &runes_meta),
+                ));
             }
 
             stack.dispatch(TrayAction::Replace(Stack::new(
@@ -70,26 +60,8 @@ pub fn StackRemover(props: &StackRemoverProps) -> Html {
     let save_stack = {
         use_callback(
             (stack.clone(), champion_id),
-            move |_: MouseEvent, (stack, _)| {
-                if let Some(window) = web_sys::window()
-                    && let Ok(local) = window.local_storage()
-                    && let Some(storage) = local
-                {
-                    let entries = stack.values();
-
-                    let mut root: HashMap<ChampionId, Value> = storage
-                        .get_item("stack")
-                        .ok()
-                        .flatten()
-                        .and_then(|s| serde_json::from_str(&s).ok())
-                        .unwrap_or_default();
-
-                    root.insert(champion_id, serde_json::json!(entries));
-
-                    if let Ok(result) = serde_json::to_string(&root) {
-                        storage.set_item("stack", &result).log();
-                    }
-                }
+            move |_: MouseEvent, (stack, champion_id)| {
+                storage::save_stack(*champion_id, stack.values());
             },
         )
     };

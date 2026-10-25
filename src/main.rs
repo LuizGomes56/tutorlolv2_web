@@ -5,11 +5,16 @@ use {
         components::{hoverdocs::HoverDocs, sidebar::Sidebar},
         formulas::Formulas,
         livegame::Livegame,
-        overlay::Overlay,
     },
     yew::prelude::*,
     yew_router::{BrowserRouter, Routable, Switch},
 };
+
+#[cfg(feature = "tauri")]
+use crate::overlay::Overlay;
+
+#[cfg(feature = "tauri")]
+mod overlay;
 
 mod about;
 mod calculator;
@@ -18,7 +23,6 @@ mod formulas;
 mod hover;
 mod livegame;
 mod model;
-mod overlay;
 mod utils;
 
 #[derive(Clone, Debug, PartialEq, Routable)]
@@ -26,6 +30,7 @@ pub enum Route {
     #[not_found]
     #[at("/")]
     Homepage,
+    #[cfg(feature = "tauri")]
     #[at("/overlay")]
     Overlay,
     #[at("/calculator")]
@@ -53,6 +58,7 @@ fn App() -> Html {
                     Route::Calculator => html!(<Calculator />),
                     Route::Formulas => html!(<Formulas />),
                     Route::Livegame => html!(<Livegame />),
+                    #[cfg(feature = "tauri")]
                     Route::Overlay => html!(<Overlay />),
                     Route::About => html!(<About />),
                     _ => html!(<Calculator />),
@@ -82,4 +88,19 @@ fn App() -> Html {
 
 fn main() {
     yew::Renderer::<App>::new().render();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Route;
+    use yew_router::Routable;
+
+    #[test]
+    fn overlay_route_is_available_only_in_tauri_builds() {
+        assert_eq!(
+            Route::routes().contains(&"/overlay"),
+            cfg!(feature = "tauri")
+        );
+        assert!(Route::routes().contains(&"/livegame"));
+    }
 }

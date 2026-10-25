@@ -15,7 +15,7 @@ use {
             stack::{Stack, StackInsert, StackRemover, StackTable},
             tables::{body::to_html, empty::EmptyTable, header::TableHeader, turret::TurretTable},
         },
-        utils::ClassCast,
+        utils::{ClassCast, transport},
     },
     std::{cell::RefCell, rc::Rc},
     tutorlolv2::{
@@ -87,12 +87,12 @@ pub enum TargetEntity {
     Enemy(usize),
 }
 
-fn game_fetch(
+async fn game_fetch(
     player: &UseReducerHandle<Player>,
     enemies: &UseReducerHandle<Enemies>,
     dragons: &UseReducerHandle<Dragons>,
-) -> Game {
-    let output = tutorlolv2::calculator::calculator(InputGame {
+) -> Result<Game, transport::Error> {
+    let output = transport::calculator(InputGame {
         active_player: InputActivePlayer {
             runes: player.runes.values(),
             rune_exceptions: player.rune_exceptions.values(),
@@ -120,16 +120,10 @@ fn game_fetch(
             })
             .collect::<Box<_>>(),
         dragons: **dragons,
-    });
+    })
+    .await?;
 
-    Game {
-        monster_damages: output.monster_damages,
-        current_player: output.current_player,
-        enemies: output.enemies.into(),
-        tower_damages: output.tower_damages,
-        items_meta: output.items_meta.into(),
-        runes_meta: output.runes_meta.into(),
-    }
+    Ok(output.into())
 }
 
 #[component]
@@ -142,6 +136,9 @@ pub fn Calculator() -> Html {
     let stack_push = Stack::use_push(&stack);
 
     let game_data = use_state(|| None::<Game>);
+    let request_error = use_state(|| None::<transport::Error>);
+    let request_pending = use_state(|| true);
+    let request_generation = use_mut_ref(|| 0_u64);
     let last_action = use_mut_ref(|| LastAction::Init);
     let entity = use_state(|| TargetEntity::Player);
     let is_item_modal_open = use_state(|| false);
@@ -169,58 +166,83 @@ pub fn Calculator() -> Html {
 
     {
         let game_data = game_data.clone();
+        let request_error = request_error.clone();
+        let request_pending = request_pending.clone();
+        let request_generation = request_generation.clone();
         let last_action = last_action.clone();
 
         use_effect_with(
             (player.clone(), enemies.clone(), dragons.clone()),
             move |(player, enemies, dragons)| {
-                if *last_action.borrow() == LastAction::Replace {
+                let generation = request_generation.borrow().wrapping_add(1);
+
+                request_generation.replace(generation);
+
+                let cleanup_generation = request_generation.clone();
+                let action = *last_action.borrow();
+
+                if action == LastAction::Replace {
                     last_action.replace(LastAction::Any);
-                    return;
-                };
+                } else {
+                    let player = player.clone();
+                    let enemies = enemies.clone();
+                    let dragons = dragons.clone();
 
-                let player = player.clone();
-                let enemies = enemies.clone();
-                let dragons = dragons.clone();
+                    request_error.set(None);
+                    request_pending.set(true);
 
-                spawn_local(async move {
-                    let data = game_fetch(&player, &enemies, &dragons);
-                    let infer_enemy_player_stats = |index| {
-                        if let Some(enemy) = &data.enemies.get(index)
-                            && let Some(input_enemy) =
-                                enemies.get(index) as Option<&Rc<PlayerData<EnemyStats>>>
-                            && input_enemy.infer_stats
+                    spawn_local(async move {
+                        let result = game_fetch(&player, &enemies, &dragons).await;
+
+                        if *request_generation.borrow() != generation {
+                            return;
+                        }
+
+                        request_pending.set(false);
+
+                        let data = match result {
+                            Ok(data) => data,
+                            Err(error) => {
+                                request_error.set(Some(error));
+                                game_data.set(None);
+                                return;
+                            }
+                        };
+
+                        // Every accepted reply represents the full current snapshot.
+                        // Update all inferred fields: an earlier request may have been
+                        // superseded before it could initialize the other inputs.
+                        if player.data.infer_stats
+                            && player.data.stats != data.current_player.current_stats
                         {
                             last_action.replace(LastAction::Replace);
-                            enemies.dispatch(EnemyAction::Change(
-                                index,
-                                DataAction::ReplaceStats(&enemy.current_stats as _),
-                            ));
+                            player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
+                                &data.current_player.current_stats as _,
+                            )));
                         }
-                    };
 
-                    let action = *last_action.borrow();
-
-                    match action {
-                        LastAction::Init | LastAction::CurrentPlayer => {
-                            if player.data.infer_stats {
-                                // data.current_player.log();
+                        for (index, enemy) in data.enemies.iter().enumerate() {
+                            if let Some(input_enemy) =
+                                enemies.get(index) as Option<&Rc<PlayerData<EnemyStats>>>
+                                && input_enemy.infer_stats
+                                && input_enemy.stats != enemy.current_stats
+                            {
                                 last_action.replace(LastAction::Replace);
-                                player.dispatch(PlayerAction::Data(DataAction::ReplaceStats(
-                                    &data.current_player.current_stats as _,
-                                )));
-                            }
-
-                            if action == LastAction::Init {
-                                (0..data.enemies.len()).for_each(infer_enemy_player_stats);
+                                enemies.dispatch(EnemyAction::Change(
+                                    index,
+                                    DataAction::ReplaceStats(&enemy.current_stats as _),
+                                ));
                             }
                         }
-                        LastAction::EnemyPlayer(index) => infer_enemy_player_stats(index),
-                        _ => {}
-                    };
 
-                    game_data.set(Some(data));
-                });
+                        game_data.set(Some(data));
+                    });
+                }
+                move || {
+                    if *cleanup_generation.borrow() == generation {
+                        cleanup_generation.replace(generation.wrapping_add(1));
+                    }
+                }
             },
         );
     }
@@ -432,6 +454,16 @@ pub fn Calculator() -> Html {
                     "flex-1", "order-3", "xl:order-2",
                     "min-w-full", "xl:min-w-0"
                 )}>
+                    if *request_pending {
+                        <p role="status" class={classes!("px-2", "py-1", "text-sm", "text-std-400")}>
+                            {"Calculating..."}
+                        </p>
+                    }
+
+                    if let Some(error) = request_error.as_ref() {
+                        {crate::components::errorlog::errorlog(error)}
+                    }
+
                     {data}
                 </div>
                 <EnemiesInput
