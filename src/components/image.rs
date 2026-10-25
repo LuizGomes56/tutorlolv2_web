@@ -111,14 +111,24 @@ impl ImageType {
             ImageType::Ability(champion_id, kind) => {
                 let ability_id = kind.ability_id();
                 let char = ability_id.as_char();
-                let suffix = if ability_id.ability_name() == AbilityName::Mega { "Mega" } else { "" };
+                let suffix = if ability_id.ability_name() == AbilityName::Mega {
+                    "Mega"
+                } else {
+                    ""
+                };
 
                 return format!("/abilities/{champion_id:?}{char}{suffix}.avif").into();
             }
-            ImageType::Champion(champion_id) => return format!("/champions/{champion_id:?}.avif").into(),
-            ImageType::Centered(champion_id) => return format!(
-                "https://ddragon.leagueoflegends.com/cdn/img/champion/centered/{champion_id:?}_0.jpg"
-            ).into(),
+            ImageType::Champion(champion_id) => {
+                return format!("/champions/{champion_id:?}.avif").into();
+            }
+            ImageType::Centered(champion_id) => {
+                return format!(
+                    // "https://ddragon.leagueoflegends.com/cdn/img/champion/centered/{champion_id:?}_0.jpg"
+                    "/centered/{champion_id:?}_0.avif"
+                )
+                .into();
+            }
             ImageType::Item(item_id) => return format!("/items/{}.avif", item_id.riot_id()).into(),
             ImageType::Rune(rune_id) => return format!("/runes/{}.avif", rune_id.riot_id()).into(),
             ImageType::Tower => "/other/tower.avif",
@@ -143,7 +153,9 @@ impl ImageType {
                 PlayerStatsField::AttackSpeed => "/stats/attack_speed.svg",
                 PlayerStatsField::CritChance => "/stats/crit_chance.svg",
                 PlayerStatsField::CritDamage => "/stats/crit_damage.svg",
-                PlayerStatsField::CurrentHealth | PlayerStatsField::MaxHealth => "/stats/health.svg",
+                PlayerStatsField::CurrentHealth | PlayerStatsField::MaxHealth => {
+                    "/stats/health.svg"
+                }
                 PlayerStatsField::CurrentMana | PlayerStatsField::MaxMana => "/stats/mana.svg",
                 PlayerStatsField::MagicPenetrationFlat
                 | PlayerStatsField::MagicPenetrationPercent => "/stats/magic_penetration.svg",

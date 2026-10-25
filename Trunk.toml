@@ -4,7 +4,6 @@ open = false
 
 [build]
 release = false
-minify = "never"
+minify = "on_release"
 open = false
 public_url = "./"
-
