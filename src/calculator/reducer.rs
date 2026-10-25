@@ -85,22 +85,25 @@ impl Reducible for Player {
     type Action = PlayerAction;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
-        let mut new = (*self).clone();
+        let mut new = self;
+        let new_mut = Rc::make_mut(&mut new);
 
         match action {
-            Self::Action::Tray(v) => v.apply(&mut new.runes),
-            Self::Action::AbilityLevels(v) => new.abilities.apply(v),
+            Self::Action::Tray(v) => v.apply(&mut new_mut.runes),
+            Self::Action::AbilityLevels(v) => new_mut.abilities.apply(v),
             Self::Action::ModifyRuneExc((rune_id, stacks)) => {
-                new.rune_exceptions.insert(rune_id, stacks);
+                new_mut.rune_exceptions.insert(rune_id, stacks);
             }
             Self::Action::Data(v) => {
-                let mut data = new.data;
+                let mut data = new.data.clone();
+
                 data.reduce_mut(true, v);
-                new.data = data;
+
+                Rc::make_mut(&mut new).data = data;
             }
         }
 
-        Rc::new(new)
+        new
     }
 }
 
@@ -108,9 +111,12 @@ impl<T: ReduceApply> Reducible for PlayerData<T> {
     type Action = DataAction<T>;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
-        let mut new = (*self).clone();
-        new.reduce_mut(false, action);
-        Rc::new(new)
+        let mut new = self;
+        let new_mut = Rc::make_mut(&mut new);
+
+        new_mut.reduce_mut(false, action);
+
+        new
     }
 }
 
@@ -118,27 +124,29 @@ impl Reducible for Enemies {
     type Action = EnemyAction;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
-        let mut new = (*self).clone();
+        let mut new = self;
+        let new_mut = Rc::make_mut(&mut new);
 
         match action {
-            EnemyAction::Insert(champion_id) => match new.len() < Self::MAX_ENEMIES {
+            EnemyAction::Insert(champion_id) => match new_mut.len() < Self::MAX_ENEMIES {
                 true => {
-                    new.push(Rc::new(PlayerData {
+                    new_mut.push(Rc::new(PlayerData {
                         champion_id,
                         ..Default::default()
                     }));
                 }
                 false => "Max enemies reached".log(),
             },
-            EnemyAction::Change(v, action) => new[v] = new[v].clone().reduce(action),
-            EnemyAction::Remove(v) => match !new.is_empty() {
+            EnemyAction::Change(v, action) => new_mut[v] = new_mut[v].clone().reduce(action),
+            EnemyAction::Remove(v) => match !new_mut.is_empty() {
                 true => {
-                    new.swap_remove(v);
+                    new_mut.swap_remove(v);
                 }
                 false => "At least one champion required".log(),
             },
         }
-        Rc::new(new)
+
+        new
     }
 }
 

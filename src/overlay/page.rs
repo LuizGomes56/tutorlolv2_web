@@ -5,14 +5,15 @@ use {
             errorlog::errorlog,
             image::{Image, ImageType},
             stack::{Stack, StackInsert, StackRemover, StackTable},
-            tables::{body::to_html, header::TableHeader},
+            tables::{body::DamageRenderer, header::TableHeader},
         },
         hover::Docs,
         livegame::{Enemy, Game},
         overlay::{panel::PanelManager, storage::initialize_panel_events},
         utils::{Loading, Print, glue::get_desktop_data, hooks::on_keydown},
     },
-    std::time::Duration,
+    std::{rc::Rc, time::Duration},
+    tutorlolv2::yew::ReduceApply,
     wasm_bindgen::{
         JsCast, JsValue,
         prelude::{Closure, wasm_bindgen},
@@ -68,10 +69,12 @@ impl tutorlolv2::yew::ReduceApply for Panel {
 impl yew::Reducible for Panel {
     type Action = PanelAction;
 
-    fn reduce(self: std::rc::Rc<Self>, action: Self::Action) -> std::rc::Rc<Self> {
-        let mut new = *self;
-        <Self as tutorlolv2::yew::ReduceApply>::apply(&mut new, action);
-        std::rc::Rc::new(new)
+    fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
+        let mut new = self;
+        let new_mut = Rc::make_mut(&mut new);
+
+        new_mut.apply(action);
+        new
     }
 }
 
@@ -227,7 +230,7 @@ pub fn Overlay() -> Html {
             let damages = enemy
                 .map(|enemy| {
                     let damages =
-                        to_html(&enemy.damages, champion_id, items_meta, runes_meta, None);
+                        DamageRenderer::new(&enemy.damages, champion_id, items_meta, runes_meta, None);
 
                     let enemy_id = enemy.champion_id;
 

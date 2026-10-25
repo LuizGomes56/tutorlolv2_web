@@ -117,11 +117,12 @@ impl Reducible for Stack {
     type Action = TrayAction<Self, StackValue>;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
-        let mut new = (*self).clone();
+        let mut new = self;
+        let new_mut = Rc::make_mut(&mut new);
 
-        action.apply(&mut new);
+        action.apply(new_mut);
 
-        Rc::new(new)
+        new
     }
 }
 

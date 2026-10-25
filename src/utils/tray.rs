@@ -141,9 +141,12 @@ impl<T: Copy> Reducible for Tray<T> {
     type Action = TrayAction<Self, T>;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
-        let mut new = (*self).clone();
-        action.apply(&mut new);
-        Rc::new(new)
+        let mut new = self;
+        let new_mut = Rc::make_mut(&mut new);
+
+        action.apply(new_mut);
+
+        new
     }
 }
 
