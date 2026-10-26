@@ -372,6 +372,7 @@ pub fn Overlay() -> Html {
 
     html! {
         <div class={classes!(
+            "desktop-overlay",
             "flex", "flex-col", "gap-4",
             "overflow-hidden", "flex-1",
             "h-full", "w-full",

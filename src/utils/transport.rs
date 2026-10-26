@@ -1,4 +1,5 @@
-//! Shared Bincode boundary for local calculations and the HTTP calculation service.
+//! Realtime input decoding and Bincode transport for the HTTP calculation service.
+#[cfg(any(test, not(all(feature = "tauri", feature = "local-calculation"))))]
 use super::BINCODE_CONFIG;
 use tutorlolv2::{
     model::{InputGame, OutputGame},
@@ -10,6 +11,7 @@ use {tutorlolv2::model::Realtime, web_sys::js_sys::Uint8Array};
 
 pub type Error = Box<dyn core::error::Error>;
 
+#[cfg(not(all(feature = "tauri", feature = "local-calculation")))]
 fn consume_all(consumed: usize, length: usize) -> Result<(), Error> {
     if consumed != length {
         return Err("Unexpected trailing bytes in Bincode payload".into());
@@ -19,11 +21,19 @@ fn consume_all(consumed: usize, length: usize) -> Result<(), Error> {
 }
 
 pub fn decode_realtime_input(bytes: &[u8]) -> Result<RiotRealtime<'_>, Error> {
-    let (input, consumed) = bincode::borrow_decode_from_slice(bytes, BINCODE_CONFIG)?;
+    #[cfg(all(feature = "tauri", feature = "local-calculation"))]
+    {
+        Ok(serde_json::from_slice(bytes)?)
+    }
 
-    consume_all(consumed, bytes.len())?;
+    #[cfg(not(all(feature = "tauri", feature = "local-calculation")))]
+    {
+        let (input, consumed) = bincode::borrow_decode_from_slice(bytes, BINCODE_CONFIG)?;
 
-    Ok(input)
+        consume_all(consumed, bytes.len())?;
+
+        Ok(input)
+    }
 }
 
 pub async fn calculator(input: InputGame<'_>) -> Result<OutputGame, Error> {
@@ -168,6 +178,7 @@ fn js_error(value: wasm_bindgen::JsValue) -> Error {
 mod tests {
     use super::*;
 
+    #[cfg(not(all(feature = "tauri", feature = "local-calculation")))]
     #[test]
     fn fixture_is_bincode_and_rejects_trailing_or_truncated_data() {
         let fixture = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.bincode"));
@@ -176,5 +187,23 @@ mod tests {
         trailing.push(0);
         assert!(decode_realtime_input(&trailing).is_err());
         assert!(decode_realtime_input(&fixture[..fixture.len() / 2]).is_err());
+    }
+
+    #[cfg(all(feature = "tauri", feature = "local-calculation"))]
+    #[test]
+    fn tauri_local_input_decodes_riot_json() {
+        let fixture = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.bincode"));
+        let (expected, _) =
+            bincode::borrow_decode_from_slice::<RiotRealtime<'_>, _>(fixture, BINCODE_CONFIG)
+                .unwrap();
+        let json = serde_json::to_vec(&expected).unwrap();
+
+        let input = decode_realtime_input(&json).expect("Tauri supplies Riot JSON bytes");
+        assert_eq!(input, expected);
+
+        let mut trailing = json.clone();
+        trailing.push(b'!');
+        assert!(decode_realtime_input(&trailing).is_err());
+        assert!(decode_realtime_input(&json[..json.len() / 2]).is_err());
     }
 }

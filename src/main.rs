@@ -54,12 +54,20 @@ fn App() -> Html {
     html! {
         <BrowserRouter>
             <Switch<Route> render={|route| {
+                #[cfg(feature = "tauri")]
+                if route == Route::Overlay {
+                    return html! {
+                        <>
+                            <Overlay />
+                            <HoverDocs />
+                        </>
+                    };
+                }
+
                 let component = match route {
                     Route::Calculator => html!(<Calculator />),
                     Route::Formulas => html!(<Formulas />),
                     Route::Livegame => html!(<Livegame />),
-                    #[cfg(feature = "tauri")]
-                    Route::Overlay => html!(<Overlay />),
                     Route::About => html!(<About />),
                     _ => html!(<Calculator />),
                 };

@@ -14,7 +14,7 @@ unsafe extern "C" {
     pub async fn get_live_game() -> Result<Uint8Array, JsValue>;
 }
 
-/// Tauri supplies a live Bincode RiotRealtime payload; browser builds use the fixture.
+/// Tauri supplies a live JSON RiotRealtime payload; browser builds use a Bincode fixture.
 /// Calculation mode is independent of the input source.
 pub async fn get_desktop_data() -> Result<Game, Box<dyn core::error::Error>> {
     #[cfg(feature = "tauri")]

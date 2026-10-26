@@ -1,6 +1,19 @@
+html {
+    background-color: #262626;
+}
+
 body {
     color: #ffffff;
     background-color: #121212;
+}
+
+html:has(.desktop-overlay),
+body:has(.desktop-overlay) {
+    background-color: transparent;
+}
+
+.desktop-overlay {
+    min-height: 100vh;
 }
 
 [data-panel="true"] [data-resize-handle] {

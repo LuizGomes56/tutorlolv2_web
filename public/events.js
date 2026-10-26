@@ -1,6 +1,4 @@
 export function mouse_events(savePanelRecord, loadPanelRecord) {
-    document.body.style.backgroundColor = "transparent";
-    document.documentElement.style.backgroundColor = "transparent";
 
     if (globalThis.__mouse_events_initialized) return;
     globalThis.__mouse_events_initialized = true;

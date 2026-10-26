@@ -4,6 +4,7 @@ open = false
 
 [build]
 release = false
+# Dev minification can fold Trunk's reload hostname placeholder into an unreplaced URL.
 minify = "on_release"
 open = false
 public_url = "./"

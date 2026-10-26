@@ -44,12 +44,38 @@ trunk build --release --features tauri
 trunk build --release --no-default-features --features tauri
 ```
 
-The desktop bridge must return a Bincode `RiotRealtime` payload. With
-`local-calculation`, the frontend calculates from that payload in WASM; without
-it, the payload is sent to the calculation service. Desktop builds propagate
+With `local-calculation`, the desktop bridge returns Riot JSON bytes, which the
+frontend deserializes into a borrowed `RiotRealtime` and calculates in WASM.
+Without `local-calculation`, the bridge must supply Bincode for the calculation
+service. Desktop builds propagate
 bridge errors instead of falling back to the sample. The overlay is excluded
-from builds without `tauri`. No JSON parsing is required in either calculation
-mode.
+from builds without `tauri`.
+
+For Windows Tauri development with the frontend in WSL, use this `build` section
+in `tauri.conf.json`:
+
+```json
+{
+  "frontendDist": "\\\\wsl.localhost\\Ubuntu\\home\\luizg\\Projects\\tutorlolv2_web\\dist",
+  "devUrl": "http://localhost:8000",
+  "beforeDevCommand": "wsl.exe --cd /home/luizg/Projects/tutorlolv2_web --exec /usr/bin/env PATH=/home/luizg/.cargo/bin:/usr/local/bin:/usr/bin:/bin /home/luizg/.cargo/bin/trunk serve --port 8000 --features tauri --minify false",
+  "beforeBuildCommand": "wsl.exe --cd /home/luizg/Projects/tutorlolv2_web --exec /usr/bin/env PATH=/home/luizg/.cargo/bin:/usr/local/bin:/usr/bin:/bin /home/luizg/.cargo/bin/trunk build --release --features tauri"
+}
+```
+
+Keep development HTML unminified: Trunk's minifier can fold its reload hostname
+placeholder into the WebSocket URL before the dev server replaces it. This
+produces repeated connections to `ws://{{__TRUNK_ADDRESS__}}/...`. Release builds
+remain minified and have no reload client. Restart Tauri development after
+changing the command, then reload the overlay window.
+
+The overlay window must use the app URL `overlay` (or
+`WebviewUrl::App("overlay".into())` when created in Rust) and `transparent: true`.
+The frontend renders `/overlay` without the sidebar or opaque page shell; all
+other routes retain the normal application layout. If `/overlay` renders the
+calculator itself, check the window's actual URL in DevTools and ensure another
+Trunk process or build is not overwriting the same `dist` directory without the
+`tauri` feature.
 
 Formula documentation and hover rendering remain available in both modes through
 the library's `client` feature. Calculation mode requires no runtime settings.
