@@ -11,9 +11,17 @@ pub fn EmptyTable(props: &EmptyTableProps) -> Html {
     html! {
         <div class={classes!("box")}>
             <table>
-                <thead><tr><th></th></tr></thead>
+                <thead>
+                    <tr>
+                        <th></th>
+                    </tr>
+                </thead>
                 <tbody>
-                    for _ in 0..rows { <tr><td></td></tr> }
+                    for _ in 0..rows {
+                        <tr>
+                            <td></td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

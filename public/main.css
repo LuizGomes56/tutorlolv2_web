@@ -39,7 +39,9 @@ body:has(.desktop-overlay) {
     align-content: center;
     font-weight: 700;
     text-align: center;
-    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-family:
+        ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     filter: drop-shadow(1.25px 1.25px 0px black);
     text-shadow: 0px 0px 4px black;
     white-space: nowrap;
@@ -122,7 +124,7 @@ table tbody tr:last-child {
 
 table th,
 table td {
-    transition: .2s ease;
+    transition: 0.2s ease;
     padding: 0 8px;
 }
 
@@ -157,8 +159,200 @@ img {
 }
 
 .bright {
-    background: linear-gradient(90deg,
-            rgba(0, 0, 0, 0) 50%,
-            rgba(90, 255, 255, 0.15) 90%,
-            rgba(90, 255, 255, 1));
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0) 50%,
+        rgba(90, 255, 255, 0.15) 90%,
+        rgba(90, 255, 255, 1)
+    );
+}
+
+/* Desktop settings use the existing zinc palette and compact widget surfaces. */
+.desktop-settings {
+    max-width: 58rem;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.desktop-settings h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.desktop-settings > p {
+    color: #d4d4d8;
+    margin-bottom: 1.5rem;
+}
+
+.overlay-settings-section {
+    padding: 1rem 0;
+    border-top: 1px solid #3f3f46;
+}
+
+.overlay-settings-section h2,
+.overlay-widget-settings h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.overlay-settings-section p,
+.overlay-widget-settings > p {
+    color: #d4d4d8;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+.overlay-shortcut-controls,
+.overlay-settings-heading {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.overlay-settings-heading {
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.overlay-shortcut-key {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #52525b;
+    background: #18181b;
+    color: #fafafa;
+    font-family: ui-monospace, monospace;
+}
+
+.overlay-settings-button {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #52525b;
+    background: #27272a;
+    color: #f4f4f5;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.overlay-settings-button:hover:not(:disabled) {
+    background: #3f3f46;
+}
+
+.overlay-settings-button:active:not(:disabled) {
+    background: #52525b;
+}
+
+.overlay-settings-button.primary {
+    border-color: #38bdf8;
+    color: #e0f2fe;
+}
+
+.overlay-settings-button:focus-visible,
+.overlay-widget-table input:focus-visible {
+    outline: 2px solid #7dd3fc;
+    outline-offset: 3px;
+}
+
+.overlay-settings-button:disabled,
+.overlay-widget-table input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.overlay-settings-section .overlay-settings-feedback {
+    min-height: 2.75rem;
+    margin: 0.75rem 0 0;
+}
+
+.overlay-settings-section .overlay-settings-error,
+.overlay-widget-settings .overlay-settings-error {
+    color: #fca5a5;
+    overflow-wrap: anywhere;
+}
+
+.overlay-settings-section .overlay-settings-warning {
+    color: #fde68a;
+}
+
+.overlay-widget-settings {
+    width: min(34rem, calc(100vw - 3rem));
+    max-height: calc(100vh - 4rem);
+    padding: 0.75rem;
+    overflow: auto;
+}
+
+.overlay-widget-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.overlay-widget-table th {
+    padding: 0.5rem;
+    text-align: left;
+    font-weight: 500;
+    white-space: normal;
+}
+
+.overlay-widget-table td {
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.overlay-widget-table input {
+    width: 1.125rem;
+    height: 1.125rem;
+    cursor: pointer;
+    accent-color: #38bdf8;
+}
+
+.overlay-widget-table thead tr {
+    background: #27272a;
+}
+
+.overlay-widget-table tbody tr:nth-child(n) {
+    background: transparent;
+    border-bottom: 1px solid #3f3f46;
+}
+
+@media (max-width: 600px) {
+    .desktop-settings {
+        padding: 1rem;
+    }
+    .overlay-widget-settings {
+        padding: 0.25rem;
+    }
+}
+
+[data-panel-id="panel-manager"] {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 20;
+}
+
+/* Keep the resize border and handles outside the scaled, intrinsically sized content. */
+.desktop-overlay .overlay-panel {
+    flex: none;
+    align-self: flex-start;
+    width: max-content;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+}
+
+.overlay-panel-content {
+    display: flow-root;
+    width: max-content;
+    transform-origin: top left;
+}
+
+.overlay-panel-editor {
+    width: max-content;
+    max-width: 32rem;
 }

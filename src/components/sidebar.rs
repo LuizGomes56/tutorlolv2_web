@@ -31,6 +31,12 @@ pub fn Sidebar() -> Html {
             .collect::<Html>()
     }
 
+    #[cfg(feature = "tauri")]
+    let desktop_settings = buttons([("Settings", Route::Settings)]);
+
+    #[cfg(not(feature = "tauri"))]
+    let desktop_settings = Html::default();
+
     html! {
         <aside class={classes!(
             "w-48", "h-full", "max-h-screen",
@@ -49,6 +55,7 @@ pub fn Sidebar() -> Html {
                     ])}
                 </div>
                 <div class={classes!("flex", "flex-col", "gap-2")}>
+                    {desktop_settings}
                     {buttons([
                         ("Formulas",    Route::Formulas),
                         ("Help & FAQ",  Route::Formulas),
