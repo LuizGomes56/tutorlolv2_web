@@ -36,7 +36,9 @@ pub fn ScoreboardDisplay(props: &ScoreboardProps) -> Html {
             <div class={classes!("box", "overflow-auto")}>
                 <table>
                     <thead>
-                        <tr><th>{"Allies"}</th></tr>
+                        <tr>
+                            <th>{"Allies"}</th>
+                        </tr>
                     </thead>
                     <tbody>
                         for ally in allies {
@@ -48,7 +50,9 @@ pub fn ScoreboardDisplay(props: &ScoreboardProps) -> Html {
             <div class={classes!("box", "overflow-auto")}>
                 <table>
                     <thead>
-                        <tr><th>{"Enemies"}</th></tr>
+                        <tr>
+                            <th>{"Enemies"}</th>
+                        </tr>
                     </thead>
                     <tbody>
                         for enemy in enemies {

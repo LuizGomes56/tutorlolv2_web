@@ -32,14 +32,21 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
     } = *props;
 
     html! {
-        <table class={classes!("data-table", if index.is_some() { Some("overlay") } else { None })}>
+        <table class={classes!(
+            "data-table",
+            if index.is_some() {
+                Some("overlay")
+            } else {
+                None
+            }
+        )}>
             <thead>
                 <tr>
                     <th class={classes!("w-0")}></th>
-                    <th>{ "Damage" }</th>
-                    <th>{ "Health" }</th>
+                    <th>{"Damage"}</th>
+                    <th>{"Health"}</th>
                     <th class={classes!("whitespace-nowrap")}>
-                        { "% HP" }
+                        {"% HP"}
                     </th>
                 </tr>
             </thead>
@@ -86,9 +93,9 @@ pub fn StackTable<T: Victim + PartialEq + 'static>(props: &StackTableProps<T>) -
                                         <Image src={ImageType::from(enemy_id)} />
                                     </button>
                                 </td>
-                                <td>{ total }</td>
-                                <td>{ final_hp }</td>
-                                <td>{ hp_damage }{ "%" }</td>
+                                <td>{total}</td>
+                                <td>{final_hp}</td>
+                                <td>{hp_damage}{"%"}</td>
                             </tr>
                         })
                     })

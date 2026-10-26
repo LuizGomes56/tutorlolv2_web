@@ -25,7 +25,7 @@ pub fn ChampionFormulas() -> Html {
     {
         html! {
             for &position in Position::VARIANTS {
-                <td class={"content-baseline"}>
+                <td class={classes!("content-baseline")}>
                     <div class={classes!("flex", "flex-col", "gap-2", "py-2")}>
                         for item in f(position) {
                             <div

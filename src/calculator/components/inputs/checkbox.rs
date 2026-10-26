@@ -60,7 +60,7 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
                 if checked {
                     <svg
                         xmlns={"http://www.w3.org/2000/svg"}
-                        class={"h-3.5 w-3.5"}
+                        class={classes!("h-3.5", "w-3.5")}
                         viewBox={"0 0 20 20"}
                         fill={"currentColor"}
                     >

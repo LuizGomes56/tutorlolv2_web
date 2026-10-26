@@ -38,10 +38,11 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
             data-panel={true}
             data-scale={1}
             data-active={false}
+            data-interactive={focused.to_string()}
             class={classes!(
-                "border", "border-2",
+                "relative", "border", "border-2",
                 "border-dashed", "select-none",
-                "touch-none", "p-2", "min-h-fit",
+                "touch-none", "p-2", "overlay-panel",
                 if *focused {
                     classes!("border-std-700", "cursor-move", "bg-std-900/75")
                 } else {
@@ -49,7 +50,10 @@ pub fn Dynamic(props: &DynamicProps) -> Html {
                 }
             )}
         >
-            {children}
+            <div data-panel-content={true} class={classes!("overlay-panel-content")}>
+                {children}
+            </div>
+
             if *focused && *resize {
                 {circle("nw", classes!("-left-1.5", "-top-1.5", "cursor-nwse-resize"))}
                 {circle("ne", classes!("-right-1.5", "-top-1.5", "cursor-nesw-resize"))}

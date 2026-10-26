@@ -348,7 +348,12 @@ pub fn Calculator() -> Html {
                                             ));
                                         }
 
-                                        html!(<tr>{images}{damages}</tr>)
+                                        html! {
+                                            <tr>
+                                                {images}
+                                                {damages}
+                                            </tr>
+                                        }
                                     })
                                     .collect::<Html>()
                                 }
@@ -458,7 +463,7 @@ pub fn Calculator() -> Html {
                     "min-w-full", "xl:min-w-0"
                 )}>
                     if *request_pending {
-                        <p role="status" class={classes!("px-2", "py-1", "text-sm", "text-std-400")}>
+                        <p role={"status"} class={classes!("px-2", "py-1", "text-sm", "text-std-400")}>
                             {"Calculating..."}
                         </p>
                     }

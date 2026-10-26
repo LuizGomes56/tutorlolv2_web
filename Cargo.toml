@@ -4,11 +4,6 @@ version = "0.2.2"
 edition = "2024"
 repository = "https://github.com/LuizGomes56/tutorlolv2_web"
 
-[features]
-default = ["local-calculation"]
-local-calculation = ["tutorlolv2/engine"]
-tauri = ["dep:serde_json"]
-
 [dependencies]
 base64 = "0.23.1"
 bincode = "2.0.1"
@@ -24,6 +19,11 @@ wasm-bindgen-futures = "0.4.79"
 web-sys = { version = "0.3.106", features = ["Headers", "Request", "RequestInit", "Response", "Window"] }
 yew = { version = "0.23.0", features = ["csr"] }
 yew-router = "0.20.0"
+
+[features]
+default = ["local-calculation", "tauri"]
+local-calculation = ["tutorlolv2/engine"]
+tauri = ["dep:serde_json"]
 
 [profile.release]
 opt-level = 3

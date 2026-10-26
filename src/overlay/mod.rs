@@ -1,3 +1,4 @@
+mod model;
 mod page;
 mod panel;
 mod storage;

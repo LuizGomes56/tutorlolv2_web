@@ -6,7 +6,7 @@ use crate::{
         stack::{Stack, StackInsert, StackRemover, StackTable},
         tables::{body::DamageRenderer, empty::EmptyTable, header::TableHeader},
     },
-    hover::Docs,
+    hover::{self, Docs},
     livegame::{
         Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
         scoreboard::ScoreboardDisplay,
@@ -14,7 +14,7 @@ use crate::{
     utils::{Loading, glue::get_desktop_data, use_setter},
 };
 use std::{rc::Rc, time::Duration};
-use tutorlolv2::{ChampionId, ItemId, TypeMetadata, bitset::BitSet, model::Damages};
+use tutorlolv2::{ChampionId, CtxVar, ItemId, TypeMetadata, bitset::BitSet, model::Damages};
 use yew::{
     platform::{spawn_local, time::sleep},
     prelude::*,
@@ -93,10 +93,14 @@ pub fn Livegame() -> Html {
                 enemies.iter().map(|enemy| &enemy.siml_items[siml_index]),
             );
 
-            let get_damages = |enemy_id: ChampionId, damages| {
+            let get_damages = |enemy_id: ChampionId, damages, data_idents: Option<String>| {
                 html! {
                     <tr>
-                        <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
+                        <td
+                            {data_idents}
+                            data_docs={Docs::global(enemy_id).encode()}
+                            class={classes!("w-12")}
+                        >
                             <Image src={ImageType::from(enemy_id)} />
                         </td>
                         {damages}
@@ -116,6 +120,7 @@ pub fn Livegame() -> Html {
                             runes_meta,
                             None,
                         ),
+                        hover::encode_idents(&CtxVar::ENEMY_VARS, &enemy.damages.ctx),
                     )
                 })
                 .collect::<Html>();
@@ -133,6 +138,7 @@ pub fn Livegame() -> Html {
                                 runes_meta,
                                 Some(&enemy.damages),
                             ),
+                            hover::encode_idents(&CtxVar::ENEMY_VARS, &enemy.damages.ctx),
                         )
                     })
                     .collect::<Html>()
@@ -144,6 +150,7 @@ pub fn Livegame() -> Html {
                 .collect::<Vec<_>>();
 
             let mut seen = BitSet::EMPTY;
+
             let columns = enemy_rows
                 .iter()
                 .flat_map(|(.., list)| list.iter())
@@ -181,12 +188,10 @@ pub fn Livegame() -> Html {
 
                                     html! {
                                         <td>
-                                            {
-                                                damage.map(|damage| html! {
-                                                    <span class={classes!("text-sm")}>
-                                                        {damage}
-                                                    </span>
-                                                }).unwrap_or_default()
+                                            for dmg in damage {
+                                                <span class={classes!("text-sm")}>
+                                                    {dmg}
+                                                </span>
                                             }
                                         </td>
                                     }

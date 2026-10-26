@@ -38,7 +38,9 @@ pub fn TurretTable(props: &TurretTableProps) -> Html {
     html! {
         <table class={classes!("data-table")}>
             {(*header).clone()}
-            <tbody><tr>{props.damages.clone()}</tr></tbody>
+            <tbody>
+                <tr>{props.damages.clone()}</tr>
+            </tbody>
         </table>
     }
 }

@@ -16,6 +16,9 @@ use crate::overlay::Overlay;
 #[cfg(feature = "tauri")]
 mod overlay;
 
+#[cfg(feature = "tauri")]
+mod desktop;
+
 mod about;
 mod calculator;
 mod components;
@@ -33,6 +36,9 @@ pub enum Route {
     #[cfg(feature = "tauri")]
     #[at("/overlay")]
     Overlay,
+    #[cfg(feature = "tauri")]
+    #[at("/settings")]
+    Settings,
     #[at("/calculator")]
     Calculator,
     #[at("/livegame")]
@@ -65,6 +71,8 @@ fn App() -> Html {
                 }
 
                 let component = match route {
+                    #[cfg(feature = "tauri")]
+                    Route::Settings => html!(<desktop::Settings />),
                     Route::Calculator => html!(<Calculator />),
                     Route::Formulas => html!(<Formulas />),
                     Route::Livegame => html!(<Livegame />),
