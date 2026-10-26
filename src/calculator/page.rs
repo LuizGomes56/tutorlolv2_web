@@ -1,8 +1,9 @@
 use crate::{
     components::tables::body::DamageRenderer,
-    hover::{Builtin, DocView, Docs},
+    hover::{self, Builtin, DocView, Docs},
 };
 use implicit_clone::ImplicitClone;
+use tutorlolv2::CtxVar;
 use {
     crate::{
         calculator::{
@@ -285,7 +286,14 @@ pub fn Calculator() -> Html {
 
                                         html! {
                                             <tr>
-                                                <td data_docs={Docs::global(enemy_id).encode()} class={classes!("w-12")}>
+                                                <td
+                                                    data_idents={hover::encode_idents(
+                                                        &CtxVar::ENEMY_VARS,
+                                                        &enemy.damages.ctx,
+                                                    )}
+                                                    data_docs={Docs::global(enemy_id).encode()}
+                                                    class={classes!("w-12")}
+                                                >
                                                     <button
                                                         class={classes!(
                                                             "cursor-pointer",
