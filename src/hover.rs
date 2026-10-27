@@ -154,6 +154,17 @@ pub fn encode_idents(idents: &[CtxVar], ctx: &Ctx) -> Option<String> {
     Some(STANDARD_NO_PAD.encode(bytes))
 }
 
+/// Numeric value shown in identifier tooltips, also used to filter visible stats.
+pub fn ident_display_value(ident: CtxVar, value: f32) -> f32 {
+    match ident {
+        CtxVar::AttackSpeed | CtxVar::BaseAttackSpeed | CtxVar::BonusAttackSpeed => {
+            (value * 100.0).round() / 100.0 + 0.0
+        }
+        // Adding zero normalizes rounded negative zero for display.
+        _ => value.round() + 0.0,
+    }
+}
+
 fn render(idents: &str, docs: &str) -> MayFail<String> {
     let mut html = String::new();
 
@@ -168,12 +179,13 @@ fn render(idents: &str, docs: &str) -> MayFail<String> {
 
         for record in bytes.as_chunks::<5>().0 {
             let ident = CtxVar::from_repr(record[0]).ok_or("Unknown context variable")?;
-            let value = f32::from_le_bytes(record[1..].try_into()?);
+            let value = ident_display_value(ident, f32::from_le_bytes(record[1..].try_into()?));
+            let name = ident.to_snake_case();
 
             write!(
                 html,
                 "<div class=\"whitespace-nowrap\"><span class=\"C12\">{}</span> = <span class=\"C8\">{value}</span></div>",
-                ident.to_snake_case()
+                name
             )?;
         }
 
@@ -204,6 +216,26 @@ pub fn render_hover_docs(idents: &str, docs: &str) -> Result<String, JsValue> {
 mod tests {
     use super::*;
     use strum::{IntoEnumIterator, VariantArray};
+
+    #[test]
+    fn displayed_ident_value_matches_zero_filter_and_rounding() {
+        for value in [0.0, 0.0000038146973, -0.000061035156, 0.49, -0.49] {
+            assert_eq!(ident_display_value(CtxVar::BonusMagicResist, value), 0.0);
+        }
+        for (value, expected) in [(0.5, 1.0), (-0.5, -1.0), (778.69995, 779.0)] {
+            assert_eq!(ident_display_value(CtxVar::AbilityPower, value), expected);
+        }
+        for ident in [
+            CtxVar::AttackSpeed,
+            CtxVar::BaseAttackSpeed,
+            CtxVar::BonusAttackSpeed,
+        ] {
+            assert_eq!(ident_display_value(ident, 0.0001), 0.0);
+            assert_eq!(ident_display_value(ident, 1.44575), 1.45);
+            assert_eq!(ident_display_value(ident, -0.42209995), -0.42);
+            assert_eq!(ident_display_value(ident, 0.0), 0.0);
+        }
+    }
 
     #[test]
     fn docs_variants_fit_buffer_and_base64_contains_only_encoded_bytes() {
@@ -376,22 +408,48 @@ mod tests {
     }
 
     #[test]
-    fn idents_round_trip_names_and_float_values() {
+    fn idents_round_trip_preserves_values_and_formats_display() {
         let ctx = Ctx {
             attack_damage: 123.25,
-            physical_multiplier: -0.5,
+            ability_power: 778.69995,
+            bonus_magic_resist: 0.0000038146973,
+            attack_speed: 1.44575,
+            base_attack_speed: 1.02365,
+            bonus_attack_speed: 0.42209995,
             ..Default::default()
         };
 
-        let encoded =
-            encode_idents(&[CtxVar::AttackDamage, CtxVar::PhysicalMultiplier], &ctx).unwrap();
+        let encoded = encode_idents(
+            &[
+                CtxVar::AttackDamage,
+                CtxVar::AbilityPower,
+                CtxVar::BonusMagicResist,
+                CtxVar::AttackSpeed,
+                CtxVar::BaseAttackSpeed,
+                CtxVar::BonusAttackSpeed,
+            ],
+            &ctx,
+        )
+        .unwrap();
 
-        assert_eq!(STANDARD_NO_PAD.decode(&encoded).unwrap().len(), 10);
+        let bytes = STANDARD_NO_PAD.decode(&encoded).unwrap();
+        assert_eq!(bytes.len(), 30);
+        assert_eq!(f32::from_le_bytes(bytes[1..5].try_into().unwrap()), 123.25);
 
         let html = render(&encoded, "").unwrap();
 
-        assert!(html.contains("attack_damage</span> = <span class=\"C8\">123.25"));
-        assert!(html.contains("physical_multiplier</span> = <span class=\"C8\">-0.5"));
+        assert!(html.contains("attack_damage</span> = <span class=\"C8\">123</span>"));
+        for (name, value) in [
+            ("ability_power", "779"),
+            ("bonus_magic_resist", "0"),
+            ("attack_speed", "1.45"),
+            ("base_attack_speed", "1.02"),
+            ("bonus_attack_speed", "0.42"),
+        ] {
+            assert!(html.contains(&format!(
+                "{name}</span> = <span class=\"C8\">{value}</span>"
+            )));
+        }
     }
 
     #[test]

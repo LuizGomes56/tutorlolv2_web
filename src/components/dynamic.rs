@@ -1,3 +1,5 @@
+#![cfg(feature = "tauri")]
+
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]

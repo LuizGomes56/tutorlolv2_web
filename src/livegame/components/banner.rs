@@ -9,12 +9,16 @@ pub struct BannerProps {
     pub riot_id: Rc<str>,
     pub game_time: u32,
     pub champion_id: ChampionId,
+
+    #[prop_or_default]
+    pub data_idents: Option<AttrValue>,
 }
 
 #[component]
 pub fn Banner(props: &BannerProps) -> Html {
     let BannerProps {
         ref riot_id,
+        ref data_idents,
         game_time,
         champion_id,
     } = *props;
@@ -24,7 +28,11 @@ pub fn Banner(props: &BannerProps) -> Html {
     let time = format!("{minutes:02}m {seconds:02}s");
 
     html! {
-        <div data_docs={Docs::global(champion_id).encode()} class={classes!("box")}>
+        <div
+            {data_idents}
+            data_docs={Docs::global(champion_id).encode()}
+            class={classes!("box")}
+        >
             <Image
                 class={classes!(
                     "img-clipped", "h-24", "sm:h-40",

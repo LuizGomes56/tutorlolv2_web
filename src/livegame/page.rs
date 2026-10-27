@@ -8,13 +8,14 @@ use crate::{
     },
     hover::{self, Docs},
     livegame::{
-        Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner, dragon::DragonDisplay,
-        scoreboard::ScoreboardDisplay,
+        CurrentPlayer, Enemy, Game, ability_levels::AbilityLevelsDisplay, banner::Banner,
+        dragon::DragonDisplay, scoreboard::ScoreboardDisplay,
     },
     utils::{Loading, glue::get_desktop_data, use_setter},
 };
 use std::{rc::Rc, time::Duration};
-use tutorlolv2::{ChampionId, CtxVar, ItemId, TypeMetadata, bitset::BitSet, model::Damages};
+use strum::IntoEnumIterator;
+use tutorlolv2::{Ctx, CtxVar, ItemId, TypeMetadata, bitset::BitSet, model::Damages};
 use yew::{
     platform::{spawn_local, time::sleep},
     prelude::*,
@@ -46,10 +47,10 @@ fn simulated_items_meta<'a>(
 
 #[component]
 pub fn Livegame() -> Html {
-    let game_data = use_state(|| Err::<Game, _>(Loading.into()));
+    let game_data = use_state(|| Err::<Game, Box<dyn core::error::Error>>(Loading.into()));
     let stack = use_reducer(Stack::default);
     let stack_push = Stack::use_push(&stack);
-    let siml_item = use_state(|| ItemId::SIML[0]);
+    let siml_item = use_state(|| const { ItemId::SIML[0] });
     let siml_item_callback = use_setter(&siml_item);
 
     {
@@ -81,6 +82,57 @@ pub fn Livegame() -> Html {
                 dragons,
             } = *data;
 
+            let player_idents = {
+                let CurrentPlayer {
+                    base_stats,
+                    bonus_stats,
+                    current_stats,
+                    level,
+                    ..
+                } = current_player;
+
+                let ctx = Ctx {
+                    base_armor: base_stats.armor,
+                    base_ad: base_stats.attack_damage,
+                    base_attack_speed: base_stats.attack_speed,
+                    base_magic_resist: base_stats.magic_resist,
+                    base_health: base_stats.max_health,
+                    base_mana: base_stats.max_mana,
+
+                    bonus_armor: bonus_stats.armor,
+                    bonus_ad: bonus_stats.attack_damage,
+                    bonus_attack_speed: bonus_stats.attack_speed,
+                    bonus_magic_resist: bonus_stats.magic_resist,
+                    bonus_health: bonus_stats.max_health,
+                    bonus_mana: bonus_stats.max_mana,
+
+                    ability_power: current_stats.ability_power,
+                    armor: current_stats.armor,
+                    armor_penetration_flat: current_stats.armor_penetration_flat,
+                    armor_penetration_percent: current_stats.armor_penetration_percent,
+                    attack_damage: current_stats.attack_damage,
+                    attack_speed: current_stats.attack_speed,
+                    crit_chance: current_stats.crit_chance,
+                    crit_damage: current_stats.crit_damage,
+                    current_health: current_stats.current_health,
+                    magic_penetration_flat: current_stats.magic_penetration_flat,
+                    magic_penetration_percent: current_stats.magic_penetration_percent,
+                    magic_resist: current_stats.magic_resist,
+                    max_health: current_stats.max_health,
+                    max_mana: current_stats.max_mana,
+                    current_mana: current_stats.current_mana,
+                    level: level.get() as _,
+
+                    ..Default::default()
+                };
+
+                let idents = CtxVar::iter()
+                    .filter(|var| hover::ident_display_value(*var, ctx[*var]) != 0.0)
+                    .collect::<Box<[_]>>();
+
+                hover::encode_idents(&idents, &ctx)
+            };
+
             let champion_id = current_player.champion_id;
             let siml_index = ItemId::SIML
                 .iter()
@@ -93,11 +145,11 @@ pub fn Livegame() -> Html {
                 enemies.iter().map(|enemy| &enemy.siml_items[siml_index]),
             );
 
-            let get_damages = |enemy_id: ChampionId, damages, data_idents: Option<String>| {
+            let get_damages = |enemy_id, damages, ctx| {
                 html! {
                     <tr>
                         <td
-                            {data_idents}
+                            data_idents={hover::encode_idents(&CtxVar::ENEMY_VARS, ctx)}
                             data_docs={Docs::global(enemy_id).encode()}
                             class={classes!("w-12")}
                         >
@@ -120,7 +172,7 @@ pub fn Livegame() -> Html {
                             runes_meta,
                             None,
                         ),
-                        hover::encode_idents(&CtxVar::ENEMY_VARS, &enemy.damages.ctx),
+                        &enemy.damages.ctx,
                     )
                 })
                 .collect::<Html>();
@@ -138,7 +190,7 @@ pub fn Livegame() -> Html {
                                 runes_meta,
                                 Some(&enemy.damages),
                             ),
-                            hover::encode_idents(&CtxVar::ENEMY_VARS, &enemy.damages.ctx),
+                            &enemy.damages.ctx,
                         )
                     })
                     .collect::<Html>()
@@ -225,6 +277,7 @@ pub fn Livegame() -> Html {
                         "flex-col", "gap-4", "min-w-80"
                     )}>
                         <Banner
+                            data_idents={player_idents}
                             riot_id={&current_player.riot_id}
                             {game_time}
                             {champion_id}

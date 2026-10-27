@@ -359,7 +359,7 @@ impl<'a> DamageRenderer<'a> {
                     // A new purchase appends one item pair absent from the owned build.
                     debug_assert!(
                         odmg.len() == damages.len()
-                            || (matches!(T::KIND, EntityKind::Item)
+                            || (const { matches!(T::KIND, EntityKind::Item) }
                                 && odmg.len() + 2 == damages.len())
                     );
 

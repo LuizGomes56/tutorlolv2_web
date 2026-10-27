@@ -21,7 +21,7 @@ yew = { version = "0.23.0", features = ["csr"] }
 yew-router = "0.20.0"
 
 [features]
-default = ["local-calculation", "tauri"]
+default = ["local-calculation"]
 local-calculation = ["tutorlolv2/engine"]
 tauri = ["dep:serde_json"]
 
