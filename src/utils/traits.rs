@@ -5,12 +5,13 @@ use tutorlolv2::{AdaptiveType, CastId, ChampionId, DamageType, ItemId, RuneId};
 
 pub trait EnumCast
 where
-    Self: CastId + PartialEq + Copy + EnumCount,
+    Self: CastId + TryFrom<u16> + PartialEq + Copy + EnumCount,
     ImageType: From<Self>,
 {
     fn random() -> Self {
         let index = random_u64(0..Self::COUNT as _);
-        unsafe { Self::try_from_u16(index as _).unwrap_unchecked() }
+
+        unsafe { Self::try_from(index as u16).unwrap_unchecked() }
     }
 
     fn image_type(&self) -> ImageType {

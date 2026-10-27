@@ -4,7 +4,8 @@ use crate::{
     utils::ClassCast,
 };
 use tutorlolv2::{
-    ChampionId, Ctx, CtxVar, DamageType, EntityId, ItemId, RuneId, TypeMetadata, ValueId,
+    ChampionId, Ctx, CtxVar, DamageType, EntityId, EntityKind, ItemId, RuneId, TypeMetadata,
+    ValueId,
     model::{Attacks, Damages, OutputEnemy},
 };
 use yew::prelude::*;
@@ -317,18 +318,17 @@ impl<'a> DamageRenderer<'a> {
             ..
         } = *self;
 
-        let tag = T::default();
-        let damages = match tag.entity() {
-            EntityId::Champion(_) => unreachable!(),
-            EntityId::Item(_) => &damages.items,
-            EntityId::Rune(_) => &damages.runes,
+        let damages = match T::KIND {
+            EntityKind::Champion => unreachable!(),
+            EntityKind::Item => &damages.items,
+            EntityKind::Rune => &damages.runes,
         };
 
         let visible_len = metadata.len() << 1;
 
         debug_assert!(
             damages.len() == visible_len
-                || (matches!(tag.entity(), EntityId::Item(_))
+                || (matches!(T::KIND, EntityKind::Item)
                     && damages.len() == visible_len + 2
                     && damages[visible_len..] == [0, 0])
         );
@@ -350,16 +350,16 @@ impl<'a> DamageRenderer<'a> {
                     EntityId::Champion(_) => unreachable!(),
                 },
                 diff: other.map(|o| {
-                    let odmg = match tag.entity() {
-                        EntityId::Champion(_) => unreachable!(),
-                        EntityId::Item(_) => &o.items,
-                        EntityId::Rune(_) => &o.runes,
+                    let odmg = match T::KIND {
+                        EntityKind::Champion => unreachable!(),
+                        EntityKind::Item => &o.items,
+                        EntityKind::Rune => &o.runes,
                     };
 
                     // A new purchase appends one item pair absent from the owned build.
                     debug_assert!(
                         odmg.len() == damages.len()
-                            || (matches!(tag.entity(), EntityId::Item(_))
+                            || (matches!(T::KIND, EntityKind::Item)
                                 && odmg.len() + 2 == damages.len())
                     );
 
@@ -400,6 +400,7 @@ impl From<DamageRenderer<'_>> for Html {
                 other.items.len() == damages.items.len()
                     || other.items.len() + 2 == damages.items.len()
             );
+
             debug_assert_eq!(other.runes.len(), damages.runes.len());
         }
 

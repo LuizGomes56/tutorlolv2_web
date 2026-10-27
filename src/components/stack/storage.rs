@@ -41,7 +41,7 @@ mod tests {
     use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
     use std::collections::HashMap;
     use strum::VariantArray;
-    use tutorlolv2::{CastId, ItemId, RuneId};
+    use tutorlolv2::{ItemId, RuneId};
 
     #[derive(Default)]
     struct MemoryStorage(HashMap<String, String>);
@@ -63,8 +63,8 @@ mod tests {
 
     #[test]
     fn combo_roundtrip_preserves_multiple_champions_and_every_action() {
-        let champion = ChampionId::try_from_u16(0).unwrap();
-        let other = ChampionId::try_from_u16(1).unwrap();
+        let champion = ChampionId::try_from(0).unwrap();
+        let other = ChampionId::try_from(1).unwrap();
         let values = vec![
             StackValue::Ability {
                 slot: 0,
@@ -88,8 +88,8 @@ mod tests {
 
     #[test]
     fn saving_one_champion_preserves_others_and_empty_combos() {
-        let champion = ChampionId::try_from_u16(0).unwrap();
-        let other = ChampionId::try_from_u16(1).unwrap();
+        let champion = ChampionId::try_from(0).unwrap();
+        let other = ChampionId::try_from(1).unwrap();
         let mut storage = MemoryStorage::default();
         assert!(save_combo_record(
             &mut storage,
@@ -190,7 +190,7 @@ mod tests {
     fn stale_slots_are_removed_before_the_damage_table_indexes_them() {
         use crate::components::stack::{Stack, Tray, TrayEntry};
         let champion = ChampionId::default();
-        let other = ChampionId::try_from_u16(1).unwrap();
+        let other = ChampionId::try_from(1).unwrap();
         let ability_id = champion.abilities()[0].kind;
         let item = ItemId::NashorsTooth;
         let rune = RuneId::default();

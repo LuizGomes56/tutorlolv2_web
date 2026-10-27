@@ -60,7 +60,7 @@ mod tests {
         assert_eq!(original.values().as_ptr(), changed.values().as_ptr());
 
         changed.insert(ItemId::DarkSeal, 9);
-        changed.insert(ItemId::try_from_u16(0).unwrap(), 2);
+        changed.insert(ItemId::try_from(0).unwrap(), 2);
         assert_eq!(original.get(&ItemId::DarkSeal).unwrap().stacks(), 4);
         assert_eq!(original.values().len(), 1);
         assert_eq!(changed.get(&ItemId::DarkSeal).unwrap().stacks(), 9);
@@ -91,10 +91,10 @@ mod tests {
         // Include zero and IDs on both sides of multiple bitset word boundaries.
         let indices = [0_u16, 1, 63, 64, 65, 127, 128];
         for index in indices {
-            ascending.insert(ItemId::try_from_u16(index).unwrap(), u32::from(index) + 2);
+            ascending.insert(ItemId::try_from(index).unwrap(), u32::from(index) + 2);
         }
         for index in indices.into_iter().rev() {
-            descending.insert(ItemId::try_from_u16(index).unwrap(), u32::from(index) + 2);
+            descending.insert(ItemId::try_from(index).unwrap(), u32::from(index) + 2);
         }
         assert_eq!(ascending, descending);
         let values: &[ValueException] = ascending.values();
@@ -106,19 +106,19 @@ mod tests {
             [2, 3, 65, 66, 67, 129, 130]
         );
         for index in indices {
-            let id = ItemId::try_from_u16(index).unwrap();
+            let id = ItemId::try_from(index).unwrap();
             assert_eq!(ascending.get(&id).unwrap().stacks(), u32::from(index) + 2);
         }
-        assert!(ascending.get(&ItemId::try_from_u16(62).unwrap()).is_none());
-        descending.insert(ItemId::try_from_u16(64).unwrap(), 99);
+        assert!(ascending.get(&ItemId::try_from(62).unwrap()).is_none());
+        descending.insert(ItemId::try_from(64).unwrap(), 99);
         assert_ne!(ascending, descending);
         assert_eq!(descending.values().len(), 7);
     }
 
     #[test]
     fn typed_maps_pack_overlapping_item_and_rune_ids_in_their_own_domain() {
-        let item = ItemId::try_from_u16(1).unwrap();
-        let rune = RuneId::try_from_u16(1).unwrap();
+        let item = ItemId::try_from(1).unwrap();
+        let rune = RuneId::try_from(1).unwrap();
         assert_ne!(item.entity(), rune.entity());
         let mut items = ExceptionMap::<ItemId>::default();
         let mut runes = ExceptionMap::<RuneId>::default();
@@ -133,7 +133,7 @@ mod tests {
     #[test]
     fn packing_truncates_stacks_without_changing_the_key() {
         let mut exceptions = ExceptionMap::<RuneId>::default();
-        let rune = RuneId::try_from_u16(0).unwrap();
+        let rune = RuneId::try_from(0).unwrap();
         exceptions.insert(rune, u32::MAX);
         assert_eq!(
             exceptions.get(&rune).unwrap().stacks(),
