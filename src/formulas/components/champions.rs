@@ -91,7 +91,7 @@ pub fn ChampionFormulas() -> Html {
                                             "font-medium", "truncate",
                                             "hidden", "md:inline"
                                         )}>
-                                            {position.name()}
+                                            {position.to_string()}
                                         </h3>
                                     </div>
                                 </th>

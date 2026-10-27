@@ -87,6 +87,10 @@ pre {
         ".ZedMono", Consolas, Monaco, "AndaleMono", "UbuntuMono", monospace;
     white-space: pre-wrap;
     tab-size: 4;
+    font-variant-ligatures: none;
+    font-feature-settings:
+        "liga" 0,
+        "clig" 0;
 }
 
 body {
