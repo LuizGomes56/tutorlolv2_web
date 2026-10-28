@@ -156,6 +156,7 @@ pub fn Overlay() -> Html {
                         let damages = DamageRenderer::new(
                             &enemy.damages,
                             champion_id,
+                            current_player.adaptive_type,
                             items_meta,
                             runes_meta,
                             None,

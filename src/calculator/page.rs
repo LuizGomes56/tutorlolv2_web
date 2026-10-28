@@ -277,6 +277,7 @@ pub fn Calculator() -> Html {
                                         let damages = DamageRenderer::new(
                                             &enemy.damages,
                                             current_player.champion_id,
+                                            current_player.adaptive_type,
                                             items_meta,
                                             runes_meta,
                                             None
@@ -335,6 +336,7 @@ pub fn Calculator() -> Html {
                                         let damages = DamageRenderer::new(
                                             damage,
                                             current_player.champion_id,
+                                            current_player.adaptive_type,
                                             items_meta,
                                             runes_meta,
                                             None

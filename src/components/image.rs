@@ -93,12 +93,43 @@ impl ImageType {
             ImageType::Ability(_, kind) => {
                 let ability_id = kind.ability_id();
                 let char = ability_id.as_char();
-                let name = ability_id.ability_name().display();
+                let name = ability_id.ability_name();
+                let label = match name {
+                    AbilityName::Mega => Some(("MEGA", "")),
+                    AbilityName::Void => None,
+                    name if name < AbilityName::Mega => {
+                        let index = name as u8;
+
+                        let number = AbilityName::from_repr(index % AbilityName::JMP)
+                            .unwrap()
+                            .short();
+
+                        let suffix = match index / AbilityName::JMP {
+                            1 => "MIN",
+                            2 => "MAX",
+                            _ => "",
+                        };
+
+                        Some(if number.is_empty() {
+                            (suffix, "")
+                        } else {
+                            (number, suffix)
+                        })
+                    }
+                    _ => None,
+                };
 
                 Some(html! {
                     <div class={classes!("img-letter", "text-sm")}>
                         <span>{char}</span>
-                        {name.map(|name| html!(<sub>{name}</sub>))}
+                        {label.map(|(first, suffix)| html! {
+                            <sub>
+                                {first}
+                                if !suffix.is_empty() {
+                                    <sub>{suffix}</sub>
+                                }
+                            </sub>
+                        })}
                     </div>
                 })
             }
@@ -273,5 +304,51 @@ pub fn Svg(props: &SvgProps) -> Html {
                 src
             )}
         />
+    }
+}
+
+#[cfg(test)]
+mod header_tests {
+    use super::*;
+    use tutorlolv2::AbilityId;
+
+    fn markup(node: &Html) -> String {
+        use yew::virtual_dom::VNode;
+        match node {
+            VNode::VTag(tag) => format!(
+                "<{}>{}</{}>",
+                tag.tag(),
+                tag.children().map(markup).unwrap_or_default(),
+                tag.tag()
+            ),
+            VNode::VText(text) => text.text.to_string(),
+            VNode::VList(list) => list.iter().map(markup).collect(),
+            _ => panic!("Unexpected header node"),
+        }
+    }
+
+    #[test]
+    fn ability_headers_preserve_numbered_nested_and_special_labels() {
+        for (name, label) in [
+            (AbilityName::Void, ""),
+            (AbilityName::_1, "<sub>1</sub>"),
+            (AbilityName::_8, "<sub>8</sub>"),
+            (AbilityName::Min, "<sub>MIN</sub>"),
+            (AbilityName::Max, "<sub>MAX</sub>"),
+            (AbilityName::_1Min, "<sub>1<sub>MIN</sub></sub>"),
+            (AbilityName::_8Min, "<sub>8<sub>MIN</sub></sub>"),
+            (AbilityName::_1Max, "<sub>1<sub>MAX</sub></sub>"),
+            (AbilityName::_8Max, "<sub>8<sub>MAX</sub></sub>"),
+            (AbilityName::Mega, "<sub>MEGA</sub>"),
+            (AbilityName::Minion, ""),
+            (AbilityName::MonsterMax, ""),
+        ] {
+            let image = ImageType::Ability(ChampionId::default(), AbilityId::Q(name).into());
+            assert_eq!(
+                markup(&image.header().unwrap()),
+                format!("<div><span>Q</span>{label}</div>"),
+                "{name:?}"
+            );
+        }
     }
 }

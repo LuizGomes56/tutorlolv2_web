@@ -168,6 +168,7 @@ pub fn Livegame() -> Html {
                         DamageRenderer::new(
                             &enemy.damages,
                             champion_id,
+                            current_player.adaptive_type,
                             items_meta,
                             runes_meta,
                             None,
@@ -186,6 +187,7 @@ pub fn Livegame() -> Html {
                             DamageRenderer::new(
                                 &enemy.siml_items[i],
                                 champion_id,
+                                current_player.adaptive_type,
                                 &siml_items_meta,
                                 runes_meta,
                                 Some(&enemy.damages),

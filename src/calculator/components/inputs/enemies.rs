@@ -9,12 +9,13 @@ use {
                 stats::{StatCell, Stats},
             },
             page::{EnemyProps, TargetEntity},
-            reducer::{DataAction, EnemyAction, EnemyDataAction, LastAction},
+            reducer::{DataAction, Enemies, EnemyAction, EnemyDataAction, LastAction},
         },
         components::{
             image::{DragonImage, ImageType},
             selector::SelectorButton,
         },
+        utils::EnumCast,
     },
     std::num::NonZeroU8,
     tutorlolv2::{
@@ -118,8 +119,33 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
         .get(*enemy_props.enemy_index)
         .unwrap_or_else(|| {
             index = 1;
+
+            if enemy_props.enemies.is_empty() {
+                core::hint::cold_path();
+                add_enemy.emit(ChampionId::random());
+            }
+
             &enemy_props.enemies[0]
         });
+
+    let btn_class = classes!(
+        "px-3",
+        "py-1.5",
+        "rounded-md",
+        "border",
+        "border-std-800",
+        "bg-std-900/70",
+        "text-xs",
+        "font-semibold",
+        "text-std-200",
+        "enabled:hover:bg-std-800/60",
+        "focus-visible:outline",
+        "focus-visible:outline-2",
+        "focus-visible:outline-blue-500",
+        "enabled:cursor-pointer",
+        "disabled:opacity-40",
+        "disabled:cursor-not-allowed"
+    );
 
     html! {
         <div class={classes!(
@@ -127,6 +153,54 @@ pub fn EnemiesInput(props: &EnemiesInputProps) -> Html {
             "w-full", "max-w-80", "sm:w-64",
             "m-2", "order-2", "xl:order-3"
         )}>
+            <div class={classes!("flex", "items-center", "justify-between", "gap-2", "px-4", "py-3")}>
+                <span class={classes!("text-sm", "font-semibold", "text-std-200", "whitespace-nowrap")}>
+                    {"Enemy "}{index}
+                </span>
+                <div class={classes!("flex", "gap-2")}>
+                    <button
+                        type={"button"}
+                        aria-label={"Add enemy"}
+                        title={"Add enemy"}
+                        disabled={enemy_props.enemies.len() >= Enemies::MAX_ENEMIES}
+                        class={&btn_class}
+                        onclick={{
+                            let enemy_index = enemy_props.enemy_index.clone();
+                            let count = enemy_props.enemies.len();
+
+                            Callback::from(move |_| {
+                                if count < Enemies::MAX_ENEMIES {
+                                    add_enemy.emit(ChampionId::random());
+                                    enemy_index.set(count);
+                                }
+                            })
+                        }}
+                    >
+                        {"Add"}
+                    </button>
+                    <button
+                        type={"button"}
+                        aria-label={"Remove enemy"}
+                        title={"Remove selected enemy"}
+                        disabled={enemy_props.enemies.len() <= 1}
+                        class={btn_class}
+                        onclick={{
+                            let enemy_index = enemy_props.enemy_index.clone();
+                            let selected = index as usize - 1;
+                            let count = enemy_props.enemies.len();
+
+                            Callback::from(move |_| {
+                                if count > 1 {
+                                    remove_enemy.emit(selected);
+                                    enemy_index.set(selected.min(count - 2));
+                                }
+                            })
+                        }}
+                    >
+                        {"Remove"}
+                    </button>
+                </div>
+            </div>
             <Banner
                 callback={champion_callback}
                 champion_id={enemy.champion_id}

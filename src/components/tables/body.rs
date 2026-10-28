@@ -4,8 +4,8 @@ use crate::{
     utils::ClassCast,
 };
 use tutorlolv2::{
-    ChampionId, Ctx, CtxVar, DamageType, EntityId, EntityKind, ItemId, RuneId, TypeMetadata,
-    ValueId,
+    AdaptiveType, ChampionId, Ctx, CtxVar, DamageType, EntityId, EntityKind, ItemId, RuneId,
+    TypeMetadata, ValueId,
     model::{Attacks, Damages, OutputEnemy},
 };
 use yew::prelude::*;
@@ -85,7 +85,7 @@ impl Cell {
         }
     }
 
-    pub fn render(self, ctx: &Ctx) -> Html {
+    pub fn render(self, ctx: &Ctx, adaptive_type: AdaptiveType) -> Html {
         let Self {
             damage_type,
             min_dmg,
@@ -97,6 +97,10 @@ impl Cell {
 
         let data_idents = hover::encode_idents(idents, ctx);
         let data_docs = docs.encode();
+        let damage_class = match damage_type {
+            DamageType::Adaptive => adaptive_type.class(),
+            _ => damage_type.class(),
+        };
 
         let main_line = Self::render_range(min_dmg, max_dmg).unwrap_or_else(|| Html::from(min_dmg));
 
@@ -112,7 +116,7 @@ impl Cell {
             <td
                 {data_idents}
                 {data_docs}
-                class={classes!("whitespace-nowrap", damage_type.class())}
+                class={classes!("whitespace-nowrap", damage_class)}
             >
                 <div class={classes!("flex", "flex-col", "items-center", "leading-tight")}>
                     <span>{main_line}</span>
@@ -126,6 +130,7 @@ impl Cell {
 pub struct DamageRenderer<'a> {
     pub damages: &'a Damages,
     pub champion_id: ChampionId,
+    pub adaptive_type: AdaptiveType,
     pub items_meta: &'a [TypeMetadata<ItemId>],
     pub runes_meta: &'a [TypeMetadata<RuneId>],
     pub other: Option<&'a Damages>,
@@ -136,6 +141,7 @@ impl<'a> DamageRenderer<'a> {
     pub fn new(
         damages: &'a Damages,
         champion_id: ChampionId,
+        adaptive_type: AdaptiveType,
         items_meta: &'a [TypeMetadata<ItemId>],
         runes_meta: &'a [TypeMetadata<RuneId>],
         other: Option<&'a Damages>,
@@ -150,6 +156,7 @@ impl<'a> DamageRenderer<'a> {
         Self {
             damages,
             champion_id,
+            adaptive_type,
             items_meta,
             runes_meta,
             other,
@@ -373,13 +380,18 @@ impl<'a> DamageRenderer<'a> {
     }
 
     pub fn render_cells(self) -> Html {
-        let Self { damages, cells, .. } = self;
+        let Self {
+            damages,
+            cells,
+            adaptive_type,
+            ..
+        } = self;
 
         debug_assert_eq!(cells.len(), cells.capacity());
 
         cells
             .into_iter()
-            .map(|cell| cell.render(&damages.ctx))
+            .map(|cell| cell.render(&damages.ctx, adaptive_type))
             .collect::<Html>()
     }
 }
@@ -413,6 +425,52 @@ impl From<DamageRenderer<'_>> for Html {
 }
 
 #[cfg(test)]
+mod adaptive_color_tests {
+    use super::*;
+
+    #[test]
+    fn adaptive_cells_use_player_type_and_other_cells_keep_their_color() {
+        for adaptive_type in [AdaptiveType::Physical, AdaptiveType::Magic] {
+            for damage_type in [
+                DamageType::Adaptive,
+                DamageType::Physical,
+                DamageType::Magic,
+                DamageType::True,
+                DamageType::Mixed,
+                DamageType::Unspecified,
+            ] {
+                let cell = Cell {
+                    damage_type,
+                    min_dmg: 100,
+                    max_dmg: None,
+                    idents: &[],
+                    docs: Docs::Builtin(Builtin::BasicAttack, DocView::Function),
+                    diff: None,
+                };
+                let yew::virtual_dom::VNode::VTag(tag) =
+                    cell.render(&Ctx::default(), adaptive_type)
+                else {
+                    panic!("Expected a table cell");
+                };
+                let expected = match damage_type {
+                    DamageType::Adaptive => adaptive_type.class(),
+                    _ => damage_type.class(),
+                };
+                let (_, class) = tag
+                    .attributes
+                    .iter()
+                    .find(|(name, _)| *name == "class")
+                    .unwrap();
+                assert!(
+                    class.split_whitespace().any(|value| value == expected),
+                    "{damage_type:?} / {adaptive_type:?}: {class}"
+                );
+            }
+        }
+    }
+}
+
+#[cfg(test)]
 mod purchase_tests {
     use super::*;
 
@@ -433,6 +491,7 @@ mod purchase_tests {
 
         let mut renderer = DamageRenderer::new(
             &damage,
+            Default::default(),
             Default::default(),
             &metadata,
             Default::default(),
@@ -472,6 +531,7 @@ mod purchase_tests {
             let mut renderer = DamageRenderer::new(
                 &damage,
                 Default::default(),
+                Default::default(),
                 &metadata,
                 Default::default(),
                 Some(&baseline),
@@ -509,6 +569,7 @@ mod purchase_tests {
         let mut renderer = DamageRenderer::new(
             &damage,
             Default::default(),
+            Default::default(),
             items_meta,
             runes_meta,
             Some(&baseline),
@@ -538,6 +599,7 @@ mod purchase_tests {
 
         let mut renderer = DamageRenderer::new(
             &damage,
+            Default::default(),
             Default::default(),
             &metadata,
             Default::default(),
@@ -586,6 +648,7 @@ mod ability_diff_tests {
             champion,
             Default::default(),
             Default::default(),
+            Default::default(),
             Some(&baseline),
         );
 
@@ -605,6 +668,7 @@ mod ability_diff_tests {
         let mut renderer2 = DamageRenderer::new(
             &damage,
             champion,
+            Default::default(),
             Default::default(),
             Default::default(),
             None,

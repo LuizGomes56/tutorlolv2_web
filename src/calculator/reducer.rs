@@ -133,7 +133,7 @@ impl Reducible for Enemies {
                 false => "Max enemies reached".log(),
             },
             EnemyAction::Change(v, action) => new_mut[v] = new_mut[v].clone().reduce(action),
-            EnemyAction::Remove(v) => match !new_mut.is_empty() {
+            EnemyAction::Remove(v) => match new_mut.len() > 1 {
                 true => {
                     new_mut.swap_remove(v);
                 }

@@ -247,7 +247,7 @@ pub fn ItemFilter(props: &ItemFilterProps) -> Html {
         html! {
             <button
                 {onclick}
-                title={stat.name()}
+                title={stat.to_string()}
                 class={classes!(
                     "border-r-3", "py-1.5", "px-4",
                     match contains {
