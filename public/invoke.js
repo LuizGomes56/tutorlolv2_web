@@ -162,7 +162,7 @@ export function watch_overlay_change(callback, onError) {
 }
 
 export function format_shortcut(shortcut) {
-    if (!shortcut) return "Loading…";
+    if (!shortcut) return "Loading...";
 
     const names = {
         Space: "Space",

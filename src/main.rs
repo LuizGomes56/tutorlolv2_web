@@ -27,6 +27,7 @@ mod hover;
 mod livegame;
 mod model;
 mod utils;
+mod watch;
 
 #[derive(Clone, Debug, PartialEq, Routable)]
 pub enum Route {
@@ -41,6 +42,10 @@ pub enum Route {
     Settings,
     #[at("/calculator")]
     Calculator,
+    #[at("/watch")]
+    Watch,
+    #[at("/watch/:code")]
+    WatchCode { code: String },
     #[at("/livegame")]
     Livegame,
     #[at("/formulas")]
@@ -75,6 +80,8 @@ fn App() -> Html {
                     Route::Settings => html!(<desktop::Settings />),
                     Route::Calculator => html!(<Calculator />),
                     Route::Formulas => html!(<Formulas />),
+                    Route::Watch => html!(<watch::Watch />),
+                    Route::WatchCode { code } => html!(<watch::Watch code={code} />),
                     Route::Livegame => html!(<Livegame />),
                     Route::About => html!(<About />),
                     _ => html!(<Calculator />),
@@ -118,5 +125,7 @@ mod tests {
             cfg!(feature = "tauri")
         );
         assert!(Route::routes().contains(&"/livegame"));
+        assert!(Route::routes().contains(&"/watch"));
+        assert!(Route::routes().contains(&"/watch/:code"));
     }
 }

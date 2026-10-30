@@ -51,7 +51,8 @@ pub fn Sidebar() -> Html {
                     {buttons([
                         ("Homepage",    Route::Homepage),
                         ("Calculator",  Route::Calculator),
-                        ("Livegame",    Route::Livegame)
+                        ("Livegame",    Route::Livegame),
+                        ("Watch",       Route::Watch)
                     ])}
                 </div>
                 <div class={classes!("flex", "flex-col", "gap-2")}>

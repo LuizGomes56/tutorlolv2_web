@@ -226,11 +226,11 @@ pub fn ShortcutSettings() -> Html {
                 aria-live={"polite"}
             >
                 {if *recording && !*recording_ready {
-                    "Preparing to record…"
+                    "Preparing to record..."
                 } else if *recording {
                     "Press a key or key combination. Escape cancels."
                 } else if *saving {
-                    "Saving shortcut…"
+                    "Saving shortcut..."
                 } else if draft.is_some() {
                     "Unsaved shortcut — select Save shortcut to apply."
                 } else {

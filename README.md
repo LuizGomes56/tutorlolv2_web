@@ -79,3 +79,12 @@ Trunk process or build is not overwriting the same `dist` directory without the
 
 Formula documentation and hover rendering remain available in both modes through
 the library's `client` feature. Calculation mode requires no runtime settings.
+
+`/watch` and `/watch/:code` are available in every build. They read capability-only
+sharing endpoints; local calculation remains the default and remote calculation
+builds send selected decoded frames through the calculation service. Set the
+sharing API base at build time with `TUTORLOLV2_API_URL=https://example.com/api`.
+Otherwise it uses `TUTORLOL_API_URL` with the trailing `/games` removed, defaulting
+to `http://127.0.0.1:8082/api`. Native sharing controls appear only on the main
+`/livegame` page and use `get_recording_state`, `set_share_mode`, and the native
+recording/share state events.

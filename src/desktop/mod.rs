@@ -1,4 +1,6 @@
+pub mod sharing;
 mod shortcut;
+
 pub use shortcut::ShortcutSettings;
 use wasm_bindgen::{JsCast, prelude::*};
 use web_sys::js_sys::Function;
@@ -19,6 +21,7 @@ unsafe extern "C" {
 #[component]
 pub fn Settings() -> Html {
     let error = use_state(String::new);
+
     let open = {
         let error = error.clone();
 
