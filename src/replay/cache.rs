@@ -61,36 +61,6 @@ pub fn retain_neighbors(cache: &mut ChunkCache, chunks: &[ChunkInfo], time: f32)
     cache.retain(|seq, _| needed.contains(seq));
 }
 
-/// Metadata records capture endpoints; accepted jitter can extend decoded coverage.
-pub fn observed_ranges(chunks: &[ChunkInfo], cache: &ChunkCache) -> Vec<ChunkInfo> {
-    chunks
-        .iter()
-        .map(|metadata| {
-            let mut range = metadata.clone();
-
-            range.first_game_time = metadata.first_game_time.min(metadata.last_game_time);
-            range.last_game_time = metadata.first_game_time.max(metadata.last_game_time);
-
-            if let Some(chunk) = cache
-                .get(&metadata.seq)
-                .filter(|chunk| chunk.validate(metadata).is_ok())
-            {
-                let frames = &chunk.borrow_dependent().frames;
-
-                if let Some((_, frame)) = frames.first() {
-                    range.first_game_time = range.first_game_time.min(frame.game_data.game_time);
-                }
-
-                if let Some((_, frame)) = frames.last() {
-                    range.last_game_time = range.last_game_time.max(frame.game_data.game_time);
-                }
-            }
-
-            range
-        })
-        .collect()
-}
-
 /// Return sample-and-hold only when the next captured sample is adjacent.
 pub fn sample_index(times: &[f32], time: f32) -> Option<usize> {
     let index = times.iter().rposition(|value| *value <= time)?;
@@ -217,13 +187,62 @@ mod tests {
             snapshot_count: 5,
             frames_format: FRAMES_FORMAT,
         };
-        let mut cache = ChunkCache::new();
-        cache.insert(0, cached);
-        let ranges = observed_ranges(&[metadata], &cache);
+        let mut store = super::super::extent::ExtentStore::default();
+        store.observe_chunk(&metadata, &cached);
+        let (ranges, _) = store.timeline(&[metadata], 99.);
         assert_eq!(
             super::super::timeline::current_index(&ranges, 102.),
             Some(0)
         );
+    }
+
+    #[test]
+    fn observed_jitter_survives_decoded_buffer_eviction() {
+        let bytes = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.bincode"));
+        let (frame, _): (tutorlolv2::riot::RiotRealtime<'_>, _) =
+            bincode::borrow_decode_from_slice(bytes, BINCODE_CONFIG).unwrap();
+        let frames = [100., 102., 101., 100., 99.]
+            .into_iter()
+            .enumerate()
+            .map(|(i, time)| {
+                let mut frame = frame.clone();
+                frame.game_data.game_time = time;
+                (i as i64, frame)
+            })
+            .collect();
+        let decoded = CachedChunk::decode(
+            bincode::encode_to_vec(
+                FrameChunk {
+                    format: FRAMES_FORMAT,
+                    frames,
+                },
+                BINCODE_CONFIG,
+            )
+            .unwrap(),
+            FRAMES_FORMAT,
+        )
+        .unwrap();
+        let metadata = ChunkInfo {
+            seq: 0,
+            first_game_time: 100.,
+            last_game_time: 99.,
+            snapshot_count: 5,
+            frames_format: FRAMES_FORMAT,
+        };
+        let mut store = super::super::extent::ExtentStore::default();
+        store.observe_chunk(&metadata, &decoded);
+        drop(decoded);
+        let (ranges, end) = store.timeline(&[metadata.clone()], 99.);
+        assert_eq!(end, 102.);
+        assert_eq!(
+            super::super::timeline::current_index(&ranges, 102.),
+            Some(0)
+        );
+        assert_eq!(super::super::timeline::gaps(&ranges, end), vec![(0., 99.)]);
+        let mut changed = metadata;
+        changed.last_game_time = 98.;
+        assert!(!store.matches(&changed));
+        assert_eq!(store.timeline(&[changed], 99.).1, 100.);
     }
 
     #[cfg(feature = "tauri")]

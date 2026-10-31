@@ -46,10 +46,9 @@ pub fn OwnerReplay(props: &OwnerReplayProps) -> Html {
     let retry = use_state(|| 0u32);
     let game = use_state(|| None::<Rc<Game>>);
     let error = use_state(String::new);
-    let cache = use_memo(
-        (),
-        |_| RefCell::new(BTreeMap::<u32, Rc<CachedChunk>>::new()),
-    );
+    let cache = use_memo(props.id.clone(), |_| {
+        RefCell::new(BTreeMap::<u32, Rc<CachedChunk>>::new())
+    });
 
     {
         let time = time.clone();
@@ -61,6 +60,7 @@ pub fn OwnerReplay(props: &OwnerReplayProps) -> Html {
         });
     }
 
+    let (extents, on_extent) = extent::use_extents(cache::ReplaySource::Owner(props.id.clone()));
     let mut chunks = props.recording.chunks.clone();
     chunks.sort_by(|a, b| a.first_game_time.total_cmp(&b.first_game_time));
 
@@ -72,6 +72,8 @@ pub fn OwnerReplay(props: &OwnerReplayProps) -> Html {
         .map(|v| v as f32)
         .unwrap_or(props.recording.summary.recording.last_game_time);
 
+    let (ranges, end) = extents.borrow().timeline(&chunks, end);
+
     controller::use_replay_controller(
         controller::ReplayRequest {
             source: cache::ReplaySource::Owner(props.id.clone()),
@@ -81,6 +83,8 @@ pub fn OwnerReplay(props: &OwnerReplayProps) -> Html {
             revision: *retry,
         },
         cache.clone(),
+        extents,
+        on_extent,
         game.clone(),
         error.clone(),
         Callback::noop(),
@@ -180,7 +184,7 @@ pub fn OwnerReplay(props: &OwnerReplayProps) -> Html {
                 { format!("Replay {} / {}",crate::history::list::duration(*time),crate::history::list::duration(end)) }
             </label>
             <div class={classes!("watch-coverage")}>
-                { for timeline::gaps(&chunks,end).iter().map(|(a,b)|html!{<span class={classes!("watch-gap")} style={format!("left:{}%;width:{}%",a/end.max(1.)*100.,(b-a)/end.max(1.)*100.)} title={format!("Missing capture {a:.0}–{b:.0}s")}/>}) }
+                { for timeline::gaps(&ranges,end).iter().map(|(a,b)|html!{<span class={classes!("watch-gap")} style={format!("left:{}%;width:{}%",a/end.max(1.)*100.,(b-a)/end.max(1.)*100.)} title={format!("Missing capture {a:.0}–{b:.0}s")}/>}) }
             </div>
             <input
                 id={"owner-time"}

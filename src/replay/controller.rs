@@ -25,6 +25,8 @@ pub struct ReplayRequest {
 pub fn use_replay_controller(
     request: ReplayRequest,
     cache: Rc<RefCell<ChunkCache>>,
+    extents: Rc<RefCell<super::extent::ExtentStore>>,
+    on_extent: Callback<()>,
     game: UseStateHandle<Option<Rc<Game>>>,
     message: UseStateHandle<String>,
     on_access_error: Callback<String>,
@@ -41,7 +43,7 @@ pub fn use_replay_controller(
                 return;
             }
 
-            let ranges = cache::observed_ranges(&request.chunks, &cache.borrow());
+            let ranges = extents.borrow().timeline(&request.chunks, request.time).0;
             cache::retain_neighbors(&mut cache.borrow_mut(), &ranges, request.time);
 
             let Some(index) = timeline::current_index(&ranges, request.time) else {
@@ -69,7 +71,9 @@ pub fn use_replay_controller(
                 let cached = cache
                     .borrow()
                     .get(&seq)
-                    .filter(|chunk| chunk.validate(metadata).is_ok())
+                    .filter(|chunk| {
+                        extents.borrow().matches(metadata) && chunk.validate(metadata).is_ok()
+                    })
                     .cloned();
 
                 let result = if let Some(chunk) = cached {
@@ -84,6 +88,9 @@ pub fn use_replay_controller(
 
                 match result {
                     Ok(chunk) => {
+                        if extents.borrow_mut().observe_chunk(metadata, &chunk) {
+                            on_extent.emit(());
+                        }
                         cache.borrow_mut().insert(seq, chunk.clone());
 
                         if seq != current {

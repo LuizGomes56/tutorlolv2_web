@@ -10,12 +10,37 @@ pub struct ObservedExtent {
 }
 
 #[derive(Default)]
-struct ExtentStore {
+pub(crate) struct ExtentStore {
     values: BTreeMap<u32, ObservedExtent>,
     revision: u64,
 }
 
 impl ExtentStore {
+    pub(crate) fn matches(&self, metadata: &ChunkInfo) -> bool {
+        self.values
+            .get(&metadata.seq)
+            .is_some_and(|extent| extent.metadata == *metadata)
+    }
+
+    pub(crate) fn observe_chunk(
+        &mut self,
+        metadata: &ChunkInfo,
+        chunk: &super::cache::CachedChunk,
+    ) -> bool {
+        if chunk.validate(metadata).is_err() {
+            return false;
+        }
+        let frames = &chunk.borrow_dependent().frames;
+        let (Some((_, first)), Some((_, last))) = (frames.first(), frames.last()) else {
+            return false;
+        };
+        self.observe(ObservedExtent {
+            metadata: metadata.clone(),
+            first: first.game_data.game_time,
+            last: last.game_data.game_time,
+        })
+    }
+
     fn observe(&mut self, value: ObservedExtent) -> bool {
         if !value.first.is_finite()
             || !value.last.is_finite()
@@ -31,7 +56,7 @@ impl ExtentStore {
         true
     }
 
-    fn timeline(&self, chunks: &[ChunkInfo], end: f32) -> (Vec<ChunkInfo>, f32) {
+    pub(crate) fn timeline(&self, chunks: &[ChunkInfo], end: f32) -> (Vec<ChunkInfo>, f32) {
         let ranges: Vec<_> = chunks
             .iter()
             .map(|metadata| {
@@ -111,4 +136,19 @@ mod tests {
         let (_, end) = store.timeline(&[changed], 100.);
         assert_eq!(end, 100.);
     }
+}
+
+/// Scope compact observations to one source, independently of decoded neighbor eviction.
+#[yew::hook]
+pub(crate) fn use_extents(
+    source: super::cache::ReplaySource,
+) -> (
+    std::rc::Rc<std::cell::RefCell<ExtentStore>>,
+    yew::Callback<()>,
+) {
+    use yew::prelude::*;
+    let revision = use_state(|| 0u64);
+    let store = use_memo(source, |_| std::cell::RefCell::new(ExtentStore::default()));
+    let changed = Callback::from(move |()| revision.set(revision.wrapping_add(1)));
+    (store, changed)
 }

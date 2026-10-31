@@ -121,7 +121,7 @@ fn Viewer(props: &ViewerProps) -> Html {
     let playing = use_state(|| false);
     let speed = use_state(|| 1u32);
     let replay_message = use_state(String::new);
-    let cache = use_memo((), |_| {
+    let cache = use_memo(props.code.clone(), |_| {
         RefCell::new(BTreeMap::<u32, Rc<api::CachedChunk>>::new())
     });
 
@@ -326,6 +326,14 @@ fn Viewer(props: &ViewerProps) -> Html {
         .map_or(0., |m| m.summary.last_game_time)
         .max(live.as_ref().map_or(0., |g| g.game_time as f32));
 
+    let (extents, on_extent) = crate::replay::extent::use_extents(
+        crate::replay::cache::ReplaySource::Capability(props.code.clone()),
+    );
+    let chunks = metadata
+        .as_ref()
+        .map(|m| m.chunks.as_slice())
+        .unwrap_or_default();
+    let (ranges, end) = extents.borrow().timeline(chunks, end);
     let viewing_live = *follow && !ended;
 
     // Access lifecycle stays here; the source-neutral controller owns bounded replay work.
@@ -358,6 +366,8 @@ fn Viewer(props: &ViewerProps) -> Html {
             revision: *retry,
         },
         cache.clone(),
+        extents,
+        on_extent,
         replay.clone(),
         replay_message.clone(),
         access_error,
@@ -496,7 +506,7 @@ fn Viewer(props: &ViewerProps) -> Html {
 
     let coverage = metadata
         .as_ref()
-        .map(|m| timeline::gaps(&m.chunks, end))
+        .map(|_| timeline::gaps(&ranges, end))
         .unwrap_or_default();
 
     let coverage_markers = coverage.iter().map(|(first, last)| {
