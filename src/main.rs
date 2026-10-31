@@ -23,9 +23,11 @@ mod about;
 mod calculator;
 mod components;
 mod formulas;
+mod history;
 mod hover;
 mod livegame;
 mod model;
+mod replay;
 mod utils;
 mod watch;
 
@@ -46,6 +48,10 @@ pub enum Route {
     Watch,
     #[at("/watch/:code")]
     WatchCode { code: String },
+    #[at("/history")]
+    History,
+    #[at("/history/:id")]
+    HistoryDetails { id: String },
     #[at("/livegame")]
     Livegame,
     #[at("/formulas")]
@@ -64,7 +70,8 @@ pub enum Route {
 fn App() -> Html {
     html! {
         <BrowserRouter>
-            <Switch<Route> render={|route| {
+            <Switch<Route>
+                render={|route| {
                 #[cfg(feature = "tauri")]
                 if route == Route::Overlay {
                     return html! {
@@ -82,6 +89,8 @@ fn App() -> Html {
                     Route::Formulas => html!(<Formulas />),
                     Route::Watch => html!(<watch::Watch />),
                     Route::WatchCode { code } => html!(<watch::Watch code={code} />),
+                    Route::History => html!(<history::History />),
+                    Route::HistoryDetails { id } => html!(<history::History id={id} />),
                     Route::Livegame => html!(<Livegame />),
                     Route::About => html!(<About />),
                     _ => html!(<Calculator />),
@@ -104,7 +113,8 @@ fn App() -> Html {
                         <HoverDocs />
                     </>
                 }
-            }} />
+            }}
+            />
         </BrowserRouter>
     }
 }
@@ -125,6 +135,8 @@ mod tests {
             cfg!(feature = "tauri")
         );
         assert!(Route::routes().contains(&"/livegame"));
+        assert!(Route::routes().contains(&"/history"));
+        assert!(Route::routes().contains(&"/history/:id"));
         assert!(Route::routes().contains(&"/watch"));
         assert!(Route::routes().contains(&"/watch/:code"));
     }
