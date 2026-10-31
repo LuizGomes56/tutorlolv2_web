@@ -1,5 +1,5 @@
-mod api;
-mod timeline;
+pub(crate) mod api;
+use crate::replay::timeline;
 
 use crate::{
     Route,
@@ -12,6 +12,7 @@ use std::{
     time::Duration,
 };
 use tutorlolv2_protocol::{ShareInfo, ShareStatus, display_code, normalize_code};
+use wasm_bindgen::JsCast;
 use web_sys::{AbortController, HtmlInputElement};
 use yew::{
     platform::{spawn_local, time::sleep},
@@ -82,17 +83,14 @@ pub fn Watch(props: &WatchProps) -> Html {
                     />
                     <button type={"submit"}>{ "Watch" }</button>
                     <p id={"code-help"} role={if *invalid {"alert"} else {"status"}}>
-                        {
-                            if *invalid {
+                        { if *invalid {
                             "Enter the eight-character code from the host. Spaces and dashes are optional."
                             } else {
                                 "No account needed. Ask the host for their share code."
-                            }
-                        }
+                            } }
                     </p>
                 </form>
             </header>
-
             if let Some(code) = code {
                 <Viewer key={code.clone()} code={code.clone()} />
             } else if !props.code.is_empty() {
@@ -100,7 +98,6 @@ pub fn Watch(props: &WatchProps) -> Html {
                     { "Invalid share code. Enter the eight-character code above." }
                 </p>
             }
-
         </main>
     }
 }
@@ -124,7 +121,7 @@ fn Viewer(props: &ViewerProps) -> Html {
     let playing = use_state(|| false);
     let speed = use_state(|| 1u32);
     let replay_message = use_state(String::new);
-    let cache = use_memo((), |_| {
+    let cache = use_memo(props.code.clone(), |_| {
         RefCell::new(BTreeMap::<u32, Rc<api::CachedChunk>>::new())
     });
 
@@ -152,10 +149,16 @@ fn Viewer(props: &ViewerProps) -> Html {
                     match api::info(&code, &task_abort).await {
                         Ok(info) if running.get() => {
                             if initial {
-                                time.set(info.summary.first_game_time);
+                                time.set(
+                                    info.chunks
+                                        .first()
+                                        .map_or(info.summary.first_game_time, |chunk| {
+                                            chunk.first_game_time
+                                        }),
+                                );
                                 initial = false;
                             }
-                            
+
                             fatal.set(false);
                             message.set(String::new());
                             metadata.set(Some(info));
@@ -323,146 +326,52 @@ fn Viewer(props: &ViewerProps) -> Html {
         .map_or(0., |m| m.summary.last_game_time)
         .max(live.as_ref().map_or(0., |g| g.game_time as f32));
 
+    let (extents, on_extent) = crate::replay::extent::use_extents(
+        crate::replay::cache::ReplaySource::Capability(props.code.clone()),
+    );
+    let chunks = metadata
+        .as_ref()
+        .map(|m| m.chunks.as_slice())
+        .unwrap_or_default();
+    let (ranges, end) = extents.borrow().timeline(chunks, end);
     let viewing_live = *follow && !ended;
 
-    // Only three decoded chunks are retained; self_cell owns the backing buffers safely.
-    {
+    // Access lifecycle stays here; the source-neutral controller owns bounded replay work.
+    let access_error = {
+        let message = message.clone();
+        let fatal = fatal.clone();
+        let metadata = metadata.clone();
+        let live = live.clone();
         let replay = replay.clone();
-        let replay_message = replay_message.clone();
         let cache = cache.clone();
-        let error_message = message.clone();
-        let fatal_state = fatal.clone();
-        let metadata_state = metadata.clone();
-        let live_state = live.clone();
 
-        use_effect_with(
-            (
-                props.code.clone(),
-                metadata.clone(),
-                *time,
-                viewing_live,
-                *fatal,
-                *retry,
-            ),
-            move |(code, metadata, time, viewing_live, fatal, _)| {
-                let abort = AbortController::new().unwrap();
-                let task_abort = abort.clone();
-                let active = Rc::new(Cell::new(true));
-                let running = active.clone();
-                let code = code.clone();
-                let metadata = (**metadata).clone();
-                let time = *time;
-                let enabled = !*viewing_live && !*fatal;
-
-                spawn_local(async move {
-                    if enabled && let Some(metadata) = metadata {
-                        let needed = timeline::neighbors(&metadata.chunks, time);
-                        cache.borrow_mut().retain(|seq, _| needed.contains(seq));
-                        replay_message.set("Loading replay...".into());
-
-                        let result = async {
-                            // Fetch current first, then neighboring chunks.
-                            let current = timeline::current_index(&metadata.chunks, time)
-                                .map(|index| &metadata.chunks[index]);
-
-                            if let Some(current) = current {
-                                let mut order = vec![current.seq];
-                                order.extend(needed.into_iter().filter(|seq| *seq != current.seq));
-
-                                for seq in order {
-                                    if !running.get() {
-                                        return Ok(());
-                                    }
-
-                                    let cached = cache.borrow().get(&seq).cloned();
-                                    let chunk = if let Some(chunk) = cached {
-                                        chunk
-                                    } else {
-                                        let response =
-                                            api::get(&format!("{code}/frames/{seq}"), &task_abort)
-                                                .await?;
-
-                                        if !response.ok() {
-                                            return Err(api::status_error(response.status()));
-                                        }
-
-                                        let chunk = api::CachedChunk::decode(
-                                            api::bytes(&response).await?,
-                                            metadata.frames_format,
-                                        )?;
-
-                                        if !running.get() {
-                                            return Ok(());
-                                        }
-
-                                        cache.borrow_mut().insert(seq, chunk.clone());
-                                        chunk
-                                    };
-
-                                    if seq == current.seq {
-                                        let frames = &chunk.borrow_dependent().frames;
-
-                                        if let Some((_, frame)) = frames
-                                            .iter()
-                                            .rev()
-                                            .find(|(_, f)| f.game_data.game_time <= time)
-                                            .or_else(|| frames.first())
-                                        {
-                                            let game =
-                                                crate::utils::transport::realtime_from(frame)
-                                                    .await
-                                                    .map_err(|e| e.to_string())?;
-
-                                            if running.get() {
-                                                replay.set(Some(Rc::new(game)));
-                                                replay_message.set(String::new());
-                                            }
-                                        } else {
-                                            return Err(
-                                                "No frames in this part of the recording.".into()
-                                            );
-                                        }
-                                    }
-                                }
-                            } else if running.get() {
-                                replay.set(None);
-                                replay_message.set(
-                                    "No recording at this time. Choose a \
-                                    covered part of the timeline."
-                                        .into(),
-                                );
-                            }
-
-                            Ok::<(), String>(())
-                        }
-                        .await;
-
-                        if let Err(error) = result
-                            && running.get()
-                        {
-                            if error.starts_with("This match")
-                                || error.starts_with("Code not found")
-                            {
-                                error_message.set(error.clone());
-                                fatal_state.set(true);
-                                metadata_state.set(None);
-                                live_state.set(None);
-                                replay.set(None);
-                                cache.borrow_mut().clear();
-                            }
-
-                            replay_message.set(error);
-                        }
-                    }
-                });
-
-                move || {
-                    active.set(false);
-                    abort.abort();
-                }
-            },
-        );
-    }
+        Callback::from(move |error: String| {
+            message.set(error);
+            fatal.set(true);
+            metadata.set(None);
+            live.set(None);
+            replay.set(None);
+            cache.borrow_mut().clear();
+        })
+    };
+    crate::replay::controller::use_replay_controller(
+        crate::replay::controller::ReplayRequest {
+            source: crate::replay::cache::ReplaySource::Capability(props.code.clone()),
+            chunks: metadata
+                .as_ref()
+                .map(|value| value.chunks.clone())
+                .unwrap_or_default(),
+            time: *time,
+            enabled: !viewing_live && !*fatal && metadata.is_some(),
+            revision: *retry,
+        },
+        cache.clone(),
+        extents,
+        on_extent,
+        replay.clone(),
+        replay_message.clone(),
+        access_error,
+    );
 
     {
         let time = time.clone();
@@ -529,7 +438,15 @@ fn Viewer(props: &ViewerProps) -> Html {
         let position = if viewing_live { end } else { *time };
 
         Callback::from(move |event: KeyboardEvent| {
-            if !event.is_composing() {
+            if !event.is_composing()
+                && !event
+                    .target()
+                    .and_then(|value| value.dyn_into::<web_sys::Element>().ok())
+                    .is_some_and(|element| {
+                        matches!(element.tag_name().as_str(), "INPUT" | "TEXTAREA" | "SELECT")
+                            || element.get_attribute("contenteditable").is_some()
+                    })
+            {
                 match event.key().as_str() {
                     "ArrowLeft" => {
                         event.prevent_default();
@@ -589,7 +506,7 @@ fn Viewer(props: &ViewerProps) -> Html {
 
     let coverage = metadata
         .as_ref()
-        .map(|m| timeline::gaps(&m.chunks, end))
+        .map(|_| timeline::gaps(&ranges, end))
         .unwrap_or_default();
 
     let coverage_markers = coverage.iter().map(|(first, last)| {
@@ -599,8 +516,7 @@ fn Viewer(props: &ViewerProps) -> Html {
                 style={format!(
                     "left:{}%;width:{}%",
                     first / end.max(1.0) * 100.0,
-                    (last - first) / end.max(1.0) * 100.0)
-                }
+                    (last - first) / end.max(1.0) * 100.0)}
                 title={format!("Not recorded: {first:.0}–{last:.0} s")}
             />
         }
@@ -628,8 +544,7 @@ fn Viewer(props: &ViewerProps) -> Html {
                         { format!("{} · {}",info.summary.champion, info.summary.active_riot_id) }
                     </span>
                     <strong>
-                        {
-                            match &info.status {
+                        { match &info.status {
                                 ShareStatus::Live { .. } => {
                                     if viewing_live {
                                         "● LIVE"
@@ -639,36 +554,30 @@ fn Viewer(props: &ViewerProps) -> Html {
                                 }
                                 ShareStatus::HostDisconnected => "Waiting for host",
                                 ShareStatus::Ended { .. } => "Match ended · replay",
-                            }
-                        }
+                            } }
                     </strong>
                 }
             </div>
-
             if !message.is_empty() {
                 <div class={classes!("watch-status")} role={"status"}>
                     { &*message }
                     <button onclick={retry_click.clone()}>{ "Retry" }</button>
                 </div>
             }
-
             if !live_message.is_empty() {
                 <div class={classes!("watch-status")} role={"status"}>
                     { &*live_message }
                     <button onclick={retry_click.clone()}>{ "Retry" }</button>
                 </div>
             }
-
             if metadata.is_some() && !*fatal {
                 <div class={classes!("watch-timeline")} onkeydown={onkey}>
                     <label for={"replay-time"}>
-                        {
-                            format!(
+                        { format!(
                                 "Replay time: {:.0} / {:.0} s",
                                 if viewing_live { end } else { *time },
                                 end
-                            )
-                        }
+                            ) }
                     </label>
                     <div class={classes!("watch-coverage")} aria-label={"Recording coverage"}>
                         { for coverage_markers }
@@ -684,7 +593,10 @@ fn Viewer(props: &ViewerProps) -> Html {
                         aria-describedby={"timeline-help"}
                     />
                     <div class={classes!("watch-actions")}>
-                        <button onclick={toggle_play} disabled={end <= 0.0}>
+                        <button
+                            onclick={toggle_play}
+                            disabled={end <= 0.0 || metadata.as_ref().is_none_or(|info| info.chunks.is_empty())}
+                        >
                             { if *playing { "Pause" } else { "Play" } }
                         </button>
                         { for speed_buttons }
@@ -697,11 +609,9 @@ fn Viewer(props: &ViewerProps) -> Html {
                     <p id={"timeline-help"}>
                         { "← / → seek 10 seconds. Hatched areas were not recorded. Sealed replay may trail live by up to a minute." }
                     </p>
-
                     if !viewing_live && !replay_message.is_empty() {
                         <p role={"status"}>{ &*replay_message }</p>
                     }
-
                     if !coverage.is_empty() {
                         <p class={classes!("watch-gap-text")}>
                             { "Missing coverage: " }
@@ -711,13 +621,11 @@ fn Viewer(props: &ViewerProps) -> Html {
                 </div>
                 <LivegameView
                     data={selected}
-                    error={
-                        if viewing_live {
-                            "Waiting for the host’s next frame...".to_string()
-                        } else {
-                            String::new()
-                        }
-                    }
+                    error={if viewing_live {
+                        "Waiting for the host’s next frame...".to_string()
+                    } else {
+                        String::new()
+                    }}
                 />
             }
         </section>

@@ -1,35 +1,11 @@
 use crate::utils::BINCODE_CONFIG;
-use std::rc::Rc;
-use tutorlolv2::riot::{FrameChunk, RiotRealtime};
+use tutorlolv2::riot::RiotRealtime;
 use tutorlolv2_protocol::{FRAMES_FORMAT, ShareInfo};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{AbortController, RequestInit, Response, js_sys::Uint8Array};
 
-self_cell::self_cell! {
-    pub struct CachedChunk {
-        owner: Vec<u8>,
-        #[covariant]
-        dependent: FrameChunk,
-    }
-}
-
-impl CachedChunk {
-    pub fn decode(bytes: Vec<u8>, format: u16) -> Result<Rc<Self>, String> {
-        Self::try_new(bytes, |bytes| {
-            let (chunk, consumed): (FrameChunk<'_>, _) =
-                bincode::borrow_decode_from_slice(bytes, BINCODE_CONFIG)
-                    .map_err(|e| e.to_string())?;
-
-            if consumed != bytes.len() || chunk.format != format {
-                return Err("Unsupported or damaged replay chunk. Try refreshing.".into());
-            }
-
-            Ok(chunk)
-        })
-        .map(Rc::new)
-    }
-}
+pub use crate::replay::cache::CachedChunk;
 
 pub fn api_base() -> String {
     if let Some(base) = option_env!("TUTORLOLV2_API_URL") {
@@ -120,6 +96,7 @@ pub async fn frame(bytes: &[u8]) -> Result<crate::livegame::Game, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tutorlolv2::riot::FrameChunk;
     #[test]
     fn borrowed_chunk_keeps_its_buffer_and_rejects_wrong_format_or_trailing_bytes() {
         let fixture = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/example.bincode"));

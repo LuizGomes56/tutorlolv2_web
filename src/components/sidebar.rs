@@ -22,9 +22,7 @@ pub fn Sidebar() -> Html {
                             class={classes!("h-5", "w-5")}
                             src={format!("/svgs/sidebar/{text}.svg")}
                         />
-                        <span class={classes!("text-shadow", "font-medium")}>
-                            {text}
-                        </span>
+                        <span class={classes!("text-shadow", "font-medium")}>{ text }</span>
                     </Link<Route>>
                 }
             })
@@ -32,37 +30,41 @@ pub fn Sidebar() -> Html {
     }
 
     #[cfg(feature = "tauri")]
-    let desktop_settings = buttons([("Settings", Route::Settings)]);
+    let desktop_settings = buttons([("History", Route::History), ("Settings", Route::Settings)]);
 
     #[cfg(not(feature = "tauri"))]
     let desktop_settings = Html::default();
 
     html! {
-        <aside class={classes!(
+        <aside
+            class={classes!(
             "w-48", "h-full", "max-h-screen",
             "hidden", "md:block"
-        )}>
-            <nav class={classes!(
+        )}
+        >
+            <nav
+                class={classes!(
                 "flex", "flex-col", "h-full",
                 "py-4", "px-4", "justify-between",
                 "box",
-            )}>
+            )}
+            >
                 <div class={classes!("flex", "flex-col", "gap-2")}>
-                    {buttons([
+                    { buttons([
                         ("Homepage",    Route::Homepage),
                         ("Calculator",  Route::Calculator),
                         ("Livegame",    Route::Livegame),
                         ("Watch",       Route::Watch)
-                    ])}
+                    ]) }
                 </div>
                 <div class={classes!("flex", "flex-col", "gap-2")}>
-                    {desktop_settings}
-                    {buttons([
+                    { desktop_settings }
+                    { buttons([
                         ("Formulas",    Route::Formulas),
                         ("Help & FAQ",  Route::Formulas),
                         ("About",       Route::About),
                         ("GitHub",      Route::Homepage)
-                    ])}
+                    ]) }
                 </div>
             </nav>
         </aside>
