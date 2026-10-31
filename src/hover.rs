@@ -157,9 +157,17 @@ pub fn encode_idents(idents: &[CtxVar], ctx: &Ctx) -> Option<String> {
 /// Numeric value shown in identifier tooltips, also used to filter visible stats.
 pub fn ident_display_value(ident: CtxVar, value: f32) -> f32 {
     match ident {
-        CtxVar::AttackSpeed | CtxVar::BaseAttackSpeed | CtxVar::BonusAttackSpeed => {
-            (value * 100.0).round() / 100.0 + 0.0
-        }
+        CtxVar::AttackSpeed
+        | CtxVar::BaseAttackSpeed
+        | CtxVar::BonusAttackSpeed
+        | CtxVar::PhysicalMultiplier
+        | CtxVar::MagicMultiplier
+        | CtxVar::SteelcapsEffect
+        | CtxVar::ArmorPenetrationPercent
+        | CtxVar::MagicPenetrationPercent
+        | CtxVar::EnemyMissingHealth
+        | CtxVar::RanduinEffect
+        | CtxVar::RocksolidEffect => (value * 100.0).round() / 100.0 + 0.0,
         // Adding zero normalizes rounded negative zero for display.
         _ => value.round() + 0.0,
     }
