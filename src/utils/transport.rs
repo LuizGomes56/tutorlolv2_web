@@ -73,12 +73,7 @@ pub async fn realtime(
         let bytes = buffer.as_slice();
 
         let input = decode_realtime_input(bytes)?;
-
-        let output = tutorlolv2::realtime::realtime(&input).map_err(|error| match error {
-            tutorlolv2::realtime::RealtimeError::UnrecognizedCurrentPlayer(player) => {
-                format!("Unable to recognize current player with name {player:?}")
-            }
-        })?;
+        let output = tutorlolv2::realtime::realtime(&input).map_err(|error| error.to_string())?;
 
         Ok(output.into())
     }
@@ -172,6 +167,28 @@ async fn post(endpoint: &str, body: Uint8Array) -> Result<Vec<u8>, Error> {
 #[cfg(not(feature = "local-calculation"))]
 fn js_error(value: wasm_bindgen::JsValue) -> Error {
     format!("Calculation service request failed: {value:?}").into()
+}
+
+/// Calculate an already decoded viewer frame without serializing it locally.
+pub async fn realtime_from(input: &RiotRealtime<'_>) -> Result<crate::livegame::Game, Error> {
+    #[cfg(feature = "local-calculation")]
+    {
+        Ok(tutorlolv2::realtime::realtime(input)
+            .map_err(|e| format!("Unable to calculate frame: {e:?}"))?
+            .into())
+    }
+
+    #[cfg(not(feature = "local-calculation"))]
+    {
+        let bytes = bincode::encode_to_vec(input, super::BINCODE_CONFIG)?;
+        let response = post("realtime", Uint8Array::from(bytes.as_slice())).await?;
+        let (output, consumed) =
+            bincode::borrow_decode_from_slice::<Realtime<'_>, _>(&response, super::BINCODE_CONFIG)?;
+
+        consume_all(consumed, response.len())?;
+
+        Ok(output.into())
+    }
 }
 
 #[cfg(test)]

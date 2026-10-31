@@ -17,9 +17,9 @@ mod components;
 mod page;
 
 pub use components::*;
-pub use page::Livegame;
+pub use page::{Livegame, LivegameView};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Game {
     pub current_player: CurrentPlayer,
     pub enemies: Rc<[Enemy]>,
@@ -31,7 +31,7 @@ pub struct Game {
     pub dragons: Dragons,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CurrentPlayer {
     pub riot_id: Rc<str>,
     pub base_stats: BasicStats,

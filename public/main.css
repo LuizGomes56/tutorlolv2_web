@@ -356,3 +356,159 @@ img {
     width: max-content;
     max-width: 32rem;
 }
+
+/* Sharing reuses the app's zinc palette and square dense controls. */
+.watch-page {
+    padding: 1rem;
+    min-width: 0;
+}
+
+.watch-entry h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.watch-entry form,
+.watch-toolbar,
+.watch-actions,
+.sharing-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.watch-entry form p,
+.sharing-bar p {
+    flex-basis: 100%;
+}
+
+.watch-entry,
+.watch-timeline,
+.watch-status,
+.sharing-bar {
+    background: #18181b;
+    border: 1px solid #52525b;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sharing-bar {
+    margin: 1rem;
+}
+
+.watch-toolbar {
+    padding-block: 0.75rem;
+    gap: 1rem;
+}
+
+.watch-page button,
+.sharing-bar button,
+.watch-entry input {
+    padding: 0.45rem 0.75rem;
+    background: #27272a;
+    border: 1px solid #52525b;
+    border-radius: 0;
+}
+
+.watch-page button,
+.sharing-bar button {
+    cursor: pointer;
+}
+
+.watch-page button:hover:enabled,
+.sharing-bar button:hover:enabled {
+    background: #3f3f46;
+}
+
+.watch-page button:active:enabled,
+.sharing-bar button:active:enabled {
+    background: #52525b;
+}
+
+.watch-page button[aria-pressed="true"],
+.sharing-bar button[aria-pressed="true"] {
+    border-color: #38bdf8;
+    color: #38bdf8;
+}
+
+.watch-page :focus-visible,
+.sharing-bar :focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 3px;
+}
+
+.watch-page button:disabled,
+.sharing-bar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.watch-entry input {
+    max-width: 100%;
+    width: 12rem;
+    font-family: ui-monospace, monospace;
+    text-transform: uppercase;
+}
+
+.watch-entry p,
+.watch-timeline p,
+.sharing-bar p {
+    color: #d4d4d8;
+    font-size: 0.875rem;
+}
+
+.watch-timeline input[type="range"] {
+    display: block;
+    width: 100%;
+    margin-block: 0.75rem;
+    accent-color: #38bdf8;
+}
+
+.watch-coverage {
+    position: relative;
+    height: 0.5rem;
+    background: #38bdf8;
+    margin-top: 0.5rem;
+}
+
+.watch-gap {
+    position: absolute;
+    height: 100%;
+    background: repeating-linear-gradient(
+        120deg,
+        #52525b 0 3px,
+        #18181b 3px 6px
+    );
+}
+
+.share-code {
+    font-family: ui-monospace, monospace;
+    user-select: all;
+    letter-spacing: 0.12em;
+}
+
+.sharing-feedback {
+    min-height: 1.25rem;
+}
+
+.watch-status button {
+    margin-left: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .watch-page {
+        padding: 0.5rem;
+    }
+    .watch-entry form {
+        align-items: stretch;
+    }
+    .watch-entry label {
+        flex-basis: 100%;
+    }
+    .watch-toolbar {
+        align-items: start;
+        flex-direction: column;
+    }
+}

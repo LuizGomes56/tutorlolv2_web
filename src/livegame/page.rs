@@ -1,6 +1,5 @@
 use crate::{
     components::{
-        errorlog::errorlog,
         image::{Image, ImageType},
         selector::Selector,
         stack::{Stack, StackInsert, StackRemover, StackTable},
@@ -13,7 +12,7 @@ use crate::{
     },
     utils::{Loading, glue::get_desktop_data, use_setter},
 };
-use std::{rc::Rc, time::Duration};
+use std::{cell::Cell, rc::Rc, time::Duration};
 use strum::IntoEnumIterator;
 use tutorlolv2::{Ctx, CtxVar, ItemId, TypeMetadata, bitset::BitSet, model::Damages};
 use yew::{
@@ -48,29 +47,64 @@ fn simulated_items_meta<'a>(
 #[component]
 pub fn Livegame() -> Html {
     let game_data = use_state(|| Err::<Game, Box<dyn core::error::Error>>(Loading.into()));
-    let stack = use_reducer(Stack::default);
-    let stack_push = Stack::use_push(&stack);
-    let siml_item = use_state(|| const { ItemId::SIML[0] });
-    let siml_item_callback = use_setter(&siml_item);
 
     {
         let game_data = game_data.clone();
 
         use_effect_with((), |_| {
+            let active = Rc::new(Cell::new(true));
+            let running = active.clone();
+
             spawn_local(async move {
-                loop {
+                while running.get() {
                     let data = get_desktop_data().await;
+
+                    if !running.get() {
+                        break;
+                    }
 
                     game_data.set(data);
 
                     sleep(Duration::from_secs(1)).await;
                 }
             });
+            move || active.set(false)
         });
     };
 
-    match &*game_data {
-        Ok(data) => {
+    #[cfg(feature = "tauri")]
+    let sharing = html!(<crate::desktop::sharing::SharingBar />);
+
+    #[cfg(not(feature = "tauri"))]
+    let sharing = Html::default();
+
+    html! {
+        <>
+            { sharing }
+            <LivegameView
+                data={(*game_data).as_ref().ok().map(|g| Rc::new(g.clone()))}
+                error={(*game_data).as_ref().err().map(ToString::to_string).unwrap_or_default()}
+            />
+        </>
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct LivegameViewProps {
+    pub data: Option<Rc<Game>>,
+    #[prop_or_default]
+    pub error: String,
+}
+
+#[component]
+pub fn LivegameView(props: &LivegameViewProps) -> Html {
+    let stack = use_reducer(Stack::default);
+    let stack_push = Stack::use_push(&stack);
+    let siml_item = use_state(|| const { ItemId::SIML[0] });
+    let siml_item_callback = use_setter(&siml_item);
+
+    match props.data.as_deref() {
+        Some(data) => {
             let Game {
                 ref current_player,
                 ref enemies,
@@ -155,7 +189,7 @@ pub fn Livegame() -> Html {
                         >
                             <Image src={ImageType::from(enemy_id)} />
                         </td>
-                        {damages}
+                        { damages }
                     </tr>
                 }
             };
@@ -230,7 +264,10 @@ pub fn Livegame() -> Html {
                 .map(|(enemy_id, base, list)| {
                     html! {
                         <tr>
-                            <td data_docs={Docs::global(*enemy_id).encode()} class={classes!("w-10")}>
+                            <td
+                                data_docs={Docs::global(*enemy_id).encode()}
+                                class={classes!("w-10")}
+                            >
                                 <Image src={ImageType::from(*enemy_id)} />
                             </td>
                             {
@@ -261,10 +298,10 @@ pub fn Livegame() -> Html {
                     <thead>
                         <tr>
                             <th />
-                            {recm_header}
+                            { recm_header }
                         </tr>
                     </thead>
-                    <tbody>{recm_body}</tbody>
+                    <tbody>{ recm_body }</tbody>
                 </table>
             };
 
@@ -290,10 +327,7 @@ pub fn Livegame() -> Html {
                         />
                         <div class={classes!("grid", "grid-cols-[auto_auto]", "gap-4")}>
                             <DragonDisplay {dragons} />
-                            <AbilityLevelsDisplay
-                                {champion_id}
-                                {ability_levels}
-                            />
+                            <AbilityLevelsDisplay {champion_id} {ability_levels} />
                         </div>
                     </div>
                     <div class={classes!(
@@ -302,12 +336,8 @@ pub fn Livegame() -> Html {
                     )}>
                         <div class={classes!("box", "overflow-auto")}>
                             <table class={classes!("data-table")}>
-                                <TableHeader
-                                    {champion_id}
-                                    {items_meta}
-                                    {runes_meta}
-                                />
-                                <tbody>{damages}</tbody>
+                                <TableHeader {champion_id} {items_meta} {runes_meta} />
+                                <tbody>{ damages }</tbody>
                             </table>
                         </div>
                         <div class={classes!("box", "overflow-auto")}>
@@ -342,9 +372,9 @@ pub fn Livegame() -> Html {
                                 "text-xl", "font-medium", "text-std-400",
                                 "px-6", "py-5"
                             )}>
-                                {"Bonus damage after buying new item"}
+                                { "Bonus damage after buying new item" }
                             </div>
-                            {recm_table}
+                            { recm_table }
                         </div>
                         <div class={classes!("box", "overflow-auto")}>
                             <div class={classes!("h-fit", "p-4")}>
@@ -362,23 +392,25 @@ pub fn Livegame() -> Html {
                                     items_meta={&siml_items_meta}
                                     {runes_meta}
                                 />
-                                <tbody>
-                                    {siml_damages(siml_index)}
-                                </tbody>
+                                <tbody>{ siml_damages(siml_index) }</tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             }
         }
-        Err(e) => {
+        None => {
             html! {
                 <div class={classes!(
                     "flex", "gap-4", "p-4",
                     "overflow-hidden", "flex-1"
                 )}>
-                    {errorlog(e)}
-                    <EmptyTable rows={5} />
+                    if !props.error.is_empty() {
+                        <p role={"status"}>{ &props.error }</p>
+                    }
+                    <EmptyTable
+                        rows={5}
+                    />
                     <div class={classes!("box", "h-96")} />
                 </div>
             }
