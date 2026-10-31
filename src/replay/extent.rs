@@ -1,8 +1,6 @@
 //! Compact observed bounds outlive decoded neighbor buffers, never the recording metadata.
-use super::cache::ReplaySource;
-use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
+use std::collections::BTreeMap;
 use tutorlolv2_protocol::ChunkInfo;
-use yew::prelude::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ObservedExtent {
@@ -34,7 +32,30 @@ impl ExtentStore {
     }
 
     fn timeline(&self, chunks: &[ChunkInfo], end: f32) -> (Vec<ChunkInfo>, f32) {
-        (chunks.to_vec(), end)
+        let ranges: Vec<_> = chunks
+            .iter()
+            .map(|metadata| {
+                let mut range = metadata.clone();
+                range.first_game_time = metadata.first_game_time.min(metadata.last_game_time);
+                range.last_game_time = metadata.first_game_time.max(metadata.last_game_time);
+
+                if let Some(observed) = self
+                    .values
+                    .get(&metadata.seq)
+                    .filter(|observed| observed.metadata == *metadata)
+                {
+                    range.first_game_time = range.first_game_time.min(observed.first);
+                    range.last_game_time = range.last_game_time.max(observed.last);
+                }
+
+                range
+            })
+            .collect();
+        let end = ranges
+            .iter()
+            .fold(end, |end, range| end.max(range.last_game_time));
+
+        (ranges, end)
     }
 }
 

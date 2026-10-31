@@ -92,21 +92,17 @@ pub fn HistoryDetailsView(props: &HistoryDetailsViewProps) -> Html {
             <Link<Route> to={Route::History}>{ "← Back to history" }</Link<Route>>
             <h1>{ "Recorded match" }</h1>
             <button onclick={refresh}>{ "Refresh details" }</button>
-
             if !error.is_empty() {
                 <p role={"alert"}>{ &*error }</p>
             }
-
             if let Some(value)=details.as_ref() {
                 <h2>
                     { format!("{} · {}",value.recording.summary.recording.champion,value.recording.summary.recording.active_riot_id) }
                 </h2>
                 <p>{ upload(&value.entry) }</p>
-
                 if let Some(e)=&value.entry.last_error {
                     <p role={"status"}>{ e }</p>
                 }
-
                 <section
                     class={classes!("sharing-bar")}
                     aria-label={"Finished match sharing"}
@@ -132,25 +128,21 @@ pub fn HistoryDetailsView(props: &HistoryDetailsViewProps) -> Html {
                             })
                         }}
                     />
-
                     if value.recording.summary.ended_at_ms.is_none() {
                         <p>
                             { "Sharing controls become available after the server confirms the match ended." }
                         </p>
                     }
-
                     if value.recording.summary.recording.is_practice||value.recording.summary.recording.is_custom!=Some(false) {
                         <p>
                             { "Public is unavailable for practice/custom games or while the game type is unknown." }
                         </p>
                     }
-
                     if let Some(code)=&value.recording.share.code {
                         <strong class={classes!("share-code")}>
                             { tutorlolv2_protocol::display_code(code) }
                         </strong>
                     }
-
                     if let Some(url)=&value.recording.share.url {
                         <a href={url.clone()}>{ "Open public viewer" }</a>
                     }
@@ -305,15 +297,13 @@ fn ShareControls(props: &ShareControlsProps) -> Html {
         <>
             <div class={classes!("watch-actions")}>{ for modes }{ for copy_buttons }</div>
             <p role={"status"} aria-live={"polite"}>
-                {
-                    if *busy {
+                { if *busy {
                         "Updating sharing..."
                     } else if !notice.is_empty() {
                         &*notice
                     } else {
                         "Owner access remains available with Private sharing."
-                    }
-            }
+                    } }
             </p>
             if !error.is_empty() {
                 <p role={"alert"}>{ &*error }</p>

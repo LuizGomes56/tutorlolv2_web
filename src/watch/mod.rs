@@ -506,8 +506,7 @@ fn Viewer(props: &ViewerProps) -> Html {
                 style={format!(
                     "left:{}%;width:{}%",
                     first / end.max(1.0) * 100.0,
-                    (last - first) / end.max(1.0) * 100.0)
-                }
+                    (last - first) / end.max(1.0) * 100.0)}
                 title={format!("Not recorded: {first:.0}–{last:.0} s")}
             />
         }

@@ -204,7 +204,6 @@ pub fn OwnerReplay(props: &OwnerReplayProps) -> Html {
             <p>
                 { "← / → seek 10 seconds. Hatched regions and gaps between samples were not captured." }
             </p>
-
             if !error.is_empty() {
                 <p role={"status"}>
                     { &*error }
@@ -215,7 +214,6 @@ pub fn OwnerReplay(props: &OwnerReplayProps) -> Html {
                     </button>
                 </p>
             }
-
             <LivegameView
                 data={(*game).clone()}
                 error={String::new()}

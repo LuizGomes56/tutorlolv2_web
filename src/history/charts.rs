@@ -299,7 +299,6 @@ pub fn Charts(props: &ChartsProps) -> Html {
         <section class={classes!("history-charts")} aria-label={"Observed host stats"}>
             <h2>{ "Observed host stats" }</h2>
             <p role={"status"}>{ &*status }</p>
-
             if samples.is_empty() {
                 <p>{ "No observed stats available." }</p>
             } else {
@@ -325,7 +324,6 @@ pub fn Charts(props: &ChartsProps) -> Html {
                     <tbody>{ for table_rows }</tbody>
                 </table>
             }
-
         </section>
     }
 }

@@ -275,27 +275,22 @@ pub fn HistoryListView() -> Html {
                 <button disabled={*busy} onclick={repair}>{ "Repair index" }</button>
             </div>
             <p role={"status"}>{ &*notice }</p>
-
             if !error.is_empty() {
                 <p role={"alert"}>
                     { &*error }
                     <button onclick={retry}>{ "Retry" }</button>
                 </p>
             }
-
             if let Some(page)=page.as_ref() {
                 if page.refreshing {
                     <p role={"status"}>{ "Refreshing cached history…" }</p>
                 }
-
                 if let Some(error)=&page.refresh_error {
                     <p role={"status"}>{ format!("Showing cached metadata. Refresh: {error}") }</p>
                 }
-
                 if page.entries.is_empty() {
                     <p>{ "No recorded matches on this page." }</p>
                 }
-
                 <div
                     class={classes!("history-rows", "grid", "gap-3", "my-4")}
                 >
@@ -481,14 +476,11 @@ fn HistoryRow(props: &HistoryRowProps) -> Html {
                 <p>{ "Result — · K/D/A — · CS — · Duration —" }</p>
             }
             <p>{ format!("{:?} · {}", entry.share.mode, upload(entry)) }</p>
-
             if let Some(error) = &entry.last_error {
                 <p role={"status"}>{ error }</p>
             }
-
             if let Some(id) = entry.recording_id.map(uuid) {
                 <Link<Route> to={Route::HistoryDetails { id }}>{ "Open replay" }</Link<Route>>
-
                 if *confirm {
                     <p>
                         { "Remove only from this device’s history? Sharing and uploads continue." }
@@ -500,7 +492,6 @@ fn HistoryRow(props: &HistoryRowProps) -> Html {
                 }
             }
             <p role={"status"}>{ if *busy {"Saving local hide…"}else{""} }</p>
-
             if !error.is_empty() {
                 <p role={"alert"}>{ &*error }</p>
             }
