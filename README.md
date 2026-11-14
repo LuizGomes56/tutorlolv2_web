@@ -1,3 +1,5 @@
+# Moved to [tutorlolv2 repository](https://github.com/LuizGomes56/tutorlolv2)
+
 # TutorLoL frontend
 
 The Yew frontend supports two calculation modes at compile time. Both use the same
